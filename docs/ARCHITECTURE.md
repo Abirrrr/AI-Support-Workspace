@@ -33,6 +33,24 @@ The project is expected to evolve around a small set of responsibilities:
 - Any provider integration should be kept behind a narrow interface.
 - The system should be designed for fast local retrieval rather than complex orchestration.
 
+## Implementation Boundary Categories
+
+### Infrastructure
+
+Infrastructure is the technical machinery that allows product code to be built, validated, and run. Repository tooling, build configuration, quality gates, and testing foundations are infrastructure. The WXT runtime extension shell—including Manifest V3 entry points, browser messaging, permissions, the background service worker, content script, popup, and options page—is also infrastructure rather than business functionality.
+
+Milestone classification still controls when infrastructure is implemented: Milestone 1 owns repository tooling and validation infrastructure, while Milestone 2 owns runtime extension-shell infrastructure. Calling the extension shell infrastructure does not move it into Milestone 1.
+
+Side Panel is not an approved application surface and requires a documented product and architecture decision before implementation.
+
+### Application Architecture
+
+Application architecture defines the layers, project-owned contracts, dependency direction, state boundaries, and adapter boundaries that organize implementation. It determines where code belongs and how responsibilities interact, but it does not itself provide a user-facing product capability.
+
+### Business Features
+
+Business features deliver product-specific behavior and user value. Knowledge and snippet management, retrieval, prompt construction, AI-provider behavior, and generated-output workflows are business features assigned to their respective roadmap milestones. They must remain independent of WXT, React, Dexie, and provider-specific infrastructure through the documented boundaries.
+
 ## Technical Foundation
 
 ### Extension Platform

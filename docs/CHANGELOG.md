@@ -24,9 +24,13 @@
 - Technology stack finalized as WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged.
 - Infrastructure decisions frozen for implementation.
 - Repository ready for Milestone 1 implementation under an approved task.
+- Repository continuity validation completed through a successful fresh-thread reconstruction.
+- Documentation clarified following reconstruction testing.
+- Milestone boundaries and infrastructure, architecture, and business-functionality terminology clarified without architecture changes.
 
 ### Notes
 
 - Milestone 0 completed without implementation code.
 - Milestones 0C and 0D documented and approved architecture without adding implementation artifacts.
+- DP-001 includes no architecture changes and no implementation changes.
 - The repository is now documented in a way that supports future milestone continuity.

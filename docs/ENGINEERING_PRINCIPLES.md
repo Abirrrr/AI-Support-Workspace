@@ -42,6 +42,12 @@ Implementation may not introduce or redefine architecture implicitly. When an im
 
 The repository documentation always takes precedence over conversational memory. Every architectural change, milestone completion, or workflow change must be reflected in repository documentation before implementation continues.
 
+## Repository Continuity Validation
+
+After a major architecture phase, reconstruct the project in a new conversation using repository documentation alone before implementation proceeds. The reconstruction should recover the approved architecture, technology stack, milestone boundaries, current repository state, and next engineering action without relying on prior conversational memory.
+
+A failed or ambiguous reconstruction is a documentation defect. Correct the repository documentation and repeat the validation before implementation begins.
+
 ## Documentation as Constitution
 
 When design questions arise, they should be checked against these principles before architecture changes are made.

@@ -18,7 +18,43 @@ Approved and froze the infrastructure stack that all implementation milestones m
 
 ## Milestone 1 — Technical Foundation (Current)
 
-Implement the approved language, build, testing, and project-structure foundation without creating the extension shell or product features.
+### Goal
+
+Establish the approved repository tooling, configuration, validation, and test foundation required before runtime extension infrastructure or product functionality is implemented.
+
+### In Scope
+
+- Initialize pnpm project metadata and deterministic dependency management.
+- Install and configure the approved WXT, TypeScript, React, Tailwind CSS, and repository tooling dependencies without creating runtime extension entry points.
+- Establish the minimal WXT build-tooling configuration needed for the technical foundation.
+- Configure TypeScript type checking.
+- Configure ESLint and Prettier.
+- Configure Vitest and the Playwright testing foundation.
+- Configure Husky and lint-staged commit quality gates.
+- Define repeatable WXT preparation or configuration-validation, type-check, lint, format-check, and test commands appropriate to this milestone.
+- Update continuous integration to run the applicable technical-foundation validation.
+
+### Out of Scope
+
+- The runtime extension shell, Manifest V3 manifest contents, permissions, background service worker, content script, popup, options page, and Side Panel.
+- AI generation or AI-provider integrations.
+- Retrieval or the Prompt Builder.
+- Knowledge Library or Snippet Library functionality.
+- Dexie storage implementation, schemas, migrations, indexes, or transactions.
+- Business logic, product workflows, or other product functionality.
+
+Side Panel is not currently approved product scope and must not be introduced without a documented architecture and product decision. All other extension-shell infrastructure listed above remains assigned to Milestone 2.
+
+### Completion Criteria
+
+- pnpm installs the approved dependencies reproducibly and produces the repository's approved lockfile.
+- WXT and TypeScript configuration preparation or validation completes successfully without adding runtime extension entry points or business behavior; producing a runnable extension bundle remains scoped to Milestone 2.
+- Type checking, ESLint, Prettier checks, and Vitest complete successfully through documented commands.
+- The Playwright foundation is configured and can be invoked; browser workflow tests remain scoped to milestones that provide a runnable extension workflow.
+- Husky and lint-staged enforce the documented staged-file quality gate.
+- Continuous integration runs all validation applicable to the technical foundation.
+- No extension shell, storage implementation, provider integration, product UI, business logic, or product functionality is introduced.
+- Principal Engineer review, applicable manual validation, repository documentation updates, and the Git checkpoint are complete.
 
 ## Milestone 2 — Extension Shell
 

@@ -25,6 +25,16 @@ Repository documentation is the only source of truth for product direction, arch
 - Every milestone should include automated tests where applicable.
 - Do not implement business functionality outside the current milestone unless explicitly requested.
 
+## Scope Interpretation
+
+- When milestone scope appears ambiguous, repository documentation overrides inference.
+- Report the ambiguity instead of silently narrowing, expanding, or redefining the milestone.
+- Do not silently remove required infrastructure work from an implementation milestone.
+- Infrastructure is the technical machinery that enables implementation, including repository tooling, build and validation configuration, and—when assigned by the roadmap—the runtime extension shell and browser entry points.
+- Architecture is the approved set of technologies, boundaries, responsibilities, and constraints that implementation must inherit.
+- Business functionality is product-specific behavior and user value, including support workflows, knowledge and snippet behavior, retrieval, prompt construction, AI-provider behavior, and generated output.
+- Classifying work as infrastructure does not move it between milestones; the roadmap remains authoritative for milestone ownership.
+
 ## Required Engineering Lifecycle
 
 Future milestones must follow this sequence:
