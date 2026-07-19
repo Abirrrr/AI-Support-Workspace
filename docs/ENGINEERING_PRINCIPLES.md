@@ -20,6 +20,10 @@ Business logic must not depend on a specific AI provider. Provider integrations 
 
 Each milestone should leave the project in a usable and testable state. Progress should be easy to review and easy to resume later.
 
+## Repository-first Continuity
+
+The repository documentation always takes precedence over conversational memory. Every architectural change, milestone completion, or workflow change must be reflected in repository documentation before implementation continues.
+
 ## Documentation as Constitution
 
 When design questions arise, they should be checked against these principles before architecture changes are made.

@@ -21,8 +21,8 @@ Testing should be automated wherever practical. The repository should favor a li
 
 ## Manual Verification Requirements
 
-Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors should not be treated as fully automatable in the early repository foundation stage.
+Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.
 
-## Current Milestone Status
+## Milestone 0 Status
 
-This milestone does not add implementation code, so there are no runtime tests to execute. The testing approach is established for future milestones.
+Milestone 0 added no implementation code, so there were no runtime tests to execute. The testing approach is established for Milestone 1 and later work; each implementation task must define the checks applicable to its scope.

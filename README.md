@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-This milestone establishes the engineering workflow and repository documentation only. No business functionality is implemented.
+Milestone 0 established the engineering workflow and repository documentation. Milestone 1 — Technical Foundation is current; no business functionality has been implemented yet.
 
 ## Repository Structure
 
@@ -15,8 +15,8 @@ This milestone establishes the engineering workflow and repository documentation
 
 ## Documentation
 
-The documentation in the docs directory is the primary source of truth for product direction and architecture.
+The documentation in the docs directory is the only authoritative source of truth for product direction, architecture, workflow, and project state.
 
 ## Next Step
 
-Future milestones should build on this foundation in small, testable steps.
+The Principal Engineer should define and approve the Milestone 1 implementation task before technical foundation work begins.

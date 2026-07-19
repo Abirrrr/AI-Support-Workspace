@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This project is a local-first, Chrome-based AI support workspace designed to help support agents work faster with context, reusable knowledge, and streamlined retrieval.
+This project is a local-first, Chrome-based AI support workspace that helps support agents work faster with reusable knowledge, contextual retrieval, and AI-assisted drafting.
 
 ## Product Definition
 
@@ -14,7 +14,7 @@ The product is intended to be:
 - A Knowledge Library
 - A Snippet Library
 - Optimized for fast local retrieval
-- Designed around Ollama first and OpenAI later
+- Provider-independent, with Ollama as the initial implementation target and OpenAI as a future provider
 - Backend-free and cloud-free
 - Fully local in storage and execution
 - Primarily tailored to Intercom support workflows
@@ -30,6 +30,6 @@ The product should reduce the time required to find the right information, reuse
 - The first version should favor a simple architecture that is easy to reason about and extend.
 - The product should remain useful even if the AI provider changes.
 
-## Non-Goals for the Current Phase
+## Milestone 0 Non-Goals
 
-This repository foundation milestone does not implement the product experience itself. It does not create a Chrome extension UI, an AI provider integration, a local database, or any business-facing features.
+Milestone 0 did not implement the product experience itself. It did not create a Chrome extension UI, an AI provider integration, a local database, or any business-facing features.

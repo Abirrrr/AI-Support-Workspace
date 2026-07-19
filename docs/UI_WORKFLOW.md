@@ -116,6 +116,8 @@ Reuse in Support Workflow
 
 The Snippet workflow is focused on reusable short-form content such as canned replies, message fragments, or other response building blocks.
 
+This workflow remains distinct from the Knowledge Library workflow. Snippets are compact, reusable response building blocks, while knowledge is broader contextual material intended to support troubleshooting and retrieval over time.
+
 ```text
 Open Snippets
 
@@ -227,19 +229,19 @@ Knowledge
 
 ↓
 
-IndexedDB
+Local persistence
 
 Snippets
 
 ↓
 
-IndexedDB
+Local persistence
 
 Settings
 
 ↓
 
-IndexedDB
+Local persistence
 ```
 
 ### Workflow Notes
@@ -250,13 +252,14 @@ IndexedDB
 
 ## 9. Future Workflows
 
-The following workflows are intentionally deferred and are not part of the current core user experience definition:
+The following potential workflows are not part of the current core user experience definition and require their own approved scope before implementation:
 
 - Import Library
 - Export Library
 - Provider Selection
 - Prompt Management
-- History
 - Advanced Search
 
-These workflows should be documented separately when they become part of the planned product scope.
+History is not an assumed workflow or feature. Whether it should be introduced remains an intentionally undecided future product decision.
+
+Any future workflow should be documented separately when it becomes part of the approved product scope.

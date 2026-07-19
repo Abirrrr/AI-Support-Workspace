@@ -24,6 +24,10 @@ Fast startup, fast retrieval, and responsive interactions are treated as product
 
 The project will be delivered through small milestones so that progress is testable, reviewable, and reversible.
 
+## Decision 7: Repository Continuity
+
+Repository documentation is the permanent project memory. Conversation history must never be treated as the authoritative project state. Every approved milestone must update the repository documentation before the project proceeds. The documentation must allow a new Principal Engineer to reconstruct the approved architecture, workflow, and project state without access to prior conversations.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.

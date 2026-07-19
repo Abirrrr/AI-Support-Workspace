@@ -50,6 +50,24 @@ Fields:
 
 The initial implementation should use a local database stored on the machine. The schema should remain simple and support fast retrieval by keyword and tag.
 
+## Future Capability Guidance
+
+### Structured Knowledge
+
+Knowledge should evolve beyond a single body-text field into structured troubleshooting knowledge. The exact structure must be decided and documented in the milestone that introduces it rather than assumed by this planning document.
+
+### Richer Snippets
+
+Snippets should eventually support reusable text with metadata such as variables, categories, and usage statistics. The exact field design remains a future decision.
+
+### Prompt Templates
+
+Prompt Templates are a future persistent entity for reusable prompt configuration. Their schema and implementation milestone have not yet been decided.
+
+### History
+
+History is an intentionally undecided future capability. It is not an assumed feature, persistent entity, or commitment in the current roadmap.
+
 ## Current Status
 
 No database implementation exists yet. This document is a planning artifact for future milestones.

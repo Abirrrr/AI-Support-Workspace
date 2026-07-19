@@ -1,58 +1,62 @@
 # Roadmap
 
-## Milestone 0 — Foundation
+## Milestone 0 — Foundation (Completed)
 
-Establish the repository structure, documentation, and engineering workflow.
+Established the repository structure, documentation setup, and engineering workflow foundation.
 
-## Milestone 1 — Extension Shell
+## Milestone 1 — Technical Foundation
+
+Prepare the technical building blocks needed for the extension without implementing product features.
+
+## Milestone 2 — Extension Shell
 
 Create the basic Chrome extension shell and manifest scaffolding.
 
-## Milestone 2 — Local Database
+## Milestone 3 — Local Database
 
 Introduce local persistence and the initial storage layer.
 
-## Milestone 3 — Knowledge Library
+## Milestone 4 — Knowledge Library
 
 Implement the knowledge library experience and local management flows.
 
-## Milestone 4 — Snippet Library
+## Milestone 5 — Snippet Library
 
 Implement the snippet library experience and local management flows.
 
-## Milestone 5 — Retrieval Engine
+## Milestone 6 — Retrieval Engine
 
 Implement fast local search and retrieval over stored content.
 
-## Milestone 6 — Prompt Builder
+## Milestone 7 — Prompt Builder
 
 Create a provider-independent prompt composition layer.
 
-## Milestone 7 — Ollama Provider
+## Milestone 8 — Ollama Provider
 
 Add Ollama as the first AI provider integration.
 
-## Milestone 8 — Output Workspace
+## Milestone 9 — Output Workspace
 
 Provide a workspace for reviewing and refining AI-generated output.
 
-## Milestone 9 — Keyboard Shortcut
+## Milestone 10 — Keyboard Shortcut
 
 Add a keyboard shortcut for quick access to the extension experience.
 
-## Milestone 10 — Settings
+## Milestone 11 — Settings
 
 Add user settings for provider selection, model choice, and behavior tuning.
 
-## Milestone 11 — Import / Export
+## Milestone 12 — Import / Export
 
 Add support for importing and exporting local data.
 
-## Milestone 12 — OpenAI Provider
+## Milestone 13 — OpenAI Provider
 
 Add OpenAI as a later provider integration.
 
-## Milestone 13 — Polish
+## Milestone 14 — Polish
 
 Improve quality, usability, performance, and documentation.
 

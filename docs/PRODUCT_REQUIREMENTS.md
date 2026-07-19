@@ -7,11 +7,18 @@ The product will eventually provide an integrated support workspace for Intercom
 ## Functional Requirements (Planned)
 
 - Capture support context from the browser and local workspace.
-- Store reusable knowledge entries locally.
-- Store reusable snippets locally.
+- Store reusable knowledge entries locally as a Knowledge Library.
+- Store reusable snippets locally as a Snippet Library.
 - Retrieve relevant content quickly during support work.
 - Build prompts for AI assistance without coupling business logic to a specific provider.
 - Allow users to review and edit AI-generated drafts before use.
+
+## Knowledge Library vs. Snippet Library
+
+- The Knowledge Library owns broader, contextual support knowledge used for troubleshooting, reference, and retrieval during support work.
+- The Snippet Library owns compact, reusable response text and message fragments intended for quick insertion or expansion into a reply.
+
+The libraries may both contribute to a support response, but they have different responsibilities and must remain separate concepts in the product experience, persistence model, and documentation.
 
 ## Quality Requirements
 
@@ -28,4 +35,4 @@ The product will eventually provide an integrated support workspace for Intercom
 
 ## Scope for Milestone 0
 
-This milestone only establishes the repository documentation, engineering workflow, and project guardrails. It does not implement any of the features above.
+Milestone 0 established the repository documentation, engineering workflow, and project guardrails. It did not implement any of the features above.

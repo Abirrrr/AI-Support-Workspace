@@ -2,37 +2,45 @@
 
 ## Current Milestone
 
-- Milestone 0: Repository Foundation
+- Milestone 1 — Technical Foundation
+
+## Previous Milestone
+
+- Milestone 0 — Foundation: Completed
 
 ## Project Status
 
-- Status: In progress / foundation established
-- Scope: Documentation, repository structure, and engineering workflow only
-- Business functionality: Not implemented in this milestone
+- Status: Milestone 0 is complete. Milestone 1 is current and has not started.
+- Scope: The next approved work is the technical foundation required before the extension shell.
+- Business functionality: Not yet implemented.
 
 ## Architecture Status
 
-- Architecture is intentionally simple and documented at a high level.
-- No backend, no cloud dependency, and no provider-specific implementation are planned for this milestone.
-- The project remains aligned with a local-first Chrome extension model.
+- Architecture remains intentionally simple and documented at a high level.
+- The project continues to follow a local-first, provider-independent architecture.
+- No implementation code exists yet.
 
 ## Completed Work
 
-- Created the repository directory structure for documentation, source, tests, and GitHub workflow assets.
-- Drafted the primary project documents covering vision, requirements, architecture, decisions, roadmap, testing, and agent rules.
-- Established initial engineering guardrails for future milestones.
+- Completed Milestone 0 documentation and engineering workflow setup.
+- Added a dedicated UI workflow document describing the user journey from a product perspective.
+- Finalized repository documentation so it can serve as the project's primary memory across future conversations.
+- Established the required lifecycle from approved decisions through validation, documentation, and a Git checkpoint.
 
 ## Next Engineering Action
 
-- Continue to use the documentation in this repository as the source of truth for all future milestones.
-- Keep future work scoped to the next milestone and update this document after each milestone.
+- The Principal Engineer should define and approve the implementation task for Milestone 1 — Technical Foundation.
+- The Coding Agent should then implement only that approved task and complete the required automated validation and any applicable manual validation.
+- Repository documentation must be updated and reviewed before a Git checkpoint and progression to Milestone 2 — Extension Shell.
 
 ## Outstanding Risks
 
-- The project is still early and the repository has no implementation code yet.
-- Future architectural decisions must remain consistent with the documented principles to avoid scope drift.
-- Browser-specific behaviors and local storage assumptions will need manual verification later.
+- The project remains early and implementation work has not begun.
+- The exact tooling and configuration choices for Milestone 1 require Principal Engineer approval before implementation.
+- Browser-specific behaviors and local storage assumptions will require manual validation later.
+- History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Commit
 
-- Pending first commit
+- `098d10af520d3900485b9f29e88fdd72ea40fa11` (`docs: establish project foundation and engineering workflow`)
+- The documentation finalization changes after that checkpoint remain uncommitted as required by Milestone 0B.

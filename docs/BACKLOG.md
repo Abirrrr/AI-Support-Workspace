@@ -2,6 +2,7 @@
 
 ## Near-Term Backlog
 
+- Establish the technical foundation and automated validation baseline.
 - Create the initial extension shell and manifest.
 - Add a local storage layer for knowledge and snippets.
 - Implement a small retrieval engine with local search.
@@ -17,4 +18,4 @@
 
 ## Notes
 
-The backlog is intentionally lightweight for the foundation milestone and will expand as the project evolves.
+The backlog was intentionally lightweight for Milestone 0 and will expand as the project evolves.

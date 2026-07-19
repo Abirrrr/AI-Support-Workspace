@@ -12,7 +12,7 @@ The project is expected to evolve around a small set of responsibilities:
 - Local storage layer: persists knowledge, snippets, and settings locally.
 - Retrieval engine: searches and ranks relevant content quickly.
 - Prompt builder: constructs provider-independent request payloads.
-- Provider adapters: connect the system to Ollama first and OpenAI later.
+- Provider adapters: preserve a provider-independent boundary, with Ollama as the initial implementation target and other providers added later.
 - Output workspace: lets the user review and refine generated content.
 
 ## Design Principles
@@ -22,7 +22,9 @@ The project is expected to evolve around a small set of responsibilities:
 - No provider-specific logic leaking into business logic.
 - No premature plugin systems.
 - Performance is a primary design goal.
-- Business logic should remain independent from specific AI providers.
+- Provider-independent architecture is the default approach.
+- Initial implementation target: Ollama.
+- Future providers may be added without affecting business logic.
 
 ## Technical Direction
 
