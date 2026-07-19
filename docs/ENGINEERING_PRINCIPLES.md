@@ -30,6 +30,8 @@ Each milestone should be small enough to review thoroughly and must leave the pr
 
 Architecture, product direction, and milestone scope must be documented and approved before implementation begins. Documentation is part of engineering work, not a retrospective summary.
 
+Milestone closeout also requires the mandatory Documentation Impact Review defined in `CODING_AGENT_RULES.md`. A milestone is not complete until affected repository documentation is synchronized—or a no-update outcome is explicitly recorded—before its Git checkpoint.
+
 ## Document Technical Decisions First
 
 A technical choice that affects the platform, language, framework, build, testing, storage, state management, project structure, or cross-layer contracts must be recorded with its rationale before implementation adopts it.
@@ -41,6 +43,8 @@ Implementation may not introduce or redefine architecture implicitly. When an im
 ## Repository-first Continuity
 
 The repository documentation always takes precedence over conversational memory. Every architectural change, milestone completion, or workflow change must be reflected in repository documentation before implementation continues.
+
+Git preserves the implementation history, while the canonical GitHub remote provides synchronization and backup. Approved milestone checkpoints must be pushed before the repository advances to the next milestone.
 
 ## Repository Continuity Validation
 

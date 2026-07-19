@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Engineering Workflow v1
+
+- Formalized the standard implementation milestone lifecycle from finalized Principal Engineer scope through Codex implementation, review, documentation synchronization, manual validation, Git checkpoint, and GitHub push.
+- Added Documentation Impact Review as a mandatory checkpoint gate with an explicit repository record required even when no documentation updates are needed.
+- Added a reusable Milestone Closeout Checklist.
+- Documented Git and GitHub synchronization policy for milestone boundaries.
+- Defined deterministic, directly copy-pasteable Principal Engineer implementation task standards.
+- Preserved the current milestone, architecture, roadmap, and product requirements.
+
 ### Milestone 1 — Technical Foundation
 
 - Completed the Milestone 1 development foundation without adding extension runtime or business functionality.

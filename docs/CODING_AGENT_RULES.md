@@ -35,28 +35,40 @@ Repository documentation is the only source of truth for product direction, arch
 - Business functionality is product-specific behavior and user value, including support workflows, knowledge and snippet behavior, retrieval, prompt construction, AI-provider behavior, and generated output.
 - Classifying work as infrastructure does not move it between milestones; the roadmap remains authoritative for milestone ownership.
 
+## Principal Engineer Implementation Task Standard
+
+Before implementation begins, the Principal Engineer must produce one finalized implementation specification for Codex. The specification must be directly copy-pasteable and include:
+
+- The complete approved milestone goal and scope.
+- Explicit non-goals and milestone boundaries.
+- Required automated and manual validation.
+- The required completion report.
+- Any repository-document reading order or task-specific constraints.
+
+After the specification is finalized, it should not be revised incrementally unless the user explicitly requests a revision. If a revision is requested, the Principal Engineer should provide one consolidated replacement specification so the implementation task remains deterministic and unambiguous.
+
 ## Required Engineering Lifecycle
 
-Future milestones must follow this sequence:
+Every implementation milestone must follow this sequence:
 
 ```text
-Architecture / Product Decision
+Principal Engineer defines and finalizes milestone scope
 
 ↓
 
-Principal Engineer creates implementation task
+Codex implements the approved scope and completes required automated validation
 
 ↓
 
-Coding Agent implementation
+Principal Engineer reviews the implementation and validation results
 
 ↓
 
-Automated validation
+Documentation Impact Review
 
 ↓
 
-Principal Engineer review
+Repository documentation synchronized when required
 
 ↓
 
@@ -64,30 +76,72 @@ Manual validation
 
 ↓
 
-Repository documentation update
+Authorized Git checkpoint
 
 ↓
 
-Git commit
+GitHub push
 
 ↓
 
-Next milestone
+Local and remote repositories synchronized; repository ready for next milestone
 ```
 
-A milestone is not complete until:
+Documentation synchronization is part of milestone completion, not optional follow-up work. A milestone is not complete until every applicable item in the Milestone Closeout Checklist is satisfied.
 
-- Documentation is updated.
-- Principal review is complete.
-- Manual validation is complete when applicable.
-- A Git checkpoint has been created.
+## Documentation Impact Review
+
+The Documentation Impact Review is a mandatory engineering gate after Principal Engineer implementation review and before manual validation or Git checkpoint approval. No Git checkpoint should be approved until this review is complete.
+
+The review determines whether the completed work requires updates to:
+
+- `PROJECT_STATE.md`.
+- `CHANGELOG.md`.
+- Architecture documentation.
+- Engineering workflow documentation.
+- Engineering principles.
+- Technical decision records.
+- Repository continuity and handoff documentation.
+- Product requirements, product workflows, or other product documentation.
+- Any other repository document affected by the completed work.
+
+Required updates must be completed before the milestone can close. If no documentation changes are required, that outcome must be recorded explicitly in `CHANGELOG.md`, `PROJECT_STATE.md`, or another appropriate repository closeout document. The repository—not conversational memory—remains the authoritative record of the review outcome and resulting engineering knowledge.
+
+## Milestone Closeout Checklist
+
+Use this checklist for every implementation milestone:
+
+- [ ] Principal Engineer implementation review and approval completed.
+- [ ] Required automated validation completed.
+- [ ] Documentation Impact Review completed and its outcome recorded.
+- [ ] Repository documentation synchronized when required.
+- [ ] Manual validation completed when applicable.
+- [ ] `PROJECT_STATE.md` updated when applicable.
+- [ ] `CHANGELOG.md` updated when applicable.
+- [ ] Intended checkpoint diff reviewed with no unrelated changes.
+- [ ] Authorized Git checkpoint created.
+- [ ] Git working tree clean after the checkpoint.
+- [ ] GitHub push completed.
+- [ ] Local and remote repositories synchronized.
+- [ ] Repository ready for the next milestone.
 
 ## Documentation Discipline
 
-- Update repository documentation as part of milestone completion, after review and validation and before the Git checkpoint.
+- Complete the Documentation Impact Review after implementation review and before manual validation or Git checkpoint approval.
+- Update affected repository documentation before manual validation and the Git checkpoint.
+- Explicitly record a no-update outcome when the Documentation Impact Review finds that no documentation changes are required.
 - Keep the project state document aligned with the latest work.
 - Preserve the long-term traceability of decisions and architecture changes.
 - Treat missing documentation updates as a failed milestone review.
+
+## Repository Synchronization
+
+- Git is the implementation history.
+- GitHub is the canonical remote repository and backup.
+- Every approved milestone must end with an authorized Git checkpoint followed by a GitHub push.
+- Confirm that the local checkpoint exists on the remote and that the working tree is clean before beginning the next milestone.
+- Local and remote repositories should remain synchronized at milestone boundaries.
+- Never store repository URLs, credentials, access tokens, or other secrets in workflow documentation.
 
 ## Change Discipline
 
@@ -106,6 +160,7 @@ Every completion report must include:
 - Known limitations
 - Architecture concerns
 - Documentation updated
+- Documentation Impact Review outcome
 
 ## Milestone 1 Scope Boundary
 
