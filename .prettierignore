@@ -1,0 +1,10 @@
+.output/
+.wxt/
+coverage/
+docs/
+node_modules/
+playwright-report/
+test-results/
+README.md
+pnpm-lock.yaml
+**/desktop.ini

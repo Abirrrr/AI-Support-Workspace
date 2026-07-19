@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Milestone 1 — Technical Foundation
+
+- Completed the Milestone 1 development foundation without adding extension runtime or business functionality.
+- Initialized pnpm project management with a reproducible lockfile and explicit dependency build-script policy.
+- Configured WXT, Manifest V3 targeting, TypeScript, React, Tailwind CSS, and Vite for future extension implementation.
+- Added ESLint, Prettier, Husky, and lint-staged quality tooling.
+- Added Vitest and Playwright testing foundations, including an infrastructure-only Playwright discovery test.
+- Added continuous integration for installation, linting, formatting, type-checking, Vitest execution, and Playwright configuration validation.
+- Validated the complete development toolchain successfully.
+- Preserved the milestone boundary: no manifest, extension entry point, runtime source, storage implementation, business feature, or WXT production build was introduced.
+- Deferred the first WXT production build to Milestone 2 — Extension Shell.
+
 ### Added
 
 - Repository foundation documentation structure

@@ -1,9 +1,15 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Build artifacts
+/.output/
+/.wxt/
 /dist/
 /build/
+/coverage/
+/playwright-report/
+/test-results/
 
 # Logs
 *.log
@@ -11,3 +17,4 @@ node_modules/
 # OS files
 .DS_Store
 Thumbs.db
+desktop.ini
