@@ -4,7 +4,19 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestone 0 established the engineering workflow and repository documentation. Milestone 1 — Technical Foundation is current; no business functionality has been implemented yet.
+The platform architecture is approved and frozen. Milestone 1 — Technical Foundation is current; no business functionality has been implemented yet.
+
+## Technology Stack
+
+- WXT with Manifest V3
+- TypeScript
+- React with Tailwind CSS
+- React Context and Hooks
+- pnpm
+- Dexie for local persistence
+- Vitest and Playwright
+- ESLint and Prettier
+- Husky and lint-staged
 
 ## Repository Structure
 
@@ -19,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should define and approve the Milestone 1 implementation task before technical foundation work begins.
+The Principal Engineer should prepare and approve the exact Milestone 1 implementation task. Implementation must conform to the frozen platform documented in the repository.

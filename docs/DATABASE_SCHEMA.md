@@ -48,7 +48,9 @@ Fields:
 
 ## Storage Approach
 
-The initial implementation should use a local database stored on the machine. The schema should remain simple and support fast retrieval by keyword and tag.
+Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers will depend on project-owned storage contracts rather than Dexie directly. The schema should remain simple and support fast retrieval by keyword and tag.
+
+Dexie table definitions, schema versions, indexes, migrations, and transaction boundaries remain planning work for the storage milestone. No schema is implemented by the platform architecture milestone.
 
 ## Future Capability Guidance
 

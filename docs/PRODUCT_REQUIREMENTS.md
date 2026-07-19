@@ -33,6 +33,13 @@ The libraries may both contribute to a support response, but they have different
 - The extension should be usable in a browser context without a hosted service.
 - Any AI integration should be introduced gradually and behind a provider abstraction.
 
+## Approved Platform Constraints
+
+- The Chrome extension platform is WXT targeting Manifest V3, using TypeScript.
+- The presentation layer uses React, Tailwind CSS, and React Context with Hooks.
+- Local persistence uses Dexie behind project-owned storage contracts.
+- Infrastructure choices must not couple product requirements or business logic to a specific AI provider.
+
 ## Scope for Milestone 0
 
 Milestone 0 established the repository documentation, engineering workflow, and project guardrails. It did not implement any of the features above.

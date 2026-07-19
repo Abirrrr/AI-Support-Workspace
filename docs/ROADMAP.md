@@ -4,9 +4,21 @@
 
 Established the repository structure, documentation setup, and engineering workflow foundation.
 
-## Milestone 1 — Technical Foundation
+## Milestone 0B — Repository Documentation Finalization (Completed)
 
-Prepare the technical building blocks needed for the extension without implementing product features.
+Finalized the repository as the authoritative project memory and established the permanent milestone lifecycle.
+
+## Milestone 0C — Technical Architecture Decisions (Completed)
+
+Documented the engineering platform requirements, architectural layers, standards, and application boundaries before implementation.
+
+## Milestone 0D — Platform Architecture Approval (Completed)
+
+Approved and froze the infrastructure stack that all implementation milestones must inherit.
+
+## Milestone 1 — Technical Foundation (Current)
+
+Implement the approved language, build, testing, and project-structure foundation without creating the extension shell or product features.
 
 ## Milestone 2 — Extension Shell
 

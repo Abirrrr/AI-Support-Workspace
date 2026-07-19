@@ -7,8 +7,17 @@ Repository documentation is the only source of truth for product direction, arch
 ## Architecture Discipline
 
 - Never redesign the architecture without updating the relevant documentation.
+- No implementation task may introduce architecture that has not already been documented and approved.
+- Implementation milestones inherit their architecture from the repository documentation.
+- If implementation requires an undocumented technical decision, stop and return the decision for documentation and approval before proceeding.
 - Never expand milestone scope beyond the current milestone goal.
 - Stop and report architectural conflicts when a proposed change would break the documented direction.
+
+## Approved Platform Discipline
+
+- Implementation must use WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged in their documented roles.
+- Do not substitute platform technologies, such as replacing WXT with Plasmo or pnpm with npm, without an explicit architecture review and approved documentation update.
+- Infrastructure libraries must remain behind the documented layer boundaries and must not redefine business logic.
 
 ## Milestone Discipline
 

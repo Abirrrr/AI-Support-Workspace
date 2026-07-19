@@ -4,20 +4,23 @@
 
 Testing should be automated wherever practical. The repository should favor a lightweight but reliable quality bar that keeps future milestones safe to evolve.
 
+Vitest is the approved platform for unit, React UI, and integration tests. Playwright is the approved platform for browser-level end-to-end tests. Manual validation remains required when extension behavior cannot be validated reliably through automation.
+
 ## Required Checks
 
-- Type checking
-- Linting
-- Unit tests
-- Integration tests
-- End-to-end tests where practical
+- TypeScript type checking
+- ESLint
+- Prettier formatting checks
+- Vitest unit, UI, and integration tests
+- Playwright end-to-end tests where practical
 - Minimal manual validation
 
 ## Testing Priorities
 
-- Validate business logic using unit tests.
-- Validate local storage and retrieval flows through integration tests.
-- Validate browser-specific features through manual verification when automation is not practical.
+- Validate business logic using Vitest unit tests.
+- Validate React behavior using Vitest UI tests.
+- Validate Dexie storage and retrieval flows through Vitest integration tests.
+- Validate browser workflows using Playwright and manual verification where automation is not practical.
 
 ## Manual Verification Requirements
 
