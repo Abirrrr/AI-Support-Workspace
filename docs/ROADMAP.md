@@ -64,11 +64,11 @@ Create the basic Chrome extension shell and manifest scaffolding.
 
 Introduce local persistence and the initial storage layer.
 
-## Milestone 4 — Knowledge Library (Current)
+## Milestone 4 — Knowledge Library (Completed)
 
 Implement the knowledge library experience and local management flows.
 
-## Milestone 5 — Snippet Library
+## Milestone 5 — Snippet Library (Current)
 
 Implement the snippet library experience and local management flows.
 

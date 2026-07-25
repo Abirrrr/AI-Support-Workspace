@@ -231,4 +231,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestone 3 — Local Database is complete following Principal Engineer review. Database `ai-support-workspace`, schema version 1, both approved tables, and both project-owned repository implementations exist and passed isolated persistence integration validation. No Settings persistence, search, retrieval, ranking, AI behavior, product UI, or unapproved physical schema has been introduced. Milestone 4 — Knowledge Library is current.
+Milestone 3 — Local Database is complete following Principal Engineer review. Database `ai-support-workspace`, schema version 1, both approved tables, and both project-owned repository implementations exist and passed isolated persistence integration validation. Milestone 4 — Knowledge Library is complete and uses the approved Knowledge record, table, and repository without changing the physical schema or indexes. No Settings persistence, search, retrieval, ranking, AI behavior, or unapproved physical schema has been introduced. Milestone 5 — Snippet Library is current.
