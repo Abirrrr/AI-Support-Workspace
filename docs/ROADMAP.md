@@ -60,11 +60,11 @@ Side Panel is not currently approved product scope and must not be introduced wi
 
 Create the basic Chrome extension shell and manifest scaffolding.
 
-## Milestone 3 — Local Database (Current)
+## Milestone 3 — Local Database (Completed)
 
 Introduce local persistence and the initial storage layer.
 
-## Milestone 4 — Knowledge Library
+## Milestone 4 — Knowledge Library (Current)
 
 Implement the knowledge library experience and local management flows.
 

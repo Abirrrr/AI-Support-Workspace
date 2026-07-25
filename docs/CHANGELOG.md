@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Milestone 3 — Local Database
+
+- Completed the Dexie-backed local persistence foundation using database `ai-support-workspace` and physical schema version 1.
+- Implemented the approved `knowledgeEntries` and `snippetEntries` tables with inbound `id` primary keys and `createdAt` indexes, without changing the approved schema.
+- Implemented project-owned `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts with the approved create, get, list, update, and delete semantics behind the persistence boundary.
+- Validated UUID generation, timestamp behavior, deterministic ordering, missing-record behavior, persistence-error wrapping, update semantics, and persistence across database close and reopen.
+- Kept `fake-indexeddb` isolated to automated tests. All 13 persistence integration tests passed, and the full Vitest suite passed with 4 files and 15 tests.
+- Passed linting, formatting, type-checking, Playwright test discovery, the production WXT build, and `git diff --check`; regression validation confirmed that the existing Manifest V3 extension shell remains operational.
+- Required no Milestone 3-specific manual Chrome validation because the persistence boundary is validated more appropriately through isolated IndexedDB integration tests, while temporary browser UI would exceed the approved milestone scope.
+- Introduced no Chrome permissions or host permissions and no Settings persistence, search, retrieval, ranking, AI behavior, product UI, undocumented schema change, or architecture change.
+- Completed the mandatory Documentation Impact Review and synchronized the affected project-state, roadmap, schema-status, architecture-status, testing, README, and changelog documentation.
+- Advanced the current project milestone to Milestone 4 — Knowledge Library. No Milestone 3 implementation checkpoint has been created yet.
+
 ### Milestone 3 — Database Architecture Definition
 
 - Corrected repository state to record Milestone 2 checkpoint `6a8b0ae`, its push to `origin/master`, and local/remote synchronization.

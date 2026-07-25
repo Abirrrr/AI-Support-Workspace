@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the planned local data model and the implementation-ready Milestone 3 physical persistence schema. Persistence is not implemented yet. Milestone 3 — Local Database is current.
+This document defines the planned local data model and the Milestone 3 physical persistence schema. The approved schema and project-owned persistence contracts were implemented without modification, and Milestone 3 — Local Database is complete.
 
 ## Planned Domain Schema
 
@@ -195,19 +195,21 @@ Tests supply `fake-indexeddb`'s `indexedDB` and matching `IDBKeyRange` implement
 
 Persistence tests must use isolated database names or delete their test database before and after each test, close database instances deterministically, and never access extension or user data. Reopen tests must close one Dexie instance and open a new instance against the same isolated test database name.
 
+Milestone 3 validation passed all 13 persistence integration tests, including database close-and-reopen coverage. The full project Vitest suite passed with 4 files and 15 tests, and `fake-indexeddb` remains confined to test code.
+
 ## Migration Policy
 
 - Version 1 is the initial physical schema and has no historical migration.
 - Every future physical schema change requires explicit Dexie version consideration and, where applicable, a version increment.
 - Future migrations must preserve existing user data unless a documented pre-release exception is explicitly approved.
 - Existing version declarations must not be silently rewritten to apply later schema changes.
-- Migration implementation is not part of this architecture-definition task.
+- No migration implementation was required for the initial version 1 schema; future migration implementation remains scoped to the milestone that introduces a physical schema change.
 
 ## Storage Approach
 
-Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers will depend on project-owned storage contracts rather than Dexie directly. The schema should remain simple and support fast retrieval by keyword and tag.
+Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers depend on project-owned storage contracts rather than Dexie directly. The schema remains intentionally minimal; search and retrieval access patterns and any indexes they require belong to later milestones.
 
-The physical schema, persistence contracts, error behavior, transaction policy, test environment, and migration policy above are approved for Milestone 3 implementation. Dexie configuration must remain centralized in the infrastructure layer.
+The physical schema, persistence contracts, error behavior, transaction policy, test environment, and migration policy above were implemented in Milestone 3 as approved. Dexie configuration remains centralized in the infrastructure layer.
 
 ## Future Capability Guidance
 
@@ -229,4 +231,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-No database implementation exists yet. Milestone 3 — Local Database is current, and its database architecture is implementation-complete. Implementation still requires a finalized Principal Engineer task and the normal validation lifecycle.
+Milestone 3 — Local Database is complete following Principal Engineer review. Database `ai-support-workspace`, schema version 1, both approved tables, and both project-owned repository implementations exist and passed isolated persistence integration validation. No Settings persistence, search, retrieval, ranking, AI behavior, product UI, or unapproved physical schema has been introduced. Milestone 4 — Knowledge Library is current.

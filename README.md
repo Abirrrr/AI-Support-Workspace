@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 2 — Extension Shell is complete and synchronized at checkpoint `6a8b0ae`. Milestone 3 — Local Database is current, and its persistence architecture is implementation-ready. The runnable Manifest V3 shell contains only the approved background service worker, content script, popup, and options page; no business functionality has been implemented yet.
+The platform architecture is approved and frozen. Milestone 3 — Local Database is complete following Principal Engineer review and documentation closeout, and Milestone 4 — Knowledge Library is current. The repository now contains the approved Dexie-backed local persistence foundation alongside the runnable Manifest V3 shell; Knowledge Library and other product functionality have not been implemented yet.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should prepare and approve the exact Milestone 3 — Local Database implementation task. Implementation must conform to the physical schema and storage boundaries documented in `docs/DATABASE_SCHEMA.md` and the frozen platform architecture.
+The Milestone 3 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the Principal Engineer should prepare and approve the exact Milestone 4 — Knowledge Library implementation task under the existing roadmap and frozen architecture.
