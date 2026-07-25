@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Milestone 3 — Database Architecture Definition
+
+- Corrected repository state to record Milestone 2 checkpoint `6a8b0ae`, its push to `origin/master`, and local/remote synchronization.
+- Approved the `ai-support-workspace` IndexedDB/Dexie database identity and initial physical schema version 1.
+- Defined `knowledgeEntries` and `snippetEntries` as the only Milestone 3 physical tables; kept Settings planned and deferred to its later roadmap milestone.
+- Defined primary keys, minimal `createdAt` indexes, UUID identity, timestamp behavior, record defaults, deterministic list ordering, project-owned CRUD contracts, error behavior, transaction policy, and migration policy.
+- Approved `fake-indexeddb` as a test-only adapter for isolated Dexie integration tests without adding the dependency or implementation code.
+- Preserved all approved domain fields and excluded search, retrieval, product UI, Settings persistence, and other future functionality from Milestone 3.
+
 ### Milestone 2 — Extension Shell
 
 - Completed the first runnable WXT Chrome extension shell targeting Manifest V3.

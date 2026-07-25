@@ -103,7 +103,9 @@ Infrastructure should run within the WXT extension and the user's browser wherev
 
 ### Local-first Storage Architecture
 
-Dexie is the approved storage abstraction over browser-local IndexedDB. The application will depend on project-owned storage contracts so domain and application logic remain independent of Dexie and the browser persistence mechanism. Knowledge, snippets, and settings are local data. Table design, migrations, indexing, and transaction behavior remain schema decisions for the storage milestone and are not implemented by this architecture milestone.
+Dexie is the approved storage abstraction over browser-local IndexedDB. The application depends on project-owned persistence contracts so domain and application logic remain independent of Dexie and the browser persistence mechanism. Dexie database declaration, typed tables, schema versions, and transaction mechanics remain centralized in the infrastructure layer.
+
+`DATABASE_SCHEMA.md` is authoritative for the implementation-ready physical schema, repository semantics, errors, transactions, testing, and migration policy. The Milestone 3 physical schema includes Knowledge Entry and Snippet Entry records. Settings remains a planned domain entity but its physical persistence is deferred to the Settings milestone.
 
 History remains an intentionally undecided capability and is not part of the planned storage architecture.
 
@@ -143,4 +145,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. The Milestone 1 development foundation and Milestone 2 runtime extension shell are implemented. The extension shell includes only the approved background service worker, content script, popup, and options page; storage and business functionality are not implemented yet.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. The Milestone 1 development foundation and Milestone 2 runtime extension shell are implemented. Milestone 3's persistence architecture is implementation-complete, while storage code and business functionality are not implemented yet.

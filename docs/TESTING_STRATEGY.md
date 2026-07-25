@@ -22,6 +22,10 @@ Vitest is the approved platform for unit, React UI, and integration tests. Playw
 - Validate Dexie storage and retrieval flows through Vitest integration tests.
 - Validate browser workflows using Playwright and manual verification where automation is not practical.
 
+### Persistence Integration Tests
+
+Milestone 3 Dexie integration tests use `fake-indexeddb` as an approved development/test-only IndexedDB adapter. Tests must use isolated databases, close and clean them deterministically, and never access extension or user data. Persistence-across-reopen behavior is tested by closing one database instance and reopening the same isolated test database through a new instance.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.

@@ -15,8 +15,8 @@
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen. Milestone 2 is complete following Principal Engineer review, automated validation, manual Chrome validation, and Documentation Impact Review. Milestone 3 is current.
-- Scope: Prepare the exact Milestone 3 — Local Database implementation task under the established architecture and milestone boundaries.
+- Status: Platform architecture remains approved and frozen. Milestone 2 is complete, checkpointed, and synchronized with GitHub. Milestone 3 is current.
+- Scope: The Milestone 3 persistence architecture is implementation-complete. The next step is a finalized Principal Engineer implementation task under the established architecture and milestone boundaries.
 - Business functionality: Not yet implemented.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
@@ -29,6 +29,7 @@
 - Testing: Vitest for unit, UI, and integration tests; Playwright for browser-level end-to-end tests.
 - Business logic remains local-first, layered, storage-independent, and AI-provider-independent.
 - Development tooling, automated validation, and the runnable Manifest V3 extension shell exist; local persistence and business functionality do not exist yet.
+- The initial physical database schema, project-owned CRUD contracts, identity and timestamp semantics, error behavior, transaction policy, migration policy, and isolated test adapter are approved in `DATABASE_SCHEMA.md` and `DECISIONS.md`.
 
 ## Completed Work
 
@@ -47,11 +48,12 @@
 - Confirmed that the generated manifest contains no `permissions` or `host_permissions`, restricts the content script to `https://example.com/*`, and does not introduce Side Panel.
 - Completed Principal Engineer review and manual Chrome validation of unpacked loading, Manifest V3 acceptance, popup and options rendering, service-worker operation, content-script initialization, absence of page modification, and absence of browser/runtime errors.
 - Completed the Milestone 2 Documentation Impact Review. Project-state, changelog, README, roadmap, architecture-status, and database-status documentation were synchronized without changing architecture, product requirements, milestone definitions, or roadmap scope.
+- Created Milestone 2 checkpoint `6a8b0ae` (`feat: implement extension shell`), pushed `master` to `origin/master`, and confirmed local and GitHub synchronization at that checkpoint.
+- Defined the implementation-ready Milestone 3 database architecture without implementing persistence or expanding product scope.
 
 ## Next Engineering Action
 
-- Complete the authorized Milestone 2 Git checkpoint and GitHub synchronization before beginning Milestone 3 implementation.
-- The Principal Engineer should then prepare and approve the exact Milestone 3 — Local Database implementation task.
+- The Principal Engineer should prepare and approve the exact Milestone 3 — Local Database implementation task.
 - Milestone 3 work must follow the approved Dexie and project-owned storage-contract boundaries documented in the repository.
 - Knowledge Library, Snippet Library, retrieval, prompt construction, provider integrations, and other later-milestone business functionality remain out of scope.
 
@@ -62,24 +64,25 @@
 - The approved platform may not be substituted without an explicit architecture review.
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
 - The WXT-generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. Side Panel is absent.
-- No storage implementation, database schema version, provider integration, or business functionality exists.
-- Milestone 2 implementation and closeout documentation are present in the working tree and await an authorized Git checkpoint and GitHub push.
+- No storage implementation, implemented database schema, provider integration, or business functionality exists.
+- Milestone 2 implementation and closeout documentation are committed at `6a8b0ae` and synchronized with `origin/master`.
+- Milestone 3 persistence architecture is defined in documentation; no database implementation or dependency has been added.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current implementation milestone: Milestone 3 — Local Database.
 - Current repository state: Documentation, architecture, the Milestone 1 development toolchain, and the reviewed and manually validated Milestone 2 extension shell are complete.
-- Next action: Create and synchronize the authorized Milestone 2 Git checkpoint, then obtain Principal Engineer approval of the exact Milestone 3 implementation task.
+- Next action: Obtain Principal Engineer approval of the exact Milestone 3 implementation task, then implement the documented physical schema and persistence contracts.
 - Business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- Dexie table design, indexes, migrations, and transaction behavior remain scoped to the storage milestone.
+- Milestone 3 implementation and persistence validation remain pending under the now-approved database architecture.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Milestone 1 — Technical Foundation remains the latest existing checkpoint. Milestone 2 implementation and closeout changes are uncommitted pending explicit checkpoint authorization.
+- Milestone 2 — Extension Shell checkpoint: `6a8b0ae` (`feat: implement extension shell`). `master` was pushed to `origin/master`, and local and GitHub state were synchronized at this checkpoint.
