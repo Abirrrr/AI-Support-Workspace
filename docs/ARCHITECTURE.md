@@ -143,4 +143,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture is approved and frozen for implementation: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. No implementation modules or platform artifacts are present yet.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. The Milestone 1 development foundation and Milestone 2 runtime extension shell are implemented. The extension shell includes only the approved background service worker, content script, popup, and options page; storage and business functionality are not implemented yet.

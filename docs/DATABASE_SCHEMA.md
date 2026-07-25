@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document describes the planned local data model for the project. The current milestone does not implement persistence, but the schema should guide future development.
+This document describes the planned local data model for the project. Persistence is not implemented yet. Milestone 3 — Local Database is current, and this planning document must guide its exact Principal Engineer implementation task.
 
 ## Core Entities
 
@@ -72,4 +72,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-No database implementation exists yet. This document is a planning artifact for future milestones.
+No database implementation exists yet. Milestone 3 — Local Database is current; schema versions, tables, indexes, migrations, and transaction boundaries require an approved implementation task before they are introduced.

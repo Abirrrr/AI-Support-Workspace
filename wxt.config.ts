@@ -8,6 +8,10 @@ export default defineConfig({
   srcDir: 'src',
   entrypointsDir: 'extension',
   modules: ['@wxt-dev/module-react'],
+  manifest: {
+    description: 'Chrome extension runtime shell for AI Support Workspace.',
+    name: 'AI Support Workspace',
+  },
   vite: () => ({
     plugins: [tailwindcss()],
   }),

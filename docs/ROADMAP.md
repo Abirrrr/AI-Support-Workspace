@@ -16,7 +16,7 @@ Documented the engineering platform requirements, architectural layers, standard
 
 Approved and froze the infrastructure stack that all implementation milestones must inherit.
 
-## Milestone 1 — Technical Foundation (Current)
+## Milestone 1 — Technical Foundation (Completed)
 
 ### Goal
 
@@ -56,11 +56,11 @@ Side Panel is not currently approved product scope and must not be introduced wi
 - No extension shell, storage implementation, provider integration, product UI, business logic, or product functionality is introduced.
 - Principal Engineer review, applicable manual validation, repository documentation updates, and the Git checkpoint are complete.
 
-## Milestone 2 — Extension Shell
+## Milestone 2 — Extension Shell (Completed)
 
 Create the basic Chrome extension shell and manifest scaffolding.
 
-## Milestone 3 — Local Database
+## Milestone 3 — Local Database (Current)
 
 Introduce local persistence and the initial storage layer.
 

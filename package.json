@@ -9,6 +9,8 @@
   "packageManager": "pnpm@11.15.0",
   "scripts": {
     "prepare": "husky",
+    "dev": "wxt",
+    "build": "wxt build && node tests/build/validate-output.mjs",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --ignore-unknown .",
     "typecheck": "tsc --noEmit",
@@ -16,7 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list",
-    "validate": "pnpm lint && pnpm format --check && pnpm typecheck && pnpm test && pnpm exec playwright test --list"
+    "validate": "pnpm lint && pnpm format --check && pnpm typecheck && pnpm test && pnpm exec playwright test --list && pnpm build"
   },
   "dependencies": {
     "react": "^19.2.7",

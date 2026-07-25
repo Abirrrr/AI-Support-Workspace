@@ -48,3 +48,6 @@ jobs:
 
       - name: Validate Playwright configuration
         run: pnpm exec playwright test --list
+
+      - name: Build extension and validate manifest
+        run: pnpm build

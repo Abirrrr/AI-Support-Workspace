@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Milestone 2 — Extension Shell
+
+- Completed the first runnable WXT Chrome extension shell targeting Manifest V3.
+- Added the approved background service worker, content script, React popup, and React options page without product or business functionality.
+- Restricted the content script to `https://example.com/*`; the generated manifest contains no `permissions` or `host_permissions` and does not include Side Panel.
+- Validated React and Tailwind within the popup and options surfaces.
+- Added the first production WXT build, automated generated-manifest and build-output validation, React shell tests, and a continuous-integration production-build gate.
+- Passed dependency installation, linting, formatting, type-checking, Vitest execution, Playwright test discovery, production build validation, and `git diff --check`.
+- Completed Principal Engineer review and manual Chrome validation. The unpacked extension loaded successfully, Chrome accepted the generated Manifest V3 manifest, all approved runtime surfaces operated without reported errors, the content script initialized on its test page, and no unintended page modification was observed.
+- Completed the mandatory Documentation Impact Review and synchronized affected repository status documentation without changing architecture, product requirements, milestone definitions, or roadmap scope.
+- Advanced the current project milestone to Milestone 3 — Local Database.
+
 ### Engineering Workflow v1
 
 - Formalized the standard implementation milestone lifecycle from finalized Principal Engineer scope through Codex implementation, review, documentation synchronization, manual validation, Git checkpoint, and GitHub push.

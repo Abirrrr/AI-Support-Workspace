@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 1 — Technical Foundation is current; no business functionality has been implemented yet.
+The platform architecture is approved and frozen. Milestone 2 — Extension Shell is complete, and Milestone 3 — Local Database is current. The runnable Manifest V3 shell contains only the approved background service worker, content script, popup, and options page; no business functionality has been implemented yet.
 
 ## Technology Stack
 
@@ -21,8 +21,8 @@ The platform architecture is approved and frozen. Milestone 1 — Technical Foun
 ## Repository Structure
 
 - docs/: project documentation and planning artifacts
-- src/: source code for future implementation
-- tests/: automated tests for future milestones
+- src/: extension runtime and presentation source code
+- tests/: automated unit, integration, build-output, and browser-test foundations
 - .github/workflows/: CI and workflow configuration
 
 ## Documentation
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should prepare and approve the exact Milestone 1 implementation task. Implementation must conform to the frozen platform documented in the repository.
+After the authorized Milestone 2 Git checkpoint and repository synchronization, the Principal Engineer should prepare and approve the exact Milestone 3 — Local Database implementation task. Implementation must conform to the frozen platform and storage boundaries documented in the repository.
