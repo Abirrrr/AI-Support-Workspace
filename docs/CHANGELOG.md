@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+### Milestone 8 — Ollama Provider
+
+- Completed the approved project-owned `GenerationProvider` boundary and `OllamaProvider` infrastructure adapter with provider identity `ollama`, preserving Prompt Builder provider independence and allowing a future OpenAI adapter to implement the same contract without changing Prompt Builder.
+- Implemented transient `GenerationRequest` input containing an existing `PromptAssembly` and caller-supplied model, plus a minimal `GenerationResult` containing generated text, provider identity, and the requested model. No model configuration is persisted, and raw Ollama responses do not escape the adapter.
+- Implemented deterministic translation into exactly one system message containing only Prompt Builder Instructions and one structured JSON user message. Applicable keys are inserted as `guidance`, `merchantContext`, `knowledge`, and `snippets`; absent sections are omitted; Knowledge exposes only title/body; Snippets expose only title/content; and application metadata is excluded.
+- Implemented exactly one native-fetch `POST` per `generate` invocation to fixed local endpoint `http://localhost:11434/api/chat` with `stream: false`, no retry, internal timeout, health check, automatic model pull, generation tuning option, remote endpoint, or cloud fallback.
+- Implemented focused `ProviderUnavailableError`, `ModelUnavailableError`, `ProviderRequestError`, `ProviderResponseError`, and `GenerationCancelledError` handling for connection failure, HTTP 404, other non-success responses, invalid successful responses, and caller `AbortSignal` cancellation.
+- Preserved local-only privacy by adding no telemetry or analytics, logging no PromptAssembly, customer, Library, generated-response, or raw provider payloads, and exposing no raw Ollama response through application contracts.
+- Added no Chrome generation workflow, background-service-worker integration, `chrome.runtime` generation messaging, localhost host permission, CORS or `OLLAMA_ORIGINS` configuration, Generate UI, Output Workspace, model selector, endpoint settings, connection indicator, or Test Connection. M8 validated the provider independently of Chrome runtime placement.
+- Added no Settings, provider, model, or endpoint persistence and no database, schema-version, table, field, index, migration, dependency, WXT configuration, extension runtime, or manifest change.
+- Other explicit M8 non-goals remained absent: OpenAI integration, a provider registry, streaming, snippet expansion, and Side Panel.
+- Added 30 focused deterministic unit tests in 1 file. The normal full Vitest suite passed with 102 tests and skipped the single opt-in live Ollama integration test when `OLLAMA_LIVE_MODEL` was absent.
+- Passed `pnpm install`, `pnpm lint`, `pnpm format --check`, `pnpm typecheck`, `pnpm test`, `pnpm exec playwright test --list`, `pnpm build`, generated Manifest V3 validation, and `git diff --check`. The generated manifest retained no `permissions`, `host_permissions`, or `side_panel`.
+- Completed a real local Ollama interoperability smoke test with `OLLAMA_LIVE_MODEL=qwen2.5:7b`, the real `OllamaProvider`, and the fixed localhost `/api/chat` endpoint. The request returned a non-empty `GenerationResult` in approximately 25 seconds; no model-quality claim is implied.
+- Hardened the opt-in live smoke test with an individual 120-second test-only timeout because real local loading and generation may exceed Vitest's normal 5-second timeout. `OllamaProvider` still has no internal timeout, and the normal suite remains independent of Ollama.
+- Completed Principal Engineer implementation review and the mandatory Documentation Impact Review. Project state, architecture status, roadmap, testing strategy, changelog, engineering principles, database status, UI workflow, and README required synchronization; `DECISIONS.md` and product requirements were reviewed and required no changes.
+- Corrected repository continuity to record architecture checkpoint `b54f141` (`docs: define ollama provider architecture`) as committed, pushed to `origin/master`, and synchronized before implementation began. No M8 implementation checkpoint has been created; implementation and closeout changes remain uncommitted pending approval.
+- Advanced the current roadmap milestone to Milestone 9 — Output Workspace without changing milestone numbering or scope.
+
 ### Milestone 8 — Ollama Provider Architecture Definition
 
 - Corrected repository continuity to record Milestone 7 implementation checkpoint `a71dfed` (`feat: implement prompt builder`) as committed, pushed to `origin/master`, and synchronized between local `master` and the remote.

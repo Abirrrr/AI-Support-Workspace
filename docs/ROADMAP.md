@@ -80,11 +80,11 @@ Implement fast local search and retrieval over stored content.
 
 Create a provider-independent prompt composition layer.
 
-## Milestone 8 — Ollama Provider (Current)
+## Milestone 8 — Ollama Provider (Completed)
 
 Add Ollama as the first AI provider integration.
 
-## Milestone 9 — Output Workspace
+## Milestone 9 — Output Workspace (Current)
 
 Provide a workspace for reviewing and refining AI-generated output.
 

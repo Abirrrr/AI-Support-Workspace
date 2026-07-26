@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 7 — Prompt Builder is complete and synchronized at checkpoint `a71dfed`, and Milestone 8 — Ollama Provider is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine provides deterministic local lexical retrieval, and the headless Prompt Builder composes prepared support inputs into a typed provider-independent `PromptAssembly`. The implementation-ready M8 architecture defines a narrow project-owned generation contract and a local-only, non-streaming Ollama adapter, but no provider implementation or extension runtime integration exists yet.
+The platform architecture is approved and frozen. Milestone 8 — Ollama Provider is complete, and Milestone 9 — Output Workspace is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine provides deterministic local lexical retrieval, the headless Prompt Builder composes prepared support inputs into a typed provider-independent `PromptAssembly`, and the replaceable `OllamaProvider` performs local-only, non-streaming generation through the project-owned `GenerationProvider` boundary. M8 remains independent of Chrome runtime placement and added no generation workflow, Output Workspace, Settings, persistence, localhost permission, or CORS integration.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should review the Milestone 8 architecture definition and authorize its documentation checkpoint and GitHub synchronization. After that checkpoint is synchronized, the exact Milestone 8 — Ollama Provider implementation task should be prepared and approved under the frozen provider contract and existing roadmap.
+The Principal Engineer should review the Milestone 8 closeout and authorize the uncommitted M8 implementation checkpoint and GitHub synchronization when satisfied. Milestone 9 — Output Workspace is the next roadmap milestone and requires its own approved architecture and implementation scope before work begins.

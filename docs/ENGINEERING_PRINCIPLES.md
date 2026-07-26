@@ -55,6 +55,3 @@ A failed or ambiguous reconstruction is a documentation defect. Correct the repo
 ## Documentation as Constitution
 
 When design questions arise, they should be checked against these principles before architecture changes are made.
-git add .
-git commit -m "docs: define ollama provider architecture"
-git push

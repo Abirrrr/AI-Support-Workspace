@@ -201,7 +201,7 @@ Prompt Builder
 
 ↓
 
-Provider Adapter (future)
+Provider Adapter
 
 ↓
 
@@ -212,11 +212,11 @@ Draft Reply
 
 - The workflow begins with Merchant Context, Guidance, or both; retrieved Library material cannot independently define the current task.
 - A future application orchestrator decides the retrieval query and supplies already-ranked Knowledge and Snippet results to Prompt Builder.
-- Prompt Builder creates a structured provider-independent assembly; a future provider adapter owns provider-specific serialization and execution.
+- Prompt Builder creates a structured provider-independent assembly; the implemented `OllamaProvider` owns Ollama-specific serialization and execution behind the project-owned generation boundary.
 - Guidance has the highest dynamic authority, followed by Merchant Context, Knowledge, and Snippets.
 - The final result is a draft reply that the user can review and edit.
 - This workflow remains provider-independent and should not depend on a specific implementation path.
-- Milestone 7 is headless and introduces no Support Workspace or Prompt Builder UI. Images shown in the broader planned Support workflow are explicitly deferred from Prompt Builder v1 and require a later architecture decision.
+- Milestones 7 and 8 are headless and introduce no Support Workspace, generation workflow, or output UI. M8 proved the provider boundary independently of Chrome runtime placement; orchestration and the editable Output Workspace remain later workflow work. Images shown in the broader planned Support workflow are explicitly deferred from Prompt Builder v1 and require a later architecture decision.
 
 ## 8. Local Data Workflow
 
