@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Milestone 9 — Output Workspace Architecture Definition
+
+- Corrected repository continuity to record Milestone 8 implementation checkpoint `2de8dcb` (`feat: implement ollama provider`) as committed, pushed to `origin/master`, and synchronized before M9 architecture definition began.
+- Defined M9 as the first complete manual Context-to-generated-output workflow with Merchant Context, Guidance, a transient Ollama model field, Generate, automatic local retrieval, Prompt Builder, `GenerationProvider`, the current Ollama adapter, safe loading and errors, editable plain-text output, and Copy.
+- Approved one dedicated foreground extension Workspace page, with the popup remaining a launcher for Workspace and Libraries and the options page retaining Knowledge and Snippet CRUD. No router, Side Panel, injected UI, or content-script change is introduced.
+- Defined focused application-layer `OutputWorkflow` orchestration over `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`, composed with existing concrete repositories and `OllamaProvider` by the Workspace entry point without a dependency-injection framework or provider registry.
+- Approved automatic retrieval on every Generate action using non-whitespace Merchant Context followed by non-whitespace Guidance, preserving each included value and joining both with exactly `\n\n`. M6 scoring, empty results, M7 precedence and selection, and provider-independent `PromptAssembly` remain unchanged.
+- Excluded manual Library selection, record pinning, retrieval override, Use in Builder behavior, and PromptAssembly preview.
+- Approved a blank-initial transient model field whose UI value is trimmed before generation. An example `qwen2.5:7b` placeholder is allowed but is not a default; model persistence, discovery, `/api/tags`, and automatic selection remain excluded.
+- Preserved the fixed `http://localhost:11434/api/chat` provider endpoint and approved foreground Workspace execution with no background generation or `chrome.runtime` generation messaging.
+- Approved exactly `http://localhost/*` as the M9 host permission while excluding `127.0.0.1`, broad host patterns, ordinary Chrome API permissions for Ollama networking, endpoint configuration, LAN, remote, and cloud access.
+- Documented the external requirement for Ollama to allow the environment-specific installed `chrome-extension://<extension-id>` origin through `OLLAMA_ORIGINS`; the extension never hardcodes the ID or modifies, launches, restarts, or broadens Ollama configuration.
+- Defined guarded single-request Generate behavior, visible generating state, prior-output preservation during generation and after failures, successful replacement with exact provider text, repeat generation through the normal Generate action, and no retry, dedicated Regenerate, Cancel, Clear, or history.
+- Defined manual multiline transient Context and Guidance, four-state idle/generating/success/error presentation, editable plain-text textarea output, exact Copy of current edited text through direct user-activation Clipboard API use, safe error messages, minimal Ollama helper text, and accessibility requirements.
+- Preserved schema version 1 and excluded Dexie, localStorage, Chrome storage, workspace drafts, output persistence, Save as Snippet, Settings, provider selection, OpenAI, shortcuts, page scraping or insertion, telemetry, analytics, cloud fallback, and prompt or output logging.
+- Defined deterministic `OutputWorkflow`, Workspace UI, generated-manifest, regression, and mandatory real Chrome validation contracts, including proof of host permission and external Ollama origin configuration at the actual browser boundary.
+- Kept Milestone 9 current and implementation-ready without adding implementation code, tests, dependencies, runtime files, manifest permissions, database changes, or a Git checkpoint.
+
 ### Milestone 8 — Ollama Provider
 
 - Completed the approved project-owned `GenerationProvider` boundary and `OllamaProvider` infrastructure adapter with provider identity `ollama`, preserving Prompt Builder provider independence and allowing a future OpenAI adapter to implement the same contract without changing Prompt Builder.

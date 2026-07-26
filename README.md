@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 8 — Ollama Provider is complete, and Milestone 9 — Output Workspace is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine provides deterministic local lexical retrieval, the headless Prompt Builder composes prepared support inputs into a typed provider-independent `PromptAssembly`, and the replaceable `OllamaProvider` performs local-only, non-streaming generation through the project-owned `GenerationProvider` boundary. M8 remains independent of Chrome runtime placement and added no generation workflow, Output Workspace, Settings, persistence, localhost permission, or CORS integration.
+The platform architecture is approved and frozen. Milestone 8 — Ollama Provider is complete and synchronized at checkpoint `2de8dcb`, and Milestone 9 — Output Workspace is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine, Prompt Builder, and replaceable generation boundary are implemented. The implementation-ready M9 architecture connects them through a focused `OutputWorkflow` on a dedicated foreground extension Workspace page with transient manual inputs, automatic retrieval, a temporary model field, editable plain-text output, Copy, minimal localhost host access, and no persistence or browser-page integration.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should review the Milestone 8 closeout and authorize the uncommitted M8 implementation checkpoint and GitHub synchronization when satisfied. Milestone 9 — Output Workspace is the next roadmap milestone and requires its own approved architecture and implementation scope before work begins.
+The Principal Engineer should review the Milestone 9 architecture definition and authorize its documentation checkpoint and GitHub synchronization. After synchronization, the exact M9 implementation task should be approved under the frozen `OutputWorkflow`, Workspace, runtime, permission, UI, privacy, and validation contracts.

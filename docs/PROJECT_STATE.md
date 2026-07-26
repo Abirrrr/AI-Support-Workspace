@@ -21,8 +21,8 @@
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen. Milestone 8 implementation, Principal Engineer review, real local Ollama validation, and Documentation Impact Review are complete. Its architecture checkpoint `b54f141` (`docs: define ollama provider architecture`) was committed, pushed to `origin/master`, and synchronized before implementation began; the M8 implementation itself remains uncommitted and has no fabricated checkpoint.
-- Scope: Milestone 9 — Output Workspace is the current milestone defined by the roadmap. It must receive its own approved scope before implementation; M8 did not implement its workflow or UI.
+- Status: Platform architecture remains approved and frozen. Milestone 8 is complete at implementation checkpoint `2de8dcb` (`feat: implement ollama provider`), which is committed, pushed to `origin/master`, and synchronized locally and remotely. Milestone 9 — Output Workspace is current, and its architecture is now defined for implementation.
+- Scope: Milestone 9 implements the first complete manual Context-to-generated-output workflow through a dedicated foreground extension Workspace page, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` is authoritative for the exact M9 scope and non-goals.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, and local Ollama provider adapter are implemented. Chrome generation orchestration, generated-output UI, and other later-milestone functionality are not implemented.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
@@ -39,11 +39,14 @@
 - Knowledge and Snippet management share the existing options-page Library surface, opened in a browser tab from popup navigation, with lightweight local tab navigation between the libraries. Their presentation uses separate application-layer boundaries over `KnowledgeEntryRepository` and `SnippetEntryRepository` and does not access Dexie directly.
 - Retrieval Engine v1 is implemented as one headless application-level operation over the two existing repository contracts. It returns separately ranked Knowledge and Snippet collections, scores records in memory, remains local and read-only, and does not access Dexie directly or depend on UI or AI-provider behavior.
 - `DECISIONS.md` is authoritative for the M6 normalization, fields, scoring, repeated-term behavior, empty and no-match behavior, deterministic per-domain ordering, absence of result limits, and performance direction.
-- Prompt Builder v1 is implemented as a pure, headless application-layer composition boundary over optional Merchant Context, optional Guidance, and already-computed Retrieval Results. A future orchestrator owns query construction and Retrieval Engine invocation; Prompt Builder validates primary input, preserves M6 ranking, selects the first five Knowledge and first three Snippet results, applies `Guidance > Merchant Context > Knowledge > Snippets`, and returns an explicitly sectioned provider-independent `PromptAssembly`.
+- Prompt Builder v1 is implemented as a pure, headless application-layer composition boundary over optional Merchant Context, optional Guidance, and already-computed Retrieval Results. M9 `OutputWorkflow` owns query construction and Retrieval Engine invocation; Prompt Builder validates primary input, preserves M6 ranking, selects the first five Knowledge and first three Snippet results, applies `Guidance > Merchant Context > Knowledge > Snippets`, and returns an explicitly sectioned provider-independent `PromptAssembly`.
 - `DECISIONS.md` is authoritative for the M7 input and output contracts, minimum valid input, default instructions, precedence and grounding, content-versus-metadata policy, selection limits, deterministic formatting, empty behavior, purity, and provider, UI, persistence, token, and image boundaries.
 - Milestone 8 implemented a narrow project-owned `GenerationProvider` boundary whose `generate` operation accepts a transient `GenerationRequest`, optionally accepts an `AbortSignal`, and returns a provider-independent `GenerationResult`. The first infrastructure adapter is `OllamaProvider`, identified as `ollama`.
-- Ollama Provider v1 uses native `fetch` against fixed local endpoint `http://localhost:11434/api/chat`, sends exactly one system message and one deterministically serialized user message with `stream: false`, and exposes no raw provider response. Runtime ownership, Chrome messaging, localhost host permission, CORS handling, UI, Settings, model persistence, retries, timeouts, model pulling, and health checks remain explicitly deferred.
+- Ollama Provider v1 uses native `fetch` against fixed local endpoint `http://localhost:11434/api/chat`, sends exactly one system message and one deterministically serialized user message with `stream: false`, and exposes no raw provider response. M9 now assigns generation to the foreground Workspace page, requires only `http://localhost/*` host access plus external Ollama origin allowance, and introduces no Chrome messaging; Settings, model persistence, retries, provider timeouts, model pulling, and health checks remain deferred.
 - `DECISIONS.md` is authoritative for the M8 request, result, translation, transport, response validation, cancellation, error taxonomy, privacy, configuration, replaceability, and deferred-runtime boundaries.
+- Milestone 9 introduces one dedicated extension-owned Workspace page and one focused application-layer `OutputWorkflow`. The Workspace entry point composes the existing repositories, Retrieval Engine, Prompt Builder, and `OllamaProvider`, while `OutputWorkflow` depends only on `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`.
+- Each Generate action constructs the frozen Context-then-Guidance retrieval query joined by exactly `\n\n`, performs one complete retrieval-to-generation workflow, and returns editable transient plain-text output. M9 uses a blank-initial transient model field, runs generation in the foreground Workspace page, adds only `http://localhost/*` host access during implementation, and requires external Ollama allowance for the installed extension origin.
+- `DECISIONS.md` is authoritative for M9 input, orchestration, retrieval, provider, runtime, permission, origin, state, output, copy, error, privacy, persistence, accessibility, testing, and manual-validation contracts.
 
 ## Completed Work
 
@@ -121,12 +124,15 @@
 - Validated the real provider against local Ollama `/api/chat` with `OLLAMA_LIVE_MODEL=qwen2.5:7b`, producing a non-empty `GenerationResult` in approximately 25 seconds. The live test has an individual 120-second test-only timeout; `OllamaProvider` still has no internal timeout.
 - Completed the mandatory Milestone 8 Documentation Impact Review. Project-state, architecture-status, roadmap, testing, changelog, engineering-principles, database-status, UI-workflow, and README documentation required synchronization; decisions and product requirements were reviewed and required no changes.
 - Preserved database `ai-support-workspace` schema version 1, tables, fields, indexes, migrations, persistence contracts, extension runtime files, Chrome permissions, browser surfaces, and WXT configuration. Chrome generation orchestration, messaging, localhost access, CORS, `OLLAMA_ORIGINS`, Output Workspace, Settings, and other deferred functionality remain later-milestone work.
+- Created and synchronized Milestone 8 implementation checkpoint `2de8dcb` (`feat: implement ollama provider`) before M9 architecture definition began.
+- Defined the implementation-ready Milestone 9 architecture for a dedicated transient Workspace, focused `OutputWorkflow`, deterministic automatic retrieval, existing Prompt Builder and provider boundaries, foreground-page generation, minimal localhost host permission, external Ollama origin configuration, editable output, Copy, safe errors, and real Chrome validation.
+- Preserved existing M6, M7, and M8 behavior, Libraries and content-script ownership, provider replaceability, schema version 1, and later milestone boundaries while introducing no implementation code, tests, dependencies, runtime files, permissions, persistence, Settings, OpenAI, Side Panel, or browser-page integration during architecture definition.
 
 ## Next Engineering Action
 
-- The Principal Engineer should review this Milestone 8 closeout and, when satisfied, authorize the M8 implementation checkpoint and GitHub synchronization.
-- Milestone 9 — Output Workspace is current. Its exact architecture and implementation scope must be documented and approved before implementation begins.
-- Runtime placement, Chrome messaging, localhost permission and CORS handling, model configuration, and other deferred concerns must remain with their appropriate approved later milestone.
+- The Principal Engineer should review the Milestone 9 architecture definition and authorize its documentation checkpoint and GitHub synchronization when satisfied.
+- After that checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 9 implementation task from the frozen M9 decisions.
+- Milestone 10 and other later functionality remain out of scope until M9 implementation, review, documentation closeout, manual validation, checkpoint, and synchronization are complete.
 
 ## Repository Status
 
@@ -137,8 +143,8 @@
 - The WXT-generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. Side Panel is absent.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `b54f141` (`docs: define ollama provider architecture`) and is synchronized between local `master` and `origin/master`; it was created before M8 implementation began.
-- Milestone 8 implementation and closeout documentation remain uncommitted. No M8 implementation checkpoint has been created.
+- The latest existing checkpoint is `2de8dcb` (`feat: implement ollama provider`) and is synchronized between local `master` and `origin/master`.
+- The Milestone 9 architecture definition is an uncommitted documentation change. No M9 implementation exists and no M9 checkpoint has been created.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated independently of Chrome runtime placement. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, generation workflow orchestration, snippet expansion or insertion, token handling, Prompt Templates, Support Workspace, Output Workspace, prompt preview, Settings functionality, Side Panel, or later-milestone business functionality exists.
@@ -147,19 +153,19 @@
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current implementation milestone: Milestone 9 — Output Workspace.
-- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library, and the reviewed and automatically validated Milestone 6 Retrieval Engine, Milestone 7 Prompt Builder, and Milestone 8 Ollama Provider are complete.
-- Next action: Obtain Principal Engineer approval for this closeout, then authorize the uncommitted M8 implementation checkpoint and synchronization before defining the exact Milestone 9 task.
+- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library, and the reviewed and automatically validated Milestone 6 Retrieval Engine, Milestone 7 Prompt Builder, and Milestone 8 Ollama Provider are complete. M9 architecture is implementation-ready but uncommitted.
+- Next action: Obtain Principal Engineer approval for the M9 architecture-definition checkpoint and synchronization, then approve the exact M9 implementation task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- The Milestone 8 implementation and closeout documentation remain uncommitted and require an authorized implementation checkpoint and GitHub synchronization.
-- Extension runtime placement for generation, localhost host access, CORS behavior, and `OLLAMA_ORIGINS` remain intentionally deferred and must be resolved by the later milestone that owns workflow/runtime integration.
+- The Milestone 9 architecture-definition changes remain uncommitted and require an authorized documentation checkpoint and GitHub synchronization before implementation begins.
+- Real browser generation depends on the M9 host permission and environment-specific external Ollama `OLLAMA_ORIGINS` configuration; implementation must validate this boundary in Chrome without changing Ollama automatically.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `b54f141` (`docs: define ollama provider architecture`). Local `master` and `origin/master` are synchronized at this checkpoint.
-- No Milestone 8 implementation checkpoint exists; the implementation and closeout documentation remain uncommitted pending Principal Engineer approval.
+- Latest existing checkpoint: `2de8dcb` (`feat: implement ollama provider`). Local `master` and `origin/master` are synchronized at this checkpoint.
+- The Milestone 9 architecture definition remains uncommitted pending Principal Engineer approval; no M9 implementation checkpoint exists.

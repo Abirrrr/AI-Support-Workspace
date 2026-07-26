@@ -76,6 +76,16 @@ Real local interoperability validation used the real `OllamaProvider`, fixed loc
 
 The live integration test remains explicitly opt-in and has an individual 120-second test-only timeout because local model loading and generation can legitimately exceed Vitest's normal 5-second timeout. This does not change production behavior: `OllamaProvider` has no internal timeout, and the normal automated suite requires neither Ollama installation nor a running Ollama service.
 
+### Output Workspace v1 Test Requirements
+
+Milestone 9 implementation must add deterministic unit coverage for `OutputWorkflow`. Query cases include Context only, Guidance only, Context plus Guidance joined by exactly `\n\n`, and omission of whitespace-only inputs. Tests must verify one Retrieval Engine call per workflow, valid empty results, original Context and Guidance plus prepared results passed to Prompt Builder, the resulting `PromptAssembly` passed through `GenerationRequest`, the trimmed UI model reaching that request, one `GenerationProvider` invocation, returned `GenerationResult`, and no Ollama-specific response dependency.
+
+Workspace component coverage must include the initial empty state; manual Context, Guidance, and model inputs; disabled Generate behavior; every valid primary-input combination; invalid blank model behavior; generating state and duplicate prevention; successful editable output; repeated Generate; preservation of prior output after a later failure; safe validation, retrieval, and provider error mappings; Copy from edited output; Copy success and failure; and transient lifecycle behavior where practical. Tests use a fake or stub workflow/provider boundary and never require real Ollama.
+
+Generated-manifest validation must require only `http://localhost/*` in `host_permissions`, reject `127.0.0.1` and broad host access, confirm no unnecessary clipboard permission, and confirm no Side Panel. Regression coverage must preserve popup and Library navigation, Knowledge and Snippet workflows, persistence, Retrieval Engine, Prompt Builder, Ollama Provider, and the production extension build.
+
+M9 requires real Chrome validation because it introduces the first extension-origin request to Ollama. Manual validation must cover extension loading, popup navigation to Workspace and Libraries, inputs and Generate rules, real generation with an installed model, loading, editable output, exact edited-output copying, repeated generation, preservation of output after a later failure, safe unavailable-provider and missing-model behavior, absence of content leaks and Chrome runtime errors, and Library regression behavior. The tester must allow the installed `chrome-extension://<extension-id>` origin through external Ollama `OLLAMA_ORIGINS` configuration; the extension does not automate that setup.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.

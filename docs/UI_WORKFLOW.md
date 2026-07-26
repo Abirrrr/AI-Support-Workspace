@@ -75,6 +75,8 @@ Save as Snippet (optional)
 - The system should help the user retrieve local knowledge before generating a reply.
 - The generated response should be editable before it is used or shared.
 - The user may save valuable content as knowledge or as a snippet for future reuse.
+- Milestone 9 implements the first dedicated extension-owned Workspace page with manual Merchant Context, manual Guidance, transient model input, Generate, editable plain-text output, and Copy. Images, explicit reset, Save actions, shortcuts, page capture, and reply insertion remain outside M9.
+- The popup remains a launcher with separate Workspace and Libraries navigation, while Knowledge and Snippet CRUD remain on the options page.
 
 ## 4. Knowledge Library Workflow
 
@@ -193,7 +195,15 @@ Optional Guidance
 
 +
 
-Already-ranked Knowledge and Snippets
+Transient Ollama Model
+
+↓
+
+OutputWorkflow
+
+↓
+
+Retrieval Engine
 
 ↓
 
@@ -201,22 +211,32 @@ Prompt Builder
 
 ↓
 
-Provider Adapter
+GenerationProvider
 
 ↓
 
-Draft Reply
+OllamaProvider
+
+↓
+
+Editable Draft Reply
+
+↓
+
+Copy
 ```
 
 ### Workflow Notes
 
 - The workflow begins with Merchant Context, Guidance, or both; retrieved Library material cannot independently define the current task.
-- A future application orchestrator decides the retrieval query and supplies already-ranked Knowledge and Snippet results to Prompt Builder.
+- M9 `OutputWorkflow` constructs the deterministic Context-then-Guidance retrieval query, invokes Retrieval Engine, and supplies already-ranked Knowledge and Snippet results to Prompt Builder.
 - Prompt Builder creates a structured provider-independent assembly; the implemented `OllamaProvider` owns Ollama-specific serialization and execution behind the project-owned generation boundary.
 - Guidance has the highest dynamic authority, followed by Merchant Context, Knowledge, and Snippets.
 - The final result is a draft reply that the user can review and edit.
 - This workflow remains provider-independent and should not depend on a specific implementation path.
-- Milestones 7 and 8 are headless and introduce no Support Workspace, generation workflow, or output UI. M8 proved the provider boundary independently of Chrome runtime placement; orchestration and the editable Output Workspace remain later workflow work. Images shown in the broader planned Support workflow are explicitly deferred from Prompt Builder v1 and require a later architecture decision.
+- M9 runs this workflow from a dedicated foreground extension page with no background generation messaging. Inputs, model, output, and feedback remain transient and are lost when the page closes or reloads.
+- Generate is available only with non-whitespace Context or Guidance, a non-whitespace model, and no active request. Repeated Generate reruns the complete workflow; M9 has no separate Regenerate, Cancel, Clear, Save, history, or prompt-preview action.
+- Images shown in the broader planned Support workflow remain deferred from Prompt Builder v1 and require a later architecture decision.
 
 ## 8. Local Data Workflow
 

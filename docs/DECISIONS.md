@@ -176,7 +176,7 @@ interface PromptBuildInput {
 
 Exact implementation naming may follow repository conventions, but these semantics are frozen. No provider or destination identifier, image or screenshot, or manually selected Library-record mechanism belongs in v1.
 
-A future application orchestrator decides the retrieval query, invokes Retrieval Engine, and supplies the resulting `RetrievalResults`. Prompt Builder never invokes Retrieval Engine, changes its scores, or reranks its results. It preserves M6 order within each domain.
+Milestone 9 `OutputWorkflow` fulfills the later application-orchestrator boundary: it decides the retrieval query, invokes Retrieval Engine, and supplies the resulting `RetrievalResults`. Prompt Builder never invokes Retrieval Engine, changes its scores, or reranks its results. It preserves M6 order within each domain.
 
 At least one of Merchant Context or Guidance must contain non-whitespace text. Context only, Guidance only, either primary input with retrieval, and Context plus Guidance are valid. Retrieval-only, completely empty, or whitespace-only primary input is invalid and produces one focused deterministic Prompt Builder validation error for the missing-primary-input condition. M7 does not create a generalized application error framework.
 
@@ -332,6 +332,102 @@ The adapter must not log prompt content, Merchant Context, Guidance, Knowledge, 
 Raw Ollama request and response types remain internal to `OllamaProvider`. The dependency direction is `PromptAssembly` to `GenerationProvider` to `OllamaProvider`; a future provider can implement the same project-owned contract without changing Prompt Builder. M8 adds no OpenAI placeholder, provider registry, or widespread provider-identity branching.
 
 M8 adds no generation options beyond the required model. It adds no UI, Support Workspace, popup or options controls, generated-output surface, persistence, Settings contract, database table, schema version, field, index, migration, Chrome runtime integration, or permission change.
+
+## Decision 25: Transient Manual Output Workspace v1
+
+Milestone 9 implements the first complete manual Context-to-generated-output workflow through one dedicated extension-owned Workspace page. It connects the existing Retrieval Engine, Prompt Builder, `GenerationProvider`, and `OllamaProvider` boundaries without changing their behavior. The workflow accepts manual Merchant Context, manual Guidance, and a temporary Ollama model value; automatically retrieves local Knowledge and Snippets; generates through the provider boundary; and presents editable plain-text output with a Copy action.
+
+M9 introduces no dedicated Regenerate, Cancel, Stop, Clear, or Reset control; manual Library selection; Save as Snippet; PromptAssembly preview; provider selection or registry; OpenAI integration; model discovery; `/api/tags`; persistent Settings or workspace drafts; generation history; keyboard shortcut; page scraping or insertion; Side Panel; streaming; retry; health check; automatic model pull; or endpoint configuration. After a request completes, the ordinary Generate button may be used again for a fresh complete workflow with the current inputs.
+
+### Workspace Surface and Composition
+
+M9 adds one dedicated foreground extension Workspace page. The popup remains a launcher and may expose separate Open Workspace and Open Libraries actions. Open Libraries preserves the existing options-page behavior, and Knowledge and Snippet CRUD remain owned by the options page. M9 introduces no router, Side Panel, injected merchant-page UI, or content-script change.
+
+The Workspace extension entry point is the composition root. It constructs the existing Knowledge and Snippet repositories, `RetrievalEngine`, `PromptBuilder`, and `OllamaProvider`, then supplies a focused application-layer `OutputWorkflow` to the React Workspace UI. Composition remains separate from presentation, no dependency-injection framework is introduced, and React components do not directly coordinate the retrieval, prompt, and provider steps.
+
+`OutputWorkflow` accepts a project-owned input conceptually equivalent to:
+
+```ts
+interface OutputWorkflowInput {
+  merchantContext?: string;
+  guidance?: string;
+  model: string;
+}
+```
+
+It depends on `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`, not Ollama-specific request or response structures. For each invocation it constructs the retrieval query, invokes Retrieval Engine once, passes the original Merchant Context and Guidance plus prepared `RetrievalResults` to Prompt Builder, constructs `GenerationRequest`, invokes `GenerationProvider` once, and returns `GenerationResult`. The current composition root supplies `OllamaProvider`; application logic introduces no provider factory, registry, selector, provider-name branching, or future-provider placeholder.
+
+### Retrieval and Prompt Construction
+
+Every Generate action performs automatic retrieval. The query includes Merchant Context first when it contains non-whitespace, followed by Guidance when it contains non-whitespace. Included values are preserved exactly and joined with exactly two newline characters (`\n\n`). Context-only and Guidance-only queries use that supplied value directly. Whitespace-only values are omitted. No labels, headings, rewriting, summarization, enrichment, tokenization, or AI transformation are added by the workflow.
+
+The existing Retrieval Engine continues to search both Knowledge and Snippets with unchanged M6 normalization, scoring, ranking, and empty-result behavior. Empty retrieval results are valid. M9 has no record pinning, manual selection, retrieval override, automatic/manual merging, or Use in Builder integration.
+
+`OutputWorkflow` passes the original Merchant Context, original Guidance, and prepared `RetrievalResults` to the existing Prompt Builder. It does not change input precedence, top-five Knowledge or top-three Snippet selection, or `PromptAssembly` format. `PromptAssembly` remains internal and is not exposed in the Workspace UI.
+
+### Model, Endpoint, and Browser Runtime
+
+Before M11 Settings, Workspace provides one transient Ollama model text field whose initial value is blank. A placeholder may show `qwen2.5:7b`, but that value is not a default and must not affect generation unless entered by the user. Workspace trims leading and trailing UI whitespace before constructing `GenerationRequest`; the resulting model must contain non-whitespace. M9 does not persist, discover, list, or automatically select models and does not call `/api/tags`.
+
+M9 preserves the fixed provider endpoint `http://localhost:11434/api/chat`. It adds no endpoint field and no `127.0.0.1`, LAN, arbitrary remote, Ollama cloud, or cloud-fallback support.
+
+Generation executes directly from the foreground Workspace page. It does not move to the background service worker and introduces no `chrome.runtime` generation request, response, cancellation, or lifecycle messages. Application and provider code remain browser-runtime independent.
+
+M9 approves exactly one new manifest host permission: `http://localhost/*`. Chrome host-permission match patterns are broader than a port, while `OllamaProvider` remains fixed to `localhost:11434`. M9 adds no ordinary Chrome API permission solely for Ollama networking and no `http://127.0.0.1/*`, broad HTTP or HTTPS pattern, or `<all_urls>`.
+
+Real browser generation also requires the installed Ollama server to allow the environment-specific `chrome-extension://<extension-id>` origin through external `OLLAMA_ORIGINS` configuration. M9 does not hardcode an extension ID, alter Ollama configuration, set environment variables, launch or restart Ollama, automatically use a wildcard origin, or broaden Ollama to remote hosts. Setup and manual-validation guidance should prefer the specific installed extension origin.
+
+### Inputs, Generation State, and Repeated Generation
+
+Merchant Context and Guidance are optional, manual, multiline, transient inputs. Any non-whitespace Guidance, including `follow up`, is valid. Both values are preserved as supplied for Prompt Builder, retained after generation during the mounted Workspace session, never scraped, rewritten, enriched, or persisted, and receive no arbitrary M9 maximum length.
+
+Generate is enabled only when Merchant Context or Guidance contains non-whitespace, the trimmed model contains non-whitespace, and no request is active. UI validation is preventive; existing Prompt Builder and provider validation remain authoritative if invalid input reaches an application boundary.
+
+One Generate click performs exactly one retrieval, prompt-build, and provider-generation workflow. While generating, Generate is disabled, duplicate requests are prevented, and a visible accessible generating state is shown. Existing output remains visible but read-only. On success, new `GenerationResult.text` replaces previous output exactly, output becomes editable, and generation-error feedback clears. On failure, existing output remains unchanged, becomes editable again, and a safe error appears. M9 performs no automatic retry.
+
+There is no dedicated Regenerate control. After completion, Generate becomes available again; another click uses current Context, Guidance, and model, reruns retrieval, rebuilds the prompt, and makes a fresh provider request. Successful output replaces any prior edited output, and no generation history is retained.
+
+M9 exposes no Stop or Cancel control. Existing `AbortSignal` capability remains available infrastructure but is not part of the M9 UI. Closing or reloading the foreground Workspace naturally abandons the interaction without new background lifecycle infrastructure.
+
+Workspace uses four explicit status values: `idle`, `generating`, `success`, and `error`. Validation feedback may appear within idle or error presentation without exposing internal retrieving, prompt-building, or provider phases. Output text remains separate from status so a prior draft can survive a later failed generation.
+
+### Output, Copy, and Error UX
+
+Generated output is one editable plain-text textarea. M9 does not render Markdown. On success, `GenerationResult.text` becomes its initial value exactly, preserving whitespace, line breaks, and Unicode. User edits live only in component state, and no original or edited generation is persisted.
+
+Copy uses `navigator.clipboard.writeText(currentOutput)` from the direct user click handler and copies the current edited textarea value exactly. M9 does not read the clipboard and does not pre-approve `clipboardRead` or `clipboardWrite`; an additional permission would require implementation evidence that direct user activation is insufficient. Copy provides lightweight transient success feedback and the safe failure message `Could not copy. Select the text and copy it manually.` It mutates neither output nor persistence.
+
+The Workspace maps expected failures to safe user-facing messages:
+
+- Missing Context or Guidance: `Add Merchant Context or Guidance before generating.`
+- Missing model: `Enter an Ollama model name.`
+- `ProviderUnavailableError`: `Couldn't connect to Ollama. Make sure Ollama is running and configured for this extension.`
+- `ModelUnavailableError`: `That model is not available in your local Ollama installation.`
+- `ProviderRequestError`: `Ollama couldn't complete the request. Try again.`
+- `ProviderResponseError`: `Ollama returned an invalid response. Try again.`
+- `GenerationCancelledError`: `Generation was cancelled.`
+- Local persistence or retrieval failure: `Couldn't read the local Library. Try again.`
+- Copy failure: `Could not copy. Select the text and copy it manually.`
+
+Equivalent punctuation and styling may follow existing UI conventions. UI errors expose no stack trace, raw cause, raw Ollama payload or response body, `PromptAssembly`, Merchant Context, or Library content. M9 never pulls or installs a model. Missing-model feedback says only that the model is unavailable locally and must be installed in Ollama before retrying.
+
+M9 provides no full onboarding wizard. Minimal helper text may state that Ollama must be installed, running locally, contain the requested model, and allow browser-extension access. Generation remains the only availability check; detailed Settings and connection management remain deferred.
+
+### Layout, Accessibility, Persistence, and Privacy
+
+Workspace uses a centered full-page vertical layout ordered as identity/header, Merchant Context textarea, Guidance textarea, Ollama model text input, Generate, generating or error status, editable Generated Output textarea, and Copy. Styling follows existing Tailwind conventions without a component or design-system dependency.
+
+Every control has an explicit visible label, buttons are semantic and keyboard-operable, native disabled behavior communicates unavailable Generate state, status and error feedback use an appropriate `aria-live` region, the output textarea is labelled, generating state is accessible, tab order is natural, and generation does not force an unexpected focus jump. M9 adds no keyboard shortcut.
+
+All Workspace state is transient: Merchant Context, Guidance, model, generated or edited output, status, and feedback are lost on page reload or close. M9 uses no Dexie, `localStorage`, `chrome.storage`, history, or draft persistence. Database `ai-support-workspace` remains at schema version 1 with only `knowledgeEntries` and `snippetEntries`; M9 adds no table, field, index, migration, or Settings persistence.
+
+M9 preserves local-first privacy. Provider-generation material is sent only to the fixed local Ollama endpoint. No telemetry, analytics, cloud fallback, prompt or output logging, or raw request or response logging is introduced. The content script and its existing match configuration remain unchanged; M9 performs no active-page read, scraping, insertion, or merchant-page modification.
+
+### Validation Boundary
+
+Automated tests must validate `OutputWorkflow`, Workspace UI, the exact `http://localhost/*` generated-manifest host permission without broader hosts or clipboard permission, absence of Side Panel, and regressions across popup, Libraries, persistence, Retrieval Engine, Prompt Builder, Ollama Provider, and the production extension build. Normal component and orchestration tests use controlled dependencies and never require real Ollama.
+
+M9 requires real Chrome validation of Workspace and Library navigation, input and Generate rules, real local generation, loading and safe errors, editable output, exact edited-output copying, repeated generation, output preservation after a later failure, missing-service and missing-model behavior, absence of leaked content or Chrome runtime errors, and Library regressions. This is the first actual Chrome-extension-to-Ollama request: automated tests validate the manifest and application boundaries, while manual Chrome validation proves host permission, external Ollama origin configuration, and browser interoperability.
 
 ## Rationale
 

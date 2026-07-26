@@ -30,6 +30,14 @@ The libraries may both contribute to a support response, but they have different
 - Prompt composition produces a structured provider-independent assembly. Provider selection, provider serialization, and AI execution occur outside this product boundary.
 - Images and screenshots are not Prompt Builder v1 inputs. Multimodal prompt behavior requires a later approved product and architecture decision.
 
+## Output Workspace v1
+
+- M9 provides one dedicated extension-owned Workspace for manual Merchant Context, manual Guidance, a transient Ollama model value, generation, editable plain-text output, and copying the current edited draft.
+- At least one of Merchant Context or Guidance plus a non-whitespace model is required. Inputs and output remain transient for the mounted Workspace session and are lost on close or reload.
+- Generate automatically runs local Knowledge and Snippet retrieval, Prompt Builder, and the current `GenerationProvider` once. A later Generate action repeats the complete workflow with current inputs.
+- The generated draft remains editable before copying. Copy uses the current edited text and preserves it exactly.
+- M9 does not include manual Library selection, dedicated Regenerate, Cancel, Clear, Save as Snippet, history, persistence, Settings, provider selection, model discovery, keyboard shortcuts, page scraping or insertion, or Side Panel.
+
 ## Quality Requirements
 
 - Fast startup and responsive interactions are required.
