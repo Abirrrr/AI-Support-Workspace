@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Milestone 7 — Prompt Builder Architecture Definition
+
+- Corrected repository continuity to record Milestone 6 implementation checkpoint `9649c1b` (`feat: implement retrieval engine`) as committed, pushed to `origin/master`, and synchronized between local `master` and the remote.
+- Defined Prompt Builder v1 as a pure, headless, deterministic application-layer composition boundary that validates already-prepared inputs, applies fixed retrieval selection and approved precedence, and produces a typed provider-independent `PromptAssembly`.
+- Approved optional Merchant Context, optional Guidance, and optional already-computed `RetrievalResults` as the input contract, with at least one non-whitespace primary input required and a focused missing-primary-input validation error.
+- Assigned retrieval-query construction and Retrieval Engine invocation to a future application orchestrator; Prompt Builder preserves M6 ranking and does not call retrieval, alter scores, or rerank results.
+- Approved `Guidance > Merchant Context > Knowledge > Snippets`, a static provider-independent grounding instruction section, top-five Knowledge and top-three Snippet selection, and canonical instructions/Guidance/Merchant Context/Knowledge/Snippets section ordering.
+- Separated provider-facing title/body or title/content material from application metadata such as domain kind, ID, score, tags, and Knowledge source, with no fabricated citations.
+- Defined deterministic empty-section, purity, grounding, formatting, and testing contracts while deferring provider serialization, AI execution, token handling, images, UI, persistence, Prompt Templates, schema changes, and retrieval orchestration.
+- Kept Milestone 7 current and added no implementation code, tests, dependencies, database changes, permissions, browser surfaces, commit, or GitHub push.
+
 ### Milestone 6 — Retrieval Engine
 
 - Completed the approved headless Retrieval Engine v1 as a local-only, deterministic, read-only application operation over the existing `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts.
@@ -14,7 +25,7 @@
 - Introduced no semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, AI or provider functionality, Context Builder, Prompt Builder, snippet expansion, `;hello` behavior, database or index change, Chrome permission, or Side Panel.
 - Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; decisions, product requirements, and the UI workflow were reviewed and required no changes.
 - Corrected repository continuity to record retrieval architecture checkpoint `5f2e0a0` (`docs: define retrieval engine architecture`) as committed, pushed to `origin/master`, and synchronized locally and remotely before implementation began.
-- Advanced the current project milestone to Milestone 7 — Prompt Builder. No Milestone 6 implementation checkpoint has been created yet.
+- Advanced the current project milestone to Milestone 7 — Prompt Builder, then created checkpoint `9649c1b` (`feat: implement retrieval engine`), pushed it to `origin/master`, and confirmed local and remote synchronization.
 
 ### Milestone 6 — Retrieval Architecture Definition
 

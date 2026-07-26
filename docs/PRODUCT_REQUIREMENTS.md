@@ -20,6 +20,16 @@ The product will eventually provide an integrated support workspace for Intercom
 
 The libraries may both contribute to a support response, but they have different responsibilities and must remain separate concepts in the product experience, persistence model, and documentation.
 
+## Prompt Composition Semantics
+
+- Prompt composition accepts Merchant Context, explicit Guidance, or both as the current-task input. At least one must contain non-whitespace text; retrieved Library material alone cannot define the user's task.
+- Guidance is the user's highest-priority current instruction. Any non-whitespace Guidance is valid, including a minimal instruction such as `follow up`.
+- Merchant Context represents the current support conversation or situation and takes priority over retrieved Library material.
+- Retrieved Knowledge is supporting factual or reference material. Retrieved Snippets are lower-priority reusable wording, style, or examples and are not instructions or independent factual authority.
+- Dynamic input conflicts follow `Guidance > Merchant Context > Knowledge > Snippets`.
+- Prompt composition produces a structured provider-independent assembly. Provider selection, provider serialization, and AI execution occur outside this product boundary.
+- Images and screenshots are not Prompt Builder v1 inputs. Multimodal prompt behavior requires a later approved product and architecture decision.
+
 ## Quality Requirements
 
 - Fast startup and responsive interactions are required.

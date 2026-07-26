@@ -189,15 +189,11 @@ Merchant Context
 
 +
 
-Images
+Optional Guidance
 
 +
 
-Optional Gist
-
-+
-
-Retrieved Knowledge
+Already-ranked Knowledge and Snippets
 
 ↓
 
@@ -205,7 +201,7 @@ Prompt Builder
 
 ↓
 
-Configured AI Provider
+Provider Adapter (future)
 
 ↓
 
@@ -214,11 +210,13 @@ Draft Reply
 
 ### Workflow Notes
 
-- The workflow begins with the support context and any supporting information the user provides.
-- Local knowledge may be used to enrich the request.
-- The prompt builder creates a structured request for the chosen AI provider.
+- The workflow begins with Merchant Context, Guidance, or both; retrieved Library material cannot independently define the current task.
+- A future application orchestrator decides the retrieval query and supplies already-ranked Knowledge and Snippet results to Prompt Builder.
+- Prompt Builder creates a structured provider-independent assembly; a future provider adapter owns provider-specific serialization and execution.
+- Guidance has the highest dynamic authority, followed by Merchant Context, Knowledge, and Snippets.
 - The final result is a draft reply that the user can review and edit.
 - This workflow remains provider-independent and should not depend on a specific implementation path.
+- Milestone 7 is headless and introduces no Support Workspace or Prompt Builder UI. Images shown in the broader planned Support workflow are explicitly deferred from Prompt Builder v1 and require a later architecture decision.
 
 ## 8. Local Data Workflow
 

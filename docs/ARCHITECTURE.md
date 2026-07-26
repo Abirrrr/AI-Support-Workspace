@@ -11,7 +11,7 @@ The project is expected to evolve around a small set of responsibilities:
 - Extension shell: hosts the user experience in the browser.
 - Local storage layer: persists knowledge, snippets, and settings locally.
 - Retrieval engine: searches and ranks relevant content quickly.
-- Prompt builder: constructs provider-independent request payloads.
+- Prompt builder: deterministically composes typed, provider-independent prompt assemblies.
 - Provider adapters: preserve a provider-independent boundary, with Ollama as the initial implementation target and other providers added later.
 - Output workspace: lets the user review and refine generated content.
 
@@ -117,6 +117,18 @@ The project-owned result envelope contains separate `knowledge` and `snippets` c
 
 `DECISIONS.md` is authoritative for Retrieval Engine v1 query normalization, participating fields, exact lexical scoring, repeated-term behavior, zero-score and empty-query behavior, deterministic ordering, absence of result limits, read-only policy, and performance direction. M6 adds no search UI, database schema or index change, provider integration, context or prompt assembly, or snippet expansion behavior.
 
+### Prompt Builder v1
+
+Milestone 7 defines a headless, deterministic application-layer Prompt Builder. It validates already-prepared prompt inputs, selects the approved number of already-ranked retrieval results, applies the documented input precedence, and returns a typed project-owned `PromptAssembly`. It remains independent from React, WXT, browser APIs, persistence, provider SDKs, and network behavior.
+
+A future application orchestration boundary decides the retrieval query, invokes the existing Retrieval Engine, and passes its `RetrievalResults` to Prompt Builder. Prompt Builder does not call Retrieval Engine, rerun scoring, rerank results, or construct the retrieval query. It preserves the separate Knowledge and Snippet collections and their M6 ranking order.
+
+The v1 input contract contains optional Merchant Context, optional Guidance, and optional already-computed Retrieval Results. At least one of Merchant Context or Guidance must contain non-whitespace text; retrieval results alone cannot define the current support task. Images, provider identifiers, destination identifiers, and manual Library-record selection are not Prompt Builder v1 inputs.
+
+`PromptAssembly` contains an ordered collection of sections whose kinds are explicit. The canonical order is instructions, non-empty Guidance, non-empty Merchant Context, selected Knowledge, and selected Snippets. Prompt Builder owns deterministic section content and a static provider-independent instruction section, but not provider message roles, request serialization, model configuration, tokenization, provider limits, or AI execution. Future provider adapters consume the assembly and serialize it for their provider boundary.
+
+Provider-facing content remains separate from application metadata. Knowledge sections use the human-readable title and body, while Snippet sections use the human-readable title and content. Record identity, retrieval score, tags, and Knowledge source may remain available as application metadata but are not automatically rendered into provider-facing text. `DECISIONS.md` is authoritative for precedence, grounding, input semantics, selection limits, formatting, empty behavior, metadata treatment, purity, and M7 non-goals.
+
 ### Project Layer Responsibilities
 
 - Extension platform layer: owns WXT and Manifest V3 entry points, Chrome API integration, permissions, messaging, and extension lifecycle behavior.
@@ -153,4 +165,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. The Milestone 1 development foundation, Milestone 2 runtime extension shell, Milestone 3 local persistence foundation, Milestone 4 Knowledge Library, Milestone 5 Snippet Library, and Milestone 6 Retrieval Engine are implemented. Knowledge and Snippet management share the existing options-page Library surface, while the headless Retrieval Engine operates over their separate project-owned repository contracts and returns independently ranked domain collections. Milestone 6 passed Principal Engineer review and comprehensive automated validation without architecture, schema, browser-surface, provider, or permission changes. No M6-specific manual Chrome validation was required because the implemented boundary is headless and is validated through deterministic unit and isolated repository-integration tests. Milestone 7 — Prompt Builder is current.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. The Milestone 1 development foundation, Milestone 2 runtime extension shell, Milestone 3 local persistence foundation, Milestone 4 Knowledge Library, Milestone 5 Snippet Library, and Milestone 6 Retrieval Engine are implemented. Knowledge and Snippet management share the existing options-page Library surface, while the headless Retrieval Engine operates over their separate project-owned repository contracts and returns independently ranked domain collections. Milestone 6 passed Principal Engineer review and comprehensive automated validation without architecture, schema, browser-surface, provider, or permission changes. No M6-specific manual Chrome validation was required because the implemented boundary is headless and is validated through deterministic unit and isolated repository-integration tests. Milestone 7 — Prompt Builder is current, and its deterministic provider-independent composition contract is approved for implementation; no Prompt Builder implementation exists yet.
