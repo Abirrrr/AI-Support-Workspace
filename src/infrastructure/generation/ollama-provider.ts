@@ -199,7 +199,9 @@ export class OllamaProvider implements GenerationProvider {
   readonly id: ProviderId = 'ollama';
 
   constructor(
-    private readonly fetchTransport: typeof globalThis.fetch = globalThis.fetch,
+    private readonly fetchTransport: typeof globalThis.fetch = globalThis.fetch.bind(
+      globalThis,
+    ),
   ) {}
 
   async generate(
@@ -208,17 +210,18 @@ export class OllamaProvider implements GenerationProvider {
   ): Promise<GenerationResult> {
     requireModel(request.model);
 
+    const requestInit: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(createChatRequest(request)),
+      ...(signal === undefined ? {} : { signal }),
+    };
     let response: Response;
 
     try {
-      response = await this.fetchTransport(OLLAMA_CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(createChatRequest(request)),
-        ...(signal === undefined ? {} : { signal }),
-      });
+      response = await this.fetchTransport(OLLAMA_CHAT_URL, requestInit);
     } catch (cause) {
       if (signal?.aborted === true) {
         throw new GenerationCancelledError(cause);

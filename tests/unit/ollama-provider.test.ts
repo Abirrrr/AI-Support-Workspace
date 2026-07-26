@@ -121,6 +121,37 @@ describe('OllamaProvider', () => {
     expect(new OllamaProvider(createSuccessfulFetch()).id).toBe('ollama');
   });
 
+  it('binds the default global fetch transport to the browser global', async () => {
+    const browserFetch: typeof globalThis.fetch = function (
+      this: typeof globalThis,
+      input,
+      init,
+    ) {
+      if (this !== globalThis) {
+        throw new TypeError('Illegal invocation');
+      }
+
+      expect(input).toBe(endpoint);
+      expect(init?.method).toBe('POST');
+
+      return Promise.resolve(
+        jsonResponse({
+          message: { role: 'assistant', content: 'Generated reply' },
+        }),
+      );
+    };
+
+    vi.stubGlobal('fetch', browserFetch);
+
+    try {
+      const result = await new OllamaProvider().generate(createRequest());
+
+      expect(result.text).toBe('Generated reply');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('accepts and preserves a caller-supplied non-whitespace model identifier', async () => {
     const fetchTransport = createSuccessfulFetch('  Original reply text  ');
     const provider = new OllamaProvider(fetchTransport);
@@ -326,6 +357,22 @@ describe('OllamaProvider', () => {
     expect(error).toBeInstanceOf(ProviderUnavailableError);
     expect((error as Error).cause).toBe(cause);
     expect(fetchTransport).toHaveBeenCalledOnce();
+  });
+
+  it('does not map prompt translation failures to ProviderUnavailableError', async () => {
+    const fetchTransport = createSuccessfulFetch();
+    const provider = new OllamaProvider(fetchTransport);
+    const request = createRequest({
+      prompt: {
+        sections: [{ kind: 'guidance', content: 'Follow up.' }],
+      },
+    });
+
+    const error = await provider.generate(request).catch((value) => value);
+
+    expect(error).toBeInstanceOf(TypeError);
+    expect(error).not.toBeInstanceOf(ProviderUnavailableError);
+    expect(fetchTransport).not.toHaveBeenCalled();
   });
 
   it('maps HTTP 404 to ModelUnavailableError without pulling or retrying', async () => {

@@ -16,7 +16,7 @@ The product will eventually provide an integrated support workspace for Intercom
 ## Knowledge Library vs. Snippet Library
 
 - The Knowledge Library owns broader, contextual support knowledge used for troubleshooting, reference, and retrieval during support work.
-- The Snippet Library owns compact, reusable response text and message fragments intended for quick insertion or expansion into a reply.
+- The Snippet Library owns compact, reusable response content and message fragments intended for quick insertion or expansion into a reply. The current implementation is plain text; the approved future rich-Snippet direction may add ordered structured content after architecture and migration review.
 
 The libraries may both contribute to a support response, but they have different responsibilities and must remain separate concepts in the product experience, persistence model, and documentation.
 
@@ -28,7 +28,7 @@ The libraries may both contribute to a support response, but they have different
 - Retrieved Knowledge is supporting factual or reference material. Retrieved Snippets are lower-priority reusable wording, style, or examples and are not instructions or independent factual authority.
 - Dynamic input conflicts follow `Guidance > Merchant Context > Knowledge > Snippets`.
 - Prompt composition produces a structured provider-independent assembly. Provider selection, provider serialization, and AI execution occur outside this product boundary.
-- Images and screenshots are not Prompt Builder v1 inputs. Multimodal prompt behavior requires a later approved product and architecture decision.
+- Images and screenshots are not Prompt Builder v1 inputs. Multimodal Context Attachments are an approved future product direction, but their Prompt Builder, provider-capability, serialization, and runtime architecture remains deferred.
 
 ## Output Workspace v1
 
@@ -38,6 +38,74 @@ The libraries may both contribute to a support response, but they have different
 - The generated draft remains editable before copying. Copy uses the current edited text and preserves it exactly.
 - The popup opens the global Workspace Side Panel in the current browser window and continues to open the separate options-page Libraries. Knowledge and Snippet CRUD do not move into the Side Panel.
 - M9 does not include a standalone Workspace tab, manual Library selection, dedicated Regenerate, Cancel, Clear, Save as Snippet, history, persistence, Settings, provider selection, model discovery, keyboard shortcuts, page scraping, or insertion.
+
+## Future Multimodal Context Attachments
+
+Multimodal Context Attachments are an approved future product direction with no assigned milestone. They do not reopen M9 or change the current text-only M9 implementation.
+
+- Merchant Context should eventually accept ordinary text plus one or more pasted screenshots or other visual context assets. Text and images may appear together in the current Context workflow, including text before and after an image, with separate Guidance supplied for the task.
+- A user should be able to paste screenshot or image clipboard content directly into Context without first saving every image to disk or uploading it to a cloud service. Exact browser clipboard mechanics remain future architecture work.
+- The product direction is not limited to one image. Count, file-size, and format limits are deliberately unresolved.
+- Attached images require a visible attachment indication, an appropriate preview, and removal before generation. Each image remains associated with the current Context workflow. Reordering is not yet approved or defined.
+- Context images are transient and local-first by default. They belong to the current Workspace or generation session unless later persistence is explicitly approved.
+- Multimodal Context remains provider-independent. Images should become generation context when the selected provider and model support image understanding, and unsupported images must never be silently discarded. The provider-capability contract and unsupported-image UX remain unresolved.
+
+The intended workflow can interleave current-task text and visual context before separate Guidance:
+
+```text
+Merchant Context
+Text
+Screenshot
+Following text
+Guidance
+```
+
+Context images are generation inputs, not reusable response assets. They must remain conceptually distinct from future Snippet images even if later implementations can share low-level utilities.
+
+## Future Rich Snippet Templates and Trigger Expansion
+
+Rich Snippet Templates and Trigger Expansion are a separate approved future product direction with no assigned milestone.
+
+- Snippets should eventually expose a Shortcut or Trigger field for text-expansion triggers such as `;hello`, `;refund`, `;shipping`, or `;shopify-limit`.
+- Typing a configured trigger in a supported support editor should replace the trigger range with the associated saved Snippet content.
+- Snippet triggers are not Milestone 10 keyboard shortcuts. M10 concerns application-level key combinations that invoke extension behavior; a Snippet trigger is typed text such as `;hello` that expands inside an editor.
+- Trigger uniqueness, case sensitivity, permitted characters, maximum length, and exact validation remain unresolved.
+- Future Snippets should support an ordered sequence of structured blocks, including paragraphs, links, emphasis, images or image references, and later supported block types. A sequence such as text → image/reference → following text must retain that exact semantic order.
+- Image representation may later use a local reusable asset, structured reference, or appropriate URL. The final storage representation and asset ownership are unresolved, and arbitrary executable HTML is not an approved content model.
+- Expansion must be target-aware. A focused expansion boundary should adapt structured content to plain text inputs, `contenteditable` surfaces, or genuinely necessary destination-specific rich editors without spreading DOM behavior through business logic.
+- Rich editors should receive rich text and inline images where supported. Plain-text editors require a deterministic safe fallback that preserves every image/reference's semantic position and uses a usable link or reference when available. Behavior for local assets without public URLs remains unresolved; images must not silently disappear.
+- Expansion must preserve surrounding editor content, replace only the intended trigger range, place the caret predictably after expansion, and handle unsupported editors safely.
+- Existing plain-text Snippets remain valid product data. Future architecture must define backward compatibility and any required migration before changing persistence.
+
+Representative behavior-only example:
+
+```text
+Title: Shopify ecosystem limitation
+Shortcut: ;shopify-limit
+
+Text: Thank you for reaching out.
+Text: This is a limitation of the Shopify ecosystem.
+Image: [reference to explanatory screenshot]
+Text: Here is what I recommend doing instead...
+```
+
+In a supported rich editor, `;shopify-limit` expands to the ordered text, inline screenshot, and following text. A conceptual plain-text fallback retains the same position:
+
+```text
+Thank you for reaching out.
+
+This is a limitation of the Shopify ecosystem.
+
+[Screenshot/reference: usable future link or reference]
+
+Here is what I recommend doing instead...
+```
+
+The exact fallback syntax is not frozen, and local assets without a usable public URL require an explicit future decision. The wording above is illustrative rather than shipped product content.
+
+## Deferred Future Architecture
+
+This documentation approves product direction only. Future architecture reviews must still define multimodal image representation, provider capability interfaces, unsupported-provider UX, limits, persistence, and provider serialization; and rich-Snippet schema, trigger validation, database migration, content model, reusable asset ownership, expansion engine, editor adapters, insertion mechanics, caret behavior, destination compatibility, and local-asset fallback.
 
 ## Quality Requirements
 

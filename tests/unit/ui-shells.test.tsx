@@ -29,10 +29,15 @@ const snippetLibrary: SnippetLibrary = {
 };
 
 describe('extension UI shells', () => {
-  it('renders popup navigation to the Knowledge Library', () => {
-    const markup = renderToStaticMarkup(<PopupShell />);
+  it('renders popup navigation to the Workspace and Libraries', () => {
+    const markup = renderToStaticMarkup(
+      <PopupShell openWorkspace={async () => undefined} />,
+    );
 
     expect(markup).toContain('AI Support Workspace');
+    expect(markup).toContain('Open Workspace');
+    expect(markup).toContain('<button');
+    expect(markup).not.toContain('href="/workspace.html"');
     expect(markup).toContain('Open Libraries');
     expect(markup).toContain('href="/options.html"');
   });

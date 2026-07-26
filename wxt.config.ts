@@ -10,6 +10,7 @@ export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest: {
     description: 'Chrome extension runtime shell for AI Support Workspace.',
+    host_permissions: ['http://localhost/*'],
     name: 'AI Support Workspace',
   },
   vite: () => ({

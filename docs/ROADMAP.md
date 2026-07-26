@@ -84,11 +84,11 @@ Create a provider-independent prompt composition layer.
 
 Add Ollama as the first AI provider integration.
 
-## Milestone 9 — Output Workspace (Current)
+## Milestone 9 — Output Workspace (Completed)
 
 Provide a workspace for reviewing and refining AI-generated output.
 
-## Milestone 10 — Keyboard Shortcut
+## Milestone 10 — Keyboard Shortcut (Current)
 
 Add a keyboard shortcut for quick access to the extension experience.
 

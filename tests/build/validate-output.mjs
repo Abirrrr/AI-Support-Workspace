@@ -8,9 +8,9 @@ const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
 assert.equal(manifest.manifest_version, 3);
 assert.equal(manifest.name, 'AI Support Workspace');
-assert.deepEqual(manifest.permissions ?? [], []);
-assert.deepEqual(manifest.host_permissions ?? [], []);
-assert.equal('side_panel' in manifest, false);
+assert.deepEqual(manifest.permissions ?? [], ['sidePanel']);
+assert.deepEqual(manifest.host_permissions ?? [], ['http://localhost/*']);
+assert.deepEqual(manifest.side_panel, { default_path: 'sidepanel.html' });
 assert.equal('sidebar_action' in manifest, false);
 assert.equal('commands' in manifest, false);
 assert.equal('devtools_page' in manifest, false);
@@ -18,10 +18,12 @@ assert.equal('devtools_page' in manifest, false);
 const serviceWorker = manifest.background?.service_worker;
 const popupPage = manifest.action?.default_popup;
 const optionsPage = manifest.options_ui?.page;
+const sidePanelPage = manifest.side_panel?.default_path;
 
 assert.equal(typeof serviceWorker, 'string');
 assert.equal(typeof popupPage, 'string');
 assert.equal(typeof optionsPage, 'string');
+assert.equal(sidePanelPage, 'sidepanel.html');
 assert.equal(manifest.content_scripts?.length, 1);
 assert.deepEqual(manifest.content_scripts[0].matches, [
   'https://example.com/*',
@@ -33,9 +35,11 @@ await Promise.all(
     serviceWorker,
     popupPage,
     optionsPage,
+    sidePanelPage,
     manifest.content_scripts[0].js[0],
   ].map((relativePath) => access(resolve(outputDirectory, relativePath))),
 );
+await assert.rejects(access(resolve(outputDirectory, 'workspace.html')));
 
 const assetFiles = await readdir(resolve(outputDirectory, 'assets'));
 const stylesheetPaths = assetFiles
@@ -51,3 +55,5 @@ const generatedCss = stylesheets.join('\n');
 
 assert.match(generatedCss, /\.w-80\{/);
 assert.match(generatedCss, /\.max-w-2xl\{/);
+assert.match(generatedCss, /\.overflow-x-hidden\{/);
+assert.match(generatedCss, /\.max-w-full\{/);

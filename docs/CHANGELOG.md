@@ -2,6 +2,40 @@
 
 ## [Unreleased]
 
+### Future Product Directions — Multimodal Context and Rich Snippet Expansion
+
+- Approved Multimodal Context Attachments as an unassigned future product direction: Merchant Context may eventually combine text with one or more pasted screenshots or visual assets for capable providers and models.
+- Required future direct clipboard image paste, visible attachment state, appropriate preview, and removal before generation without requiring every screenshot to be saved to disk or uploaded to a cloud service. Count, size, format, and reordering rules remain unresolved.
+- Established transient, local-first Context images as the preferred default and required a provider-independent capability boundary that never silently discards unsupported images.
+- Approved Rich Snippet Templates & Trigger Expansion as a separate unassigned future direction, including a future Shortcut or Trigger field with semicolon syntax such as `;hello` and `;shopify-limit`.
+- Explicitly separated Snippet triggers from M10 Keyboard Shortcut: application key combinations invoke extension behavior, while typed semicolon triggers expand saved content inside supported editors.
+- Approved ordered structured Snippet content capable of preserving text → image/reference → following text, with future paragraphs, links, emphasis, images, and other appropriate structured blocks. Arbitrary executable HTML is not approved.
+- Required target-aware expansion through a focused editor capability boundary, rich insertion where supported, and deterministic plain-text fallback that preserves image/reference position and does not silently omit local or remote assets.
+- Required future expansion safety for trigger replacement range, surrounding-content preservation, caret placement, and unsupported-editor behavior, plus backward compatibility for existing plain-text Snippets.
+- Distinguished transient generation-owned Context images from reusable Library-owned Snippet images; shared low-level utilities may be considered later without collapsing domain ownership.
+- Deferred all implementation architecture, including image and rich-content representation, provider capability interfaces, unsupported-provider UX, limits, persistence, serialization, trigger validation and uniqueness, database migration, reusable asset ownership, expansion engine, editor adapters, insertion mechanics, compatibility matrix, caret behavior, and local-asset fallback.
+- Added no milestone number and did not reopen M9 or redefine M10 or M11. No implementation, test, dependency, permission, or database-schema change was made.
+
+### Milestone 9 — Output Workspace
+
+- Completed the first end-to-end manual support-drafting workflow in one extension-owned global Chrome Side Panel generated as `sidepanel.html` through WXT's native Side Panel entry point. Popup Open Workspace opens the current-window global panel; Open Libraries retains the options-page browser-tab behavior.
+- Added the focused application-layer `OutputWorkflow` over `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`, with the Side Panel entry point composing the existing Knowledge and Snippet repositories and `OllamaProvider`. React remains presentation-only and provider replaceability remains intact.
+- Implemented automatic retrieval on every Generate action using non-whitespace Merchant Context first and Guidance second, joined by exactly `\n\n` when both are present. Existing M6 ranking and M7 selection, precedence, static Instructions, and `PromptAssembly` contracts remain unchanged and internal.
+- Added optional manual multiline transient Merchant Context and Guidance plus a blank-initial caller-entered transient model field. Guidance remains case-specific steering such as `follow up` and does not replace Prompt Builder's permanent Instructions; no input or model value is persisted or discovered.
+- Implemented guarded foreground Side Panel generation, visible loading and safe error states, exact initial preservation of provider output, editable plain-text drafts, and repeated Generate through a new complete workflow. Successful repetition replaces output; failure preserves the existing draft. M9 adds no Regenerate, Cancel, Clear, Reset, Save as Snippet, or history.
+- Implemented Copy through `navigator.clipboard.writeText` from direct user interaction, copying the current edited value with line breaks preserved and providing safe success or failure feedback without clipboard permission.
+- Preserved foreground extension-page execution with no service-worker orchestration, background generation messaging, content-script integration, Intercom scraping, active-page reading, or reply insertion.
+- Final generated MV3 output contains exactly `sidePanel` in ordinary permissions, exactly `http://localhost/*` in host permissions, and `side_panel.default_path: sidepanel.html`. It adds no `tabs`, `activeTab`, storage, clipboard, scripting, `127.0.0.1`, or broad URL permission and leaves content-script matches unchanged.
+- Preserved fixed local provider endpoint `http://localhost:11434/api/chat`. Browser use requires external `OLLAMA_ORIGINS` allowance for the installed extension origin; the extension neither changes Ollama configuration nor adds a health check, model pull, endpoint setting, retry, or provider timeout.
+- Corrected a browser-runtime transport defect found during manual validation: native `globalThis.fetch` had been stored unbound and invocation through the provider instance caused `TypeError: Illegal invocation`, which was caught as `ProviderUnavailableError`. The default transport now binds fetch to `globalThis`, request construction occurs outside the transport catch, and only genuine fetch failures map to provider unavailability.
+- Added deterministic transport-binding and error-taxonomy regressions. The final full suite passed 136 tests with 1 opt-in live Ollama test skipped normally; the focused provider, workflow, and UI regression run passed 60 of 60 tests. Installation, linting, formatting, type-checking, Playwright discovery, production build, generated-output validation, and `git diff --check` passed.
+- Completed Principal Engineer review and real Chrome manual validation of extension reload, popup and Side Panel opening, companion-panel and narrow-width behavior, all inputs, Generate eligibility, real `qwen2.5:7b` generation, loading and success feedback, editable output, edited-output Copy and line breaks, repeated generation, Guidance influence, and Knowledge and Snippet Library regressions without blocking runtime or network errors after the transport fix.
+- Confirmed the safe provider-unavailable connection message and safe unavailable-model message in Chrome, with the previous output preserved after both failures. Direct Chrome-extension-origin connectivity to local Ollama and a successful `/api/chat` response were verified during diagnosis; no raw provider error, customer content, prompt assembly, or generated text was exposed by the Workspace error UI.
+- Recorded one manual content-quality observation: a `qwen2.5:7b` response said “Delivery should be soon.” despite Guidance not to promise a delivery date. This is future prompt/model-quality work, not an M9 workflow failure or architecture change.
+- Preserved transient-only Workspace state and database `ai-support-workspace` schema version 1 with no Context, Guidance, model, output, history, Settings, table, field, index, or migration change.
+- Completed the mandatory Documentation Impact Review and advanced the current roadmap milestone to Milestone 10 — Keyboard Shortcut. Project state, architecture status, UI workflow, roadmap, testing strategy, changelog, database status, backlog, and README required synchronization; decisions, product requirements, engineering principles, and coding-agent rules required no changes.
+- Recorded Side Panel architecture amendment checkpoint `e587398` (`docs: move output workspace to side panel`) as committed and pushed before the final implementation migration. No M9 implementation checkpoint has been fabricated; implementation and closeout documentation remain uncommitted pending authorization.
+
 ### Milestone 9 — Side Panel Architecture Amendment
 
 - Recorded the Principal Engineer's manual product-review decision to supersede the original standalone extension-tab Workspace before the existing M9 implementation was committed.
@@ -15,7 +49,7 @@
 - Kept Knowledge and Snippet CRUD on the existing options page and retained all approved `OutputWorkflow`, Retrieval Engine, Prompt Builder, GenerationProvider, OllamaProvider, model, Generate, output, Copy, error, privacy, and deferred-feature behavior.
 - Amended automated validation to cover the Side Panel entry point, `side_panel.default_path`, exact permissions, direct popup opening, absence of background messaging, reused Workspace behavior, regressions, and production build.
 - Replaced standalone Workspace-tab manual validation with global Chrome Side Panel validation beside the active webpage, including normal narrow-width behavior, real Ollama generation, exact permissions, and Library regressions.
-- Updated architecture and project continuity to checkpoint `d0e01d7` (`docs: define output workspace architecture`) and recorded that the existing uncommitted M9 implementation predates this amendment and requires a later focused Side Panel migration.
+- Updated architecture and project continuity through the original `d0e01d7` definition, then created Side Panel amendment checkpoint `e587398` (`docs: move output workspace to side panel`) before the later focused implementation migration.
 - This amendment changed documentation only. It did not modify the existing uncommitted implementation, tests, WXT or manifest configuration, dependencies, database, or milestone status.
 
 ### Milestone 9 — Output Workspace Architecture Definition

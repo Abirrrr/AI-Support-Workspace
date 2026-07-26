@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { PopupShell } from '../../ui/popup/PopupShell';
 import '../../ui/styles.css';
+import { openWorkspaceSidePanel } from './open-workspace';
 
 const root = document.querySelector('#root');
 
@@ -12,6 +13,6 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <PopupShell />
+    <PopupShell openWorkspace={openWorkspaceSidePanel} />
   </StrictMode>,
 );

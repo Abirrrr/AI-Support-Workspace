@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-- Milestone 9 — Output Workspace
+- Milestone 10 — Keyboard Shortcut
 
 ## Previous Milestones
 
@@ -18,13 +18,20 @@
 - Milestone 6 — Retrieval Engine: Completed
 - Milestone 7 — Prompt Builder: Completed
 - Milestone 8 — Ollama Provider: Completed
+- Milestone 9 — Output Workspace: Completed
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen through Milestone 9 architecture checkpoint `d0e01d7` (`docs: define output workspace architecture`), which is committed, pushed to `origin/master`, and synchronized locally and remotely. Milestone 9 — Output Workspace is current. Manual product review has amended its surface from a standalone extension page to a global Chrome Side Panel; the amendment documentation and the pre-amendment M9 implementation are uncommitted.
-- Scope: Milestone 9 implements the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` is authoritative for the exact M9 scope and non-goals.
-- Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, and local Ollama provider adapter are implemented. An uncommitted M9 implementation exists but still uses the superseded standalone Workspace page and is not an approved M9 completion state; it must be migrated to the Side Panel after this documentation amendment is reviewed.
+- Status: Platform architecture remains approved and frozen through Milestone 9 Side Panel architecture amendment checkpoint `e587398` (`docs: move output workspace to side panel`), which was committed and pushed before the final M9 implementation migration. Milestone 9 — Output Workspace has completed implementation review, documentation closeout, automated validation, and manual Chrome validation. Milestone 10 — Keyboard Shortcut is current. No M9 implementation checkpoint exists yet.
+- Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
+- Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
+
+## Approved Unassigned Future Product Directions
+
+- **Multimodal Context Attachments:** Merchant Context should eventually combine text with one or more transient clipboard screenshots or visual assets for generation through a provider-independent capability boundary. Unsupported images must not disappear silently.
+- **Rich Snippet Templates & Trigger Expansion:** Snippets should eventually support semicolon triggers, ordered structured text/image/reference content, and target-aware expansion with deterministic plain-text fallback.
+- These directions have no assigned milestone and define no implementation architecture. They do not reopen M9, redefine M10 Keyboard Shortcut, redefine M11 Settings, authorize persistence changes, or change database schema version 1. `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, and `BACKLOG.md` preserve the detailed intent and unresolved architecture questions.
 
 ## Architecture Status
 
@@ -44,7 +51,7 @@
 - Milestone 8 implemented a narrow project-owned `GenerationProvider` boundary whose `generate` operation accepts a transient `GenerationRequest`, optionally accepts an `AbortSignal`, and returns a provider-independent `GenerationResult`. The first infrastructure adapter is `OllamaProvider`, identified as `ollama`.
 - Ollama Provider v1 uses native `fetch` against fixed local endpoint `http://localhost:11434/api/chat`, sends exactly one system message and one deterministically serialized user message with `stream: false`, and exposes no raw provider response. M9 assigns generation to the foreground Side Panel page, requires exactly `sidePanel` permission plus `http://localhost/*` host access and external Ollama origin allowance, and introduces no generation messaging; Settings, model persistence, retries, provider timeouts, model pulling, and health checks remain deferred.
 - `DECISIONS.md` is authoritative for the M8 request, result, translation, transport, response validation, cancellation, error taxonomy, privacy, configuration, replaceability, and deferred-runtime boundaries.
-- Milestone 9 introduces one extension-owned global Chrome Side Panel and one focused application-layer `OutputWorkflow`. The WXT Side Panel entry point composes the existing repositories, Retrieval Engine, Prompt Builder, and `OllamaProvider`, while `OutputWorkflow` depends only on `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`.
+- Milestone 9 implemented one extension-owned global Chrome Side Panel and one focused application-layer `OutputWorkflow`. The native WXT Side Panel entry point generates `sidepanel.html` and composes the existing repositories, Retrieval Engine, Prompt Builder, and `OllamaProvider`, while `OutputWorkflow` depends only on `RetrievalEngine`, `PromptBuilder`, and `GenerationProvider`.
 - Each Generate action constructs the frozen Context-then-Guidance retrieval query joined by exactly `\n\n`, performs one complete retrieval-to-generation workflow, and returns editable transient plain-text output. M9 uses a blank-initial transient model field, runs generation in the foreground Side Panel page, adds only `sidePanel` plus `http://localhost/*`, and requires external Ollama allowance for the installed extension origin.
 - `DECISIONS.md` is authoritative for M9 input, orchestration, retrieval, provider, runtime, permission, origin, state, output, copy, error, privacy, persistence, accessibility, testing, and manual-validation contracts.
 
@@ -128,12 +135,19 @@
 - Defined the original implementation-ready Milestone 9 architecture for a dedicated transient Workspace, focused `OutputWorkflow`, deterministic automatic retrieval, existing Prompt Builder and provider boundaries, foreground-page generation, minimal localhost host permission, external Ollama origin configuration, editable output, Copy, safe errors, and real Chrome validation. The standalone page and Side Panel exclusion in that original surface decision are superseded by the later M9 amendment.
 - Preserved existing M6, M7, and M8 behavior, Libraries and content-script ownership, provider replaceability, schema version 1, and later milestone boundaries while introducing no implementation code, tests, dependencies, runtime files, permissions, persistence, Settings, OpenAI, or browser-page integration during the original architecture definition.
 - Amended the M9 surface after manual product review to one global WXT Chrome Side Panel with `sidePanel` permission, current-window popup opening, fluid narrow-width layout, and Side Panel-specific automated and manual validation. The amendment changes no workflow, provider, persistence, privacy, or deferred-feature contract and does not modify the existing uncommitted implementation.
+- Created Milestone 9 Side Panel architecture amendment checkpoint `e587398` (`docs: move output workspace to side panel`), pushed it to `origin/master`, and synchronized local and remote state before the final implementation migration.
+- Completed Milestone 9 by migrating the unfinished standalone Workspace surface to WXT's native global Chrome Side Panel entry point generated as `sidepanel.html`, opening it from popup Open Workspace, preserving options-page Libraries, and adapting the existing view to fluid narrow panel widths.
+- Implemented the focused `OutputWorkflow` orchestration from transient Merchant Context, Guidance, and model through automatic Retrieval Engine invocation, Prompt Builder, `GenerationProvider`, `OllamaProvider`, editable exact provider output, and Copy of the current edited draft. Repeated Generate reruns the complete workflow; failures preserve existing output.
+- Corrected a browser-runtime transport defect discovered during manual validation: native `globalThis.fetch` was stored unbound and invoked through the provider instance, causing `TypeError: Illegal invocation` and an incorrect `ProviderUnavailableError`. The production default is now bound to `globalThis`, request construction occurs outside the transport catch, and focused regression tests protect the error taxonomy.
+- Completed final automated validation with 136 passing tests and 1 opt-in live Ollama test skipped in the normal suite. The focused provider/workflow/UI regression run passed 60 of 60 tests; installation, linting, formatting, type-checking, Playwright discovery, production build, generated-output validation, and `git diff --check` also passed.
+- Completed real Chrome manual validation of extension reload, popup and Side Panel opening, companion-panel and narrow-width behavior, Context, Guidance, transient model, Generate eligibility, real `qwen2.5:7b` generation, loading and success feedback, editable output, edited-output Copy with line breaks, repeated generation, Guidance influence, safe missing-model and provider-unavailable errors with output preservation, and both Library regressions without blocking runtime or network errors after the transport fix.
+- Completed the mandatory Milestone 9 Documentation Impact Review. Project state, architecture status, UI workflow, roadmap, testing strategy, changelog, database status, backlog, and README required synchronization; decisions, product requirements, engineering principles, and coding-agent rules were reviewed and required no change. The observation that one local-model response said “Delivery should be soon.” despite contrary Guidance is recorded as future prompt/model-quality work rather than an M9 workflow failure.
 
 ## Next Engineering Action
 
-- The Principal Engineer should review the Milestone 9 Side Panel architecture amendment and authorize the next implementation task when satisfied.
-- That implementation task should migrate the existing uncommitted standalone Workspace entry point, popup opening behavior, manifest contract, responsive layout, and related tests to the approved global Side Panel without rewriting `OutputWorkflow` or provider behavior.
-- Milestone 10 and other later functionality remain out of scope until M9 implementation, review, documentation closeout, manual validation, checkpoint, and synchronization are complete.
+- Review the complete uncommitted M9 implementation and documentation diff, then create and push an authorized M9 implementation checkpoint when explicitly approved.
+- After that checkpoint is synchronized, define Milestone 10 — Keyboard Shortcut architecture and implementation scope before making M10 changes.
+- Milestone 11 and later functionality remain out of scope.
 
 ## Repository Status
 
@@ -141,32 +155,33 @@
 - A fresh-thread reconstruction validation successfully recovered the frozen architecture, repository status, and correct current milestone using repository documentation alone.
 - The approved platform may not be substituted without an explicit architecture review.
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
-- At committed checkpoint `d0e01d7`, the generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. The current uncommitted pre-amendment implementation adds a standalone Workspace page and localhost host permission; it does not yet satisfy the newly approved Side Panel contract.
+- At committed architecture checkpoint `e587398`, the Side Panel amendment is documented but the final M9 implementation is not yet committed. The current uncommitted implementation generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen manifest contract.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `d0e01d7` (`docs: define output workspace architecture`) and is synchronized between local `master` and `origin/master`.
-- Uncommitted M9 implementation exists in the working tree. It predates the Side Panel amendment and remains awaiting migration, implementation review, documentation closeout, manual validation, and an authorized implementation checkpoint.
+- The latest existing checkpoint is `e587398` (`docs: move output workspace to side panel`) and is synchronized between local `master` and `origin/master`.
+- The completed M9 implementation and documentation closeout remain uncommitted in the working tree pending an authorized implementation checkpoint.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated independently of Chrome runtime placement. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, snippet expansion or insertion, token handling, Prompt Templates, Settings functionality, page integration, or later-milestone business functionality is approved. M9 workflow implementation is uncommitted, and its approved browser surface is now the global Side Panel.
+- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated independently of Chrome runtime placement. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, Prompt Templates, Settings functionality, or page integration is implemented. Multimodal Context Attachments and Rich Snippet Templates & Trigger Expansion are approved future product directions, but their milestones and implementation architecture remain unassigned. M9 workflow implementation is uncommitted, and its approved browser surface is the global Side Panel.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current implementation milestone: Milestone 9 — Output Workspace.
-- Current repository state: Documentation and architecture through checkpoint `d0e01d7`, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library, and the reviewed and automatically validated Milestone 6 Retrieval Engine, Milestone 7 Prompt Builder, and Milestone 8 Ollama Provider are complete. M9 implementation and its Side Panel architecture amendment are uncommitted.
-- Next action: Review this documentation amendment, then authorize a focused implementation migration from the standalone Workspace page to the global WXT Side Panel.
+- Current implementation milestone: Milestone 10 — Keyboard Shortcut.
+- Current repository state: Documentation and architecture through checkpoint `e587398`, all implementation through Milestone 8, and the reviewed, automatically validated, and manually validated uncommitted Milestone 9 implementation and documentation closeout are complete. The M9 implementation checkpoint is still pending authorization.
+- Next action: Review and authorize the M9 implementation checkpoint, synchronize it remotely, then define M10 architecture before implementation.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- The existing uncommitted M9 implementation targets the superseded standalone page and must not be treated as review-ready until a later task migrates its surface, popup opening behavior, manifest, layout, and tests to the Side Panel contract.
-- Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration; implementation must validate these boundaries in Chrome without changing Ollama automatically.
+- Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration. These boundaries passed manual Chrome validation, but environment setup remains external and must not be changed automatically.
+- Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
+- Multimodal and rich-Snippet architecture remains deliberately unresolved, including image and rich-content representation, provider and editor capability boundaries, unsupported-image behavior, limits, reusable asset ownership, trigger validation, migration, insertion, caret handling, and plain-text fallback for local assets.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `d0e01d7` (`docs: define output workspace architecture`). Local `master` and `origin/master` are synchronized at this checkpoint.
-- The M9 Side Panel amendment and the pre-amendment M9 implementation are uncommitted; no M9 implementation checkpoint exists.
+- Latest existing checkpoint: `e587398` (`docs: move output workspace to side panel`). Local `master` and `origin/master` are synchronized at this checkpoint.
+- The completed M9 implementation and closeout documentation are uncommitted; no M9 implementation checkpoint exists.
