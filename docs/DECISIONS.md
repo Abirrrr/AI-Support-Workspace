@@ -335,15 +335,15 @@ M8 adds no generation options beyond the required model. It adds no UI, Support 
 
 ## Decision 25: Transient Manual Output Workspace v1
 
-Milestone 9 implements the first complete manual Context-to-generated-output workflow through one dedicated extension-owned Workspace page. It connects the existing Retrieval Engine, Prompt Builder, `GenerationProvider`, and `OllamaProvider` boundaries without changing their behavior. The workflow accepts manual Merchant Context, manual Guidance, and a temporary Ollama model value; automatically retrieves local Knowledge and Snippets; generates through the provider boundary; and presents editable plain-text output with a Copy action.
+Milestone 9 implements the first complete manual Context-to-generated-output workflow through one extension-owned global Chrome Side Panel. It connects the existing Retrieval Engine, Prompt Builder, `GenerationProvider`, and `OllamaProvider` boundaries without changing their behavior. The workflow accepts manual Merchant Context, manual Guidance, and a temporary Ollama model value; automatically retrieves local Knowledge and Snippets; generates through the provider boundary; and presents editable plain-text output with a Copy action.
 
-M9 introduces no dedicated Regenerate, Cancel, Stop, Clear, or Reset control; manual Library selection; Save as Snippet; PromptAssembly preview; provider selection or registry; OpenAI integration; model discovery; `/api/tags`; persistent Settings or workspace drafts; generation history; keyboard shortcut; page scraping or insertion; Side Panel; streaming; retry; health check; automatic model pull; or endpoint configuration. After a request completes, the ordinary Generate button may be used again for a fresh complete workflow with the current inputs.
+M9 introduces no dedicated Regenerate, Cancel, Stop, Clear, or Reset control; manual Library selection; Save as Snippet; PromptAssembly preview; provider selection or registry; OpenAI integration; model discovery; `/api/tags`; persistent Settings or workspace drafts; generation history; keyboard shortcut; page scraping or insertion; standalone Workspace tab; streaming; retry; health check; automatic model pull; or endpoint configuration. After a request completes, the ordinary Generate button may be used again for a fresh complete workflow with the current inputs.
 
 ### Workspace Surface and Composition
 
-M9 adds one dedicated foreground extension Workspace page. The popup remains a launcher and may expose separate Open Workspace and Open Libraries actions. Open Libraries preserves the existing options-page behavior, and Knowledge and Snippet CRUD remain owned by the options page. M9 introduces no router, Side Panel, injected merchant-page UI, or content-script change.
+M9 adds one global foreground Chrome Side Panel containing the Workspace. It is an extension-owned companion UI intended to remain visible beside the current support website without switching tabs. The popup remains a launcher with separate Open Workspace and Open Libraries actions. Open Workspace opens the global Side Panel in the current browser window from the direct popup user gesture; Open Libraries preserves the existing options-page behavior. Knowledge and Snippet CRUD remain owned by the options page. M9 introduces no router, injected merchant-page UI, or content-script change.
 
-The Workspace extension entry point is the composition root. It constructs the existing Knowledge and Snippet repositories, `RetrievalEngine`, `PromptBuilder`, and `OllamaProvider`, then supplies a focused application-layer `OutputWorkflow` to the React Workspace UI. Composition remains separate from presentation, no dependency-injection framework is introduced, and React components do not directly coordinate the retrieval, prompt, and provider steps.
+The WXT Side Panel entry point is the composition root. It produces `sidepanel.html`, constructs the existing Knowledge and Snippet repositories, `RetrievalEngine`, `PromptBuilder`, and `OllamaProvider`, then supplies a focused application-layer `OutputWorkflow` to the React Workspace UI. Composition remains separate from presentation, no dependency-injection framework is introduced, and React components do not directly coordinate the retrieval, prompt, and provider steps.
 
 `OutputWorkflow` accepts a project-owned input conceptually equivalent to:
 
@@ -371,9 +371,9 @@ Before M11 Settings, Workspace provides one transient Ollama model text field wh
 
 M9 preserves the fixed provider endpoint `http://localhost:11434/api/chat`. It adds no endpoint field and no `127.0.0.1`, LAN, arbitrary remote, Ollama cloud, or cloud-fallback support.
 
-Generation executes directly from the foreground Workspace page. It does not move to the background service worker and introduces no `chrome.runtime` generation request, response, cancellation, or lifecycle messages. Application and provider code remain browser-runtime independent.
+Generation executes directly from the foreground Side Panel page. It does not move to the background service worker and introduces no `chrome.runtime` generation request, response, cancellation, or lifecycle messages. Application and provider code remain browser-runtime independent.
 
-M9 approves exactly one new manifest host permission: `http://localhost/*`. Chrome host-permission match patterns are broader than a port, while `OllamaProvider` remains fixed to `localhost:11434`. M9 adds no ordinary Chrome API permission solely for Ollama networking and no `http://127.0.0.1/*`, broad HTTP or HTTPS pattern, or `<all_urls>`.
+M9 approves exactly one Chrome API permission, `sidePanel`, and exactly one new manifest host permission, `http://localhost/*`. The generated Manifest V3 contract contains `permissions: ['sidePanel']`, `host_permissions: ['http://localhost/*']`, and `side_panel.default_path` pointing to the WXT Side Panel entry point. Chrome host-permission match patterns are broader than a port, while `OllamaProvider` remains fixed to `localhost:11434`. M9 adds no `tabs`, `activeTab`, storage, clipboard, or scripting permission and no `http://127.0.0.1/*`, broad HTTP or HTTPS pattern, or `<all_urls>`.
 
 Real browser generation also requires the installed Ollama server to allow the environment-specific `chrome-extension://<extension-id>` origin through external `OLLAMA_ORIGINS` configuration. M9 does not hardcode an extension ID, alter Ollama configuration, set environment variables, launch or restart Ollama, automatically use a wildcard origin, or broaden Ollama to remote hosts. Setup and manual-validation guidance should prefer the specific installed extension origin.
 
@@ -387,7 +387,7 @@ One Generate click performs exactly one retrieval, prompt-build, and provider-ge
 
 There is no dedicated Regenerate control. After completion, Generate becomes available again; another click uses current Context, Guidance, and model, reruns retrieval, rebuilds the prompt, and makes a fresh provider request. Successful output replaces any prior edited output, and no generation history is retained.
 
-M9 exposes no Stop or Cancel control. Existing `AbortSignal` capability remains available infrastructure but is not part of the M9 UI. Closing or reloading the foreground Workspace naturally abandons the interaction without new background lifecycle infrastructure.
+M9 exposes no Stop or Cancel control. Existing `AbortSignal` capability remains available infrastructure but is not part of the M9 UI. Closing, destroying, or reloading the Side Panel naturally abandons the interaction without new background lifecycle infrastructure.
 
 Workspace uses four explicit status values: `idle`, `generating`, `success`, and `error`. Validation feedback may appear within idle or error presentation without exposing internal retrieving, prompt-building, or provider phases. Output text remains separate from status so a prior draft can survive a later failed generation.
 
@@ -415,7 +415,7 @@ M9 provides no full onboarding wizard. Minimal helper text may state that Ollama
 
 ### Layout, Accessibility, Persistence, and Privacy
 
-Workspace uses a centered full-page vertical layout ordered as identity/header, Merchant Context textarea, Guidance textarea, Ollama model text input, Generate, generating or error status, editable Generated Output textarea, and Copy. Styling follows existing Tailwind conventions without a component or design-system dependency.
+Workspace uses a fluid vertical Side Panel layout ordered as identity/header, Merchant Context textarea, Guidance textarea, Ollama model text input, Generate, generating or error status, editable Generated Output textarea, and Copy. Controls occupy the available narrow panel width without normal horizontal scrolling, vertical scrolling is permitted, and no code attempts to force Chrome's user-controlled Side Panel width. Styling follows existing Tailwind conventions without a component or design-system dependency.
 
 Every control has an explicit visible label, buttons are semantic and keyboard-operable, native disabled behavior communicates unavailable Generate state, status and error feedback use an appropriate `aria-live` region, the output textarea is labelled, generating state is accessible, tab order is natural, and generation does not force an unexpected focus jump. M9 adds no keyboard shortcut.
 
@@ -425,9 +425,23 @@ M9 preserves local-first privacy. Provider-generation material is sent only to t
 
 ### Validation Boundary
 
-Automated tests must validate `OutputWorkflow`, Workspace UI, the exact `http://localhost/*` generated-manifest host permission without broader hosts or clipboard permission, absence of Side Panel, and regressions across popup, Libraries, persistence, Retrieval Engine, Prompt Builder, Ollama Provider, and the production extension build. Normal component and orchestration tests use controlled dependencies and never require real Ollama.
+Automated tests must validate `OutputWorkflow`, the Side Panel-hosted Workspace UI, the WXT Side Panel entry point, generated `side_panel.default_path`, exact `sidePanel` Chrome API permission, exact `http://localhost/*` host permission without broader hosts or unnecessary permissions, direct popup opening of the current-window Side Panel, absence of background messaging for opening or generation, and regressions across popup, Libraries, persistence, Retrieval Engine, Prompt Builder, Ollama Provider, and the production extension build. No standalone Workspace tab is required. Normal component and orchestration tests use controlled dependencies and never require real Ollama.
 
-M9 requires real Chrome validation of Workspace and Library navigation, input and Generate rules, real local generation, loading and safe errors, editable output, exact edited-output copying, repeated generation, output preservation after a later failure, missing-service and missing-model behavior, absence of leaked content or Chrome runtime errors, and Library regressions. This is the first actual Chrome-extension-to-Ollama request: automated tests validate the manifest and application boundaries, while manual Chrome validation proves host permission, external Ollama origin configuration, and browser interoperability.
+M9 requires real Chrome validation that popup Open Workspace opens the global Side Panel beside the active webpage, the panel remains usable during normal support-page navigation, Open Libraries still opens options, controls work at narrow Side Panel dimensions without horizontal layout breakage, and the existing input, Generate, real local generation, loading, safe-error, editable-output, Copy, repeated-generation, output-preservation, missing-service, missing-model, privacy, runtime-error, and Library-regression contracts hold. This is the first actual Chrome-extension-to-Ollama request: automated tests validate the manifest and application boundaries, while manual Chrome validation proves Side Panel opening, `sidePanel` permission, host permission, external Ollama origin configuration, and browser interoperability.
+
+## Decision 26: M9 Global Chrome Side Panel Surface Amendment
+
+Manual product review rejected the standalone extension-tab Workspace after M9 implementation had begun but before that implementation was committed. This decision deliberately supersedes only Decision 25's original standalone page, separate-tab, centered full-page layout, and Side Panel exclusion. The OutputWorkflow, retrieval, prompt, provider, model, state, output, Copy, error, privacy, persistence, and deferred-scope contracts remain unchanged.
+
+M9 uses WXT's native Side Panel entry point as one global Workspace companion beside any current browser tab. The generated page is `sidepanel.html`, and the generated MV3 manifest declares `side_panel.default_path` for that page. The panel is not enabled per site, does not use tab-specific or dynamic paths, and does not create different side panels or content by website. Chrome controls panel width and lifecycle.
+
+The popup stays in place because it also owns Open Libraries. Open Workspace calls `chrome.sidePanel.open(...)` from the direct popup user interaction for the current browser window. Resolving that window requires no `tabs` or `activeTab` permission, and no background message is introduced solely to open the panel. Clicking the extension toolbar icon continues to open the popup rather than bypassing it.
+
+The amended manifest contract adds only `sidePanel` to ordinary permissions and preserves only `http://localhost/*` in host permissions. It adds no `tabs`, `activeTab`, `storage`, `clipboardRead`, `clipboardWrite`, `scripting`, `127.0.0.1`, or broad host access. The Side Panel shares the same environment-specific `chrome-extension://<extension-id>` origin requirement already documented for external Ollama `OLLAMA_ORIGINS` configuration.
+
+Workspace state remains transient for the mounted Side Panel instance. Chrome closure, destruction, or reload may discard it, and this surface change does not authorize persistence. The UI must be fluid, narrow-width-safe, vertically scrollable, and free of normal horizontal scrolling without attempting to programmatically set Side Panel width.
+
+Implementation validation must replace standalone-page checks with Side Panel entrypoint, popup-opening, permission, manifest, narrow-layout, and real Chrome Side Panel checks. Existing application and component tests remain applicable because the React view and all workflow behavior are reused without redesign.
 
 ## Rationale
 

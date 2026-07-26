@@ -2,7 +2,25 @@
 
 ## [Unreleased]
 
+### Milestone 9 — Side Panel Architecture Amendment
+
+- Recorded the Principal Engineer's manual product-review decision to supersede the original standalone extension-tab Workspace before the existing M9 implementation was committed.
+- Approved one extension-owned global Chrome Side Panel as the M9 Workspace companion beside the active support website, with no per-site enablement, tab-specific path, dynamic panel content, or content-script integration.
+- Approved WXT's native Side Panel entry point, generated `sidepanel.html`, and generated `side_panel.default_path`; a standalone `workspace.html` page is no longer the primary or required M9 surface.
+- Preserved the popup with Open Workspace and Open Libraries. Open Workspace opens the global Side Panel for the current browser window from the direct user interaction; Open Libraries continues opening the existing options page; no background message is added solely to open Workspace.
+- Added exactly `sidePanel` to the approved ordinary Chrome permissions while retaining exactly `http://localhost/*` in host permissions. Excluded `tabs`, `activeTab`, storage, clipboard, scripting, `127.0.0.1`, and broad host access.
+- Preserved foreground extension-UI generation, the fixed local Ollama endpoint, and environment-specific external `OLLAMA_ORIGINS` configuration for `chrome-extension://<extension-id>` without moving generation or panel opening into background messaging.
+- Preserved transient Workspace state for the mounted Side Panel instance without localStorage, Chrome storage, Dexie, Settings, history, drafts, or schema changes.
+- Replaced the centered full-page layout contract with a fluid, narrow-width-safe, vertically scrollable Side Panel layout that does not force Chrome's user-controlled panel width and avoids normal horizontal scrolling.
+- Kept Knowledge and Snippet CRUD on the existing options page and retained all approved `OutputWorkflow`, Retrieval Engine, Prompt Builder, GenerationProvider, OllamaProvider, model, Generate, output, Copy, error, privacy, and deferred-feature behavior.
+- Amended automated validation to cover the Side Panel entry point, `side_panel.default_path`, exact permissions, direct popup opening, absence of background messaging, reused Workspace behavior, regressions, and production build.
+- Replaced standalone Workspace-tab manual validation with global Chrome Side Panel validation beside the active webpage, including normal narrow-width behavior, real Ollama generation, exact permissions, and Library regressions.
+- Updated architecture and project continuity to checkpoint `d0e01d7` (`docs: define output workspace architecture`) and recorded that the existing uncommitted M9 implementation predates this amendment and requires a later focused Side Panel migration.
+- This amendment changed documentation only. It did not modify the existing uncommitted implementation, tests, WXT or manifest configuration, dependencies, database, or milestone status.
+
 ### Milestone 9 — Output Workspace Architecture Definition
+
+The original standalone Workspace page and Side Panel exclusion recorded in this historical section were superseded by the subsequent M9 Side Panel Architecture Amendment above. All workflow, provider, persistence, and non-surface decisions remain in force.
 
 - Corrected repository continuity to record Milestone 8 implementation checkpoint `2de8dcb` (`feat: implement ollama provider`) as committed, pushed to `origin/master`, and synchronized before M9 architecture definition began.
 - Defined M9 as the first complete manual Context-to-generated-output workflow with Merchant Context, Guidance, a transient Ollama model field, Generate, automatic local retrieval, Prompt Builder, `GenerationProvider`, the current Ollama adapter, safe loading and errors, editable plain-text output, and Copy.

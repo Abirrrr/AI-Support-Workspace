@@ -43,7 +43,7 @@ Establish the approved repository tooling, configuration, validation, and test f
 - Dexie storage implementation, schemas, migrations, indexes, or transactions.
 - Business logic, product workflows, or other product functionality.
 
-Side Panel is not currently approved product scope and must not be introduced without a documented architecture and product decision. All other extension-shell infrastructure listed above remains assigned to Milestone 2.
+Side Panel was not approved within Milestone 1 and could not be introduced there without a documented architecture and product decision. The later Milestone 9 architecture now approves Side Panel specifically as the global Output Workspace surface; that amendment does not move Side Panel or other extension-shell work into Milestone 1. All other extension-shell infrastructure listed above remains assigned to Milestone 2.
 
 ### Completion Criteria
 
