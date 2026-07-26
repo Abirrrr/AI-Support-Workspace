@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Milestone 7 — Prompt Builder
+
+- Completed the approved deterministic, pure, headless Prompt Builder v1 as an application-layer operation over optional Merchant Context, optional Guidance, and optional prepared M6 `RetrievalResults`.
+- Implemented the focused missing-primary-input error: at least one non-whitespace Context or Guidance value is required, retrieval-only input is rejected, and minimal Guidance such as `follow up` is valid.
+- Implemented the frozen static provider-independent instructions and `Guidance > Merchant Context > Knowledge > Snippets` precedence without AI-based conflict resolution.
+- Preserved M6 ranking while selecting at most the first five Knowledge and first three Snippet results, with no reranking, rescoring, threshold, padding, or retrieval invocation.
+- Implemented typed explicit Instructions, Guidance, Merchant Context, Knowledge, and Snippets sections in canonical order, omitting empty optional sections and producing structurally deterministic assemblies without mutating inputs.
+- Kept human-readable Knowledge title/body and Snippet title/content separate from application metadata. Domain kinds, IDs, and scores remain metadata; tags and Knowledge source are not automatically rendered into prompt content.
+- Added 22 focused deterministic unit tests in 1 file. The full Vitest suite passed with 13 files and 72 tests.
+- Passed dependency installation, linting, the final formatting check, type-checking, Playwright discovery of 1 test, the production WXT build, generated Manifest V3 validation, and `git diff --check`.
+- Required no M7-specific manual Chrome validation because Prompt Builder is headless, deterministic unit tests comprehensively cover its behavior, no browser interaction was added, and temporary demonstration UI would violate milestone scope.
+- Introduced no retrieval orchestration, provider execution or serialization, Ollama, OpenAI, AI behavior, UI, images, Prompt Templates, persistence or history, token handling, snippet expansion, `;hello` behavior, schema or index change, Chrome permission, or Side Panel.
+- Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; decisions, product requirements, and the UI workflow were reviewed and required no changes.
+- Corrected repository continuity to record Prompt Builder architecture checkpoint `2c2c0ae` (`docs: define prompt builder architecture`) as committed, pushed to `origin/master`, and synchronized locally and remotely before implementation began.
+- Advanced the current project milestone to Milestone 8 — Ollama Provider. No Milestone 7 implementation checkpoint has been created yet.
+
 ### Milestone 7 — Prompt Builder Architecture Definition
 
 - Corrected repository continuity to record Milestone 6 implementation checkpoint `9649c1b` (`feat: implement retrieval engine`) as committed, pushed to `origin/master`, and synchronized between local `master` and the remote.
@@ -11,7 +27,7 @@
 - Approved `Guidance > Merchant Context > Knowledge > Snippets`, a static provider-independent grounding instruction section, top-five Knowledge and top-three Snippet selection, and canonical instructions/Guidance/Merchant Context/Knowledge/Snippets section ordering.
 - Separated provider-facing title/body or title/content material from application metadata such as domain kind, ID, score, tags, and Knowledge source, with no fabricated citations.
 - Defined deterministic empty-section, purity, grounding, formatting, and testing contracts while deferring provider serialization, AI execution, token handling, images, UI, persistence, Prompt Templates, schema changes, and retrieval orchestration.
-- Kept Milestone 7 current and added no implementation code, tests, dependencies, database changes, permissions, browser surfaces, commit, or GitHub push.
+- Kept Milestone 7 current without implementation code, tests, dependencies, database changes, permissions, or browser surfaces, then created checkpoint `2c2c0ae` (`docs: define prompt builder architecture`), pushed it to `origin/master`, and confirmed local and remote synchronization before implementation began.
 
 ### Milestone 6 — Retrieval Engine
 

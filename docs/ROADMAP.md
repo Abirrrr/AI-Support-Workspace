@@ -76,11 +76,11 @@ Implement the snippet library experience and local management flows.
 
 Implement fast local search and retrieval over stored content.
 
-## Milestone 7 — Prompt Builder (Current)
+## Milestone 7 — Prompt Builder (Completed)
 
 Create a provider-independent prompt composition layer.
 
-## Milestone 8 — Ollama Provider
+## Milestone 8 — Ollama Provider (Current)
 
 Add Ollama as the first AI provider integration.
 
