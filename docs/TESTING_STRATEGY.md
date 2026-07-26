@@ -62,6 +62,22 @@ Boundary coverage verifies that Prompt Builder invokes no retrieval operation, e
 
 Focused Milestone 7 validation passed with 1 file and 22 tests. The full project Vitest suite passed with 13 files and 72 tests. Dependency installation, linting, the final formatting check, type-checking, Playwright discovery of 1 test, the production WXT build, generated Manifest V3 validation, and `git diff --check` also passed.
 
+### Ollama Provider v1 Test Requirements
+
+Milestone 8 implementation must add deterministic Vitest coverage for the project-owned `GenerationProvider` contract and `OllamaProvider` adapter without requiring a running Ollama server. Tests inject a fetch-compatible transport and must make no real network request during the normal automated suite.
+
+Contract coverage must verify provider identity, rejection of empty or whitespace-only model values, preservation of valid model identifiers, minimal `GenerationResult` shape, and confinement of raw Ollama types to the adapter.
+
+Translation and request coverage must verify exactly one system message containing only the Prompt Builder Instructions content and one user message containing deterministic JSON. Applicable JSON keys must appear in Guidance, Merchant Context, Knowledge, and Snippets order; absent sections must be omitted; Knowledge must expose only title and body; Snippets must expose only title and content; application metadata must be excluded; JSON escaping must be valid; and input `PromptAssembly` values must not be mutated.
+
+Transport coverage must verify `POST http://localhost:11434/api/chat`, the exact body fields `model`, `messages`, and `stream: false`, absence of unsupported generation options, use of the injected transport, and forwarding of an optional `AbortSignal`.
+
+Success coverage must verify that valid non-whitespace assistant content maps to text, provider identity `ollama`, and the requested model while raw provider fields are ignored. Failure coverage must verify connection failure as `ProviderUnavailableError`, HTTP 404 as `ModelUnavailableError`, every other non-success response as `ProviderRequestError`, safe extraction of an Ollama JSON `error` string when available, malformed success JSON and invalid response shapes as `ProviderResponseError`, missing, non-string, empty, or whitespace-only assistant content as `ProviderResponseError`, and caller cancellation as `GenerationCancelledError` rather than provider unavailability.
+
+Boundary tests must prove no React, persistence, Chrome API, provider SDK, real-network, or Prompt Builder mutation dependency. They must not create a provider registry, leak provider-specific types through project contracts, or require Chrome UI.
+
+An additional live Ollama validation may be provided as an explicit opt-in integration smoke test following existing Vitest conventions without new dependencies. It must require the tester to supply an already-installed model name, use the real `OllamaProvider` and fixed `http://localhost:11434` service, verify a non-empty `GenerationResult`, and never pull or install a model. The normal automated suite must never require Ollama to be installed or running. Chrome UI is not required because runtime integration is explicitly deferred.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.

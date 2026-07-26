@@ -20,8 +20,8 @@
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen. Milestone 7 implementation has passed Principal Engineer review, comprehensive automated validation, and its Documentation Impact Review. No M7-specific manual Chrome validation was required, and Milestone 8 is current. The uncommitted Milestone 7 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization.
-- Scope: Milestone 8 — Ollama Provider is the next implementation milestone defined by the roadmap. Its exact task has not yet been approved or implemented.
+- Status: Platform architecture remains approved and frozen. Milestone 7 implementation and documentation closeout are complete at checkpoint `a71dfed` (`feat: implement prompt builder`), which is committed, pushed to `origin/master`, and synchronized locally and remotely. Milestone 8 is current, and its Ollama Provider architecture is now defined for implementation.
+- Scope: Milestone 8 — Ollama Provider remains the current implementation milestone defined by the roadmap. Its project-owned generation contract, Ollama adapter behavior, runtime deferrals, error policy, and validation requirements are implementation-ready, but no M8 implementation task has been approved or executed.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, and deterministic provider-independent Prompt Builder are implemented. Provider integration, AI execution, output, and other later-milestone functionality are not implemented.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
@@ -40,6 +40,9 @@
 - `DECISIONS.md` is authoritative for the M6 normalization, fields, scoring, repeated-term behavior, empty and no-match behavior, deterministic per-domain ordering, absence of result limits, and performance direction.
 - Prompt Builder v1 is implemented as a pure, headless application-layer composition boundary over optional Merchant Context, optional Guidance, and already-computed Retrieval Results. A future orchestrator owns query construction and Retrieval Engine invocation; Prompt Builder validates primary input, preserves M6 ranking, selects the first five Knowledge and first three Snippet results, applies `Guidance > Merchant Context > Knowledge > Snippets`, and returns an explicitly sectioned provider-independent `PromptAssembly`.
 - `DECISIONS.md` is authoritative for the M7 input and output contracts, minimum valid input, default instructions, precedence and grounding, content-versus-metadata policy, selection limits, deterministic formatting, empty behavior, purity, and provider, UI, persistence, token, and image boundaries.
+- Milestone 8 introduces a narrow project-owned `GenerationProvider` boundary whose `generate` operation accepts a transient `GenerationRequest`, optionally accepts an `AbortSignal`, and returns a provider-independent `GenerationResult`. The first infrastructure adapter is `OllamaProvider`, identified as `ollama`.
+- Ollama Provider v1 uses native `fetch` against fixed local endpoint `http://localhost:11434/api/chat`, sends exactly one system message and one deterministically serialized user message with `stream: false`, and exposes no raw provider response. Runtime ownership, Chrome messaging, localhost host permission, CORS handling, UI, Settings, model persistence, retries, timeouts, model pulling, and health checks remain explicitly deferred.
+- `DECISIONS.md` is authoritative for the M8 request, result, translation, transport, response validation, cancellation, error taxonomy, privacy, configuration, replaceability, and deferred-runtime boundaries.
 
 ## Completed Work
 
@@ -103,11 +106,16 @@
 - Passed dependency installation, linting, final formatting validation, type-checking, Playwright discovery of 1 test, the production WXT build, generated Manifest V3 validation, and `git diff --check`.
 - Completed Principal Engineer review and determined that no M7-specific manual Chrome validation was required because Prompt Builder is headless, its behavior is comprehensively covered by deterministic unit tests, and temporary demonstration UI would violate milestone scope.
 - Completed the Milestone 7 Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; decisions, product requirements, and UI workflow were reviewed and required no changes.
+- Created Milestone 7 implementation checkpoint `a71dfed` (`feat: implement prompt builder`), pushed `master` to `origin/master`, and confirmed local and remote synchronization at that checkpoint.
+- Defined the implementation-ready Milestone 8 provider boundary as a project-owned `GenerationProvider` contract with provider identity, transient model and `PromptAssembly` input, optional caller cancellation, and a minimal provider-independent text result.
+- Defined `OllamaProvider` as a runtime-independent infrastructure adapter using native `fetch`, an injectable fetch-compatible test seam, fixed local-only `/api/chat` access, exactly two translated messages, non-streaming generation, strict success-response validation, and focused project-owned provider errors.
+- Preserved provider replaceability, prompt composition semantics, privacy, schema version 1, extension runtime files, browser surfaces, and manifest permissions while explicitly deferring runtime ownership, CORS and extension access, Settings, model persistence, UI, output workflow integration, retries, timeouts, health checks, model pulling, and provider tuning.
+- Defined deterministic automated provider-contract coverage and an optional opt-in live Ollama smoke-validation policy without adding implementation code, tests, dependencies, manifests, permissions, or WXT configuration during architecture definition.
 
 ## Next Engineering Action
 
-- The Principal Engineer should review this closeout and authorize the Milestone 7 implementation checkpoint and GitHub synchronization when satisfied.
-- After the Milestone 7 checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 8 — Ollama Provider implementation task.
+- The Principal Engineer should review the Milestone 8 architecture definition and authorize its documentation checkpoint and GitHub synchronization when satisfied.
+- After that documentation checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 8 — Ollama Provider implementation task from the frozen M8 decisions.
 - Output workflows and other later-milestone functionality remain out of scope for Milestone 8 unless the existing roadmap and an approved implementation task explicitly include them.
 
 ## Repository Status
@@ -119,28 +127,29 @@
 - The WXT-generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. Side Panel is absent.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `2c2c0ae` (`docs: define prompt builder architecture`) and is synchronized between local `master` and `origin/master`.
-- Milestone 7 implementation and closeout documentation are not yet committed. No Milestone 7 implementation checkpoint has been recorded.
+- The latest existing checkpoint is `a71dfed` (`feat: implement prompt builder`) and is synchronized between local `master` and `origin/master`.
+- The Milestone 8 architecture definition is currently an uncommitted documentation change. No Milestone 8 architecture or implementation checkpoint has been recorded.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, workflow orchestration, snippet expansion or insertion, provider integration or serialization, AI execution, token handling, Prompt Templates, Support Workspace, prompt preview, Settings functionality, Side Panel, or later-milestone business functionality exists.
+- No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, workflow orchestration, snippet expansion or insertion, provider implementation or execution, token handling, Prompt Templates, Support Workspace, prompt preview, Settings functionality, Side Panel, or later-milestone business functionality exists.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current implementation milestone: Milestone 8 — Ollama Provider.
 - Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library, and the reviewed and automatically validated Milestone 6 Retrieval Engine and Milestone 7 Prompt Builder are complete.
-- Next action: Obtain Principal Engineer approval for the Milestone 7 implementation checkpoint and synchronization, then obtain approval of the exact Milestone 8 implementation task.
+- Next action: Obtain Principal Engineer approval for the Milestone 8 architecture-definition checkpoint and synchronization, then obtain approval of the exact Milestone 8 implementation task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- The Milestone 7 implementation and closeout changes remain uncommitted and require an authorized checkpoint and GitHub synchronization before the next implementation task begins.
+- The Milestone 8 architecture-definition changes remain uncommitted and require an authorized checkpoint and GitHub synchronization before implementation begins.
+- The future extension runtime for generation, localhost host access, and CORS behavior remain intentionally undecided and must be resolved when the workflow/runtime integration milestone actually requires them.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `2c2c0ae` (`docs: define prompt builder architecture`). Local `master` and `origin/master` are synchronized at this checkpoint.
-- The completed Milestone 7 implementation and closeout documentation do not yet have an authorized implementation checkpoint.
+- Latest existing checkpoint: `a71dfed` (`feat: implement prompt builder`). Local `master` and `origin/master` are synchronized at this checkpoint.
+- The Milestone 8 architecture definition does not yet have an authorized documentation checkpoint, and no M8 implementation checkpoint exists.

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Milestone 8 — Ollama Provider Architecture Definition
+
+- Corrected repository continuity to record Milestone 7 implementation checkpoint `a71dfed` (`feat: implement prompt builder`) as committed, pushed to `origin/master`, and synchronized between local `master` and the remote.
+- Defined a narrow project-owned `GenerationProvider` contract with stable provider identity, transient `PromptAssembly` and model input, optional caller cancellation, and a minimal provider-independent generated-text result.
+- Defined `OllamaProvider` as the first infrastructure adapter with identity `ollama`, native `fetch`, an injected fetch-compatible test seam, fixed local-only `http://localhost:11434/api/chat` access, and no SDK or new HTTP dependency.
+- Approved deterministic conversion of each `PromptAssembly` into exactly one unchanged Instructions system message and one JSON user message ordered as applicable Guidance, Merchant Context, Knowledge, and Snippets content, excluding application metadata.
+- Approved an exact non-streaming chat request with `stream: false`, caller-supplied model validation, strict assistant-content response validation, optional `AbortSignal` forwarding, and focused unavailable, missing-model, request, response, and cancellation errors.
+- Preserved provider replaceability and local privacy by keeping raw Ollama types internal, exposing no raw response or telemetry, adding no prompt or generated-content logging, and defining no OpenAI placeholder, provider registry, or provider-name branching across consumers.
+- Explicitly deferred extension runtime ownership, Chrome messaging and localhost permissions, CORS and extension-origin handling, UI and output workflows, Settings and model persistence, health checks, model pulling, streaming, timeouts, retries, tuning options, and database changes.
+- Defined deterministic injected-transport automated coverage and an optional opt-in live validation against a developer's existing local Ollama model; normal automated tests must not require Ollama or real network access.
+- Kept Milestone 8 current and made its provider architecture implementation-ready without adding implementation code, tests, dependencies, manifests, permissions, browser-runtime changes, UI, or WXT configuration.
+
 ### Milestone 7 — Prompt Builder
 
 - Completed the approved deterministic, pure, headless Prompt Builder v1 as an application-layer operation over optional Merchant Context, optional Guidance, and optional prepared M6 `RetrievalResults`.
@@ -16,7 +28,7 @@
 - Introduced no retrieval orchestration, provider execution or serialization, Ollama, OpenAI, AI behavior, UI, images, Prompt Templates, persistence or history, token handling, snippet expansion, `;hello` behavior, schema or index change, Chrome permission, or Side Panel.
 - Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; decisions, product requirements, and the UI workflow were reviewed and required no changes.
 - Corrected repository continuity to record Prompt Builder architecture checkpoint `2c2c0ae` (`docs: define prompt builder architecture`) as committed, pushed to `origin/master`, and synchronized locally and remotely before implementation began.
-- Advanced the current project milestone to Milestone 8 — Ollama Provider. No Milestone 7 implementation checkpoint has been created yet.
+- Advanced the current project milestone to Milestone 8 — Ollama Provider, then created checkpoint `a71dfed` (`feat: implement prompt builder`), pushed it to `origin/master`, and confirmed local and remote synchronization.
 
 ### Milestone 7 — Prompt Builder Architecture Definition
 

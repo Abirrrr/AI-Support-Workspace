@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 7 — Prompt Builder is complete following Principal Engineer review, comprehensive automated validation, and documentation closeout, and Milestone 8 — Ollama Provider is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine provides deterministic local lexical retrieval, and the headless Prompt Builder composes prepared support inputs into a typed provider-independent `PromptAssembly` for future provider adapters.
+The platform architecture is approved and frozen. Milestone 7 — Prompt Builder is complete and synchronized at checkpoint `a71dfed`, and Milestone 8 — Ollama Provider is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface; the headless Retrieval Engine provides deterministic local lexical retrieval, and the headless Prompt Builder composes prepared support inputs into a typed provider-independent `PromptAssembly`. The implementation-ready M8 architecture defines a narrow project-owned generation contract and a local-only, non-streaming Ollama adapter, but no provider implementation or extension runtime integration exists yet.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Principal Engineer should review the Milestone 7 closeout and authorize its implementation checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the exact Milestone 8 — Ollama Provider task should be prepared and approved under the existing roadmap and frozen provider boundary.
+The Principal Engineer should review the Milestone 8 architecture definition and authorize its documentation checkpoint and GitHub synchronization. After that checkpoint is synchronized, the exact Milestone 8 — Ollama Provider implementation task should be prepared and approved under the frozen provider contract and existing roadmap.
