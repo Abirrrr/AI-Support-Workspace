@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 5 — Snippet Library is complete following Principal Engineer review, manual Chrome validation, and documentation closeout, and Milestone 6 — Retrieval Engine is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface, which is reached from the extension popup and uses lightweight local tab navigation between the two libraries.
+The platform architecture is approved and frozen. Milestone 6 — Retrieval Engine is complete following Principal Engineer review, comprehensive automated validation, and documentation closeout, and Milestone 7 — Prompt Builder is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface, while the headless Retrieval Engine provides deterministic local lexical retrieval over both domains for future consumers.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Milestone 5 is committed and synchronized at checkpoint `10fbd72` (`feat: implement snippet library`). The deterministic lexical architecture for the current Milestone 6 — Retrieval Engine is implementation-ready and awaits Principal Engineer approval before the finalized implementation task proceeds.
+The Milestone 6 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the Principal Engineer should prepare and approve the exact Milestone 7 — Prompt Builder implementation task under the existing roadmap and frozen architecture.

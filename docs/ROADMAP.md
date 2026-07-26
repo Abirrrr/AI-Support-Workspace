@@ -72,11 +72,11 @@ Implement the knowledge library experience and local management flows.
 
 Implement the snippet library experience and local management flows.
 
-## Milestone 6 — Retrieval Engine (Current)
+## Milestone 6 — Retrieval Engine (Completed)
 
 Implement fast local search and retrieval over stored content.
 
-## Milestone 7 — Prompt Builder
+## Milestone 7 — Prompt Builder (Current)
 
 Create a provider-independent prompt composition layer.
 

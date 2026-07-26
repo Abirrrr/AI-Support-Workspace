@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Milestone 6 — Retrieval Engine
+
+- Completed the approved headless Retrieval Engine v1 as a local-only, deterministic, read-only application operation over the existing `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts.
+- Implemented separate typed Knowledge and Snippet result collections with complete domain records and numeric relevance scores; no combined cross-domain ranking was introduced.
+- Implemented the frozen NFKC, lowercase, Unicode letter-or-number tokenization and exact 5/3/1 title/tag/body-or-content scoring behavior defined in `DECISIONS.md`, including token deduplication, Knowledge source exclusion, zero-score exclusion, tokenless-query handling, deterministic score/`createdAt`/`id` ordering, and no fixed result limit.
+- Kept retrieval in memory behind project-owned repository boundaries with no record mutation, direct Dexie access, persistence search API, schema or index change, browser UI, provider dependency, or network access.
+- Added focused deterministic unit and isolated IndexedDB repository-integration coverage. Focused retrieval validation passed with 2 files and 14 tests, and the full Vitest suite passed with 12 files and 50 tests.
+- Passed dependency installation, linting, the final formatting check, type-checking, Playwright discovery of 1 test, the production WXT build, generated Manifest V3 validation, and `git diff --check`.
+- Required no M6-specific manual Chrome validation because the feature is headless, its algorithm and real repository integration are comprehensively covered by automation, and temporary demonstration UI would violate milestone scope.
+- Introduced no semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, AI or provider functionality, Context Builder, Prompt Builder, snippet expansion, `;hello` behavior, database or index change, Chrome permission, or Side Panel.
+- Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; decisions, product requirements, and the UI workflow were reviewed and required no changes.
+- Corrected repository continuity to record retrieval architecture checkpoint `5f2e0a0` (`docs: define retrieval engine architecture`) as committed, pushed to `origin/master`, and synchronized locally and remotely before implementation began.
+- Advanced the current project milestone to Milestone 7 — Prompt Builder. No Milestone 6 implementation checkpoint has been created yet.
+
 ### Milestone 6 — Retrieval Architecture Definition
 
 - Corrected repository continuity to record Milestone 5 checkpoint `10fbd72` (`feat: implement snippet library`) as committed, pushed to `origin/master`, and synchronized locally and remotely.
@@ -13,7 +27,7 @@
 - Defined zero-score exclusion, empty results for queries without tokens, independent score-descending ranking with `createdAt` and `id` tie-breakers, and no fixed M6 result limit.
 - Preserved database `ai-support-workspace`, schema version 1, tables, fields, indexes, migrations, repository contracts, browser surfaces, permissions, and provider independence.
 - Added deterministic Retrieval Engine unit and isolated repository-integration test requirements without requiring browser UI for retrieval validation.
-- Kept Milestone 6 current and performed no retrieval implementation, dependency change, schema change, UI change, commit, or push.
+- Kept Milestone 6 current without retrieval implementation, dependency, schema, or UI changes, then created checkpoint `5f2e0a0` (`docs: define retrieval engine architecture`), pushed it to `origin/master`, and confirmed local and remote synchronization.
 
 ### Milestone 5 — Snippet Library
 

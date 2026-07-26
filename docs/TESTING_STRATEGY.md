@@ -38,13 +38,15 @@ Milestone 5 added focused application, React UI, and application-to-Dexie integr
 
 ### Retrieval Engine Tests
 
-Milestone 6 requires focused deterministic unit coverage for the Retrieval Engine v1 algorithm defined in `DECISIONS.md`. Query normalization tests must cover case, punctuation, Unicode letters and numbers, whitespace, repeated query terms, and empty or punctuation-only queries.
+Milestone 6 added focused deterministic unit coverage for the Retrieval Engine v1 algorithm defined in `DECISIONS.md`. Query normalization coverage includes case, punctuation, Unicode letters and numbers, whitespace, repeated query terms, NFKC behavior, exact-token behavior, and empty or punctuation-only queries.
 
-Field and scoring tests must cover title, tags, Knowledge `body`, Snippet `content`, multiple-field matches, exclusion of Knowledge `source`, and exact 5/3/1 field weights. Tests must prove that repeated query terms and repeated field terms do not inflate scores.
+Field and scoring coverage includes title, tags, Knowledge `body`, Snippet `content`, multiple-field matches, exclusion of Knowledge `source`, exact 5/3/1 field weights, and proof that repeated query or field terms do not inflate scores.
 
-Ranking and result tests must cover score-descending order, `createdAt` tie-breaking, `id` tie-breaking, zero-score exclusion, separate Knowledge and Snippet collections, explicit result domain kinds, empty inputs, and return of every positive-score result without a fixed limit. Repeated executions over identical inputs must produce identical results.
+Ranking and result coverage includes score-descending order, `createdAt` tie-breaking, `id` tie-breaking, zero-score exclusion, separate Knowledge and Snippet collections, explicit result domain kinds, empty inputs, return of every positive-score result without a fixed limit, and deterministic repeated executions over identical inputs.
 
-Read-only tests must verify that retrieval does not modify the supplied or persisted records. Focused integration coverage must persist Knowledge and Snippet records through the real repositories in an isolated IndexedDB environment, retrieve them through the existing repository boundaries, and verify deterministic ranking without duplicating the Milestone 3 persistence contract suite.
+Read-only tests verify that retrieval does not modify supplied or persisted records. Focused integration coverage persists Knowledge and Snippet records through the real repositories in an isolated IndexedDB environment, retrieves them through the existing repository boundaries, and verifies deterministic ranking without duplicating the Milestone 3 persistence contract suite.
+
+Focused Milestone 6 validation passed with 2 files and 14 tests. The full project Vitest suite passed with 12 files and 50 tests. Dependency installation, linting, the final formatting check, type-checking, Playwright discovery of 1 test, the production WXT build, generated Manifest V3 validation, and `git diff --check` also passed.
 
 ## Manual Verification Requirements
 
@@ -56,7 +58,7 @@ Milestone 4 manual Chrome validation confirmed that popup navigation opens the K
 
 Milestone 5 manual Chrome validation confirmed that popup navigation opens the existing Library surface, lightweight local tab navigation opens the Snippet Library, its empty state works, create and edit changes appear immediately and persist across reload or reopen, deletion cancellation preserves the record, confirmed deletion remains effective after reload or reopen, the Knowledge Library remains operational, and the tested workflow reports no runtime problems.
 
-Milestone 6 Retrieval Engine v1 is a headless application boundary and should be validated through deterministic unit tests and isolated repository integration tests. Temporary browser UI must not be added solely for manual retrieval demonstration. Existing extension build and runtime regression validation still applies, but no M6-specific manual Chrome workflow is required unless an approved implementation introduces genuinely browser-specific behavior.
+No Milestone 6-specific manual Chrome validation was required. Retrieval Engine v1 is a headless application boundary, its deterministic algorithm is covered by unit tests, and its real repository behavior is covered by isolated IndexedDB integration tests. Adding temporary browser UI solely to demonstrate retrieval would violate the approved milestone scope. Existing extension build and runtime regression validation passed.
 
 ## Milestone 0 Status
 
