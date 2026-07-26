@@ -2,13 +2,23 @@
 
 ## [Unreleased]
 
+### Milestone 10 — Runtime Sequencing Architecture Amendment
+
+- Recorded real Chrome evidence that command registration, Chrome-native remapping to `Ctrl+Shift+Y`, command dispatch, `activeTab`, main-frame `scripting`, and direct keyboard-command Side Panel opening all work independently.
+- Diagnosed the production runtime defect: awaiting `chrome.scripting.executeScript(...)` before `chrome.sidePanel.open(...)` exhausts Chrome's keyboard-command user-action eligibility, while safe open-failure handling swallows the rejection and produces no visible M10 behavior.
+- Replaced the capture-completion-before-open requirement with capture invocation first, immediate Side Panel open invocation second without an intervening await, and independent settlement handling only after both operations have started.
+- Recorded repeated real Chrome diagnostic success for the amended invocation ordering, including fulfilled capture/open outcomes and exact leading-whitespace preservation. Delivery into Merchant Context was intentionally outside that diagnostic, so corrected end-to-end manual validation remains pending.
+- Preserved the existing typed success/empty/failure contract, transient ready/acknowledgement delivery, exact Context replacement, mounted state preservation, safe failure behavior, permissions, host access, content-script matches, database schema version 1, M11 separation, Snippet-trigger separation, and multimodal separation.
+- Required structural automated regression coverage for capture-first invocation, immediate synchronous open invocation, absence of an awaited boundary between them, independent outcomes, and delivery only after the capture result exists. Real Chrome validation remains mandatory because API fakes cannot prove transient user activation.
+- Made no implementation, test, dependency, WXT configuration, permission, persistence, or schema change and did not mark M10 complete.
+
 ### Milestone 10 — Keyboard Shortcut Architecture Definition
 
 - Corrected repository continuity to record Milestone 9 implementation checkpoint `7b88b94` (`feat: implement output workspace`) as committed, pushed to `origin/master`, and synchronized before M10 architecture definition began.
 - Defined exactly one browser-scoped standard Chrome command, `capture-selection-to-workspace`, with description `Capture selected text in AI Support Workspace`, suggested default `Ctrl+Shift+Space`, suggested macOS key `Command+Shift+Space`, Chrome-native remapping, no `_execute_action`, and no global scope.
 - Assigned focused command recognition, active-tab and window validation, on-demand selection extraction, global Side Panel opening, transient delivery, acknowledgement, and safe failure coordination to the existing service worker without moving Retrieval Engine, Prompt Builder, `OutputWorkflow`, Ollama generation, persistence, or Workspace state into the background.
 - Approved least-privilege main-frame selection capture through exactly `activeTab` and `scripting`, retaining `sidePanel`, exactly `http://localhost/*` host access, and the unchanged `https://example.com/*` persistent content-script match without `tabs`, storage, clipboard, `<all_urls>`, or permanent support-site permission.
-- Defined textarea or text-capable input range precedence over main-frame document selection; exact preservation of non-whitespace Unicode, line breaks, and surrounding whitespace; whitespace-only empty behavior; capture-before-panel-opening ordering; and exclusion of surrounding-page scraping, cross-frame capture, and screenshots.
+- Defined textarea or text-capable input range precedence over main-frame document selection; exact preservation of non-whitespace Unicode, line breaks, and surrounding whitespace; whitespace-only empty behavior; capture-invocation-before-panel-open-invocation ordering as superseded and clarified by the runtime sequencing amendment; and exclusion of surrounding-page scraping, cross-frame capture, and screenshots.
 - Defined open/activate rather than toggle Side Panel behavior and a focused typed ready-and-acknowledgement runtime contract that reliably delivers success or safe failure to mounted and newly opened panels without durable storage or a generalized message bus.
 - Defined exact Merchant Context replacement, preservation of Guidance, model, generated or edited Output, and active generation, manual-only future Generate behavior, Context focus with caret at the end, safe empty-selection and restricted-page feedback, and no unrelated focus change on failure.
 - Defined generated-manifest, background command, selection extraction, transient delivery, Side Panel state/focus, regression, and real Chrome validation requirements. Normal shortcut tests require no live Ollama.

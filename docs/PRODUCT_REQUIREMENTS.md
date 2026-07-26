@@ -41,7 +41,7 @@ The libraries may both contribute to a support response, but they have different
 
 ## Selected-Text Keyboard Command v1
 
-- M10 provides exactly one browser-scoped Chrome command that captures explicitly selected text from the active normal webpage, then opens or activates the existing global Workspace Side Panel.
+- M10 provides exactly one browser-scoped Chrome command that initiates capture of explicitly selected text from the active normal webpage, then immediately opens or activates the existing global Workspace Side Panel without awaiting capture completion.
 - A successful capture replaces Merchant Context exactly, focuses its textarea with the caret at the end, and leaves the user ready to review, edit, and invoke Generate manually.
 - Guidance, the transient model, generated or edited Output, and any active generation request remain unchanged. The captured Context applies only to later Generate actions and never triggers generation automatically.
 - Selection is active-tab, main-frame, text-only, and explicit. A focused textarea or text-capable input selection takes precedence over ordinary document selection; surrounding page content, conversation structure, cross-origin frames, and screenshots are not captured.

@@ -22,7 +22,7 @@
 
 ## Project Status
 
-- Status: Milestone 9 implementation checkpoint `7b88b94` (`feat: implement output workspace`) is committed, pushed, and synchronized with `origin/master`. Milestone 9 — Output Workspace is complete. Milestone 10 — Keyboard Shortcut remains current, and its selected-text command architecture is defined for implementation without marking M10 complete.
+- Status: Milestone 9 implementation checkpoint `7b88b94` (`feat: implement output workspace`) and M10 architecture checkpoint `7f5bbe8` (`docs: define keyboard shortcut architecture`) are committed, pushed, and synchronized with `origin/master`. Milestone 9 — Output Workspace is complete. Milestone 10 — Keyboard Shortcut remains current; its uncommitted implementation passed automated validation but exposed a real-Chrome runtime sequencing defect during manual validation. The approved sequencing amendment now requires capture invocation followed immediately by Side Panel open invocation without an intervening await. M10 is not complete.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Current architecture scope: M10 defines exactly one browser-scoped `capture-selection-to-workspace` command that captures explicit main-frame selection through `activeTab` and `scripting`, opens or activates the global Side Panel, replaces Merchant Context, focuses Context with its caret at the end, and leaves Generate manual. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -57,6 +57,7 @@
 - `DECISIONS.md` is authoritative for M9 input, orchestration, retrieval, provider, runtime, permission, origin, state, output, copy, error, privacy, persistence, accessibility, testing, and manual-validation contracts.
 - Milestone 10 architecture defines one normal Chrome command with suggested keys `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS, browser-only scope, Chrome-native remapping, and no Generate, Copy, toggle, OS-global, or shortcut-system behavior.
 - M10 selection capture is explicit, active-tab, main-frame, text-only, and on demand. A focused textarea or text-capable input selection takes precedence over document selection; exact non-whitespace text is preserved, persistent content-script matches remain unchanged, and surrounding-page scraping, cross-frame capture, screenshots, and permanent site access remain excluded.
+- M10 runtime sequencing invokes `chrome.scripting.executeScript(...)` first, immediately invokes `chrome.sidePanel.open({ windowId })` in the same keyboard-command user-action turn without awaiting capture, and only then observes the independent capture/open outcomes. Capture initiation precedes open initiation; capture completion need not precede open initiation.
 - M10 adds exactly `activeTab` and `scripting` alongside `sidePanel`, retains exactly `http://localhost/*` in host permissions, and adds no `tabs`, storage, clipboard, broad host, dependency, Settings, persistence, or schema change.
 - A focused typed ready-and-acknowledgement runtime boundary must deliver capture or safe failure feedback to mounted and newly opened Side Panels without durable storage. Success replaces only Merchant Context and focuses it at the end; Guidance, model, output, and active generation are preserved, and automatic Generate remains excluded.
 - `DECISIONS.md` is authoritative for the exact M10 command, manifest, selection, sequencing, Side Panel, runtime, delivery, state, focus, error, scope-protection, testing, and manual-validation contracts.
@@ -152,11 +153,15 @@
 - Defined M10 as one browser-scoped standard Chrome command for exact active-page main-frame selection capture, global Workspace Side Panel open/activation, Merchant Context replacement, Context focus with caret at the end, and manual future generation.
 - Approved the exact command identity, description, suggested Windows/Linux/default and macOS keys, Chrome-native remapping, `activeTab` plus `scripting` least-privilege capture, unchanged persistent content script, typed transient ready/acknowledgement delivery, state preservation, safe feedback, automated validation, and manual Chrome validation contracts.
 - Preserved M9 foreground generation, existing application boundaries, database schema version 1, M11 Settings scope, future Rich Snippet Trigger Expansion, future Multimodal Context Attachments, and all excluded permissions and hosts while making no implementation, test, dependency, configuration, or persistence change during architecture definition.
+- Created M10 architecture checkpoint `7f5bbe8` (`docs: define keyboard shortcut architecture`), pushed it to `origin/master`, and synchronized local and remote state before implementation began.
+- Implemented the uncommitted M10 command, selection extractor, transient ready/acknowledgement delivery, Workspace application, focused tests, manifest validation, and least-privilege permission changes. Automated validation passed with 169 tests and one opt-in live Ollama test skipped; manual Chrome validation remains incomplete.
+- During real Chrome validation, confirmed Chrome-native shortcut remapping to `Ctrl+Shift+Y`, production command dispatch, on-demand exact selection scripting, and direct command-turn Side Panel opening. Diagnosed that awaiting capture completion before `chrome.sidePanel.open(...)` exhausted Chrome's user-action eligibility and was silently swallowed by safe open-failure handling.
+- Validated the amended sequence in real Chrome by initiating selection capture first, immediately initiating Side Panel opening without an intervening await, and then observing both outcomes; capture and open repeatedly fulfilled and exact leading whitespace was preserved. This diagnostic did not exercise delivery into Merchant Context, so corrected end-to-end manual validation remains pending.
 
 ## Next Engineering Action
 
-- Review the M10 architecture-definition documentation diff, then create and push an authorized architecture checkpoint when explicitly approved.
-- After that checkpoint is synchronized, implement the frozen Milestone 10 — Keyboard Shortcut contract and its required automated validation.
+- Review and authorize the M10 runtime sequencing architecture amendment, then create and push a checkpoint only when explicitly approved.
+- After the amendment is synchronized, correct the uncommitted orchestration and regression tests, complete implementation review, and repeat full real Chrome validation.
 - Milestone 11 and later functionality remain out of scope.
 
 ## Repository Status
@@ -168,18 +173,18 @@
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `7b88b94` (`feat: implement output workspace`) and is synchronized between local `master` and `origin/master`.
-- The working tree contains only the current documentation-only M10 architecture definition pending review and explicit checkpoint authorization.
+- The latest existing checkpoint is `7f5bbe8` (`docs: define keyboard shortcut architecture`) and is synchronized between local `master` and `origin/master`.
+- The working tree contains the uncommitted M10 implementation plus this documentation-only runtime sequencing amendment. Implementation and test files are unchanged by the amendment task.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, Prompt Templates, Settings functionality, or M10 page integration is implemented. Multimodal Context Attachments and Rich Snippet Templates & Trigger Expansion remain approved, unassigned future directions separate from M10.
+- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, Prompt Templates, or Settings functionality is implemented. The uncommitted M10 page-selection integration awaits its sequencing correction and renewed manual validation. Multimodal Context Attachments and Rich Snippet Templates & Trigger Expansion remain approved, unassigned future directions separate from M10.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current implementation milestone: Milestone 10 — Keyboard Shortcut.
-- Current repository state: Documentation and implementation through Milestone 9 are synchronized at checkpoint `7b88b94`. The documentation-only M10 architecture definition is present for review; no M10 implementation exists yet.
-- Next action: Review and authorize an M10 architecture checkpoint, synchronize it remotely, then implement the frozen M10 scope.
+- Current repository state: Documentation and implementation through Milestone 9 plus the M10 architecture definition are synchronized at checkpoint `7f5bbe8`. The M10 implementation and runtime sequencing amendment are uncommitted; the implementation requires correction under the amendment and renewed manual validation.
+- Next action: Review and authorize the M10 runtime sequencing amendment, checkpoint it only with explicit approval, then correct the orchestration and regression coverage before repeating real Chrome validation.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -193,5 +198,5 @@
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `7b88b94` (`feat: implement output workspace`). Local `master` and `origin/master` are synchronized at this checkpoint.
-- M9 is complete. M10 remains current and is not implemented or complete.
+- Latest existing checkpoint: `7f5bbe8` (`docs: define keyboard shortcut architecture`). Local `master` and `origin/master` are synchronized at this checkpoint.
+- M9 is complete. M10 remains current, uncommitted, under implementation and manual validation, and is not complete.

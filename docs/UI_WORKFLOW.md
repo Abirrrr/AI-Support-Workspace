@@ -169,11 +169,21 @@ Keyboard Shortcut
 
 ↓
 
-Global Workspace Side Panel Opens or Activates
+Start Main-Frame Selection Capture
 
 ↓
 
-Selected Text Becomes Merchant Context
+Immediately Start Global Side Panel Open / Activate
+
+(No Await Between These Invocations)
+
+↓
+
+Observe Capture and Open Outcomes Independently
+
+↓
+
+Deliver Selected Text to Merchant Context
 
 ↓
 
@@ -183,7 +193,8 @@ Ready to Generate
 ### Workflow Notes
 
 - M10 defines exactly one browser-scoped Chrome command, `capture-selection-to-workspace`, suggested as `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. Chrome's native extension shortcut manager owns remapping.
-- The command captures explicit selected text from the active tab's main frame before opening or focusing the Side Panel. A focused textarea or text-capable input selection takes precedence over the ordinary main-frame document selection.
+- The command invokes explicit main-frame selection capture first, then invokes Side Panel opening immediately in the same keyboard-command turn without awaiting capture completion. Capture invocation must precede open invocation; capture completion need not precede open invocation. A focused textarea or text-capable input selection takes precedence over the ordinary main-frame document selection.
+- After both operations have started, capture and panel-open outcomes are handled independently. A successfully opened panel receives success, empty, or safe failure through the existing transient ready/acknowledgement delivery contract.
 - Non-whitespace selected text replaces Merchant Context exactly, including line breaks, Unicode, and surrounding whitespace; Guidance, model, generated or edited Output, and any active generation request remain unchanged.
 - The global Side Panel opens when closed and remains open when already open. Repeated invocation never toggles it closed.
 - After successful delivery, Merchant Context receives focus with its caret at the end. Generate remains manual and is never invoked by the shortcut.
