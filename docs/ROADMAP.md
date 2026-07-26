@@ -68,11 +68,11 @@ Introduce local persistence and the initial storage layer.
 
 Implement the knowledge library experience and local management flows.
 
-## Milestone 5 — Snippet Library (Current)
+## Milestone 5 — Snippet Library (Completed)
 
 Implement the snippet library experience and local management flows.
 
-## Milestone 6 — Retrieval Engine
+## Milestone 6 — Retrieval Engine (Current)
 
 Implement fast local search and retrieval over stored content.
 

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Milestone 5 — Snippet Library
+
+- Completed the first usable local Snippet Library on the existing options-page Library surface shared with the Knowledge Library through lightweight local tab navigation.
+- Preserved popup navigation to the Library in a browser tab and kept the Knowledge Library operational after the Milestone 5 changes.
+- Added a separate application-layer Snippet Library boundary over the existing project-owned `SnippetEntryRepository`; presentation code does not access Dexie or IndexedDB directly.
+- Implemented deterministic listing, empty and loading states, manual creation, editing, confirmation-protected deletion, and local success and error feedback for Snippet entries.
+- Exposed only the approved user-authored Snippet fields: title, content, and tags. Identity and timestamps remain persistence-owned.
+- Preserved the approved database `ai-support-workspace`, physical schema version 1, table definitions, indexes, repository contracts, and persistence semantics.
+- Added focused application, React UI, and application-to-Dexie integration coverage. The focused Milestone 5 suite passed with 3 files and 11 tests, and the full Vitest suite passed with 10 files and 36 tests.
+- Passed linting, formatting, type-checking, Playwright test discovery, the production WXT build, generated Manifest V3 validation, and `git diff --check`.
+- Completed Principal Engineer review and manual Chrome validation. Popup navigation opened the Library, lightweight local tabs opened the Snippet Library, the empty state worked, create and edit changes appeared immediately and persisted across reload or reopen, canceled deletion preserved data, confirmed deletion remained effective after reload or reopen, the Knowledge Library remained operational, and no runtime problems were reported during the tested workflow.
+- Introduced no Chrome permissions, host permissions, database schema or index changes, snippet expansion or insertion, retrieval, AI behavior, Settings functionality, Side Panel, or other later-milestone functionality.
+- Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; product requirements, the UI workflow, and the backlog were reviewed and required no changes.
+- Corrected repository continuity to record Milestone 4 checkpoint `8f65922` (`feat: implement knowledge library`) as committed, pushed to `origin/master`, and synchronized locally and remotely.
+- Advanced the current project milestone to Milestone 6 — Retrieval Engine. No Milestone 5 Git checkpoint has been created yet.
+
 ### Milestone 4 — Knowledge Library
 
 - Completed the first usable local Knowledge Library on the existing options-page surface, with popup navigation that opens the surface in a browser tab.
@@ -15,7 +31,7 @@
 - Introduced no Chrome permissions, host permissions, database schema or index changes, Snippet functionality, retrieval, search, ranking, AI behavior, Settings functionality, Side Panel, or other unapproved browser surface.
 - Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; product requirements and the UI workflow were reviewed and required no changes.
 - Corrected repository continuity to record Milestone 3 checkpoint `fd6ffe5` (`feat: implement local persistence foundation`) as committed, pushed to `origin/master`, and synchronized locally and remotely.
-- Advanced the current project milestone to Milestone 5 — Snippet Library. No Milestone 4 Git checkpoint has been created yet.
+- Advanced the current project milestone to Milestone 5 — Snippet Library, then created checkpoint `8f65922` (`feat: implement knowledge library`), pushed it to `origin/master`, and confirmed local and remote synchronization.
 
 ### Milestone 3 — Local Database
 

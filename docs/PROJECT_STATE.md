@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-- Milestone 5 — Snippet Library
+- Milestone 6 — Retrieval Engine
 
 ## Previous Milestones
 
@@ -14,12 +14,13 @@
 - Milestone 2 — Extension Shell: Completed
 - Milestone 3 — Local Database: Completed
 - Milestone 4 — Knowledge Library: Completed
+- Milestone 5 — Snippet Library: Completed
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen. Milestone 4 implementation has passed Principal Engineer review and manual Chrome validation, its Documentation Impact Review is complete, and Milestone 5 is current. The uncommitted Milestone 4 implementation and closeout changes still await an authorized Git checkpoint and GitHub synchronization.
-- Scope: Milestone 5 — Snippet Library is the next implementation milestone defined by the roadmap. Its exact task has not yet been approved or implemented.
-- Business functionality: The Knowledge Library is implemented. Snippet Library, retrieval, prompt construction, provider integration, output, and other later-milestone functionality are not implemented.
+- Status: Platform architecture remains approved and frozen. Milestone 5 implementation has passed Principal Engineer review and manual Chrome validation, its Documentation Impact Review is complete, and Milestone 6 is current. The uncommitted Milestone 5 implementation and closeout changes still await an authorized Git checkpoint and GitHub synchronization.
+- Scope: Milestone 6 — Retrieval Engine is the next implementation milestone defined by the roadmap. Its exact task has not yet been approved or implemented.
+- Business functionality: The Knowledge Library and Snippet Library are implemented. Retrieval, prompt construction, provider integration, output, and other later-milestone functionality are not implemented.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
 ## Architecture Status
@@ -30,9 +31,9 @@
 - State and persistence: React Context and Hooks, with Dexie behind project-owned storage contracts.
 - Testing: Vitest for unit, UI, and integration tests; Playwright for browser-level end-to-end tests.
 - Business logic remains local-first, layered, storage-independent, and AI-provider-independent.
-- Development tooling, automated validation, the runnable Manifest V3 extension shell, the Dexie-backed local persistence foundation, and the Knowledge Library business feature exist.
+- Development tooling, automated validation, the runnable Manifest V3 extension shell, the Dexie-backed local persistence foundation, and the Knowledge and Snippet Library business features exist.
 - The initial physical database schema, project-owned CRUD contracts, identity and timestamp semantics, error behavior, transaction policy, migration policy, and isolated test adapter are approved in `DATABASE_SCHEMA.md` and `DECISIONS.md`.
-- The current authorized Knowledge Library surface is the existing options page, opened in a browser tab from popup navigation. Presentation uses an application-layer boundary over `KnowledgeEntryRepository` and does not access Dexie directly.
+- Knowledge and Snippet management share the existing options-page Library surface, opened in a browser tab from popup navigation, with lightweight local tab navigation between the libraries. Their presentation uses separate application-layer boundaries over `KnowledgeEntryRepository` and `SnippetEntryRepository` and does not access Dexie directly.
 
 ## Completed Work
 
@@ -65,12 +66,20 @@
 - Passed linting, formatting, type-checking, Playwright test discovery, the production WXT build, generated Manifest V3 validation, and `git diff --check` without adding permissions, host permissions, or Side Panel.
 - Completed Principal Engineer review and manual Chrome validation of popup navigation, immediate create and edit behavior, persistence across reload or reopen, delete cancellation, confirmed deletion, deletion persistence, and absence of reported runtime problems.
 - Completed the Milestone 4 Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation were synchronized; product requirements and UI workflow were reviewed and required no changes.
+- Created Milestone 4 checkpoint `8f65922` (`feat: implement knowledge library`), pushed `master` to `origin/master`, and confirmed local and remote synchronization at that checkpoint.
+- Completed Milestone 5 by adding a focused create, list, edit, and confirmation-protected delete experience for Snippets on the existing options-page Library surface.
+- Added lightweight local tab navigation between the Knowledge and Snippet libraries while preserving the existing popup-to-Library browser-tab navigation and keeping the Knowledge Library operational.
+- Kept Snippet UI behavior behind a separate application-layer boundary over `SnippetEntryRepository`, used the real Milestone 3 Dexie implementation in production, and preserved database `ai-support-workspace`, physical schema version 1, table definitions, indexes, contracts, and persistence semantics.
+- Added focused application, React UI, and application-to-Dexie integration coverage. The focused Milestone 5 suite passed with 3 files and 11 tests, and the full project suite passed with 10 files and 36 tests.
+- Passed linting, formatting, type-checking, Playwright test discovery, the production WXT build, generated Manifest V3 validation, and `git diff --check` without adding permissions, host permissions, schema or index changes, snippet expansion or insertion, retrieval, AI, Settings, or Side Panel functionality.
+- Completed Principal Engineer review and manual Chrome validation of Library navigation, the Snippet empty state, immediate create and edit behavior, persistence across reload or reopen, delete cancellation, confirmed deletion, deletion persistence, Knowledge Library regression behavior, and absence of reported runtime problems.
+- Completed the Milestone 5 Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation were synchronized; product requirements, UI workflow, and backlog were reviewed and required no changes.
 
 ## Next Engineering Action
 
-- The Principal Engineer should review this closeout and authorize the Milestone 4 Git checkpoint and GitHub synchronization when satisfied.
-- After the Milestone 4 checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 5 — Snippet Library implementation task.
-- Retrieval, prompt construction, provider integrations, and other later-milestone functionality remain out of scope for Milestone 5 unless the existing roadmap and an approved implementation task explicitly include them.
+- The Principal Engineer should review this closeout and authorize the Milestone 5 Git checkpoint and GitHub synchronization when satisfied.
+- After the Milestone 5 checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 6 — Retrieval Engine implementation task.
+- Prompt construction, provider integrations, and other later-milestone functionality remain out of scope for Milestone 6 unless the existing roadmap and an approved implementation task explicitly include them.
 
 ## Repository Status
 
@@ -80,27 +89,27 @@
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
 - The WXT-generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. Side Panel is absent.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
-- The Knowledge Library exists on the options page with popup navigation and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `fd6ffe5` (`feat: implement local persistence foundation`) and is synchronized with `origin/master`.
-- Milestone 4 implementation and closeout documentation are not yet committed. No Milestone 4 Git checkpoint has been recorded.
-- No Snippet Library, retrieval, provider integration, AI behavior, Settings functionality, or later-milestone business functionality exists.
+- The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
+- The latest existing checkpoint is `8f65922` (`feat: implement knowledge library`) and is synchronized with `origin/master`.
+- Milestone 5 implementation and closeout documentation are not yet committed. No Milestone 5 Git checkpoint has been recorded.
+- No snippet expansion or insertion, retrieval, provider integration, AI behavior, Settings functionality, or later-milestone business functionality exists.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current implementation milestone: Milestone 5 — Snippet Library.
-- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, and the reviewed and manually validated Milestone 4 Knowledge Library are complete.
-- Next action: Obtain Principal Engineer approval for the Milestone 4 checkpoint and synchronization, then obtain approval of the exact Milestone 5 implementation task.
+- Current implementation milestone: Milestone 6 — Retrieval Engine.
+- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, and the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library are complete.
+- Next action: Obtain Principal Engineer approval for the Milestone 5 checkpoint and synchronization, then obtain approval of the exact Milestone 6 implementation task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- The Milestone 4 implementation and closeout changes remain uncommitted and require an authorized checkpoint and GitHub synchronization before the next implementation task begins.
+- The Milestone 5 implementation and closeout changes remain uncommitted and require an authorized checkpoint and GitHub synchronization before the next implementation task begins.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `fd6ffe5` (`feat: implement local persistence foundation`). `master` and `origin/master` are synchronized at this checkpoint.
-- The completed Milestone 4 implementation and closeout documentation do not yet have an authorized Git checkpoint.
+- Latest existing checkpoint: `8f65922` (`feat: implement knowledge library`). `master` and `origin/master` are synchronized at this checkpoint.
+- The completed Milestone 5 implementation and closeout documentation do not yet have an authorized Git checkpoint.

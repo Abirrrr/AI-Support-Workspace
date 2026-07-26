@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen. Milestone 4 — Knowledge Library is complete following Principal Engineer review, manual Chrome validation, and documentation closeout, and Milestone 5 — Snippet Library is current. The first product functionality now lets users manage locally persisted Knowledge entries through the existing options-page surface, reached from the extension popup.
+The platform architecture is approved and frozen. Milestone 5 — Snippet Library is complete following Principal Engineer review, manual Chrome validation, and documentation closeout, and Milestone 6 — Retrieval Engine is current. Users can manage locally persisted Knowledge and Snippet entries through the shared options-page Library surface, which is reached from the extension popup and uses lightweight local tab navigation between the two libraries.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Milestone 4 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the Principal Engineer should prepare and approve the exact Milestone 5 — Snippet Library implementation task under the existing roadmap and frozen architecture.
+The Milestone 5 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the Principal Engineer should prepare and approve the exact Milestone 6 — Retrieval Engine implementation task under the existing roadmap and frozen architecture.

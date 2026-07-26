@@ -11,7 +11,7 @@ export function PopupShell() {
         rel="noreferrer"
         target="_blank"
       >
-        Open Knowledge Library
+        Open Libraries
       </a>
     </main>
   );
