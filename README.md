@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-The Milestone 5 implementation and closeout changes await an authorized Git checkpoint and GitHub synchronization. After that milestone boundary is synchronized, the Principal Engineer should prepare and approve the exact Milestone 6 — Retrieval Engine implementation task under the existing roadmap and frozen architecture.
+Milestone 5 is committed and synchronized at checkpoint `10fbd72` (`feat: implement snippet library`). The deterministic lexical architecture for the current Milestone 6 — Retrieval Engine is implementation-ready and awaits Principal Engineer approval before the finalized implementation task proceeds.

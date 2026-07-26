@@ -18,8 +18,8 @@
 
 ## Project Status
 
-- Status: Platform architecture remains approved and frozen. Milestone 5 implementation has passed Principal Engineer review and manual Chrome validation, its Documentation Impact Review is complete, and Milestone 6 is current. The uncommitted Milestone 5 implementation and closeout changes still await an authorized Git checkpoint and GitHub synchronization.
-- Scope: Milestone 6 — Retrieval Engine is the next implementation milestone defined by the roadmap. Its exact task has not yet been approved or implemented.
+- Status: Platform architecture remains approved and frozen. Milestone 5 is complete and synchronized at checkpoint `10fbd72` (`feat: implement snippet library`). Milestone 6 is current, and its deterministic lexical retrieval architecture is now implementation-ready. No Milestone 6 retrieval code has been implemented.
+- Scope: Milestone 6 — Retrieval Engine will implement the approved local, deterministic, lexical, provider-independent, read-only retrieval operation defined in `DECISIONS.md`, without UI or database changes.
 - Business functionality: The Knowledge Library and Snippet Library are implemented. Retrieval, prompt construction, provider integration, output, and other later-milestone functionality are not implemented.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
@@ -34,6 +34,8 @@
 - Development tooling, automated validation, the runnable Manifest V3 extension shell, the Dexie-backed local persistence foundation, and the Knowledge and Snippet Library business features exist.
 - The initial physical database schema, project-owned CRUD contracts, identity and timestamp semantics, error behavior, transaction policy, migration policy, and isolated test adapter are approved in `DATABASE_SCHEMA.md` and `DECISIONS.md`.
 - Knowledge and Snippet management share the existing options-page Library surface, opened in a browser tab from popup navigation, with lightweight local tab navigation between the libraries. Their presentation uses separate application-layer boundaries over `KnowledgeEntryRepository` and `SnippetEntryRepository` and does not access Dexie directly.
+- Retrieval Engine v1 is approved as one headless application-level operation over the two existing repository contracts. It returns separately ranked Knowledge and Snippet collections, scores records in memory, remains local and read-only, and does not access Dexie directly or depend on UI or AI-provider behavior.
+- `DECISIONS.md` is authoritative for the M6 normalization, fields, scoring, repeated-term behavior, empty and no-match behavior, deterministic per-domain ordering, absence of result limits, and performance direction.
 
 ## Completed Work
 
@@ -74,11 +76,15 @@
 - Passed linting, formatting, type-checking, Playwright test discovery, the production WXT build, generated Manifest V3 validation, and `git diff --check` without adding permissions, host permissions, schema or index changes, snippet expansion or insertion, retrieval, AI, Settings, or Side Panel functionality.
 - Completed Principal Engineer review and manual Chrome validation of Library navigation, the Snippet empty state, immediate create and edit behavior, persistence across reload or reopen, delete cancellation, confirmed deletion, deletion persistence, Knowledge Library regression behavior, and absence of reported runtime problems.
 - Completed the Milestone 5 Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation were synchronized; product requirements, UI workflow, and backlog were reviewed and required no changes.
+- Created Milestone 5 checkpoint `10fbd72` (`feat: implement snippet library`), pushed `master` to `origin/master`, and confirmed local and remote synchronization at that checkpoint.
+- Defined the implementation-ready Milestone 6 Retrieval Engine v1 architecture as a local, deterministic, lexical, provider-independent, read-only application operation over the existing Knowledge and Snippet repository contracts.
+- Approved separate Knowledge and Snippet result collections; NFKC, locale-independent lowercase, and Unicode letter-or-number tokenization; exact title/tag/body-or-content weights of 5/3/1; query and field token deduplication; zero-score exclusion; empty-query behavior; deterministic score/`createdAt`/`id` ordering; and no fixed result limit.
+- Preserved the existing database, schema version, tables, fields, indexes, migrations, repository contracts, browser surfaces, permissions, and provider-independent boundaries while adding no implementation code or dependencies.
 
 ## Next Engineering Action
 
-- The Principal Engineer should review this closeout and authorize the Milestone 5 Git checkpoint and GitHub synchronization when satisfied.
-- After the Milestone 5 checkpoint is synchronized, the Principal Engineer should prepare and approve the exact Milestone 6 — Retrieval Engine implementation task.
+- The Principal Engineer should review and approve the Milestone 6 retrieval architecture definition.
+- After approval, the Principal Engineer should authorize the finalized Milestone 6 — Retrieval Engine implementation task against the deterministic algorithm in `DECISIONS.md`.
 - Prompt construction, provider integrations, and other later-milestone functionality remain out of scope for Milestone 6 unless the existing roadmap and an approved implementation task explicitly include them.
 
 ## Repository Status
@@ -90,26 +96,26 @@
 - The WXT-generated Manifest V3 extension includes only the background service worker, content script, popup, and options page. Side Panel is absent.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `8f65922` (`feat: implement knowledge library`) and is synchronized with `origin/master`.
-- Milestone 5 implementation and closeout documentation are not yet committed. No Milestone 5 Git checkpoint has been recorded.
-- No snippet expansion or insertion, retrieval, provider integration, AI behavior, Settings functionality, or later-milestone business functionality exists.
+- The latest existing checkpoint is `10fbd72` (`feat: implement snippet library`) and is synchronized with `origin/master`.
+- Milestone 5 implementation and closeout documentation are committed and synchronized locally and remotely.
+- No snippet expansion or insertion, retrieval implementation, provider integration, AI behavior, Settings functionality, or later-milestone business functionality exists.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current implementation milestone: Milestone 6 — Retrieval Engine.
-- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, and the reviewed and manually validated Milestone 4 Knowledge Library and Milestone 5 Snippet Library are complete.
-- Next action: Obtain Principal Engineer approval for the Milestone 5 checkpoint and synchronization, then obtain approval of the exact Milestone 6 implementation task.
+- Current repository state: Documentation, architecture, the Milestone 1 development toolchain, the reviewed and manually validated Milestone 2 extension shell, the reviewed and automatically validated Milestone 3 local persistence foundation, and the reviewed, manually validated, committed, and synchronized Milestone 4 Knowledge Library and Milestone 5 Snippet Library are complete. The Milestone 6 retrieval architecture is implementation-ready, but retrieval is not implemented.
+- Next action: Obtain Principal Engineer approval of the M6 retrieval architecture definition, then authorize the exact Milestone 6 implementation task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation.
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
-- The Milestone 5 implementation and closeout changes remain uncommitted and require an authorized checkpoint and GitHub synchronization before the next implementation task begins.
+- Milestone 6 implementation must follow the exact deterministic lexical retrieval decisions in `DECISIONS.md`; no algorithmic details may be silently substituted.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `8f65922` (`feat: implement knowledge library`). `master` and `origin/master` are synchronized at this checkpoint.
-- The completed Milestone 5 implementation and closeout documentation do not yet have an authorized Git checkpoint.
+- Latest existing checkpoint: `10fbd72` (`feat: implement snippet library`). `master` and `origin/master` are synchronized at this checkpoint.
+- The Milestone 6 retrieval architecture-definition documentation is not committed. No Milestone 6 implementation checkpoint exists.

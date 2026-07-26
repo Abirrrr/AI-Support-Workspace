@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Milestone 6 — Retrieval Architecture Definition
+
+- Corrected repository continuity to record Milestone 5 checkpoint `10fbd72` (`feat: implement snippet library`) as committed, pushed to `origin/master`, and synchronized locally and remotely.
+- Defined Retrieval Engine v1 as one local, deterministic, read-only, provider-independent application operation over the existing `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts, with in-memory scoring and no direct Dexie access.
+- Approved a project-owned result envelope with separately ranked `knowledge` and `snippets` collections. Results retain their explicit domain kind, record identity, complete domain record, and numeric lexical score; no combined cross-domain ordering is defined.
+- Approved Unicode NFKC normalization, locale-independent lowercase conversion, contiguous Unicode letter-or-number tokenization, and query and field token deduplication without stemming, fuzzy or prefix matching, synonym expansion, stop-word removal, or phrase matching.
+- Defined Knowledge scoring fields as title, tags, and body while excluding source, and Snippet scoring fields as title, tags, and content.
+- Approved exact per-token field weights of 5 for title, 3 for tags, and 1 for body or content, with no repeated-term inflation or phrase, recency, usage, source, domain, or random bonuses.
+- Defined zero-score exclusion, empty results for queries without tokens, independent score-descending ranking with `createdAt` and `id` tie-breakers, and no fixed M6 result limit.
+- Preserved database `ai-support-workspace`, schema version 1, tables, fields, indexes, migrations, repository contracts, browser surfaces, permissions, and provider independence.
+- Added deterministic Retrieval Engine unit and isolated repository-integration test requirements without requiring browser UI for retrieval validation.
+- Kept Milestone 6 current and performed no retrieval implementation, dependency change, schema change, UI change, commit, or push.
+
 ### Milestone 5 — Snippet Library
 
 - Completed the first usable local Snippet Library on the existing options-page Library surface shared with the Knowledge Library through lightweight local tab navigation.
@@ -16,7 +29,7 @@
 - Introduced no Chrome permissions, host permissions, database schema or index changes, snippet expansion or insertion, retrieval, AI behavior, Settings functionality, Side Panel, or other later-milestone functionality.
 - Completed the mandatory Documentation Impact Review. Project-state, changelog, roadmap, README, architecture-status, database-status, and testing documentation required synchronization; product requirements, the UI workflow, and the backlog were reviewed and required no changes.
 - Corrected repository continuity to record Milestone 4 checkpoint `8f65922` (`feat: implement knowledge library`) as committed, pushed to `origin/master`, and synchronized locally and remotely.
-- Advanced the current project milestone to Milestone 6 — Retrieval Engine. No Milestone 5 Git checkpoint has been created yet.
+- Advanced the current project milestone to Milestone 6 — Retrieval Engine, then created checkpoint `10fbd72` (`feat: implement snippet library`), pushed it to `origin/master`, and confirmed local and remote synchronization.
 
 ### Milestone 4 — Knowledge Library
 

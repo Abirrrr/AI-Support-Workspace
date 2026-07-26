@@ -36,6 +36,16 @@ Milestone 4 added focused application tests for repository delegation, persisten
 
 Milestone 5 added focused application, React UI, and application-to-Dexie integration coverage for the Snippet Library. The focused Milestone 5 suite passed with 3 files and 11 tests, and the full project Vitest suite passed with 10 files and 36 tests. Validation covered the empty state, immediate create and edit behavior, confirmation-protected deletion, persistence through the real Snippet repository and Dexie boundary, and regression coverage for the existing Knowledge Library.
 
+### Retrieval Engine Tests
+
+Milestone 6 requires focused deterministic unit coverage for the Retrieval Engine v1 algorithm defined in `DECISIONS.md`. Query normalization tests must cover case, punctuation, Unicode letters and numbers, whitespace, repeated query terms, and empty or punctuation-only queries.
+
+Field and scoring tests must cover title, tags, Knowledge `body`, Snippet `content`, multiple-field matches, exclusion of Knowledge `source`, and exact 5/3/1 field weights. Tests must prove that repeated query terms and repeated field terms do not inflate scores.
+
+Ranking and result tests must cover score-descending order, `createdAt` tie-breaking, `id` tie-breaking, zero-score exclusion, separate Knowledge and Snippet collections, explicit result domain kinds, empty inputs, and return of every positive-score result without a fixed limit. Repeated executions over identical inputs must produce identical results.
+
+Read-only tests must verify that retrieval does not modify the supplied or persisted records. Focused integration coverage must persist Knowledge and Snippet records through the real repositories in an isolated IndexedDB environment, retrieve them through the existing repository boundaries, and verify deterministic ranking without duplicating the Milestone 3 persistence contract suite.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.
@@ -45,6 +55,8 @@ No Milestone 3-specific manual Chrome validation was required. Its persistence b
 Milestone 4 manual Chrome validation confirmed that popup navigation opens the Knowledge Library on the existing options-page surface, creation and editing appear immediately and persist across reload or reopen, deletion cancellation preserves the record, confirmed deletion remains effective after reload or reopen, and the tested Knowledge Library workflow reports no runtime problems.
 
 Milestone 5 manual Chrome validation confirmed that popup navigation opens the existing Library surface, lightweight local tab navigation opens the Snippet Library, its empty state works, create and edit changes appear immediately and persist across reload or reopen, deletion cancellation preserves the record, confirmed deletion remains effective after reload or reopen, the Knowledge Library remains operational, and the tested workflow reports no runtime problems.
+
+Milestone 6 Retrieval Engine v1 is a headless application boundary and should be validated through deterministic unit tests and isolated repository integration tests. Temporary browser UI must not be added solely for manual retrieval demonstration. Existing extension build and runtime regression validation still applies, but no M6-specific manual Chrome workflow is required unless an approved implementation introduces genuinely browser-specific behavior.
 
 ## Milestone 0 Status
 

@@ -86,6 +86,78 @@ Future physical schema changes require explicit version and migration considerat
 
 `fake-indexeddb` is the approved development/test-only IndexedDB adapter for deterministic Dexie integration tests. It must remain outside production modules, use isolated test databases, and never access extension or user data. Production persistence continues to use the browser's native IndexedDB implementation through Dexie.
 
+## Decision 22: Deterministic Lexical Retrieval v1
+
+Milestone 6 implements one local, read-only, provider-independent application-level retrieval operation over the existing `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts. It loads records through each repository's `list()` operation and scores them in memory. Retrieval does not access Dexie directly, mutate persisted data, add repository search methods, add a browser UI, or depend on an AI provider or network service.
+
+### Result Contract
+
+The project-owned retrieval result envelope contains two independently ranked collections:
+
+```ts
+interface RetrievalResults {
+  knowledge: readonly KnowledgeRetrievalResult[];
+  snippets: readonly SnippetRetrievalResult[];
+}
+
+interface KnowledgeRetrievalResult {
+  kind: 'knowledge';
+  id: string;
+  record: KnowledgeEntry;
+  score: number;
+}
+
+interface SnippetRetrievalResult {
+  kind: 'snippet';
+  id: string;
+  record: SnippetEntry;
+  score: number;
+}
+```
+
+Each result retains its explicit domain kind, record identity, complete domain record, and numeric lexical relevance score. Knowledge and Snippets are not combined into one cross-domain ranking because they remain distinct domain concepts and later consumers may apply different selection policies. M6 therefore defines no cross-domain tie-breaker and adds no provider or prompt-builder metadata.
+
+### Query and Field Normalization
+
+The query and every participating textual field use the same deterministic pipeline:
+
+1. Apply Unicode NFKC normalization with `String.prototype.normalize('NFKC')`.
+2. Apply JavaScript locale-independent lowercase conversion with `String.prototype.toLowerCase()`.
+3. Extract contiguous Unicode letter-or-number tokens using the equivalent of `/[\p{L}\p{N}]+/gu`; punctuation and whitespace are separators.
+4. Represent tokens as a set. Duplicate query tokens and repeated tokens within a field are ignored for scoring.
+
+M6 does not apply stemming, fuzzy matching, prefix matching, synonym expansion, stop-word removal, phrase matching, or provider-assisted query rewriting.
+
+Knowledge scoring uses only `title`, `tags`, and `body`. The `source` field remains metadata and never contributes to relevance. Snippet scoring uses only `title`, `tags`, and `content`; persisted field names do not change. A record's tags are treated as one combined token set, so the same query token contributes the tag weight at most once even when it appears in multiple tags.
+
+### Scoring and Matching
+
+Retrieval uses exact normalized token-set membership. For every unique query token, a record receives:
+
+- 5 points when its title token set contains the token.
+- 3 points when its combined tag token set contains the token.
+- 1 point when its Knowledge `body` or Snippet `content` token set contains the token.
+
+The total score is the sum of those field contributions across all unique query tokens. A token may contribute in multiple participating fields, but repeated occurrences within one field do not increase its contribution. Repeated query terms therefore produce the same scores and ordering as a single occurrence.
+
+There are no phrase, recency, usage, source, domain, or random bonuses. Records with score zero are excluded. An empty, whitespace-only, or punctuation-only query produces empty `knowledge` and `snippets` collections rather than returning the Library contents.
+
+### Ranking and Limits
+
+Knowledge and Snippet results are ordered independently by:
+
+1. Higher score first.
+2. Earlier `createdAt` first when scores tie.
+3. Lexicographically smaller `id` first when score and `createdAt` tie, using deterministic JavaScript string ordering rather than database iteration order.
+
+M6 applies no fixed result limit. Every positive-score result is returned in deterministic order. Result selection and limiting belong to later consumers such as context or prompt assembly.
+
+### Storage, Privacy, and Performance
+
+Retrieval is strictly read-only and does not change timestamps, tags, usage data, record ordering, or any other persisted value. Database `ai-support-workspace`, schema version 1, tables, fields, indexes, and migrations remain unchanged. No normalized fields, token tables, tag or full-text indexes, vector data, or embeddings are persisted.
+
+All queries and Library content remain local to the extension. Retrieval has zero dependency on OpenAI, Ollama, Custom GPT, AI SDKs, embeddings, or network APIs. For the current local-library scale, straightforward in-memory tokenization and scoring should remain approximately linear relative to records × unique query tokens × participating fields. Background indexing, Web Workers, search libraries, caches, and precomputed search persistence require a future measured need and approved decision.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.

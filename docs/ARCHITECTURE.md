@@ -109,6 +109,14 @@ Dexie is the approved storage abstraction over browser-local IndexedDB. The appl
 
 History remains an intentionally undecided capability and is not part of the planned storage architecture.
 
+### Retrieval Engine v1
+
+Milestone 6 introduces one headless application-level retrieval operation over the existing local Knowledge and Snippet domains. The retrieval application boundary depends on the project-owned `KnowledgeEntryRepository` and `SnippetEntryRepository` contracts, loads records through `list()`, and performs deterministic lexical scoring in memory. Retrieval must not access Dexie or IndexedDB directly, add persistence search methods, mutate records, or depend on React, WXT, a browser UI, an AI provider, or a network service.
+
+The project-owned result envelope contains separate `knowledge` and `snippets` collections. Each result preserves its domain kind, source record identity, complete domain record, and numeric relevance score. The domains are ranked independently, with no combined cross-domain ordering, because Knowledge and Snippets remain distinct concepts and later consumers may apply different selection policies.
+
+`DECISIONS.md` is authoritative for Retrieval Engine v1 query normalization, participating fields, exact lexical scoring, repeated-term behavior, zero-score and empty-query behavior, deterministic ordering, absence of result limits, read-only policy, and performance direction. M6 adds no search UI, database schema or index change, provider integration, context or prompt assembly, or snippet expansion behavior.
+
 ### Project Layer Responsibilities
 
 - Extension platform layer: owns WXT and Manifest V3 entry points, Chrome API integration, permissions, messaging, and extension lifecycle behavior.
