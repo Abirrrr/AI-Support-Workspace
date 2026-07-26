@@ -92,6 +92,20 @@ Manual diagnosis uncovered a browser-runtime fetch-binding defect: storing nativ
 
 Final M9 validation passed with 136 tests and 1 opt-in live Ollama test skipped in the normal suite. A focused provider, workflow, and Workspace UI regression run passed 60 of 60 tests. `pnpm install`, linting, formatting, type-checking, the normal Vitest suite, Playwright discovery of 1 test, production build, generated-output and manifest validation, and `git diff --check` passed. The normal suite remains independent of Ollama.
 
+### Selected-Text Keyboard Command v1 Tests
+
+Milestone 10 implementation must add generated-manifest coverage proving exactly one normal command named `capture-selection-to-workspace`, description `Capture selected text in AI Support Workspace`, suggested default `Ctrl+Shift+Space`, macOS suggestion `Command+Shift+Space`, and no global scope. The generated permission set must contain exactly `sidePanel`, `activeTab`, and `scripting`; host permissions must remain exactly `http://localhost/*`; the existing `https://example.com/*` persistent content-script match must remain unchanged; and `tabs`, storage, clipboard, broad site, `<all_urls>`, and unrelated permissions must remain absent.
+
+Background command coverage must verify listener registration, recognition of only the approved command, safe ignoring of unknown commands, safe use of the command-provided tab and window, selected-text extraction before Side Panel opening, global current-command-window opening, repeated open/activate behavior without toggling or closing, and safe missing-tab, missing-window, scripting, and Side Panel failures without raw Chrome errors.
+
+Selection-extraction coverage must include exact normal document and contenteditable selection, selected substrings from textarea and supported text-capable input ranges, Unicode and line-break preservation, leading and trailing whitespace preservation when the result contains non-whitespace, whitespace-only empty behavior, exclusion of surrounding page content, and active-tab main-frame-only targeting. Tests must prove no arbitrary conversation-DOM scraping, cross-frame capture, screenshot capture, or persistent content-script expansion.
+
+Typed delivery coverage must prove that an already-mounted Side Panel and a newly opened Side Panel both receive the capture result, the mount race is handled through the focused readiness and acknowledgement contract, the Side Panel acknowledges only after applying the result or feedback, failed delivery does not silently overwrite state, and no Dexie, localStorage, Chrome storage, or other persistent capture mechanism is used.
+
+Workspace coverage must prove that successful capture replaces Merchant Context exactly, preserves Guidance, model, generated or edited Output, and any active generation request, never invokes Generate, focuses Merchant Context, and places its caret at the end without selecting all. Empty selection and restricted or failed capture must preserve existing Context, show the approved safe feedback, avoid unrelated focus movement, and hide raw Chrome errors. Regression coverage must preserve the M9 Workspace, popup, Libraries, Retrieval Engine, Prompt Builder, Ollama Provider, generation, Copy, and production build.
+
+Normal M10 tests must use controlled Chrome and provider boundaries. They require neither a live Ollama service nor a real model.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.
@@ -107,6 +121,8 @@ No Milestone 6-specific manual Chrome validation was required. Retrieval Engine 
 No Milestone 7-specific manual Chrome validation was required. Prompt Builder v1 is a headless application boundary with no browser UI or runtime interaction, and deterministic unit tests comprehensively cover its behavior. Adding temporary browser UI solely to demonstrate prompt composition would violate the approved milestone scope. Existing production build and Manifest V3 regression validation passed.
 
 Milestone 9 manual Chrome validation passed after the native-fetch binding correction. It covered the global Side Panel surface beside the active webpage, narrow-width operation, real local generation, output editing and Copy, repeated generation, Guidance influence, safe missing-model and provider-unavailable feedback with prior-output preservation, expected options-page Library navigation, both Library regressions, and absence of blocking Chrome runtime or network errors.
+
+Milestone 10 requires real Chrome validation after implementation review. Reload the extension; confirm `capture-selection-to-workspace` and its assigned or user-remapped key in `chrome://extensions/shortcuts`; invoke it from normal document, textarea, and available contenteditable selections; verify exact Context replacement, global Side Panel opening, Context focus and end-caret placement, Guidance/model/output preservation, no automatic generation, and repeated replacement without panel toggle. Validate empty selection, a restricted Chrome page, safe feedback, normal Generate afterward, popup Workspace and Library navigation, absence of runtime errors, and the exact least-privilege permission surface. Shortcut capture validation does not require live Ollama; generation regression may be run separately where useful.
 
 ## Milestone 0 Status
 

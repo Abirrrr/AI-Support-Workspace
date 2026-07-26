@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Milestone 10 — Keyboard Shortcut Architecture Definition
+
+- Corrected repository continuity to record Milestone 9 implementation checkpoint `7b88b94` (`feat: implement output workspace`) as committed, pushed to `origin/master`, and synchronized before M10 architecture definition began.
+- Defined exactly one browser-scoped standard Chrome command, `capture-selection-to-workspace`, with description `Capture selected text in AI Support Workspace`, suggested default `Ctrl+Shift+Space`, suggested macOS key `Command+Shift+Space`, Chrome-native remapping, no `_execute_action`, and no global scope.
+- Assigned focused command recognition, active-tab and window validation, on-demand selection extraction, global Side Panel opening, transient delivery, acknowledgement, and safe failure coordination to the existing service worker without moving Retrieval Engine, Prompt Builder, `OutputWorkflow`, Ollama generation, persistence, or Workspace state into the background.
+- Approved least-privilege main-frame selection capture through exactly `activeTab` and `scripting`, retaining `sidePanel`, exactly `http://localhost/*` host access, and the unchanged `https://example.com/*` persistent content-script match without `tabs`, storage, clipboard, `<all_urls>`, or permanent support-site permission.
+- Defined textarea or text-capable input range precedence over main-frame document selection; exact preservation of non-whitespace Unicode, line breaks, and surrounding whitespace; whitespace-only empty behavior; capture-before-panel-opening ordering; and exclusion of surrounding-page scraping, cross-frame capture, and screenshots.
+- Defined open/activate rather than toggle Side Panel behavior and a focused typed ready-and-acknowledgement runtime contract that reliably delivers success or safe failure to mounted and newly opened panels without durable storage or a generalized message bus.
+- Defined exact Merchant Context replacement, preservation of Guidance, model, generated or edited Output, and active generation, manual-only future Generate behavior, Context focus with caret at the end, safe empty-selection and restricted-page feedback, and no unrelated focus change on failure.
+- Defined generated-manifest, background command, selection extraction, transient delivery, Side Panel state/focus, regression, and real Chrome validation requirements. Normal shortcut tests require no live Ollama.
+- Preserved database `ai-support-workspace` schema version 1 and excluded Settings, shortcut persistence or editor UI, Generate and Copy shortcuts, automatic generation, Snippet triggers or expansion, multimodal capture, dependencies, implementation code, tests, and WXT/manifest configuration changes from this documentation-only task.
+- Kept Milestone 10 current and made its architecture implementation-ready without marking M10 complete, creating a Git checkpoint, or pushing this documentation change.
+
 ### Future Product Directions — Multimodal Context and Rich Snippet Expansion
 
 - Approved Multimodal Context Attachments as an unassigned future product direction: Merchant Context may eventually combine text with one or more pasted screenshots or visual assets for capable providers and models.
@@ -34,7 +47,7 @@
 - Recorded one manual content-quality observation: a `qwen2.5:7b` response said “Delivery should be soon.” despite Guidance not to promise a delivery date. This is future prompt/model-quality work, not an M9 workflow failure or architecture change.
 - Preserved transient-only Workspace state and database `ai-support-workspace` schema version 1 with no Context, Guidance, model, output, history, Settings, table, field, index, or migration change.
 - Completed the mandatory Documentation Impact Review and advanced the current roadmap milestone to Milestone 10 — Keyboard Shortcut. Project state, architecture status, UI workflow, roadmap, testing strategy, changelog, database status, backlog, and README required synchronization; decisions, product requirements, engineering principles, and coding-agent rules required no changes.
-- Recorded Side Panel architecture amendment checkpoint `e587398` (`docs: move output workspace to side panel`) as committed and pushed before the final implementation migration. No M9 implementation checkpoint has been fabricated; implementation and closeout documentation remain uncommitted pending authorization.
+- Recorded Side Panel architecture amendment checkpoint `e587398` (`docs: move output workspace to side panel`) as committed and pushed before the final implementation migration. The completed implementation and closeout documentation were later committed and synchronized at `7b88b94` (`feat: implement output workspace`).
 
 ### Milestone 9 — Side Panel Architecture Amendment
 

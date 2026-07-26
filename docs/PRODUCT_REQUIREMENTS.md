@@ -39,6 +39,16 @@ The libraries may both contribute to a support response, but they have different
 - The popup opens the global Workspace Side Panel in the current browser window and continues to open the separate options-page Libraries. Knowledge and Snippet CRUD do not move into the Side Panel.
 - M9 does not include a standalone Workspace tab, manual Library selection, dedicated Regenerate, Cancel, Clear, Save as Snippet, history, persistence, Settings, provider selection, model discovery, keyboard shortcuts, page scraping, or insertion.
 
+## Selected-Text Keyboard Command v1
+
+- M10 provides exactly one browser-scoped Chrome command that captures explicitly selected text from the active normal webpage, then opens or activates the existing global Workspace Side Panel.
+- A successful capture replaces Merchant Context exactly, focuses its textarea with the caret at the end, and leaves the user ready to review, edit, and invoke Generate manually.
+- Guidance, the transient model, generated or edited Output, and any active generation request remain unchanged. The captured Context applies only to later Generate actions and never triggers generation automatically.
+- Selection is active-tab, main-frame, text-only, and explicit. A focused textarea or text-capable input selection takes precedence over ordinary document selection; surrounding page content, conversation structure, cross-origin frames, and screenshots are not captured.
+- Empty or unavailable selection never replaces Context. The Side Panel provides safe selection or copy-and-paste guidance where it can open, without exposing raw Chrome errors or requesting permanent support-site access.
+- The suggested shortcut is `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. Chrome's native extension shortcut manager owns remapping, collision handling, and unassigned commands; M10 adds no in-app shortcut editor or Settings persistence.
+- M10 adds no Generate shortcut, Copy shortcut, toggle command, OS-global behavior, persistent Workspace state, Snippet expansion, or multimodal capture.
+
 ## Future Multimodal Context Attachments
 
 Multimodal Context Attachments are an approved future product direction with no assigned milestone. They do not reopen M9 or change the current text-only M9 implementation.

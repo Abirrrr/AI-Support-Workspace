@@ -169,7 +169,7 @@ Keyboard Shortcut
 
 ↓
 
-Extension Opens
+Global Workspace Side Panel Opens or Activates
 
 ↓
 
@@ -182,10 +182,14 @@ Ready to Generate
 
 ### Workflow Notes
 
-- The user should be able to launch the extension quickly from the browser context.
-- The selected text should become the starting point for merchant context.
+- M10 defines exactly one browser-scoped Chrome command, `capture-selection-to-workspace`, suggested as `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. Chrome's native extension shortcut manager owns remapping.
+- The command captures explicit selected text from the active tab's main frame before opening or focusing the Side Panel. A focused textarea or text-capable input selection takes precedence over the ordinary main-frame document selection.
+- Non-whitespace selected text replaces Merchant Context exactly, including line breaks, Unicode, and surrounding whitespace; Guidance, model, generated or edited Output, and any active generation request remain unchanged.
+- The global Side Panel opens when closed and remains open when already open. Repeated invocation never toggles it closed.
+- After successful delivery, Merchant Context receives focus with its caret at the end. Generate remains manual and is never invoked by the shortcut.
+- Empty selection preserves Context and asks the user to select page text. Restricted or failed page capture preserves Context and asks the user to copy and paste instead. Raw Chrome errors are not shown.
 - The shortcut workflow is intended to reduce friction and accelerate the support task.
-- The exact shortcut key will be determined later.
+- Selection capture is text-only, main-frame-only, transient, and user-invoked. It does not scrape surrounding page content, read cross-origin frames, expand persistent content-script matches, or capture screenshots.
 - This application-level keyboard shortcut is distinct from future Snippet Trigger Expansion. M10 opens or invokes extension behavior through a key combination; typed text such as `;hello` expands saved Snippet content inside a supported editor.
 
 ## 7. AI Generation Workflow

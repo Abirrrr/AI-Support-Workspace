@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-The platform architecture is approved and frozen through Milestone 9 Side Panel architecture amendment checkpoint `e587398`. Milestone 9 — Output Workspace is implemented, reviewed, automatically validated, manually validated in Chrome, and documented; its implementation checkpoint remains uncommitted. The native WXT global Side Panel provides transient manual Context, Guidance, model input, automatic local retrieval, provider-independent generation through Ollama, editable plain-text output, and Copy beside the active support website. Knowledge and Snippet management remain in the options-page Library surface. Milestone 10 — Keyboard Shortcut is current.
+Milestone 9 — Output Workspace is complete and synchronized at implementation checkpoint `7b88b94` (`feat: implement output workspace`). The native WXT global Side Panel provides transient manual Context, Guidance, model input, automatic local retrieval, provider-independent generation through Ollama, editable plain-text output, and Copy beside the active support website. Knowledge and Snippet management remain in the options-page Library surface. Milestone 10 — Keyboard Shortcut is current, with architecture defined for one browser-scoped command that captures explicit active-page selection, opens or activates Workspace, replaces and focuses Merchant Context, and leaves Generate manual.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Review and authorize the complete uncommitted Milestone 9 implementation checkpoint, push and synchronize it, then define Milestone 10 — Keyboard Shortcut architecture before implementation.
+Review and authorize the documentation-only Milestone 10 architecture checkpoint, synchronize it remotely, then implement the frozen selected-text keyboard command contract.

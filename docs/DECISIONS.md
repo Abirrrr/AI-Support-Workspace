@@ -443,6 +443,54 @@ Workspace state remains transient for the mounted Side Panel instance. Chrome cl
 
 Implementation validation must replace standalone-page checks with Side Panel entrypoint, popup-opening, permission, manifest, narrow-layout, and real Chrome Side Panel checks. Existing application and component tests remain applicable because the React view and all workflow behavior are reused without redesign.
 
+## Decision 27: M10 Selected-Text Keyboard Command
+
+Milestone 10 adds exactly one browser-scoped standard Chrome command, `capture-selection-to-workspace`, with the user-facing description `Capture selected text in AI Support Workspace`. Its suggested shortcut is `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. The command is declared through the manifest `commands` key, does not use `_execute_action`, and must not set `global: true`. Chrome's native `chrome://extensions/shortcuts` surface owns user remapping, collision handling, and unassigned-command recovery; M10 adds no in-app shortcut editor, shortcut persistence, forced assignment, or collision-repair UI.
+
+### Runtime and Manifest Boundary
+
+The existing extension service worker owns `chrome.commands.onCommand` for this focused command. The command listener validates the command-provided active tab and browser window, performs explicit selection extraction, opens or activates the existing global Workspace Side Panel, transiently delivers the capture result, and coordinates safe failures. Unknown commands are ignored. React presentation code does not register the command listener, and the service worker does not acquire Retrieval Engine, Prompt Builder, `OutputWorkflow`, `OllamaProvider`, generation, persistence, or durable Workspace-state responsibilities.
+
+M10 preserves `side_panel.default_path`, the existing `sidePanel` permission, and the exact `http://localhost/*` host permission. It adds exactly `activeTab` and `scripting` to ordinary permissions so explicit user invocation can run selection extraction in the active tab without permanent site access. The `commands` declaration is a manifest key rather than an ordinary permission. M10 adds no `tabs`, storage, clipboard, notification, broad host, `<all_urls>`, permanent support-site host, `127.0.0.1`, remote-provider, or cloud permission. The existing persistent content script and its `https://example.com/*` development match remain unchanged.
+
+The command is available only while Chrome is focused and a current active normal webpage can be addressed. It has no OS-global promise and no special behavior for Chrome-unfocused use, DevTools, `chrome://` pages, Chrome Web Store restricted surfaces, cross-origin frames, or incognito. Existing Chrome incognito policy remains unchanged. Unsupported or restricted contexts fail safely without requesting broader access.
+
+### Selection Extraction and Ordering
+
+M10 captures only an explicit selection from the active tab's main frame. Selection extraction applies this precedence:
+
+1. When the focused element is a `textarea` or a text-capable `input` that exposes a non-empty selection range, return exactly the selected substring of its value.
+2. Otherwise, return the main-frame document selection from `window.getSelection()` or equivalent.
+3. Treat an absent or whitespace-only result as empty.
+
+Any selected text that contains non-whitespace is preserved exactly, including Unicode, line breaks, and leading or trailing whitespace. M10 does not scrape surrounding page content, inspect a support application's conversation DOM, infer Merchant Context, read cross-origin iframe selection, capture screenshots, or fall back to arbitrary page text. Contenteditable selection is handled through the ordinary main-frame document selection. Cross-frame capture remains future scope.
+
+The command must capture selection before opening or focusing the Side Panel so browser focus changes cannot destroy the page selection. After capture completes, the service worker opens or activates the global Side Panel for the command's browser window and then delivers the result. The command is open/activate behavior, not toggle behavior: a closed panel opens, an already-open panel remains open, and repeated invocation never closes it. M10 creates no tab-specific panel path.
+
+### Transient Delivery Contract
+
+M10 introduces one focused typed Chrome runtime messaging boundary for capture delivery. Its result states are success with exact selected text, empty selection, unsupported or restricted page, and capture failure. Delivery must work when the Side Panel is already mounted and when the command opens a previously closed panel. A newly mounted Side Panel announces readiness, the service worker retains only the current in-flight command result long enough to deliver it, and the Side Panel acknowledges after it has applied the result or failure feedback. Implementations may use a focused ready-and-acknowledgement handshake, but must not introduce a generalized message bus.
+
+The capture must not be silently lost because the Side Panel has not finished mounting. No capture is written to Dexie, `localStorage`, `chrome.storage`, or another durable store. No database table or Workspace persistence mechanism is added. If reliable delivery cannot be implemented within this transient handshake without persistence or another permission, implementation must stop for architecture review instead of changing this contract.
+
+### Workspace State, Focus, and Feedback
+
+On acknowledged success, the Side Panel replaces Merchant Context with the exact captured text. It preserves Guidance, the transient Ollama model, generated or user-edited Output, and all existing M9 transient-state semantics. It clears previous capture-specific feedback and may show lightweight capture success feedback. The selected text affects future Generate actions only; M10 never appends to or merges with old Context and never automatically invokes Generate.
+
+After applying a successful capture, the Side Panel focuses the Merchant Context textarea and places its caret at the end without selecting all text. It does not focus Generate. If a generation request is active, capture does not cancel it or alter its already-constructed `GenerationRequest`; Merchant Context changes only for the next generation, while the current generating and output behavior remains governed by M9.
+
+An empty selection does not alter Merchant Context. The Side Panel opens or remains open where possible and shows `Select text on the page, then use the shortcut again.` A restricted page or other capture failure also preserves Context and shows the safe equivalent of `Couldn't capture selected text from this page. Copy and paste it into Merchant Context.` Capture failure does not force unrelated focus movement. Raw Chrome errors are never exposed.
+
+If Side Panel opening fails, the service worker safely maps or swallows the raw Chrome exception. M10 adds no notification permission and no alternate tab, window, or popup error surface. A small capture-status message inside the existing Side Panel is the only approved M10 UI addition; M10 does not redesign Workspace.
+
+### Validation and Deferred Scope
+
+Automated validation must cover the exact command manifest, suggested keys, browser-only scope, exact permission and host contract, command dispatch and unknown-command handling, command-provided tab and window use, capture-before-open ordering, main-frame selection precedence and exact-text preservation, empty and restricted-page failures, non-toggle Side Panel behavior, transient readiness and acknowledgement delivery for mounted and newly opened panels, state replacement and preservation, focus and caret behavior, active-generation preservation, raw-error hiding, absence of capture persistence, and regressions across M9 Workspace, popup, Libraries, Retrieval Engine, Prompt Builder, Ollama Provider, generation, Copy, and production build. Normal tests use controlled browser and provider boundaries and require no live Ollama.
+
+Manual Chrome validation must confirm the installed command in `chrome://extensions/shortcuts`, suggested-key assignment or native remapping after collision, normal document, textarea, and contenteditable selection, exact Context replacement, focus and caret placement, state preservation, absence of automatic generation, repeated non-toggle invocation, empty-selection and restricted-page feedback, normal Generate and popup/Library regressions, absence of runtime errors, and the exact permission surface.
+
+M10 adds no Generate or Copy shortcut, automatic generation, Snippet trigger field, semicolon detection, Snippet expansion, editor replacement, screenshot or clipboard-image capture, multimodal request change, Settings functionality, dependency, database change, schema migration, or persistent Workspace state. Rich Snippet Trigger Expansion and Multimodal Context Attachments remain separately tracked future work.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.
