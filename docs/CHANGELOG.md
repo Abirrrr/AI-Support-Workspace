@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Milestone 10 — Guidance Focus UX Amendment
+
+- Amended successful shortcut capture so exact Merchant Context replacement is followed by Guidance focus rather than Merchant Context focus, matching the next natural step of entering optional case-specific instructions.
+- Required a collapsed caret at the end of the preserved Guidance value; empty Guidance is ready for immediate typing, while existing Guidance is not selected, replaced, appended to, or otherwise modified.
+- Preserved exact Context replacement, Guidance/model/Output/active-generation state, manual Generate behavior, runtime sequencing, transient ready/acknowledgement delivery, permissions, persistence, database schema version 1, M11 separation, Snippet-trigger separation, and multimodal separation.
+- Kept empty, restricted-page, and failed-capture feedback unchanged and required those paths not to force Guidance focus.
+- Amended future automated and real Chrome validation to cover Guidance focus and collapsed end-caret placement, Guidance preservation without selection, absence of final Merchant Context focus, failure-path focus behavior, and absence of automatic Generate.
+- Made no implementation, test, dependency, WXT configuration, permission, persistence, or schema change and did not mark M10 complete.
+
 ### Milestone 10 — Runtime Sequencing Architecture Amendment
 
 - Recorded real Chrome evidence that command registration, Chrome-native remapping to `Ctrl+Shift+Y`, command dispatch, `activeTab`, main-frame `scripting`, and direct keyboard-command Side Panel opening all work independently.
@@ -20,7 +29,7 @@
 - Approved least-privilege main-frame selection capture through exactly `activeTab` and `scripting`, retaining `sidePanel`, exactly `http://localhost/*` host access, and the unchanged `https://example.com/*` persistent content-script match without `tabs`, storage, clipboard, `<all_urls>`, or permanent support-site permission.
 - Defined textarea or text-capable input range precedence over main-frame document selection; exact preservation of non-whitespace Unicode, line breaks, and surrounding whitespace; whitespace-only empty behavior; capture-invocation-before-panel-open-invocation ordering as superseded and clarified by the runtime sequencing amendment; and exclusion of surrounding-page scraping, cross-frame capture, and screenshots.
 - Defined open/activate rather than toggle Side Panel behavior and a focused typed ready-and-acknowledgement runtime contract that reliably delivers success or safe failure to mounted and newly opened panels without durable storage or a generalized message bus.
-- Defined exact Merchant Context replacement, preservation of Guidance, model, generated or edited Output, and active generation, manual-only future Generate behavior, Context focus with caret at the end, safe empty-selection and restricted-page feedback, and no unrelated focus change on failure.
+- Defined exact Merchant Context replacement, preservation of Guidance, model, generated or edited Output, and active generation, manual-only future Generate behavior, and safe empty-selection and restricted-page feedback. Its original Context-focus requirement is superseded by the Guidance Focus UX Amendment above.
 - Defined generated-manifest, background command, selection extraction, transient delivery, Side Panel state/focus, regression, and real Chrome validation requirements. Normal shortcut tests require no live Ollama.
 - Preserved database `ai-support-workspace` schema version 1 and excluded Settings, shortcut persistence or editor UI, Generate and Copy shortcuts, automatic generation, Snippet triggers or expansion, multimodal capture, dependencies, implementation code, tests, and WXT/manifest configuration changes from this documentation-only task.
 - Kept Milestone 10 current and made its architecture implementation-ready without marking M10 complete, creating a Git checkpoint, or pushing this documentation change.
