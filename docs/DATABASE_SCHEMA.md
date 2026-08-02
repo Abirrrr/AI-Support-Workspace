@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the planned local data model and the Milestone 3 physical persistence schema. The approved schema and project-owned persistence contracts were implemented without modification, and Milestone 3 — Local Database is complete.
+This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, and Milestone 11 added the approved version 2 singleton Settings store without modifying the version 1 declarations.
 
 ## Planned Domain Schema
 
@@ -45,7 +45,7 @@ Fields:
 
 `defaultModel` is an opaque Ollama model identifier after leading and trailing whitespace are trimmed. `null` means that no default is saved and a new Workspace Side Panel session starts with a blank transient model field. M11 adds no provider, provider-base-URL, theme, shortcut, writing-preference, credential, or arbitrary key/value setting.
 
-The application-owned aggregate does not expose persistence identity. Milestone 11 implementation will add the physical singleton record and typed Settings persistence contract described below; the currently implemented version 1 database does not yet contain them.
+The application-owned aggregate does not expose persistence identity. Milestone 11 implemented the physical singleton record and typed Settings persistence contract described below in database version 2.
 
 ## Milestone 3 Physical Schema
 
@@ -97,9 +97,9 @@ The `snippetEntries` table stores exactly the approved Snippet Entry fields:
 - `createdAt: string`
 - `updatedAt: string`
 
-## Approved Milestone 11 Physical Schema
+## Implemented Milestone 11 Physical Schema
 
-Milestone 11 implementation will increment the Dexie schema from version 1 to version 2. Version 2 preserves the existing `knowledgeEntries` and `snippetEntries` declarations exactly and adds only:
+Milestone 11 incremented the Dexie schema from version 1 to version 2. Version 2 preserves the existing `knowledgeEntries` and `snippetEntries` declarations exactly and adds only:
 
 ```text
 settings: 'id'
@@ -116,7 +116,7 @@ interface SettingsRecord {
 
 `id` is the inbound primary key. The literal singleton identity is `global`. No secondary, compound, or multi-entry index is approved. The record has no timestamps because singleton load/save behavior does not require ordering or audit metadata, and the existing timestamp rules are entity-specific rather than a universal repository requirement.
 
-The version 1 to version 2 migration performs no Knowledge or Snippet transformation and must preserve every existing Library record. It does not create a Settings record automatically. Absence of the singleton record is normal and is resolved by the application layer to `{ defaultModel: null }`. Dexie schema rollback from version 2 to version 1 is not supported; migration is forward-only. No other table, field, or index changes are allowed in M11.
+The version 1 to version 2 migration performs no Knowledge or Snippet transformation and preserves every existing Library record. It does not create a Settings record automatically. Absence of the singleton record is normal and is resolved by the application layer to `{ defaultModel: null }`. Dexie schema rollback from version 2 to version 1 is not supported; migration is forward-only. No other table, field, or index changes were made in M11.
 
 All persisted fields are required. Milestone 3 does not add fields to either record type.
 
@@ -230,17 +230,17 @@ Milestone 3 validation passed all 13 persistence integration tests, including da
 ## Migration Policy
 
 - Version 1 is the initial physical schema and has no historical migration.
-- Every future physical schema change requires explicit Dexie version consideration and, where applicable, a version increment.
+- Every later physical schema change requires explicit Dexie version consideration and, where applicable, a version increment.
 - Future migrations must preserve existing user data unless a documented pre-release exception is explicitly approved.
 - Existing version declarations must not be silently rewritten to apply later schema changes.
-- No migration implementation was required for the initial version 1 schema; future migration implementation remains scoped to the milestone that introduces a physical schema change.
-- M11 is the first approved future physical change: version 2 adds only the singleton `settings` table, preserves the two version 1 stores and all their records, performs no Library transformation, creates no default record, and does not support rollback to version 1.
+- No migration implementation was required for the initial version 1 schema. M11 implemented the first migration when it introduced a physical schema change.
+- Version 2 adds only the singleton `settings` table, preserves the two version 1 stores and all their records, performs no Library transformation, creates no default record, and does not support rollback to version 1.
 
 ## Storage Approach
 
 Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers depend on project-owned storage contracts rather than Dexie directly. The schema remains intentionally minimal; search and retrieval access patterns and any indexes they require belong to later milestones.
 
-The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 architecture now approves the version 2 Settings addition described above, but it remains unimplemented. Dexie configuration remains centralized in the infrastructure layer.
+The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition described above without changing the version 1 declarations or existing Library contracts. Dexie configuration remains centralized in the infrastructure layer.
 
 ## Future Capability Guidance
 
@@ -262,4 +262,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestone 3 — Local Database is complete following Principal Engineer review. Database `ai-support-workspace`, schema version 1, both implemented tables, and both implemented repository contracts exist and passed isolated persistence integration validation. Milestones 4 through 10 are complete. The M9 Output Workspace and M10 Keyboard Shortcut keep Context, Guidance, generated or edited Output, capture results, delivery IDs, status, and feedback transient. Milestone 11 — Settings is current and architecture-defined but not implemented. Its approved implementation will add only the optional saved default Ollama model through the version 2 singleton `settings` table while preserving every existing Knowledge and Snippet record. Until implementation, the physical database remains version 1.
+Milestones 3 through 11 are complete. Database `ai-support-workspace` now uses schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. Automated migration coverage proved that representative version 1 Knowledge and Snippet records survive unchanged, no Settings record is created automatically, `global` saves and reloads across reopen, and `null` remains a persisted clear state. The M9 Output Workspace and M10 Keyboard Shortcut still keep Context, Guidance, generated or edited Output, capture results, delivery IDs, status, and feedback transient; only the optional default model is persisted through Settings. M12 — Import / Export is current and has not defined another schema change.

@@ -533,7 +533,7 @@ The form loads before becoming editable. Save is disabled while loading or savin
 
 The domain/application boundary owns the `Settings` type, normalization, default resolution, and focused load/save services. A minimal project-owned `SettingsRepository` loads the optional aggregate and saves the aggregate. React does not call Dexie, the repository exposes no Dexie record identity, and arbitrary string key/value storage is prohibited. The infrastructure adapter maps the application aggregate to the singleton physical record `{ id: 'global', defaultModel }`.
 
-M11 uses Dexie/IndexedDB and no `chrome.storage`, `localStorage`, filesystem, remote storage, or Chrome `storage` permission. Implementation increments database `ai-support-workspace` from schema version 1 to version 2 and adds only `settings: 'id'`. The table has no secondary indexes or timestamps. The forward-only migration preserves all Knowledge and Snippet records without transformation, creates no Settings record automatically, changes no existing store or index, and does not support rollback to version 1.
+M11 uses Dexie/IndexedDB and no `chrome.storage`, `localStorage`, filesystem, remote storage, or Chrome `storage` permission. Implementation incremented database `ai-support-workspace` from schema version 1 to version 2 and added only `settings: 'id'`. The table has no secondary indexes or timestamps. The forward-only migration preserves all Knowledge and Snippet records without transformation, creates no Settings record automatically, changes no existing store or index, and does not support rollback to version 1.
 
 An absent physical record is normal. The repository reports absence, and the application load boundary resolves it to `{ defaultModel: null }`. The repository supports only singleton load and save; there is no list, create, update-by-ID, delete UI, or unrelated CRUD. Saving blank input is the supported clear operation.
 
@@ -558,6 +558,14 @@ M11 changes no manifest permission or host. The existing `sidePanel`, `activeTab
 Automated coverage must prove application defaults, trim/clear normalization, opaque model preservation, safe load/save failure mapping, schema version 1 to version 2 upgrade, singleton persistence and reopen, absence of automatic record creation, Knowledge and Snippet preservation, no unrelated schema change, Settings UI loading/dirty/saving/success/error/accessibility behavior, Workspace initialization and load-failure fallback, transient overrides, reopen behavior, no live synchronization, current-field generation, and regressions across M9, M10, popup, Libraries, Retrieval Engine, Prompt Builder, `OllamaProvider`, generated manifest, and production build. Normal tests require no live Ollama.
 
 After implementation review, real Chrome validation must cover first-run blank state, save and options-page reload, new Side Panel initialization, transient Workspace override and generation, Side Panel reopen, clear-to-null behavior, safe feedback where practical, Library data preservation through migration, M10 capture, popup navigation, unchanged permissions, and generation with an already installed valid model.
+
+### Implementation and Closeout Status
+
+M11 implemented Decision 31 without amendment. The focused typed boundary, Dexie version 2 singleton, options-page form, pre-editable-state Side Panel bootstrap, transient Workspace semantics, and M10 handshake protection all match the approved dependency and scope contracts. React does not call Dexie, Prompt Builder and `OllamaProvider` remain Settings-independent, and `GenerationRequest`, provider identity, fixed endpoint, manifest, permissions, dependencies, and configuration remain unchanged.
+
+Automated validation passed 69 focused tests in 9 files and 200 tests in 25 files in the normal suite; 1 opt-in live Ollama test in 1 file remained skipped. Lint, formatting, type-checking, Playwright discovery, the production Chrome MV3 build, generated-output and manifest validation, and `git diff --check` passed. Real Chrome validation separately passed first-run and migration behavior, save/reload persistence, new-session initialization, transient override and reopen restoration, real `qwen2.5:7b` generation, clear-to-null, Library preservation, M10 capture, popup navigation, and unchanged permissions. Persistence load/save fault UI was covered by automation rather than manual database fault injection.
+
+No new architecture decision resulted from implementation or validation. M11 is complete and M12 retains its existing Import / Export ownership without architecture or scope expansion here. The uncommitted M11 implementation, tests, and closeout documentation await Principal approval and an authorized checkpoint.
 
 ## Rationale
 

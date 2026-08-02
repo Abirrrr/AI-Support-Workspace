@@ -10,6 +10,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
+import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
 import { OptionsShell } from '../../src/ui/options/OptionsShell';
@@ -55,6 +56,15 @@ function createKnowledgeLibrary() {
     }),
     delete: vi.fn(async () => false),
   } satisfies KnowledgeLibrary;
+}
+
+function createSettings(): SettingsApplication {
+  return {
+    load: vi.fn(async () => ({ defaultModel: null })),
+    save: vi.fn(async (defaultModelInput) => ({
+      defaultModel: defaultModelInput.trim() || null,
+    })),
+  };
 }
 
 afterEach(cleanup);
@@ -210,10 +220,12 @@ describe('SnippetLibraryView', () => {
 
   it('navigates between distinct libraries without reloading either view', async () => {
     const knowledgeLibrary = createKnowledgeLibrary();
+    const settings = createSettings();
     const snippetLibrary = createSnippetLibrary();
     render(
       <OptionsShell
         knowledgeLibrary={knowledgeLibrary}
+        settings={settings}
         snippetLibrary={snippetLibrary}
       />,
     );
@@ -235,6 +247,15 @@ describe('SnippetLibraryView', () => {
     expect(
       screen.getByRole('heading', { name: 'Snippet Library' }),
     ).toBeTruthy();
+    expect(snippetLibrary.load).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Settings' }),
+    ).toBeTruthy();
+    expect(settings.load).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
     expect(snippetLibrary.load).toHaveBeenCalledOnce();
   });
 });

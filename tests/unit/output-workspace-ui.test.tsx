@@ -167,6 +167,114 @@ describe('OutputWorkspaceView', () => {
     );
   });
 
+  it('initializes a new session with the saved default model', () => {
+    render(
+      <OutputWorkspaceView
+        initialModel="llama3.2:latest"
+        outputWorkflow={createWorkflow()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'llama3.2:latest',
+    );
+  });
+
+  it('keeps a settings load failure non-blocking and allows a manual model', async () => {
+    const workflow = createWorkflow();
+    render(
+      <OutputWorkspaceView
+        initialModel=""
+        outputWorkflow={workflow}
+        settingsLoadFailureMessage="Couldn't load the saved model. Enter a model manually."
+      />,
+    );
+
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty('value', '');
+    expect(
+      screen.getByText(
+        "Couldn't load the saved model. Enter a model manually.",
+      ),
+    ).toBeTruthy();
+
+    enterValidInput({ merchantContext: 'Current conversation' });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate' }));
+
+    expect(await screen.findByDisplayValue('Generated reply')).toBeTruthy();
+  });
+
+  it('does not live-sync a changed default into an already mounted session', async () => {
+    const workflow = createWorkflow();
+    const { rerender } = render(
+      <OutputWorkspaceView
+        initialModel="saved-model:one"
+        outputWorkflow={workflow}
+      />,
+    );
+    enterValidInput({
+      merchantContext: 'Current conversation',
+      guidance: 'Keep this concise.',
+      model: 'temporary-model:override',
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate' }));
+    const output = await screen.findByDisplayValue('Generated reply');
+    fireEvent.change(output, { target: { value: 'Edited retained output' } });
+
+    rerender(
+      <OutputWorkspaceView
+        initialModel="saved-model:two"
+        outputWorkflow={workflow}
+      />,
+    );
+
+    expect(screen.getByLabelText('Merchant Context')).toHaveProperty(
+      'value',
+      'Current conversation',
+    );
+    expect(screen.getByLabelText('Guidance')).toHaveProperty(
+      'value',
+      'Keep this concise.',
+    );
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'temporary-model:override',
+    );
+    expect(screen.getByLabelText('Generated Output')).toHaveProperty(
+      'value',
+      'Edited retained output',
+    );
+  });
+
+  it('reloads the saved default when a Workspace session is recreated', () => {
+    const firstSession = render(
+      <OutputWorkspaceView
+        initialModel="saved-model:latest"
+        outputWorkflow={createWorkflow()}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText('Ollama model'), {
+      target: { value: 'temporary-model:override' },
+    });
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'temporary-model:override',
+    );
+
+    firstSession.unmount();
+    render(
+      <OutputWorkspaceView
+        initialModel="saved-model:latest"
+        outputWorkflow={createWorkflow()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'saved-model:latest',
+    );
+  });
+
   it('keeps Generate disabled without primary input or without a model', () => {
     render(<OutputWorkspaceView outputWorkflow={createWorkflow()} />);
     const generate = screen.getByRole('button', { name: 'Generate' });
@@ -463,6 +571,30 @@ describe('OutputWorkspaceView', () => {
       screen.getByText('Selected text added to Merchant Context.'),
     ).toBeTruthy();
     expect(workflow.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves the saved initial model when capture supplies Context without generating', async () => {
+    const workflow = createWorkflow();
+    const capture = createCaptureSource();
+    render(
+      <OutputWorkspaceView
+        captureSource={capture.source}
+        initialModel="saved-model:latest"
+        outputWorkflow={workflow}
+      />,
+    );
+
+    await capture.emit({ kind: 'success', text: 'Captured Context' });
+
+    expect(screen.getByLabelText('Merchant Context')).toHaveProperty(
+      'value',
+      'Captured Context',
+    );
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'saved-model:latest',
+    );
+    expect(workflow.generate).not.toHaveBeenCalled();
   });
 
   it('focuses empty Guidance ready for typing after successful capture', async () => {

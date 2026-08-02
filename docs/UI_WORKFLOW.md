@@ -77,7 +77,7 @@ Save as Snippet (optional)
 - The system should help the user retrieve local knowledge before generating a reply.
 - The generated response should be editable before it is used or shared.
 - The user may save valuable content as knowledge or as a snippet for future reuse.
-- Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, transient blank-initial model input, Generate, editable plain-text output, and Copy. It remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, Save actions, shortcuts, page capture, and reply insertion remain outside M9.
+- Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
 - The popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries continues to open the options page, where Knowledge and Snippet CRUD remain.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
@@ -312,6 +312,9 @@ Transient Model Field Starts with Saved Default
 - A new Side Panel session loads Settings once before establishing editable model state. The saved model initializes that field; missing, null, or failed Settings load initializes blank. Failure shows `Couldn't load the saved model. Enter a model manually.` without blocking the rest of Workspace.
 - Workspace model edits remain transient and never save Settings. Generate uses the current Workspace value. Closing and reopening reloads the latest saved default, while an already-mounted panel does not live-sync changes.
 - Provider selection, endpoint configuration, behavior tuning, writing preferences, theme, shortcut settings, Workspace persistence, reset, import, and export are outside M11.
+- The implemented controls retain a visible associated label, descriptive help, native keyboard operation, natural focus order, accessible loading state, live success/error announcements, and narrow-width-safe navigation and form layout.
+- Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
+- Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
 
 ## 9. Local Data Workflow
 

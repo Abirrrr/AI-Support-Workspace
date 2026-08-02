@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace and 10 — Keyboard Shortcut are complete. The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the later repository-continuity correction is committed at `37ad72f` (`docs: synchronize project state after M10`); local `master` is synchronized with `origin/master`. The browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection, immediately opens the global Workspace Side Panel without awaiting capture, delivers a typed transient result through a delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus and a collapsed end caret, and leaves Generate manual. Opening a closed panel provides usable Guidance keyboard focus. When the panel is already visible and the webpage owns keyboard focus, Chrome may keep keyboard routing on the webpage despite the successful internal focus request, so the user may need to click Guidance. Milestone 11 — Settings is current and architecture-defined but not implemented. It adds one local saved default Ollama model, a typed Settings boundary, and the required Dexie version 2 migration; all other settings remain deferred.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, and 11 — Settings are complete. The latest committed checkpoint is `f0eb4d3` (`docs: define default model settings architecture`); the completed M11 implementation, tests, and closeout documentation remain uncommitted pending Principal approval. M11 adds exactly one optional saved default Ollama model through a typed Settings boundary and Dexie version 2 singleton. Each new Side Panel session initializes its transient model field from that value; Workspace overrides remain temporary. The browser-scoped M10 capture handshake, provider boundary, fixed local Ollama endpoint, popup behavior, manifest, and permissions remain unchanged. Milestone 12 — Import / Export is current, but its architecture and implementation are not defined by the M11 closeout.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Prepare a separate Principal Engineer implementation specification for the approved Milestone 11 — Settings architecture. Do not mark M11 complete or advance to M12 before implementation, review, documentation synchronization, and validation are complete.
+Review and authorize the uncommitted M11 implementation checkpoint, then push and synchronize it. After that milestone boundary is complete, define Milestone 12 — Import / Export architecture in a separate documentation task before implementation; do not expand M12 through M11 closeout wording.

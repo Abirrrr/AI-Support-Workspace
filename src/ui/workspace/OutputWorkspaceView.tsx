@@ -29,7 +29,9 @@ export type OutputWorkspaceStatus = 'idle' | 'generating' | 'success' | 'error';
 
 interface OutputWorkspaceViewProps {
   captureSource?: WorkspaceCaptureSource | undefined;
+  initialModel?: string | undefined;
   outputWorkflow: Pick<OutputWorkflow, 'generate'>;
+  settingsLoadFailureMessage?: string | null | undefined;
 }
 
 interface CaptureFeedback {
@@ -78,11 +80,13 @@ function getGenerationErrorMessage(error: unknown): string {
 
 export function OutputWorkspaceView({
   captureSource,
+  initialModel = '',
   outputWorkflow,
+  settingsLoadFailureMessage = null,
 }: OutputWorkspaceViewProps) {
   const [merchantContext, setMerchantContext] = useState('');
   const [guidance, setGuidance] = useState('');
-  const [model, setModel] = useState('');
+  const [model, setModel] = useState(initialModel);
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState<OutputWorkspaceStatus>('idle');
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -295,6 +299,15 @@ export function OutputWorkspaceView({
               Ollama must be installed, running locally, contain this model, and
               allow access from this Chrome extension.
             </p>
+            {settingsLoadFailureMessage === null ? null : (
+              <p
+                aria-live="polite"
+                className="mt-2 text-sm text-red-700"
+                role="status"
+              >
+                {settingsLoadFailureMessage}
+              </p>
+            )}
           </div>
 
           <button

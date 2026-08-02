@@ -11,8 +11,7 @@
 
 ## Future Considerations
 
-- Improve import and export capabilities.
-- Implement the roadmap-defined M11 Settings capability for one optional saved default Ollama model through the approved typed boundary and Dexie version 2 singleton migration; M10 Keyboard Shortcut is complete.
+- Define the roadmap-owned Milestone 12 Import / Export architecture before implementation; M11 Settings is complete.
 - Reconsider provider endpoint configuration only with provider expansion or a dedicated security and permissions architecture review.
 - Consider persistent Prompt Profiles or writing preferences only through a separate product and precedence decision; they are not M11 behavior tuning.
 - Refine the UI around Intercom support workflows.
