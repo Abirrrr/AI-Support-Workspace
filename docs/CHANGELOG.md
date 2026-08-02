@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### M12-D.1 — Backup Format v1 DTO Isolation Source Review Approval
+
+- Implemented the focused correction after M12-D source review rejected direct reuse of live `KnowledgeEntry`, `SnippetEntry`, and `Settings` types at the public versioned backup boundary.
+- Added dedicated exact `BackupKnowledgeRecordV1`, `BackupSnippetRecordV1`, and `BackupSettingsV1` DTOs so Backup Format v1 remains frozen and independently versioned from live domain and persistence models.
+- Replaced record-level spreads at export, validation, restore, persistence-snapshot, and persistence-write boundaries with explicit approved-field mappings while preserving deterministic ordering, tag order, IDs, timestamps, text, source, Settings semantics, and JSON format version 1.
+- Added regression coverage proving simulated future Knowledge, Snippet, Settings, DTO, and persisted-record fields cannot enter serialized version 1 backups or restored IndexedDB records; strict imported JSON continues rejecting unexpected keys.
+- Recorded reported validation success: 48 focused tests passed; the full suite passed 251 tests with 1 existing opt-in test skipped; lint, formatting, type-checking, Playwright discovery, production build and generated-output validation, and `git diff --check` passed.
+- Principal Engineer source review approved M12-D.1 and found no remaining architecture correction. Manual Chrome validation remains pending, the corrected implementation and tests remain uncommitted, and no M12 implementation checkpoint exists.
+- This documentation-only source-review approval update changes no source, test, architecture, decision, database schema version 2, manifest, permission, dependency, or configuration and does not mark M12-D.1 or Milestone 12 complete.
+
 ### M12-D Principal Review Rejection and M12-D.1 Activation
 
 - Recorded that M12-C — Import / Export Architecture Definition is committed and synchronized at checkpoint `7ebe874` (`docs: define import and export architecture`).
