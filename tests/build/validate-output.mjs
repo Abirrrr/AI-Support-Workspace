@@ -8,12 +8,33 @@ const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
 assert.equal(manifest.manifest_version, 3);
 assert.equal(manifest.name, 'AI Support Workspace');
-assert.deepEqual(manifest.permissions ?? [], ['sidePanel']);
+assert.deepEqual(manifest.permissions ?? [], [
+  'sidePanel',
+  'activeTab',
+  'scripting',
+]);
 assert.deepEqual(manifest.host_permissions ?? [], ['http://localhost/*']);
 assert.deepEqual(manifest.side_panel, { default_path: 'sidepanel.html' });
 assert.equal('sidebar_action' in manifest, false);
-assert.equal('commands' in manifest, false);
+assert.deepEqual(manifest.commands, {
+  'capture-selection-to-workspace': {
+    description: 'Capture selected text in AI Support Workspace',
+    suggested_key: {
+      default: 'Ctrl+Shift+Space',
+      mac: 'Command+Shift+Space',
+    },
+  },
+});
+assert.equal(
+  'global' in manifest.commands['capture-selection-to-workspace'],
+  false,
+);
 assert.equal('devtools_page' in manifest, false);
+assert.equal(manifest.permissions.includes('tabs'), false);
+assert.equal(manifest.permissions.includes('storage'), false);
+assert.equal(manifest.permissions.includes('clipboardRead'), false);
+assert.equal(manifest.permissions.includes('clipboardWrite'), false);
+assert.equal(manifest.host_permissions.includes('<all_urls>'), false);
 
 const serviceWorker = manifest.background?.service_worker;
 const popupPage = manifest.action?.default_popup;

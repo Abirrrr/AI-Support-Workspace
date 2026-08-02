@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -22,7 +23,12 @@ import {
   MissingOutputInputError,
   type OutputWorkflow,
 } from '../../src/application/output/output-workflow';
+import type { SelectionCaptureResult } from '../../src/shared/selection-capture';
 import { OutputWorkspaceView } from '../../src/ui/workspace/OutputWorkspaceView';
+import type {
+  WorkspaceCaptureHandler,
+  WorkspaceCaptureSource,
+} from '../../src/ui/workspace/workspace-capture-source';
 
 function createResult(text: string): GenerationResult {
   return {
@@ -38,6 +44,31 @@ function createWorkflow() {
       createResult('Generated reply'),
     ),
   } satisfies Pick<OutputWorkflow, 'generate'>;
+}
+
+function createCaptureSource() {
+  let handler: WorkspaceCaptureHandler | undefined;
+  const source: WorkspaceCaptureSource = {
+    subscribe(nextHandler) {
+      handler = nextHandler;
+
+      return () => {
+        if (handler === nextHandler) handler = undefined;
+      };
+    },
+  };
+
+  return {
+    source,
+    async emit(result: SelectionCaptureResult) {
+      if (handler === undefined) {
+        throw new Error('Workspace capture handler is not subscribed.');
+      }
+
+      const captureHandler = handler;
+      await act(async () => captureHandler(result));
+    },
+  };
 }
 
 function enterValidInput(
@@ -388,5 +419,159 @@ describe('OutputWorkspaceView', () => {
       ),
     ).toBeTruthy();
     expect(screen.queryByText('raw clipboard failure')).toBeNull();
+  });
+
+  it('replaces only Merchant Context, preserves state, and focuses the end of existing Guidance without generating', async () => {
+    const workflow = createWorkflow();
+    const capture = createCaptureSource();
+    render(
+      <OutputWorkspaceView
+        captureSource={capture.source}
+        outputWorkflow={workflow}
+      />,
+    );
+    enterValidInput({
+      merchantContext: 'Old Context',
+      guidance: 'Make this shorter.',
+      model: 'qwen2.5:7b',
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate' }));
+    const output = await screen.findByDisplayValue('Generated reply');
+    fireEvent.change(output, { target: { value: 'Edited retained output' } });
+
+    const selectedText = '  Selected line one\nSelected line two 🌍  ';
+    await capture.emit({ kind: 'success', text: selectedText });
+
+    const context =
+      screen.getByLabelText<HTMLTextAreaElement>('Merchant Context');
+    const guidance = screen.getByLabelText<HTMLTextAreaElement>('Guidance');
+    expect(context.value).toBe(selectedText);
+    expect(guidance.value).toBe('Make this shorter.');
+    expect(screen.getByLabelText('Ollama model')).toHaveProperty(
+      'value',
+      'qwen2.5:7b',
+    );
+    expect(screen.getByLabelText('Generated Output')).toHaveProperty(
+      'value',
+      'Edited retained output',
+    );
+    expect(document.activeElement).toBe(guidance);
+    expect(document.activeElement).not.toBe(context);
+    expect(guidance.selectionStart).toBe('Make this shorter.'.length);
+    expect(guidance.selectionEnd).toBe('Make this shorter.'.length);
+    expect(
+      screen.getByText('Selected text added to Merchant Context.'),
+    ).toBeTruthy();
+    expect(workflow.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('focuses empty Guidance ready for typing after successful capture', async () => {
+    const workflow = createWorkflow();
+    const capture = createCaptureSource();
+    render(
+      <OutputWorkspaceView
+        captureSource={capture.source}
+        outputWorkflow={workflow}
+      />,
+    );
+    const context =
+      screen.getByLabelText<HTMLTextAreaElement>('Merchant Context');
+    const guidance = screen.getByLabelText<HTMLTextAreaElement>('Guidance');
+    context.focus();
+
+    await capture.emit({ kind: 'success', text: 'Selected Context' });
+
+    expect(context.value).toBe('Selected Context');
+    expect(guidance.value).toBe('');
+    expect(document.activeElement).toBe(guidance);
+    expect(document.activeElement).not.toBe(context);
+    expect(guidance.selectionStart).toBe(0);
+    expect(guidance.selectionEnd).toBe(0);
+    expect(workflow.generate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      result: { kind: 'empty' } as const,
+      feedback: 'Select text on the page, then use the shortcut again.',
+    },
+    {
+      result: { kind: 'failure' } as const,
+      feedback:
+        "Couldn't capture selected text from this page. Copy and paste it into Merchant Context.",
+    },
+  ])(
+    'preserves Context, existing focus, and output for $result.kind capture',
+    async ({ result, feedback }) => {
+      const workflow = createWorkflow();
+      const capture = createCaptureSource();
+      render(
+        <OutputWorkspaceView
+          captureSource={capture.source}
+          outputWorkflow={workflow}
+        />,
+      );
+      enterValidInput({
+        merchantContext: 'Existing Context',
+        guidance: 'Existing Guidance',
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Generate' }));
+      await screen.findByDisplayValue('Generated reply');
+      const guidance = screen.getByLabelText<HTMLTextAreaElement>('Guidance');
+      const model = screen.getByLabelText<HTMLInputElement>('Ollama model');
+      model.focus();
+
+      await capture.emit(result);
+
+      expect(screen.getByLabelText('Merchant Context')).toHaveProperty(
+        'value',
+        'Existing Context',
+      );
+      expect(screen.getByLabelText('Generated Output')).toHaveProperty(
+        'value',
+        'Generated reply',
+      );
+      expect(guidance.value).toBe('Existing Guidance');
+      expect(document.activeElement).toBe(model);
+      expect(document.activeElement).not.toBe(guidance);
+      expect(screen.getByText(feedback)).toBeTruthy();
+    },
+  );
+
+  it('updates visible Context for the next request without cancelling active generation', async () => {
+    const deferred = createDeferred<GenerationResult>();
+    const workflow = createWorkflow();
+    workflow.generate.mockImplementationOnce(async () => deferred.promise);
+    const capture = createCaptureSource();
+    render(
+      <OutputWorkspaceView
+        captureSource={capture.source}
+        outputWorkflow={workflow}
+      />,
+    );
+    enterValidInput({ merchantContext: 'In-flight Context' });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate' }));
+    await waitFor(() => expect(workflow.generate).toHaveBeenCalledOnce());
+
+    await capture.emit({ kind: 'success', text: 'Next Context' });
+
+    expect(workflow.generate).toHaveBeenCalledWith({
+      merchantContext: 'In-flight Context',
+      guidance: '',
+      model: 'qwen2.5:7b',
+    });
+    expect(screen.getByLabelText('Merchant Context')).toHaveProperty(
+      'value',
+      'Next Context',
+    );
+    expect(screen.getByRole('button', { name: 'Generating…' })).toHaveProperty(
+      'disabled',
+      true,
+    );
+
+    deferred.resolve(createResult('Completed in-flight output'));
+    expect(
+      await screen.findByDisplayValue('Completed in-flight output'),
+    ).toBeTruthy();
   });
 });

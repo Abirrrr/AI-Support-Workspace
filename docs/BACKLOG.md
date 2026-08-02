@@ -12,7 +12,7 @@
 ## Future Considerations
 
 - Improve import and export capabilities.
-- Add settings and keyboard shortcuts.
+- Add the roadmap-defined Settings capability; M10 Keyboard Shortcut is complete.
 - Refine the UI around Intercom support workflows.
 - Evaluate prompt and local-model quality improvements for cases where generated wording implies unsupported commitments or timelines despite contrary Guidance.
 - Expand testing coverage as implementation matures.

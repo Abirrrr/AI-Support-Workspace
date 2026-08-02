@@ -9,6 +9,7 @@ import { createDatabase } from '../../infrastructure/persistence/database';
 import { DexieKnowledgeEntryRepository } from '../../infrastructure/persistence/dexie-knowledge-entry-repository';
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
 import { OutputWorkspaceView } from '../../ui/workspace/OutputWorkspaceView';
+import { createChromeWorkspaceCaptureSource } from '../keyboard-shortcut/sidepanel-capture-source';
 import '../../ui/styles.css';
 
 const root = document.querySelector('#root');
@@ -31,9 +32,13 @@ const outputWorkflow = new OutputWorkflow(
   promptBuilder,
   generationProvider,
 );
+const captureSource = createChromeWorkspaceCaptureSource();
 
 createRoot(root).render(
   <StrictMode>
-    <OutputWorkspaceView outputWorkflow={outputWorkflow} />
+    <OutputWorkspaceView
+      captureSource={captureSource}
+      outputWorkflow={outputWorkflow}
+    />
   </StrictMode>,
 );

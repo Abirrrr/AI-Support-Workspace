@@ -88,11 +88,11 @@ Add Ollama as the first AI provider integration.
 
 Provide a workspace for reviewing and refining AI-generated output.
 
-## Milestone 10 — Keyboard Shortcut (Current)
+## Milestone 10 — Keyboard Shortcut (Completed)
 
 Add a keyboard shortcut for quick access to the extension experience.
 
-## Milestone 11 — Settings
+## Milestone 11 — Settings (Current)
 
 Add user settings for provider selection, model choice, and behavior tuning.
 

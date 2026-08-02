@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import {
   GenerationCancelledError,
@@ -13,6 +14,13 @@ import {
   MissingOutputInputError,
   type OutputWorkflow,
 } from '../../application/output/output-workflow';
+import {
+  CAPTURE_FAILURE_MESSAGE,
+  CAPTURE_SUCCESS_MESSAGE,
+  EMPTY_SELECTION_MESSAGE,
+  type SelectionCaptureResult,
+} from '../../shared/selection-capture';
+import type { WorkspaceCaptureSource } from './workspace-capture-source';
 
 const COPY_FAILURE_MESSAGE =
   'Could not copy. Select the text and copy it manually.';
@@ -20,7 +28,13 @@ const COPY_FAILURE_MESSAGE =
 export type OutputWorkspaceStatus = 'idle' | 'generating' | 'success' | 'error';
 
 interface OutputWorkspaceViewProps {
+  captureSource?: WorkspaceCaptureSource | undefined;
   outputWorkflow: Pick<OutputWorkflow, 'generate'>;
+}
+
+interface CaptureFeedback {
+  readonly kind: 'success' | 'error';
+  readonly message: string;
 }
 
 function hasNonWhitespaceText(value: string): boolean {
@@ -63,6 +77,7 @@ function getGenerationErrorMessage(error: unknown): string {
 }
 
 export function OutputWorkspaceView({
+  captureSource,
   outputWorkflow,
 }: OutputWorkspaceViewProps) {
   const [merchantContext, setMerchantContext] = useState('');
@@ -72,7 +87,10 @@ export function OutputWorkspaceView({
   const [status, setStatus] = useState<OutputWorkspaceStatus>('idle');
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+  const [captureFeedback, setCaptureFeedback] =
+    useState<CaptureFeedback | null>(null);
   const generationActive = useRef(false);
+  const guidanceRef = useRef<HTMLTextAreaElement>(null);
   const copyFeedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -91,6 +109,36 @@ export function OutputWorkspaceView({
     },
     [],
   );
+
+  useEffect(() => {
+    if (captureSource === undefined) return;
+
+    return captureSource.subscribe((result: SelectionCaptureResult) => {
+      if (result.kind === 'success') {
+        flushSync(() => {
+          setMerchantContext(result.text);
+          setCaptureFeedback({
+            kind: 'success',
+            message: CAPTURE_SUCCESS_MESSAGE,
+          });
+        });
+
+        const guidanceElement = guidanceRef.current;
+        const guidanceEnd = guidanceElement?.value.length ?? 0;
+        guidanceElement?.focus();
+        guidanceElement?.setSelectionRange(guidanceEnd, guidanceEnd);
+        return;
+      }
+
+      setCaptureFeedback({
+        kind: 'error',
+        message:
+          result.kind === 'empty'
+            ? EMPTY_SELECTION_MESSAGE
+            : CAPTURE_FAILURE_MESSAGE,
+      });
+    });
+  }, [captureSource]);
 
   function clearCopyFeedback() {
     if (copyFeedbackTimeout.current !== null) {
@@ -184,9 +232,32 @@ export function OutputWorkspaceView({
             <textarea
               className="mt-2 min-h-40 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-6 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               id="merchant-context"
-              onChange={(event) => setMerchantContext(event.target.value)}
+              onChange={(event) => {
+                setMerchantContext(event.target.value);
+                setCaptureFeedback(null);
+              }}
               value={merchantContext}
             />
+          </div>
+
+          <div
+            aria-live={
+              captureFeedback?.kind === 'error' ? 'assertive' : 'polite'
+            }
+            className="min-h-5 text-sm"
+            role={captureFeedback?.kind === 'error' ? 'alert' : 'status'}
+          >
+            {captureFeedback === null ? null : (
+              <p
+                className={
+                  captureFeedback.kind === 'error'
+                    ? 'text-red-700'
+                    : 'text-emerald-700'
+                }
+              >
+                {captureFeedback.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -200,6 +271,7 @@ export function OutputWorkspaceView({
               className="mt-2 min-h-28 w-full max-w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-6 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               id="guidance"
               onChange={(event) => setGuidance(event.target.value)}
+              ref={guidanceRef}
               value={guidance}
             />
           </div>

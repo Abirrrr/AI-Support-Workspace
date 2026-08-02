@@ -183,7 +183,11 @@ Observe Capture and Open Outcomes Independently
 
 ↓
 
-Deliver Selected Text to Merchant Context
+Deliver Typed Result by ID through Ready / Acknowledgement
+
+↓
+
+Replace Merchant Context on Success
 
 ↓
 
@@ -196,17 +200,18 @@ Ready to Generate
 
 ### Workflow Notes
 
-- M10 defines exactly one browser-scoped Chrome command, `capture-selection-to-workspace`, suggested as `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. Chrome's native extension shortcut manager owns remapping.
+- M10 implements exactly one browser-scoped Chrome command, `capture-selection-to-workspace`, suggested as `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. `Ctrl+Shift+Space` conflicted locally with Text Blaze, so the user remapped it to `Ctrl+Shift+Y` through `chrome://extensions/shortcuts`; Chrome's native extension shortcut manager owns that customization, and the manifest default remains unchanged.
 - The command invokes explicit main-frame selection capture first, then invokes Side Panel opening immediately in the same keyboard-command turn without awaiting capture completion. Capture invocation must precede open invocation; capture completion need not precede open invocation. A focused textarea or text-capable input selection takes precedence over the ordinary main-frame document selection.
-- After both operations have started, capture and panel-open outcomes are handled independently. A successfully opened panel receives success, empty, or safe failure through the existing transient ready/acknowledgement delivery contract.
+- After both operations have started, capture and panel-open outcomes are handled independently. A successfully opened panel receives typed success, empty, or failure through a transient delivery ID. A newly mounted panel sends readiness, pending delivery is retried, the panel acknowledges only after applying the result or feedback, and only the matching acknowledged item is removed.
 - Non-whitespace selected text replaces Merchant Context exactly, including line breaks, Unicode, and surrounding whitespace; Guidance, model, generated or edited Output, and any active generation request remain unchanged.
 - The global Side Panel opens when closed and remains open when already open. Repeated invocation never toggles it closed.
 - After every successful delivery, Workspace requests Guidance DOM focus and places a collapsed caret at the end of its preserved value. Empty Guidance is ready for immediate typing when the command opens a closed Side Panel; existing Guidance is not selected, replaced, or otherwise modified. Merchant Context does not receive requested final DOM focus. Generate remains manual and is never invoked by the shortcut.
 - When the Side Panel is already visible and the webpage owns keyboard focus, Chrome may keep physical keyboard input routed to the webpage even though Guidance is the active element inside the panel document with the correct caret. The user may need to click Guidance. The shortcut does not retry, delay, poll, close and reopen, toggle, or use another browser surface to force activation.
-- Empty selection preserves Context and asks the user to select page text. Restricted or failed page capture preserves Context and asks the user to copy and paste instead. These paths do not force Guidance focus, and raw Chrome errors are not shown.
+- Empty selection preserves Context and shows `Select text on the page, then use the shortcut again.` Restricted or failed page capture preserves Context and shows `Couldn't capture selected text from this page. Copy and paste it into Merchant Context.` These paths also preserve Output, do not force Guidance focus or Generate, and expose no raw Chrome error.
 - The shortcut workflow is intended to reduce friction and accelerate the support task.
 - Selection capture is text-only, main-frame-only, transient, and user-invoked. It does not scrape surrounding page content, read cross-origin frames, expand persistent content-script matches, or capture screenshots.
 - This application-level keyboard shortcut is distinct from future Snippet Trigger Expansion. M10 opens or invokes extension behavior through a key combination; typed text such as `;hello` expands saved Snippet content inside a supported editor.
+- M10 real Chrome validation passed normal document, textarea, and contenteditable selection; first and repeated capture; empty and restricted-page feedback; state preservation; manual Generate using the new Context and existing Guidance; exact edited-output Copy with line breaks; popup Workspace and Library navigation; and both Knowledge and Snippet Library regressions. The already-visible-panel keyboard-routing limitation remains the only documented focus caveat and is not an implementation failure.
 
 ## 7. AI Generation Workflow
 
