@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace and 10 — Keyboard Shortcut are complete. The latest existing checkpoint is `8cfc38b` (`docs: record repeated side panel focus limitation`); the completed M10 implementation, tests, and closeout documentation remain uncommitted pending Principal approval and the authorized implementation checkpoint. The browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection, immediately opens the global Workspace Side Panel without awaiting capture, delivers a typed transient result through a delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus and a collapsed end caret, and leaves Generate manual. Opening a closed panel provides usable Guidance keyboard focus. When the panel is already visible and the webpage owns keyboard focus, Chrome may keep keyboard routing on the webpage despite the successful internal focus request, so the user may need to click Guidance. Milestone 11 — Settings is the current roadmap milestone; its architecture and implementation have not begun.
+Milestones 9 — Output Workspace and 10 — Keyboard Shortcut are complete. The latest checkpoint is `6093361` (`feat: add selected-text capture shortcut`); the M10 implementation, tests, and closeout documentation are committed and pushed, local `master` is synchronized with `origin/master`, and verified preflight found a clean working tree. The browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection, immediately opens the global Workspace Side Panel without awaiting capture, delivers a typed transient result through a delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus and a collapsed end caret, and leaves Generate manual. Opening a closed panel provides usable Guidance keyboard focus. When the panel is already visible and the webpage owns keyboard focus, Chrome may keep keyboard routing on the webpage despite the successful internal focus request, so the user may need to click Guidance. Milestone 11 — Settings is the current roadmap milestone; its architecture and implementation have not begun.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Obtain Principal approval for the completed M10 implementation and closeout diff, then create and push the authorized M10 implementation checkpoint and confirm local/remote synchronization. Only after that checkpoint may Milestone 11 — Settings architecture and implementation work begin.
+Proceed with a separate approved Milestone 11 — Settings architecture-definition task. Do not begin implementation until that architecture is documented and approved.

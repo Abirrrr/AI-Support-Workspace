@@ -23,7 +23,7 @@
 
 ## Project Status
 
-- Status: Milestone 10 — Keyboard Shortcut is complete following implementation review, automated validation, the Documentation Impact Review, and real Chrome manual validation. The latest existing checkpoint is `8cfc38b` (`docs: record repeated side panel focus limitation`), with local `master` synchronized to its tracked `origin/master`. The completed M10 implementation, tests, and closeout documentation are uncommitted pending Principal approval and the authorized implementation checkpoint. Milestone 11 — Settings is the current roadmap milestone; no M11 architecture or implementation has begun.
+- Status: Milestone 10 — Keyboard Shortcut is complete following implementation review, automated validation, the Documentation Impact Review, real Chrome manual validation, and the authorized implementation checkpoint. The latest checkpoint is `6093361` (`feat: add selected-text capture shortcut`), committed and pushed with local `master` synchronized to its tracked `origin/master`; verified preflight found a clean working tree. Milestone 11 — Settings is the current roadmap milestone; no M11 architecture or implementation has begun.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -156,7 +156,7 @@
 - Approved the exact command identity, description, suggested Windows/Linux/default and macOS keys, Chrome-native remapping, `activeTab` plus `scripting` least-privilege capture, unchanged persistent content script, typed transient ready/acknowledgement delivery, state preservation, safe feedback, automated validation, and manual Chrome validation contracts.
 - Preserved M9 foreground generation, existing application boundaries, database schema version 1, M11 Settings scope, future Rich Snippet Trigger Expansion, future Multimodal Context Attachments, and all excluded permissions and hosts while making no implementation, test, dependency, configuration, or persistence change during architecture definition.
 - Created M10 architecture checkpoint `7f5bbe8` (`docs: define keyboard shortcut architecture`), pushed it to `origin/master`, and synchronized local and remote state before implementation began.
-- Implemented the M10 command, selection extractor, delivery-ID ready/acknowledgement queue, Workspace application, focused tests, generated-output validation, and least-privilege manifest changes. The completed implementation and tests remain uncommitted pending Principal approval and an authorized implementation checkpoint.
+- Implemented the M10 command, selection extractor, delivery-ID ready/acknowledgement queue, Workspace application, focused tests, generated-output validation, and least-privilege manifest changes. The completed implementation, tests, and closeout documentation are committed and pushed at checkpoint `6093361` (`feat: add selected-text capture shortcut`).
 - During real Chrome validation, confirmed Chrome-native shortcut remapping to `Ctrl+Shift+Y`, production command dispatch, on-demand exact selection scripting, and direct command-turn Side Panel opening. Diagnosed that awaiting capture completion before `chrome.sidePanel.open(...)` exhausted Chrome's user-action eligibility and was silently swallowed by safe open-failure handling.
 - Validated the amended sequence end to end in real Chrome by initiating selection capture first, immediately initiating Side Panel opening without an intervening await, and then observing both outcomes. Capture, open, typed delivery, exact Context replacement, and exact leading-whitespace preservation passed.
 - Implemented and covered the amended successful-capture behavior so exact Merchant Context replacement is followed on every success by `guidanceElement.focus()` and `setSelectionRange(end, end)`. Empty and failed capture preserve existing feedback and do not force Guidance focus.
@@ -166,13 +166,11 @@
 - Recorded the observed cross-world preload mismatch and unused generated preloads as non-blocking WXT/Vite/Chrome generated-output warnings with no observed functional impact and no explicit application-source request. M10 makes no configuration change; investigate separately only if functional or performance evidence emerges.
 - Completed final automated validation: focused M10/Workspace tests passed; the full Vitest suite passed 171 tests with one opt-in live Ollama test skipped; lint, formatting, type-checking, Playwright discovery of 1 Chromium infrastructure test, the production WXT Chrome MV3 build, generated-output and manifest validation, and `git diff --check` passed. Only expected Windows LF-to-CRLF notices occurred, and no live Ollama test was required for M10.
 - Completed the mandatory M10 Documentation Impact Review. Project state, architecture status, decision-record delivery and closeout wording, UI workflow, roadmap, backlog status, testing strategy, database status, changelog, and README required synchronization. Product requirements, engineering principles, and coding-agent rules were reviewed and required no changes.
-- Marked Milestone 10 complete and advanced the current roadmap milestone to Milestone 11 — Settings without defining M11 architecture or implementation. The M10 implementation checkpoint does not yet exist and awaits Principal approval, Git commit, and GitHub push.
+- Marked Milestone 10 complete and advanced the current roadmap milestone to Milestone 11 — Settings without defining M11 architecture or implementation. The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), committed, pushed, and synchronized between local `master` and `origin/master`.
 
 ## Next Engineering Action
 
-- Obtain Principal approval for the completed M10 implementation, tests, and closeout documentation.
-- Only after explicit authorization, create the M10 implementation checkpoint, push it to GitHub, and confirm local and remote synchronization with a clean milestone-boundary worktree.
-- After synchronization, define Milestone 11 — Settings architecture and implementation scope in a separate approved task. This closeout does not define or implement M11.
+- Define Milestone 11 — Settings architecture and implementation scope in a separate approved task. This repository-state correction does not define or implement M11.
 
 ## Repository Status
 
@@ -183,18 +181,18 @@
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 1, two physical tables, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The latest existing checkpoint is `8cfc38b` (`docs: record repeated side panel focus limitation`), with local `master` synchronized to its tracked `origin/master`.
-- The working tree intentionally contains the completed uncommitted M10 implementation and tests plus this documentation-only closeout. This closeout changed no source, test, dependency, or configuration file.
+- The latest checkpoint is `6093361` (`feat: add selected-text capture shortcut`), committed and pushed with local `master` synchronized to its tracked `origin/master`; verified preflight found a clean working tree at this checkpoint.
+- This repository-state synchronization correction changes documentation only and does not change source, tests, dependencies, or configuration.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, Prompt Templates, or Settings functionality is implemented. The completed uncommitted M10 page-selection integration passed automated and manual validation. Multimodal Context Attachments, Rich Snippet Templates & Trigger Expansion, and supported future activation of an already-visible Chrome Side Panel remain approved, unassigned future directions separate from M10.
+- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, Prompt Templates, or Settings functionality is implemented. The completed M10 page-selection integration passed automated and manual validation and is committed and pushed at checkpoint `6093361`. Multimodal Context Attachments, Rich Snippet Templates & Trigger Expansion, and supported future activation of an already-visible Chrome Side Panel remain approved, unassigned future directions separate from M10.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
 - Current roadmap milestone: Milestone 11 — Settings. Its architecture and implementation have not begun.
-- Current repository state: Documentation through the M10 repeated-focus limitation is synchronized at checkpoint `8cfc38b`. The completed M10 implementation, tests, and closeout documentation are uncommitted and awaiting Principal approval and the authorized implementation checkpoint.
-- Next action: Approve, commit, and push the completed M10 checkpoint, confirm local/remote synchronization, then begin a separate M11 architecture-definition task.
+- Current repository state: The completed M10 implementation, tests, and closeout documentation are committed at checkpoint `6093361` (`feat: add selected-text capture shortcut`), pushed to `origin/master`, and synchronized with local `master`; verified preflight found a clean working tree.
+- Next action: Begin a separate approved M11 architecture-definition task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -210,5 +208,5 @@
 
 ## Current Git Checkpoint
 
-- Latest existing checkpoint: `8cfc38b` (`docs: record repeated side panel focus limitation`). Local `master` is synchronized to its tracked `origin/master` at this checkpoint.
-- M10 is complete, but its implementation checkpoint does not yet exist. The completed implementation, tests, and closeout documentation remain uncommitted pending Principal approval; no GitHub push has occurred for M10. M11 is current but has no approved architecture or implementation yet.
+- Latest checkpoint: `6093361` (`feat: add selected-text capture shortcut`). The checkpoint is committed and pushed, and local `master` is synchronized to its tracked `origin/master` at this checkpoint; verified preflight found a clean working tree.
+- M10 is complete at its implementation checkpoint. M11 is current but has no approved architecture or implementation yet.

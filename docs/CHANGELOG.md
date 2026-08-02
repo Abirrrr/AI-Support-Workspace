@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Repository Continuity Correction — M10 Implementation Checkpoint
+
+- Corrected active repository continuity to record `6093361` (`feat: add selected-text capture shortcut`) as the completed Milestone 10 implementation checkpoint, committed and pushed with local `master` synchronized to `origin/master`; verified preflight found a clean working tree at that checkpoint.
+- Confirmed Milestone 10 — Keyboard Shortcut is complete and Milestone 11 — Settings is current. This correction does not define or implement M11.
+- Completed a documentation-only Documentation Impact Review for repository-state synchronization. `PROJECT_STATE.md`, the current architecture status, the changelog, and README required correction; the roadmap and coding-agent rules were reviewed and required no changes. No source, test, dependency, configuration, architecture, product behavior, or database-schema change was made.
+
 ### Milestone 10 — Keyboard Shortcut Closeout
 
 - Completed exactly one browser-scoped command, `capture-selection-to-workspace`, with description `Capture selected text in AI Support Workspace`, suggested default `Ctrl+Shift+Space`, suggested macOS key `Command+Shift+Space`, no global scope, and Chrome-native customization through `chrome://extensions/shortcuts`. The user's local `Ctrl+Shift+Y` remap resolved a Text Blaze conflict without changing the manifest default.
