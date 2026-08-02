@@ -565,7 +565,26 @@ M11 implemented Decision 31 without amendment. The focused typed boundary, Dexie
 
 Automated validation passed 69 focused tests in 9 files and 200 tests in 25 files in the normal suite; 1 opt-in live Ollama test in 1 file remained skipped. Lint, formatting, type-checking, Playwright discovery, the production Chrome MV3 build, generated-output and manifest validation, and `git diff --check` passed. Real Chrome validation separately passed first-run and migration behavior, save/reload persistence, new-session initialization, transient override and reopen restoration, real `qwen2.5:7b` generation, clear-to-null, Library preservation, M10 capture, popup navigation, and unchanged permissions. Persistence load/save fault UI was covered by automation rather than manual database fault injection.
 
-No new architecture decision resulted from implementation or validation. M11 is complete and M12 retains its existing Import / Export ownership without architecture or scope expansion here. The uncommitted M11 implementation, tests, and closeout documentation await Principal approval and an authorized checkpoint.
+No new architecture decision resulted from implementation or validation. M11 is complete and M12 retains its existing Import / Export ownership without architecture or scope expansion here. The M11 implementation and closeout were later committed and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`).
+
+## Decision 32: Milestone Task Governance and Future Capability Assignments
+
+This is a workflow-governance and roadmap-assignment decision, not an implementation or application-architecture decision.
+
+Every Principal Engineer or coding-agent task inside a milestone must have a unique identifier formed from the milestone number and a sequential letter, such as `M12-A`, `M12-B`, and `M12-C`. Identifiers are never reused for independent tasks. Every task heading and completion-report heading uses the same identifier, `PROJECT_STATE.md` records the active task, and each completion report confirms that work remained within that identified scope. Every task ends with an independent Principal-readiness self-check before completion is reported.
+
+Focused corrections or continuations of the same task use sequential decimal suffixes, such as `M12-C.1` and `M12-C.2`. A correction remains part of its original task, does not consume the next normal letter, and must not be represented as a new independent task. M12-A.1 is the corrective execution of the M12-A documentation work after M12-A ran only a readiness self-check and produced no repository changes.
+
+Roadmap ownership is assigned as follows:
+
+- M12 remains Import / Export.
+- M13 remains Provider Expansion / OpenAI.
+- M14 is Multimodal Context Attachments only.
+- M15 is Rich Snippet Templates & Trigger Expansion only.
+
+M12 will use an independently versioned export-file format whose version remains separate from the Dexie schema version. Future export-format versions may support future persisted data types. Transient screenshot Context does not enter M12. Future Rich Snippet data does not enter the initial M12 scope because that capability does not exist yet. Detailed Import / Export decisions begin with the unstarted M12-B — Import / Export Architecture Readiness Review.
+
+The M14 and M15 assignments establish high-level roadmap ownership only. Detailed multimodal and Rich Snippet architecture remains deferred to future tasks within those milestones, and neither screenshot nor Rich Snippet implementation may enter M12.
 
 ## Rationale
 

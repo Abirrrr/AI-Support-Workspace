@@ -96,19 +96,25 @@ Add a keyboard shortcut for quick access to the extension experience.
 
 Provide a local Settings UI where the user can save one optional default Ollama model and have each new Workspace Side Panel session initialize its transient model field from that saved value. Establish the typed Settings persistence boundary and the Dexie version 2 migration that adds only the singleton Settings record.
 
-Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 13 — OpenAI Provider, when more than one provider exists.
+Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 13 — Provider Expansion / OpenAI, when more than one provider exists.
 
 ## Milestone 12 — Import / Export (Current)
 
 Add support for importing and exporting local data.
 
-## Milestone 13 — OpenAI Provider
+M12 will use an independently versioned export-file format whose versioning remains separate from Dexie schema versioning. Future export-format versions may support future persisted data types. Transient screenshot Context is outside M12, and future Rich Snippet data is outside the initial M12 scope because that capability does not exist yet. Detailed Import / Export architecture begins with M12-B — Import / Export Architecture Readiness Review, which has not started.
+
+## Milestone 13 — Provider Expansion / OpenAI
 
 Add OpenAI as a later provider integration and define provider selection when more than one provider exists.
 
-## Milestone 14 — Polish
+## Milestone 14 — Multimodal Context Attachments
 
-Improve quality, usability, performance, and documentation.
+Allow one or more screenshots or images to be pasted into Merchant Context with transient, local-first behavior by default, a provider-independent attachment boundary, provider capability checks, and explicit feedback when a provider cannot use or omits an attachment. Detailed architecture remains deferred to future M14 tasks.
+
+## Milestone 15 — Rich Snippet Templates & Trigger Expansion
+
+Add semicolon triggers such as `;hello`, ordered rich content such as text → image/reference → text, rich-editor insertion where supported, deterministic plain-text fallback, an editor capability or adapter boundary, and compatibility with existing plain Snippets. Detailed architecture remains deferred to future M15 tasks.
 
 ## Planning Note
 

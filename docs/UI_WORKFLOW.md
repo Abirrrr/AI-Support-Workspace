@@ -348,18 +348,17 @@ Local persistence
 
 ## 10. Future Workflows
 
-### Approved Unassigned Product Directions
+### Assigned Future Capability Workflows
 
-- **Multimodal Context Attachments:** combine text with one or more transient clipboard screenshots or visual assets for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling.
-- **Rich Snippet Templates & Trigger Expansion:** expand semicolon triggers into ordered structured Snippet content through a destination-aware editor boundary, with safe positional fallback for editors that cannot insert rich content.
+- **M14 — Multimodal Context Attachments:** combine text with one or more transient clipboard screenshots or visual assets for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
+- **M15 — Rich Snippet Templates & Trigger Expansion:** expand semicolon triggers into ordered structured Snippet content through a destination-aware editor boundary, with safe positional fallback for editors that cannot insert rich content. Detailed architecture remains deferred.
 
 Context images provide transient visual information to generation. Snippet images are reusable Library-owned response content intended for editor expansion. Their domain ownership must remain separate.
 
 The following potential workflows are not part of the current core user experience definition and require their own approved scope before implementation:
 
-- Import Library
-- Export Library
-- Provider Selection, deferred to Milestone 13 when more than one provider exists
+- Import and Export, owned by Milestone 12 with architecture beginning in M12-B
+- Provider Selection, deferred to Milestone 13 Provider Expansion / OpenAI when more than one provider exists
 - Provider endpoint configuration after a dedicated security and permissions architecture review
 - Persistent Prompt Profiles or writing preferences after a separate product and precedence decision
 - Prompt Management

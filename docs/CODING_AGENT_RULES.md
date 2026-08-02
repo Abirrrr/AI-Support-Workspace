@@ -25,6 +25,34 @@ Repository documentation is the only source of truth for product direction, arch
 - Every milestone should include automated tests where applicable.
 - Do not implement business functionality outside the current milestone unless explicitly requested.
 
+## Milestone Task Identification
+
+- Every Principal Engineer or coding-agent task inside a milestone must use a unique identifier made from the parent milestone number and a sequential letter, such as `M12-A`, `M12-B`, `M12-C`, and `M12-D`.
+- Normal task letters are assigned sequentially and are never reused within the same milestone for an independent task.
+- Every Codex task heading and matching completion-report heading must include the exact task identifier.
+- `PROJECT_STATE.md` must record the current active task identifier. A task may not silently change the documented milestone or active task.
+- Every completion report must confirm that work remained within the identified task scope.
+- Git commit messages may include the task identifier when useful, but no task-identifier commit-message format is mandatory.
+- This convention introduces no epics, sprints, ticket system, story points, issue tracker, or deeper project-management hierarchy.
+
+### Corrective Task Suffixes
+
+- A focused correction or continuation of the same task uses a sequential decimal suffix, such as `M12-C.1` and `M12-C.2`.
+- A decimal correction remains part of the original task and does not consume the next normal letter. The next independent task after `M12-C`, `M12-C.1`, or `M12-C.2` remains `M12-D`.
+- A correction must not be represented as a new independent task, and a previous identifier must not be reused for unrelated work.
+- M12-A.1 is the corrective execution of the missing M12-A documentation work; M12-A ran only a readiness self-check, produced no repository changes, and was superseded rather than reused.
+
+### Task Continuity Gate
+
+Before changing files, the coding agent must compare the supplied identifier, milestone, repository documentation, and Git state. Stop and report a continuity conflict when:
+
+- The supplied task identifier conflicts with the active task in `PROJECT_STATE.md`.
+- An identifier is reused for an independent task.
+- The supplied milestone number differs from the current documented milestone.
+- A corrective task is represented as a new independent task.
+- The next sequential task identifier is skipped without explanation.
+- Documentation and Git state materially disagree.
+
 ## Scope Interpretation
 
 - When milestone scope appears ambiguous, repository documentation overrides inference.
@@ -134,6 +162,13 @@ Use this checklist for every implementation milestone:
 - Preserve the long-term traceability of decisions and architecture changes.
 - Treat missing documentation updates as a failed milestone review.
 
+## Principal-Readiness Self-Check
+
+- Every Principal Engineer or coding-agent task must end with a final independent Principal-readiness review before its completion report.
+- The review must verify the exact task identifier in the task and report headings, current milestone and active-task continuity, adherence to only the identified task scope, documentation consistency, intended-file-only Git diff, required validation results, and the absence of unauthorized commits or pushes.
+- The completion report must state `Principal-readiness self-check: PASS` or `Principal-readiness self-check: FAIL`.
+- A failed self-check must list every unresolved issue, must not claim the task is complete, and must not recommend a checkpoint until the issues are resolved.
+
 ## Repository Synchronization
 
 - Git is the implementation history.
@@ -154,6 +189,8 @@ Use this checklist for every implementation milestone:
 
 Every completion report must include:
 
+- A heading containing the exact active task identifier
+- Confirmation that only the identified task scope was addressed
 - Files changed
 - Tests executed
 - Validation performed
@@ -161,6 +198,7 @@ Every completion report must include:
 - Architecture concerns
 - Documentation updated
 - Documentation Impact Review outcome
+- Principal-readiness self-check result
 
 ## Milestone 1 Scope Boundary
 

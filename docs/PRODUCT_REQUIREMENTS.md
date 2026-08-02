@@ -62,9 +62,9 @@ The libraries may both contribute to a support response, but they have different
 - M11 includes no provider selector, configurable endpoint, remote or LAN Ollama, OpenAI, credentials, model discovery, generation tuning, writing preferences, editable grounding instructions, theme, shortcut setting, Workspace persistence, history, reset, import, or export.
 - The existing provider boundary, fixed `http://localhost:11434` endpoint, Chrome-native shortcut management, popup behavior, M9 Workspace behavior, M10 capture behavior, and manifest permissions remain unchanged.
 
-## Future Multimodal Context Attachments
+## M14 — Multimodal Context Attachments
 
-Multimodal Context Attachments are an approved future product direction with no assigned milestone. They do not reopen M9 or change the current text-only M9 implementation.
+Multimodal Context Attachments are assigned to M14. This roadmap assignment does not define detailed architecture, reopen M9, or change the current text-only M9 implementation.
 
 - Merchant Context should eventually accept ordinary text plus one or more pasted screenshots or other visual context assets. Text and images may appear together in the current Context workflow, including text before and after an image, with separate Guidance supplied for the task.
 - A user should be able to paste screenshot or image clipboard content directly into Context without first saving every image to disk or uploading it to a cloud service. Exact browser clipboard mechanics remain future architecture work.
@@ -85,9 +85,9 @@ Guidance
 
 Context images are generation inputs, not reusable response assets. They must remain conceptually distinct from future Snippet images even if later implementations can share low-level utilities.
 
-## Future Rich Snippet Templates and Trigger Expansion
+## M15 — Rich Snippet Templates & Trigger Expansion
 
-Rich Snippet Templates and Trigger Expansion are a separate approved future product direction with no assigned milestone.
+Rich Snippet Templates & Trigger Expansion is assigned to M15 as a separate approved future product direction. This roadmap assignment does not define detailed architecture.
 
 - Snippets should eventually expose a Shortcut or Trigger field for text-expansion triggers such as `;hello`, `;refund`, `;shipping`, or `;shopify-limit`.
 - Typing a configured trigger in a supported support editor should replace the trigger range with the associated saved Snippet content.

@@ -4,6 +4,14 @@
 
 - Milestone 12 — Import / Export
 
+## Task State
+
+- Last completed task: M12-A.1 — Task Identification and Future Capability Roadmap Alignment.
+- Active task: M12-B — Import / Export Architecture Readiness Review.
+- Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
+- M12-A.1 passed Principal review, is complete, and is awaiting the shared documentation checkpoint.
+- M12-B is the next authorized task. Its implementation has not started, and Import / Export architecture has not yet been defined.
+
 ## Previous Milestones
 
 - Milestone 0 — Foundation: Completed
@@ -24,18 +32,27 @@
 
 ## Project Status
 
-- Status: Milestone 11 — Settings is implemented, automatically validated, manually validated in real Chrome, and complete. Its implementation, tests, and closeout documentation remain uncommitted pending Principal approval and an authorized Git checkpoint. Milestone 12 — Import / Export is the next roadmap milestone; its architecture and implementation have not been defined by this closeout.
+- Status: Milestone 11 — Settings is implemented, validated, complete, and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`). Milestone 12 — Import / Export is current. M12-A.1 passed Principal review and is complete pending the shared documentation checkpoint. M12-B is active as the next authorized task, but its implementation has not started and Import / Export architecture remains undefined.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
 - The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
 
-## Approved Unassigned Future Product Directions
+## Approved Future Product Directions
 
-- **Multimodal Context Attachments:** Merchant Context should eventually combine text with one or more transient clipboard screenshots or visual assets for generation through a provider-independent capability boundary. Unsupported images must not disappear silently.
-- **Rich Snippet Templates & Trigger Expansion:** Snippets should eventually support semicolon triggers, ordered structured text/image/reference content, and target-aware expansion with deterministic plain-text fallback.
+- **M14 — Multimodal Context Attachments:** Merchant Context should eventually combine text with one or more transient clipboard screenshots or visual assets for generation through a provider-independent capability boundary. Provider capability checks and explicit unsupported-provider or omission feedback must ensure unsupported images never disappear silently. Detailed M14 architecture remains deferred.
+- **M15 — Rich Snippet Templates & Trigger Expansion:** Snippets should eventually support semicolon triggers, ordered structured text/image/reference content, target-aware rich-editor insertion, deterministic plain-text fallback, and compatibility with existing plain Snippets. Detailed M15 architecture remains deferred.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
-- These directions have no assigned milestone and define no implementation architecture. They do not reopen M9, redefine M10 Keyboard Shortcut, redefine completed M11 Settings, authorize additional persistence changes, or change database schema version 2. `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, and `BACKLOG.md` preserve the detailed intent and unresolved architecture questions.
+- The Side Panel focus direction remains unassigned. The M14 and M15 assignments define roadmap ownership only, not implementation architecture. These directions do not reopen M9, redefine M10 Keyboard Shortcut, redefine completed M11 Settings, authorize persistence changes, or change database schema version 2. `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, and `BACKLOG.md` preserve the approved intent and unresolved architecture questions.
+
+## Milestone 12 Scope Protection
+
+- M12 remains Import / Export. M12-A.1 does not define or implement its architecture.
+- M12 will use an independently versioned export-file format; export-format versioning remains separate from Dexie schema versioning.
+- Future export-format versions may support future persisted data types.
+- Transient screenshot Context is not part of M12.
+- Future Rich Snippet data is not part of the initial M12 scope because that capability does not exist yet.
+- Export fields, merge or replace behavior, duplicate handling, backup validation, import transactions, UI behavior, file naming, errors, and acceptance criteria remain undecided and begin no earlier than M12-B.
 
 ## Architecture Status
 
@@ -180,11 +197,12 @@
 - Completed final automated validation: the focused suite passed 69 tests in 9 files; the full Vitest suite passed 200 tests in 25 files with 1 opt-in live Ollama test skipped in 1 file; lint, formatting, type-checking, Playwright discovery of 1 Chromium test in 1 file, the production Chrome MV3 build, generated-output and manifest validation, and `git diff --check` passed. Only expected Windows LF-to-CRLF notices occurred.
 - Completed real Chrome M11 validation of first-run blank state, save and options-page reload persistence, new Side Panel initialization, transient Workspace override and reopen restoration, real `qwen2.5:7b` generation, clear-to-null behavior, Knowledge and Snippet preservation, M10 capture/state behavior, popup navigation, and unchanged permissions. Persistence failure UI remains deterministically covered by automation; manual database fault injection was not required or performed.
 - Completed the mandatory M11 Documentation Impact Review. Project state, architecture status, decision implementation status, UI workflow, roadmap, backlog, database schema, testing strategy, changelog, and README required synchronization. Product requirements, engineering principles, and coding-agent rules were reviewed and required no change.
-- Marked Milestone 11 complete and advanced the current roadmap milestone to Milestone 12 — Import / Export without defining or expanding M12 architecture or implementation. The M11 implementation checkpoint is awaiting Principal approval and an authorized Git commit; the working tree contains the uncommitted implementation, tests, and closeout documentation.
+- Marked Milestone 11 complete and advanced the current roadmap milestone to Milestone 12 — Import / Export without defining or expanding M12 architecture or implementation. The M11 implementation and closeout were later committed and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`).
+- Completed M12-A.1 as the corrective documentation-only execution of M12-A after the original M12-A produced no repository changes. M12-A.1 passed Principal review, introduced task governance, and assigned M14 and M15 without defining M12, M14, or M15 architecture. Its changes await the shared documentation checkpoint.
 
 ## Next Engineering Action
 
-- Define and approve Milestone 12 — Import / Export architecture in a separate documentation task before implementation. This M11 closeout does not define or expand M12.
+- Begin the active M12-B — Import / Export Architecture Readiness Review. M12-B implementation has not started; do not implement Import / Export before its architecture is defined and approved. The completed M12-A.1 changes remain uncommitted pending the shared documentation checkpoint.
 
 ## Repository Status
 
@@ -195,18 +213,18 @@
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 2, the unchanged Knowledge and Snippet stores, the singleton Settings store, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`). The latest committed and pushed repository checkpoint is the M11 architecture definition at `f0eb4d3` (`docs: define default model settings architecture`), with local `master` synchronized to `origin/master` before M11 implementation.
-- The working tree intentionally contains completed, uncommitted M11 implementation, tests, and closeout documentation. No M11 implementation checkpoint hash exists yet.
+- The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`). The latest committed and pushed repository checkpoint is the completed M11 implementation at `d40e031` (`feat: add default Ollama model settings`).
+- M12-A.1 passed Principal review and is complete. Its documentation changes remain uncommitted pending the shared documentation checkpoint with this task-state transition.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. M11 Settings now initializes the transient model through a separate persistence/application boundary without changing `GenerationRequest`, Prompt Builder, or `OllamaProvider`. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, or Prompt Templates are implemented. Multimodal Context Attachments, Rich Snippet Templates & Trigger Expansion, and supported future activation of an already-visible Chrome Side Panel remain approved, unassigned future directions.
+- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. M11 Settings now initializes the transient model through a separate persistence/application boundary without changing `GenerationRequest`, Prompt Builder, or `OllamaProvider`. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, or Prompt Templates are implemented. Multimodal Context Attachments is assigned to M14, Rich Snippet Templates & Trigger Expansion is assigned to M15, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 12 — Import / Export. M11 Settings is complete; M12 architecture and implementation remain undefined by this closeout.
-- Current repository state: HEAD remains the committed M11 architecture checkpoint `f0eb4d3` (`docs: define default model settings architecture`). The working tree contains the completed, uncommitted M11 implementation, tests, and closeout documentation pending Principal approval and an authorized checkpoint.
-- Next action: review and authorize the M11 Git checkpoint, push and synchronize it, then define M12 architecture separately before implementation.
+- Current roadmap milestone: Milestone 12 — Import / Export. Last completed task: M12-A.1 — Task Identification and Future Capability Roadmap Alignment. Active task: M12-B — Import / Export Architecture Readiness Review.
+- Current repository state: HEAD and `origin/master` began M12-A.1 synchronized at `d40e031` (`feat: add default Ollama model settings`). The working tree contains the uncommitted M12-A.1 documentation and this focused task-state transition, all awaiting one shared documentation checkpoint.
+- Next action: begin the active but unstarted M12-B architecture-readiness review. Import / Export architecture and implementation remain undefined.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -217,10 +235,10 @@
 - The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
 - Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration. These boundaries passed manual Chrome validation, but environment setup remains external and must not be changed automatically.
 - Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
-- Multimodal and rich-Snippet architecture remains deliberately unresolved, including image and rich-content representation, provider and editor capability boundaries, unsupported-image behavior, limits, reusable asset ownership, trigger validation, migration, insertion, caret handling, and plain-text fallback for local assets.
+- Detailed M14 multimodal and M15 rich-Snippet architecture remains deliberately unresolved, including image and rich-content representation, provider and editor capability details, unsupported-image behavior, limits, reusable asset ownership, trigger validation, migration, insertion, caret handling, and plain-text fallback details for local assets.
 - History remains intentionally undecided and must not be assumed to be in scope.
 
 ## Current Git Checkpoint
 
-- Latest committed and pushed checkpoint: `f0eb4d3` (`docs: define default model settings architecture`). M10 is complete at implementation checkpoint `6093361` (`feat: add selected-text capture shortcut`).
-- M11 is complete and manually validated, but its implementation checkpoint is awaiting Principal approval and an authorized Git commit. The implementation, tests, and closeout documentation remain uncommitted; no push was performed.
+- Latest committed and pushed checkpoint: `d40e031` (`feat: add default Ollama model settings`). M11 is complete, and local `master` was synchronized with `origin/master` when M12-A.1 began.
+- M12-A.1 passed Principal review and is complete, and M12-B is active but unstarted. The shared documentation checkpoint remains uncommitted; no push has been performed.

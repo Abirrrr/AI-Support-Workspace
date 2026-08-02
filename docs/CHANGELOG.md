@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### M12-A.1 — Task Identification and Future Capability Roadmap Alignment
+
+- Introduced mandatory milestone task identifiers using the parent milestone number plus sequential non-reusable letters, required the exact identifier in Codex task and completion-report headings, and added active-task tracking in `PROJECT_STATE.md`.
+- Introduced sequential decimal suffixes for focused corrections or continuations of the same task without consuming the next normal letter. Recorded M12-A.1 as the corrective execution after M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded rather than reused.
+- Added coding-agent continuity gates for identifier reuse or mismatch, incorrect corrective-task representation, milestone mismatch, unexplained sequential skips, and material disagreement between documentation and Git state.
+- Added a permanent final independent Principal-readiness self-check requirement and required PASS or FAIL reporting before any task completion claim.
+- Kept M12 as Import / Export and M13 as Provider Expansion / OpenAI. Assigned M14 only to Multimodal Context Attachments and M15 only to Rich Snippet Templates & Trigger Expansion, while moving generic Polish work to the backlog.
+- Protected M12 at a high level: export-file versioning remains independent from Dexie schema versioning; future versions may support future persisted data types; transient screenshot Context is excluded; and future Rich Snippet data is outside the initial M12 scope. Detailed Import / Export decisions begin with the unstarted M12-B architecture-readiness task.
+- Preserved the approved high-level multimodal and Rich Snippet product directions while deferring detailed M14 and M15 architecture and all implementation.
+- Completed a documentation-only impact review covering workflow governance, project continuity, roadmap assignment, and coding-agent process. No product implementation, application-architecture implementation, test, database, schema, manifest, permission, dependency, or configuration change was made.
+- M12-A.1 passed Principal review and is complete. M12-B — Import / Export Architecture Readiness Review is now active as the next authorized task, but its implementation has not started and Import / Export architecture remains undefined. The shared documentation checkpoint remains uncommitted, and no push has been performed.
+
 ### Milestone 11 — Default Ollama Model Settings Closeout
 
 - Completed exactly one local setting, `Settings { defaultModel: string | null }`, with `null` as the application default, no implicit installed model, `qwen2.5:7b` as placeholder/example text only, trim-on-save normalization, opaque non-empty identifiers, and empty or whitespace-only clearing to `null` without contacting Ollama.
@@ -16,7 +28,7 @@
 - Completed real Chrome validation of the visible Settings section, blank first-run state, disabled initial Save, migration preservation, `qwen2.5:7b` save and options reload persistence, new Side Panel initialization, transient `temporary-test-model` override and reopen restoration, real local Ollama generation, clear-to-null across reload and new session, `Ctrl+Shift+Y` M10 capture with model preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save failure UI was validated through automation; manual database fault injection was not performed.
 - Kept provider selection; configurable `providerBaseUrl`; LAN or remote Ollama; OpenAI; API keys and credentials; model discovery, pulling, health checks, and automatic installation; generation tuning, temperature, and token limits; writing preferences, persistent custom instructions, and editable Prompt Builder grounding instructions; theme; `shortcutsEnabled` and in-app remapping; Snippet triggers and Rich Snippets; multimodal Context and screenshots; Workspace Context, Guidance, and Output persistence; history; reset; import/export and backup/restore; a generic Settings renderer; multiple Settings categories; and live cross-page synchronization out of M11. M12 retains its documented import/export ownership.
 - Completed the Documentation Impact Review. Project state, architecture status, Decision 31 implementation status, UI workflow, roadmap, backlog, database schema, testing strategy, changelog, and README required synchronization. Product requirements, engineering principles, and coding-agent rules were reviewed and required no change.
-- Marked M11 complete and advanced the current roadmap milestone to Milestone 12 — Import / Export without defining or expanding M12 architecture or implementation. The M11 implementation, tests, and closeout documentation remain uncommitted pending Principal approval and an authorized Git checkpoint; no checkpoint hash is invented here.
+- Marked M11 complete and advanced the current roadmap milestone to Milestone 12 — Import / Export without defining or expanding M12 architecture or implementation. The M11 implementation and closeout were later committed and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`).
 
 ### Milestone 11 — Settings Architecture Definition
 
@@ -99,17 +111,17 @@
 
 ### Future Product Directions — Multimodal Context and Rich Snippet Expansion
 
-- Approved Multimodal Context Attachments as an unassigned future product direction: Merchant Context may eventually combine text with one or more pasted screenshots or visual assets for capable providers and models.
+- Approved Multimodal Context Attachments as a future product direction: Merchant Context may eventually combine text with one or more pasted screenshots or visual assets for capable providers and models. The capability is now assigned to M14.
 - Required future direct clipboard image paste, visible attachment state, appropriate preview, and removal before generation without requiring every screenshot to be saved to disk or uploaded to a cloud service. Count, size, format, and reordering rules remain unresolved.
 - Established transient, local-first Context images as the preferred default and required a provider-independent capability boundary that never silently discards unsupported images.
-- Approved Rich Snippet Templates & Trigger Expansion as a separate unassigned future direction, including a future Shortcut or Trigger field with semicolon syntax such as `;hello` and `;shopify-limit`.
+- Approved Rich Snippet Templates & Trigger Expansion as a separate future direction, including a future Shortcut or Trigger field with semicolon syntax such as `;hello` and `;shopify-limit`. The capability is now assigned to M15.
 - Explicitly separated Snippet triggers from M10 Keyboard Shortcut: application key combinations invoke extension behavior, while typed semicolon triggers expand saved content inside supported editors.
 - Approved ordered structured Snippet content capable of preserving text → image/reference → following text, with future paragraphs, links, emphasis, images, and other appropriate structured blocks. Arbitrary executable HTML is not approved.
 - Required target-aware expansion through a focused editor capability boundary, rich insertion where supported, and deterministic plain-text fallback that preserves image/reference position and does not silently omit local or remote assets.
 - Required future expansion safety for trigger replacement range, surrounding-content preservation, caret placement, and unsupported-editor behavior, plus backward compatibility for existing plain-text Snippets.
 - Distinguished transient generation-owned Context images from reusable Library-owned Snippet images; shared low-level utilities may be considered later without collapsing domain ownership.
 - Deferred all implementation architecture, including image and rich-content representation, provider capability interfaces, unsupported-provider UX, limits, persistence, serialization, trigger validation and uniqueness, database migration, reusable asset ownership, expansion engine, editor adapters, insertion mechanics, compatibility matrix, caret behavior, and local-asset fallback.
-- Added no milestone number and did not reopen M9 or redefine M10 or M11. No implementation, test, dependency, permission, or database-schema change was made.
+- This earlier direction added no milestone number and did not reopen M9 or redefine M10 or M11; Decision 32 now assigns the capabilities to M14 and M15. No implementation, test, dependency, permission, or database-schema change was made.
 
 ### Milestone 9 — Output Workspace
 
