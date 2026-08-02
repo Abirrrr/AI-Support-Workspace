@@ -130,6 +130,24 @@ Final focused M11 validation passed 69 tests in 9 files. The full normal Vitest 
 
 Real Chrome validation confirmed options-page and Settings navigation; blank first-run state and initially disabled Save; save and reload persistence using `qwen2.5:7b`; new Side Panel initialization; transient Workspace override and generation using the current field; close/reopen restoration of the saved default; clear-to-null behavior; Knowledge and Snippet preservation after migration; M10 selected-text capture with preserved manual model and no automatic Generate; popup navigation; unchanged permissions; and real Ollama generation with the installed model. Persistence load/save failure UI remained covered by automated tests; manual database fault injection was not required or performed.
 
+### Import / Export v1 Test Contract
+
+M12-D automated tests must cover the following without requiring a live Ollama service:
+
+- exact strict version 1 envelope, identifier, required keys, forbidden extra or dangerous keys, independent format versioning, valid UTC `exportedAt`, and safe unsupported-version handling;
+- empty persisted state; exact Knowledge, Snippet, and Settings fields and types; UUID and timestamp validation; missing physical Settings resolved to `null`; populated and null Settings; no physical Settings ID; duplicate IDs; empty arrays; and complete-file rejection when any nested value is invalid;
+- exclusion of transient Workspace, browser/page, provider, secret, M14, and M15 data;
+- deterministic Knowledge and Snippet ordering by `createdAt` then `id`, exact text and tag-order preservation including Unicode, line breaks, and special characters, exact UTC metadata and filename formatting, UTF-8 serialization, object-URL creation/revocation, and export success/failure mapping;
+- aligned 25 MiB import `File.size` and serialized-export UTF-8 limits, rejection before import reading, and the absence of extra record or field limits;
+- file read and JSON parse failures, no persistence before complete validation, safe errors without raw details, no evaluation or executable rendering, and HTML-like values retained as plain strings;
+- fourth options-page-section navigation; Export and file-selection actions; preview filename, timestamp, counts, saved-model/null rendering; no bodies/content/diff; replacement-file, validation-failure, success, and Cancel resets; warning; acknowledgement; native disabled state; busy states; success summary counts; failure behavior; focus and label behavior; privacy warning; live announcements; and every exact M12 message;
+- one replace-only application operation, bypass of ordinary create/update semantics, preservation of all IDs/timestamps/tags/source metadata, Settings string and null restore, valid empty restore, no partial writes, existing-state preservation after failure, and ordering-independent export/restore round-trip equivalence;
+- one isolated Dexie read/write transaction across all three existing stores, exact physical mapping including Settings `global`, complete rollback after forced clear or write failures at each store boundary, and no schema version or index change;
+- options-page-local post-restore refresh without restart or application-wide broadcast, no already-mounted Side Panel live sync, and correct restored-default behavior after Side Panel recreation;
+- regressions for Knowledge, Snippets, Settings, Workspace, M10 capture, popup navigation, Retrieval, Prompt Builder, Ollama provider, generated manifest, permissions, and production build.
+
+The tests must also prove that the implementation introduces no merge, selective restore, per-Library import, drag-and-drop, pasted JSON, JSON editor, router, extension page, event bus, subscription framework, encryption, compression, ZIP, signing, cloud/scheduled behavior, schema migration, permission, dependency, or configuration change.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.
@@ -155,6 +173,43 @@ Empty selection preserved Context and Output, showed `Select text on the page, t
 Generate regression completed with the newly captured Context and preserved Guidance, and Output displayed normally. Copy regression succeeded with line breaks preserved. Popup Open Workspace and Open Libraries worked, and the Knowledge and Snippet Libraries loaded normally. These checks complete the required M10 manual validation.
 
 Milestone 11 real Chrome validation is complete. Settings was visible as the third options-page section; first-run input was blank with Save disabled; existing Knowledge and Snippet records survived the version 2 migration; saving `qwen2.5:7b` showed `Settings saved.` and survived options-page reload; and a newly recreated Side Panel initialized the exact saved value without a warning. A temporary `temporary-test-model` Workspace override did not save and closing/reopening restored `qwen2.5:7b`. Real local generation with `qwen2.5:7b` completed and displayed output normally. Clearing the setting saved `null`; options reload and a new Side Panel both remained blank. `Ctrl+Shift+Y` capture still replaced Merchant Context, preserved a manually entered Workspace model, and did not generate automatically. Popup Open Workspace and Open Libraries worked, permissions remained unchanged, and no visible error occurred in these flows. Persistence failure UI was validated through automation rather than manual database fault injection.
+
+After M12-D implementation review, real Chrome validation must verify:
+
+1. Create representative Knowledge records.
+2. Create representative Snippets.
+3. Save a default model.
+4. Enter transient Workspace Context, Guidance, Output, and model override.
+5. Export a backup.
+6. Confirm the JSON file downloads.
+7. Confirm the filename contract.
+8. Inspect the valid JSON envelope and format version.
+9. Confirm Knowledge, Snippets, and Settings are present.
+10. Confirm transient Workspace data is absent.
+11. Confirm screenshot and Rich Snippet data are absent.
+12. Change current local Knowledge, Snippets, and Settings.
+13. Select the backup for import.
+14. Confirm preview counts and Settings summary.
+15. Confirm Restore is disabled before acknowledgement.
+16. Confirm Cancel clears the pending restore.
+17. Select the backup again and confirm replacement.
+18. Confirm Knowledge records and IDs are restored.
+19. Confirm Snippet records and IDs are restored.
+20. Confirm timestamps, tags, and source metadata are preserved.
+21. Confirm Settings are restored.
+22. Confirm the mounted Side Panel model does not live-update.
+23. Close and recreate the Side Panel and confirm the restored default loads.
+24. Confirm invalid JSON is rejected.
+25. Confirm an unsupported format version is rejected.
+26. Confirm an oversized file is rejected where practical.
+27. Confirm failed validation changes no data.
+28. Confirm Knowledge, Snippets, and Settings refresh in the options page.
+29. Confirm empty-backup replacement behavior in a controlled test.
+30. Confirm popup, M10 capture, and M11 generation remain functional.
+31. Confirm permissions remain unchanged.
+32. Confirm no live Ollama test is required for Import / Export itself.
+
+These checks are deferred until M12-D implementation review and are not performed by the M12-C documentation task.
 
 ## Milestone 0 Status
 

@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### M12-C — Import / Export Architecture Definition
+
+- Recorded completion of M12-B — Import / Export Architecture Readiness Review with verdict `ARCHITECTURE DEFINITION REQUIRED`, followed by M12-C's approved architecture definition. M12 remains current and incomplete.
+- Defined manual local backup for recovery after reinstall or browser-data loss and user-mediated transfer between Chrome profiles or computers. Excluded cloud sync, collaboration, sharing, bulk editing, automatic backup, and scheduled backup.
+- Defined strict public JSON format version 1 with identifier `ai-support-workspace-backup`, UTC export timestamp, and exact Knowledge, Snippet, and always-present Settings data. Kept format versioning independent of application and Dexie schema versions and excluded physical persistence details, transient state, provider state, secrets, and future M14/M15 data.
+- Defined deterministic export ordering, exact logical-value preservation, UTC filename pattern, in-memory JSON Blob/object-URL delivery, aligned 25 MiB import and serialized UTF-8 export limits, and no downloads or filesystem permission.
+- Defined untrusted all-or-nothing parsing and strict validation, including exact keys and types, canonical UUIDs, ISO timestamps, dangerous-key rejection, duplicate-ID rejection, safe unknown-version behavior, no repair, and no executable or external-resource interpretation.
+- Approved replace-only restore after complete validation, preserving imported IDs, timestamps, text, tag order, source, and Settings through one focused application port and one Dexie read/write transaction across all three existing stores. Any failure rolls back completely; `defaultModel: null` clears the saved default and valid empty arrays clear the Libraries.
+- Added Import / Export as the fourth options-page section with one Export action; one labelled JSON input; metadata-only preview; exact destructive warning and acknowledgement; Restore, Cancel, busy and accessible status states; exact safe messages; privacy warning; and options-page-local refresh without mounted-Side-Panel live synchronization.
+- Defined automated and future real Chrome validation contracts for the format, strict security boundary, size limit, deterministic serialization, preview and confirmation UX, atomic rollback, round-trip equivalence, accessibility, regressions, and unchanged generated manifest and schema.
+- Deferred merge, selective or per-Library restore, drag-and-drop, pasted JSON, raw editor, history, scheduling, cloud behavior, encryption, password protection, compression, ZIP, signing, generalized data-management infrastructure, future-format migration implementation, M14 data, and M15 data.
+- Added Decision 33 and synchronized project state, architecture, product requirements, UI workflow, roadmap, backlog, database schema, testing strategy, changelog, and README. Engineering principles and coding-agent rules were reviewed and required no change.
+- This documentation-only definition changes no implementation, test, database schema version 2, manifest, permission, host access, dependency, or configuration.
+- M12-C passed Principal Engineer review and is complete. The M12 architecture is implementation-ready, its shared architecture documentation checkpoint remains uncommitted, and M12-D is active as the next authorized implementation task but has not started. No M12 implementation checkpoint exists.
+
 ### M12-A.1 — Task Identification and Future Capability Roadmap Alignment
 
 - Introduced mandatory milestone task identifiers using the parent milestone number plus sequential non-reusable letters, required the exact identifier in Codex task and completion-report headings, and added active-task tracking in `PROJECT_STATE.md`.
@@ -12,7 +27,7 @@
 - Protected M12 at a high level: export-file versioning remains independent from Dexie schema versioning; future versions may support future persisted data types; transient screenshot Context is excluded; and future Rich Snippet data is outside the initial M12 scope. Detailed Import / Export decisions begin with the unstarted M12-B architecture-readiness task.
 - Preserved the approved high-level multimodal and Rich Snippet product directions while deferring detailed M14 and M15 architecture and all implementation.
 - Completed a documentation-only impact review covering workflow governance, project continuity, roadmap assignment, and coding-agent process. No product implementation, application-architecture implementation, test, database, schema, manifest, permission, dependency, or configuration change was made.
-- M12-A.1 passed Principal review and is complete. M12-B — Import / Export Architecture Readiness Review is now active as the next authorized task, but its implementation has not started and Import / Export architecture remains undefined. The shared documentation checkpoint remains uncommitted, and no push has been performed.
+- M12-A.1 passed Principal review and is complete. Its shared documentation checkpoint was committed and synchronized at `f09e776` (`docs: add task identifiers and assign future milestones`). M12-B subsequently completed its readiness review and M12-C now defines the Import / Export architecture.
 
 ### Milestone 11 — Default Ollama Model Settings Closeout
 

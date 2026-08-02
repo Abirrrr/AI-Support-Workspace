@@ -14,6 +14,7 @@ The product is organized around a small set of top-level areas:
 - Knowledge Library
 - Snippets
 - Settings
+- Import / Export
 
 These areas represent the primary navigation for the application.
 
@@ -316,7 +317,51 @@ Transient Model Field Starts with Saved Default
 - Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
 - Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
 
-## 9. Local Data Workflow
+## 9. Import / Export Workflow
+
+Import / Export is the fourth top-level section in the existing options-page shell. It adds no popup action, Side Panel control, separate extension page, or router.
+
+```text
+Open Options Page
+↓
+Import / Export
+↓
+Export backup
+↓
+Browser downloads version 1 JSON file
+```
+
+```text
+Choose one JSON backup
+↓
+Size, parse, and strict full-file validation
+↓
+Review filename, timestamp, counts, and saved model
+↓
+Read replacement warning and check acknowledgement
+↓
+Restore backup
+↓
+Atomically replace Knowledge, Snippets, and Settings
+```
+
+### Workflow Notes
+
+- Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
+- The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
+- Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Export over the 25 MiB serialized UTF-8 limit uses `This backup file is too large. Choose a file smaller than 25 MB.`
+- Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.
+- Selecting a file clears any earlier preview and acknowledgement. A file above 25 MiB is rejected before reading. Read failure reports `Couldn't read this backup file. Choose another file.`
+- Strict validation occurs before preview or persistence. Invalid content reports `This isn't a valid AI Support Workspace backup file.` An unknown format version reports `This backup version isn't supported by this version of AI Support Workspace.`
+- A valid preview shows filename, exported timestamp, Knowledge count, Snippet count, and saved default model; `null` appears as `No saved default model`. Knowledge bodies, Snippet content, and record diffs are never previewed.
+- The destructive warning reads `Restoring this backup will replace your current Knowledge, Snippets, and saved Settings.` The initially unchecked acknowledgement reads `I understand that my current local data will be replaced.` Restore uses native disabled behavior until acknowledgement and while busy.
+- `Cancel` clears selection-specific preview, confirmation, and status. Selecting a replacement file performs the same reset. A valid empty backup remains restorable and clears both Libraries under normal acknowledgement.
+- Successful replacement reports `Backup restored.` plus the restored Knowledge count, Snippet count, and `Settings restored`. It then clears the selected file, preview, and acknowledgement. A failed atomic replacement reports `Couldn't restore the backup. Your existing data was not changed.` and retains the current data. Validation failure clears the acknowledgement and invalid selection state.
+- After success, the options page locally refreshes or remounts its Knowledge, Snippets, and Settings sections so navigation shows restored data without a browser restart. This introduces no event bus, runtime broadcast, or subscription system.
+- An already-mounted Side Panel does not live-sync restored Settings and does not change transient Merchant Context, Guidance, Output, or model state. A recreated Side Panel loads the restored default through the existing M11 workflow.
+- Controls have visible labels and explanations, keyboard operation, natural focus order, accessible busy states and live announcements, native disabled semantics, focus on the preview after validation, and focus or equivalent announcement for validation errors. The layout remains usable at narrow options-page widths.
+
+## 10. Local Data Workflow
 
 The application is local-first. User data should remain under local control and be available without a backend.
 
@@ -346,7 +391,7 @@ Local persistence
 - The product should remain usable even when the user is offline.
 - Local data access should be fast, predictable, and reliable.
 
-## 10. Future Workflows
+## 11. Future Workflows
 
 ### Assigned Future Capability Workflows
 
@@ -357,7 +402,6 @@ Context images provide transient visual information to generation. Snippet image
 
 The following potential workflows are not part of the current core user experience definition and require their own approved scope before implementation:
 
-- Import and Export, owned by Milestone 12 with architecture beginning in M12-B
 - Provider Selection, deferred to Milestone 13 Provider Expansion / OpenAI when more than one provider exists
 - Provider endpoint configuration after a dedicated security and permissions architecture review
 - Persistent Prompt Profiles or writing preferences after a separate product and precedence decision

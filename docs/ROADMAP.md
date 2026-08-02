@@ -102,7 +102,9 @@ Provider selection, provider endpoint configuration, behavior tuning, theme, sho
 
 Add support for importing and exporting local data.
 
-M12 will use an independently versioned export-file format whose versioning remains separate from Dexie schema versioning. Future export-format versions may support future persisted data types. Transient screenshot Context is outside M12, and future Rich Snippet data is outside the initial M12 scope because that capability does not exist yet. Detailed Import / Export architecture begins with M12-B — Import / Export Architecture Readiness Review, which has not started.
+M12 provides manual local backup, restore after reinstall or local browser-data loss, and file transfer between profiles or computers. M12-C defines one strict, independently versioned JSON format containing current Knowledge, Snippets, and Settings; deterministic export; a 25 MiB guard; replace-only, identity-preserving atomic restore; preview and destructive acknowledgement; and a fourth options-page section without permissions, schema changes, or dependencies. M12-D implementation is next and has not started.
+
+Cloud synchronization, collaboration, sharing workflows, bulk editing, automatic or scheduled backups, merge import, encryption, compression, screenshot Context, and Rich Snippet data are outside M12.
 
 ## Milestone 13 — Provider Expansion / OpenAI
 

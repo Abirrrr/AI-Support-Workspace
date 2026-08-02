@@ -183,7 +183,92 @@ The Side Panel composition root loads Settings once at startup and resolves the 
 
 Prompt Builder and `OllamaProvider` do not read Settings, provider identity remains `ollama`, and the endpoint remains fixed at `http://localhost:11434`. M11 adds no provider selection, endpoint configuration, behavior tuning, persistent writing preferences, theme, shortcut setting, Workspace persistence, secret storage, generic global state, runtime message, database subscription, dependency, or manifest permission. `DECISIONS.md` and `DATABASE_SCHEMA.md` are authoritative for the complete M11 contract and migration.
 
-The implemented M11 architecture passed deterministic application, persistence, migration, UI, Workspace, and M10 handshake regression coverage plus real Chrome validation. Manual validation confirmed first-run blank state, save/reload persistence, new-session initialization, transient override restoration, real local Ollama generation, clear-to-null behavior, Library preservation, shortcut compatibility, popup navigation, and unchanged permissions. M11 is complete; its implementation checkpoint remains pending Principal approval and an authorized commit.
+The implemented M11 architecture passed deterministic application, persistence, migration, UI, Workspace, and M10 handshake regression coverage plus real Chrome validation. Manual validation confirmed first-run blank state, save/reload persistence, new-session initialization, transient override restoration, real local Ollama generation, clear-to-null behavior, Library preservation, shortcut compatibility, popup navigation, and unchanged permissions. M11 is complete and synchronized at implementation checkpoint `d40e031` (`feat: add default Ollama model settings`).
+
+### Import / Export v1
+
+Milestone 12 defines manual local backup and replace-only restoration of the currently persisted Knowledge, Snippet, and Settings domains. It supports recovery after reinstall or local browser-data loss and physical transfer of a backup file to another Chrome profile or computer. It provides no cloud synchronization, collaboration, sharing workflow, bulk editing, automatic backup, or scheduled backup.
+
+#### Public Backup Contract
+
+The public application-owned JSON DTO is distinct from Dexie records, physical store names, schema versions, and the Settings singleton identity. Format version 1 has the exact envelope shape:
+
+```json
+{
+  "format": "ai-support-workspace-backup",
+  "formatVersion": 1,
+  "exportedAt": "2026-08-02T08:00:00.000Z",
+  "data": {
+    "knowledge": [],
+    "snippets": [],
+    "settings": {
+      "defaultModel": null
+    }
+  }
+}
+```
+
+Every displayed key is required, and strict version 1 validation rejects every unexpected key. `format` is exactly `ai-support-workspace-backup`; `formatVersion` is integer `1`; and `exportedAt` is a valid UTC ISO-8601 timestamp. Application and Dexie schema versions are not included. Settings is always present and exposes only `defaultModel: string | null`; a missing physical Settings record resolves through the M11 default to `null`, and physical ID `global` never enters the DTO.
+
+Knowledge records contain exactly non-nullable strings `id`, `title`, `body`, `createdAt`, `updatedAt`, and `source`, plus non-nullable `tags: string[]`. Snippet records contain exactly non-nullable strings `id`, `title`, `content`, `createdAt`, and `updatedAt`, plus non-nullable `tags: string[]`. Version 1 contains no usage counts, Snippet triggers, rich content, images, or future fields.
+
+Backup-format versioning is independent from Dexie schema versioning. M12 accepts only version 1; unknown versions are rejected safely, and there is no older supported version. Future format migrations belong inside the parser/import boundary. Future database migrations must not redefine version 1, and future M14 or M15 persisted data requires a later backup-format decision, normally a new version.
+
+Export orders Knowledge and Snippet arrays by `createdAt` ascending and then `id` ascending, preserves tag order and all text exactly, and produces filename `ai-support-workspace-backup-YYYY-MM-DDTHH-mm-ssZ.json` using UTC without colons. Object-key order is not semantically significant, and database iteration order is not part of restore equivalence. Normal browser collision behavior applies. Serialization occurs in memory, followed by a JSON Blob, object URL, temporary-anchor download, and object-URL revocation. No Chrome downloads or filesystem permission is used.
+
+#### Size, Validation, and Security
+
+Import rejects `File.size` above 25 MiB (`26,214,400` bytes) before reading or parsing. Export measures serialized UTF-8 bytes and refuses output above the same limit. There are no record-count, per-store, or new field-length limits.
+
+Every file is untrusted. Processing is size check, text read, JSON parse, exact identifier/version/envelope/data validation, complete Knowledge/Snippet/Settings validation, duplicate-ID validation, trusted application-model construction, and only then persistence. Validation is strict and all-or-nothing: missing, unexpected, or dangerous keys; invalid types, nullability, canonical UUIDs, ISO timestamps, Settings values, or duplicate IDs reject the complete file. Dangerous keys include `__proto__`, `prototype`, and `constructor`.
+
+The parser does not repair data and performs no persistence. It uses no evaluation, executable HTML, external-resource loading, arbitrary or prototype-based merging, paths, URL fetch, or script interpretation. HTML-like values remain plain strings and React renders them through normal escaped text rendering. Valid text, whitespace, tags and tag order, IDs, timestamps, and metadata remain exact.
+
+#### Export and Restore Boundaries
+
+The conceptual export flow is:
+
+```text
+Backup snapshot reader
+→ export application service
+→ BackupFileV1 DTO
+→ serializer
+→ browser download adapter
+```
+
+The conceptual import flow is:
+
+```text
+Browser file reader
+→ JSON parser
+→ strict BackupFileV1 validator
+→ import preview model
+→ restore application service
+→ transactional restore port
+→ Dexie transaction adapter
+```
+
+React owns interaction and presentation but no backup-format or persistence rule. The parser/validator never writes. The application layer owns replace policy; infrastructure maps public DTOs to physical records, restores the `global` Settings identity, and owns transaction mechanics. Provider, Prompt Builder, Retrieval Engine, Workspace, and M10 capture boundaries remain unchanged.
+
+M12 restore has exactly one mode: replace all current Knowledge, Snippets, and Settings. It clears and writes all three stores within one Dexie read/write transaction after validation. Either every write succeeds or rollback leaves existing state unchanged. Ordinary create/update repositories are not used because they generate IDs or timestamps; a focused application-owned restore persistence port preserves every logical field exactly. Imported `defaultModel: null` clears the saved default.
+
+The round-trip invariant is export followed by controlled restore yields equivalent persisted Knowledge, Snippets, and Settings, including identical IDs, timestamps, text, tag order, source, and default model. Public record-array ordering and physical database ordering are not restore-equivalence requirements.
+
+#### Options-Page Integration
+
+Import / Export is the fourth top-level section in the existing options-page shell. Export provides explanation, privacy warning, `Export backup`, busy state, and status. Import provides one labelled input accepting `.json,application/json`, validated filename/timestamp/Knowledge count/Snippet count/saved-model preview, destructive warning, unchecked acknowledgement, `Restore backup`, Cancel, busy state, and status. MIME and extension are advisory; content validation remains authoritative. Selecting a replacement file, validation failure, successful restore, and Cancel reset the applicable selected-file preview, confirmation, and status state.
+
+The warning is `Restoring this backup will replace your current Knowledge, Snippets, and saved Settings.` The checkbox is `I understand that my current local data will be replaced.` Restore remains natively disabled until checked. Preview never renders Knowledge bodies or Snippet content. Valid empty Library arrays remain exportable and, after normal acknowledgement, clear current Libraries while restoring Settings.
+
+Exact user messages are `Backup exported.`, `Couldn't export your data. Try again.`, `This backup file is too large. Choose a file smaller than 25 MB.`, `Couldn't read this backup file. Choose another file.`, `This isn't a valid AI Support Workspace backup file.`, `This backup version isn't supported by this version of AI Support Workspace.`, `Couldn't restore the backup. Your existing data was not changed.`, and `Backup restored.` The restore-success summary also reports the restored Knowledge count, Snippet count, and that Settings was restored. Raw JSON, browser, validation, and Dexie errors remain hidden.
+
+After success, options-page-local navigation must show restored Knowledge, Snippets, and Settings without a browser restart. The smallest local refresh/remount mechanism is used; no event bus, runtime broadcast, or subscription framework is added. An already-mounted Side Panel does not live-sync imported Settings or transient Context, Guidance, Output, or model state; a recreated panel loads the restored default under M11 behavior.
+
+The section uses visible headings and labels, keyboard-operable controls, associated explanation, natural focus order, accessible busy states and live announcements, native disabled semantics, preview focus after validation, accessible validation-error focus or equivalent announcement, and narrow-width-safe options layout. It adds no popup action, Side Panel UI, extension page, router, per-Library import control, generic data-management framework, merge controls, drag-and-drop, JSON editor, history, or scheduler.
+
+Backup files may contain merchant knowledge, internal notes, reusable support replies, and saved local-model configuration. The UI states `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.` M12 provides no encryption, password protection, compression, ZIP, cryptographic signing, or related dependency.
+
+M12 changes no manifest, Chrome permission, host permission, Dexie schema, dependency, or configuration. Database schema remains version 2. Any later implementation need for such a change is an architecture conflict requiring review.
 
 ### Project Layer Responsibilities
 
@@ -221,4 +306,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 11 are implemented and validated. M11 completed exactly one optional saved default Ollama model, the options-page Settings form, typed load/save boundaries, new-session Workspace initialization, and the Dexie version 2 singleton migration. Final validation passed 69 focused tests, 200 normal-suite tests with 1 opt-in live Ollama test skipped, all static and build gates, generated-output validation, and the complete real Chrome workflow including manual local Ollama generation. The documented M10 repeated-panel keyboard-routing limitation remains non-blocking. Milestone 12 — Import / Export is current, but its architecture and implementation have not been defined by the M11 closeout.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 11 are implemented and validated. M12-C defines the implementation-ready Import / Export v1 architecture above without changing the implemented platform, source, tests, database schema version 2, manifest, permissions, dependencies, or configuration. M12-D implementation has not started, and M12 is not complete.

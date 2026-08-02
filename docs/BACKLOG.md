@@ -11,14 +11,15 @@
 
 ## Future Considerations
 
-- Define the roadmap-owned Milestone 12 Import / Export architecture before implementation; M11 Settings is complete.
-- Preserve an independently versioned M12 export-file format that is separate from Dexie schema versioning; exact format and import behavior begin with the unstarted M12-B architecture-readiness task.
+- Implement the approved M12 Import / Export architecture only through the unstarted M12-D implementation task after the M12-C documentation checkpoint is approved.
+- Preserve the application-owned backup format independently from Dexie schema versioning; future format evolution must not silently redefine format version 1.
 - Reconsider provider endpoint configuration only with provider expansion or a dedicated security and permissions architecture review.
 - Consider persistent Prompt Profiles or writing preferences only through a separate product and precedence decision; they are not M11 behavior tuning.
 - Refine the UI around Intercom support workflows.
 - Evaluate prompt and local-model quality improvements for cases where generated wording implies unsupported commitments or timelines despite contrary Guidance.
 - Expand testing coverage as implementation matures.
 - Continue generic quality, usability, performance, and documentation polish as ongoing backlog work rather than a separately assigned M14 capability.
+- Consider merge import, selective import/export, encrypted backup, compression, backup history, or scheduling only through separate future product and architecture decisions; none is part of M12.
 
 ## Approved Future Capabilities
 

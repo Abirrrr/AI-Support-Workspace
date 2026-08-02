@@ -6,11 +6,13 @@
 
 ## Task State
 
-- Last completed task: M12-A.1 — Task Identification and Future Capability Roadmap Alignment.
-- Active task: M12-B — Import / Export Architecture Readiness Review.
+- Last completed task: M12-C — Import / Export Architecture Definition.
+- Active task: M12-D — Import / Export Implementation. M12-D implementation has not started.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
-- M12-A.1 passed Principal review, is complete, and is awaiting the shared documentation checkpoint.
-- M12-B is the next authorized task. Its implementation has not started, and Import / Export architecture has not yet been defined.
+- M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
+- M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
+- M12-C defined the approved Import / Export architecture, passed Principal Engineer review, and is complete awaiting the shared architecture documentation checkpoint.
+- M12-D is the next authorized task, but its implementation has not started. M12 remains current and incomplete, and no M12 implementation checkpoint exists.
 
 ## Previous Milestones
 
@@ -32,7 +34,7 @@
 
 ## Project Status
 
-- Status: Milestone 11 — Settings is implemented, validated, complete, and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`). Milestone 12 — Import / Export is current. M12-A.1 passed Principal review and is complete pending the shared documentation checkpoint. M12-B is active as the next authorized task, but its implementation has not started and Import / Export architecture remains undefined.
+- Status: Milestone 11 — Settings is implemented, validated, complete, and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`). Milestone 12 — Import / Export is current and incomplete. M12-B completed its readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`. M12-C defined the implementation-ready architecture, passed Principal Engineer review, and is complete awaiting the shared architecture documentation checkpoint. M12-D is active as the next authorized task, but implementation has not started.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -45,14 +47,16 @@
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
 - The Side Panel focus direction remains unassigned. The M14 and M15 assignments define roadmap ownership only, not implementation architecture. These directions do not reopen M9, redefine M10 Keyboard Shortcut, redefine completed M11 Settings, authorize persistence changes, or change database schema version 2. `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, and `BACKLOG.md` preserve the approved intent and unresolved architecture questions.
 
-## Milestone 12 Scope Protection
+## Milestone 12 Architecture
 
-- M12 remains Import / Export. M12-A.1 does not define or implement its architecture.
-- M12 will use an independently versioned export-file format; export-format versioning remains separate from Dexie schema versioning.
-- Future export-format versions may support future persisted data types.
-- Transient screenshot Context is not part of M12.
-- Future Rich Snippet data is not part of the initial M12 scope because that capability does not exist yet.
-- Export fields, merge or replace behavior, duplicate handling, backup validation, import transactions, UI behavior, file naming, errors, and acceptance criteria remain undecided and begin no earlier than M12-B.
+- M12 provides manual local backup, restoration after reinstall or browser-data loss, and file-based transfer to another Chrome profile or computer. It is not synchronization, collaboration, sharing workflow, bulk editing, automatic backup, or scheduled backup.
+- Backup format version 1 is one strict application-owned JSON envelope identified by `ai-support-workspace-backup`, independently versioned from Dexie, with required `formatVersion: 1`, UTC `exportedAt`, and required Knowledge, Snippet, and Settings data.
+- Knowledge exports `id`, `title`, `body`, `tags`, `createdAt`, `updatedAt`, and `source`. Snippets export `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`. Settings always exports `defaultModel: string | null`; the physical `global` ID is excluded.
+- Export ordering is `createdAt` ascending then `id` ascending. Restore preserves IDs, timestamps, text, tags and tag order, source, and Settings exactly; it never uses ordinary create operations that generate identity or timestamps.
+- M12 supports replace-only restore after strict all-or-nothing validation and an explicit destructive acknowledgement. One Dexie transaction clears and replaces Knowledge, Snippets, and Settings atomically through a focused restore port.
+- Import and export share a 25 MiB (`26,214,400` byte) guard. Export uses in-memory JSON, a Blob, an object URL, and a temporary anchor; import uses one labelled JSON file input. No permission, schema, dependency, or manifest change is approved.
+- Import / Export is the fourth options-page section. Valid files show filename, export timestamp, Knowledge and Snippet counts, and saved-model summary before confirmation. Options-page-local navigation must reload restored data; mounted Side Panels do not live-sync Settings.
+- Merchant Context, Guidance, generated Output, Workspace overrides and active state, M10 deliveries, screenshots, clipboard/browser state, logs, Ollama data, secrets, unrelated storage, and future M14/M15 data are excluded. Encryption, passwords, compression, ZIP, merge, selective import/export, backup history, and scheduling are also excluded.
 
 ## Architecture Status
 
@@ -198,11 +202,14 @@
 - Completed real Chrome M11 validation of first-run blank state, save and options-page reload persistence, new Side Panel initialization, transient Workspace override and reopen restoration, real `qwen2.5:7b` generation, clear-to-null behavior, Knowledge and Snippet preservation, M10 capture/state behavior, popup navigation, and unchanged permissions. Persistence failure UI remains deterministically covered by automation; manual database fault injection was not required or performed.
 - Completed the mandatory M11 Documentation Impact Review. Project state, architecture status, decision implementation status, UI workflow, roadmap, backlog, database schema, testing strategy, changelog, and README required synchronization. Product requirements, engineering principles, and coding-agent rules were reviewed and required no change.
 - Marked Milestone 11 complete and advanced the current roadmap milestone to Milestone 12 — Import / Export without defining or expanding M12 architecture or implementation. The M11 implementation and closeout were later committed and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`).
-- Completed M12-A.1 as the corrective documentation-only execution of M12-A after the original M12-A produced no repository changes. M12-A.1 passed Principal review, introduced task governance, and assigned M14 and M15 without defining M12, M14, or M15 architecture. Its changes await the shared documentation checkpoint.
+- Completed M12-A.1 as the corrective documentation-only execution of M12-A after the original M12-A produced no repository changes. M12-A.1 passed Principal review, introduced task governance, assigned M14 and M15 without defining their detailed architecture, and was committed and synchronized at `f09e776` (`docs: add task identifiers and assign future milestones`).
+- Completed M12-B as a read-only Import / Export architecture-readiness review. It changed no files and concluded `ARCHITECTURE DEFINITION REQUIRED` because deterministic data, format, validation, restore, transaction, UI, and acceptance behavior remained undecided.
+- Completed M12-C as the documentation-only definition of the implementation-ready M12 architecture. M12-C passed Principal Engineer review and is complete awaiting the shared architecture documentation checkpoint; it changed no source, test, database, schema, manifest, permission, dependency, or configuration.
+- Activated M12-D as the next authorized implementation task. M12-D implementation has not started.
 
 ## Next Engineering Action
 
-- Begin the active M12-B — Import / Export Architecture Readiness Review. M12-B implementation has not started; do not implement Import / Export before its architecture is defined and approved. The completed M12-A.1 changes remain uncommitted pending the shared documentation checkpoint.
+- Create the shared M12-C architecture documentation checkpoint only when explicitly authorized, synchronize it, and then begin the active but unstarted M12-D — Import / Export Implementation task. M12 remains incomplete.
 
 ## Repository Status
 
@@ -214,7 +221,7 @@
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 2, the unchanged Knowledge and Snippet stores, the singleton Settings store, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
 - The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`). The latest committed and pushed repository checkpoint is the completed M11 implementation at `d40e031` (`feat: add default Ollama model settings`).
-- M12-A.1 passed Principal review and is complete. Its documentation changes remain uncommitted pending the shared documentation checkpoint with this task-state transition.
+- The latest committed and pushed documentation checkpoint is `f09e776` (`docs: add task identifiers and assign future milestones`). M12-C passed Principal Engineer review and its approved architecture documentation remains uncommitted awaiting the shared checkpoint.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. M11 Settings now initializes the transient model through a separate persistence/application boundary without changing `GenerationRequest`, Prompt Builder, or `OllamaProvider`. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, or Prompt Templates are implemented. Multimodal Context Attachments is assigned to M14, Rich Snippet Templates & Trigger Expansion is assigned to M15, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
@@ -222,9 +229,9 @@
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 12 — Import / Export. Last completed task: M12-A.1 — Task Identification and Future Capability Roadmap Alignment. Active task: M12-B — Import / Export Architecture Readiness Review.
-- Current repository state: HEAD and `origin/master` began M12-A.1 synchronized at `d40e031` (`feat: add default Ollama model settings`). The working tree contains the uncommitted M12-A.1 documentation and this focused task-state transition, all awaiting one shared documentation checkpoint.
-- Next action: begin the active but unstarted M12-B architecture-readiness review. Import / Export architecture and implementation remain undefined.
+- Current roadmap milestone: Milestone 12 — Import / Export. Last completed task: M12-C — Import / Export Architecture Definition. Active task: M12-D — Import / Export Implementation.
+- Current repository state: HEAD and `origin/master` remain synchronized at `f09e776` (`docs: add task identifiers and assign future milestones`). The working tree contains the approved uncommitted M12-C architecture documentation and this focused M12-C.1 continuity correction.
+- Next action: create and synchronize the shared M12-C architecture documentation checkpoint when authorized, then begin the active but unstarted M12-D implementation task. M12 is not complete.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -240,5 +247,5 @@
 
 ## Current Git Checkpoint
 
-- Latest committed and pushed checkpoint: `d40e031` (`feat: add default Ollama model settings`). M11 is complete, and local `master` was synchronized with `origin/master` when M12-A.1 began.
-- M12-A.1 passed Principal review and is complete, and M12-B is active but unstarted. The shared documentation checkpoint remains uncommitted; no push has been performed.
+- Latest committed and pushed checkpoint: `f09e776` (`docs: add task identifiers and assign future milestones`). M12-B completed its readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`, and M12-C is complete after passing Principal Engineer review.
+- The approved M12-C architecture documentation remains uncommitted awaiting the shared checkpoint. M12-D is active but its implementation has not started; no M12 implementation checkpoint or push exists.

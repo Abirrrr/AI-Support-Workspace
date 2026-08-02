@@ -242,6 +242,26 @@ Dexie is the approved storage abstraction over browser-local IndexedDB. Applicat
 
 The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition described above without changing the version 1 declarations or existing Library contracts. Dexie configuration remains centralized in the infrastructure layer.
 
+## Milestone 12 Backup and Restore Contract
+
+M12 does not change the physical database. Database `ai-support-workspace` remains schema version 2 with the existing `knowledgeEntries`, `snippetEntries`, and `settings` stores and indexes. The public backup format is an independently versioned application DTO, not a dump of Dexie tables.
+
+Version 1 contains required top-level `format`, `formatVersion`, `exportedAt`, and `data` keys. Its `data` object contains exactly:
+
+- `knowledge`: records with exactly `id`, `title`, `body`, `tags`, `createdAt`, `updatedAt`, and `source`.
+- `snippets`: records with exactly `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`.
+- `settings`: always present with exactly `defaultModel: string | null`.
+
+The physical Settings singleton identity `{ id: 'global' }`, table names, database name, schema version, and indexes are not exported. Infrastructure resolves an absent Settings record to the public `null` default and recreates the physical `global` identity during restore. No transient Workspace state or future M14/M15 field enters version 1.
+
+A focused backup snapshot reader obtains a logically consistent read of all three domains for export. A focused transactional restore port accepts already parsed and validated trusted application data. The parser and validator perform no persistence. React never accesses Dexie.
+
+Restore is replace-only. After complete validation, infrastructure clears and writes Knowledge, Snippets, and Settings in one Dexie read/write transaction covering all three stores. A write failure aborts and rolls back the transaction so existing data remains unchanged. Ordinary repository create or update methods are not used because restore must preserve imported UUIDs, `createdAt`, `updatedAt`, text, tag order, Knowledge `source`, and Settings exactly. `defaultModel: null` clears the saved default. Empty valid Library arrays clear their corresponding stores.
+
+Export orders public Knowledge and Snippet arrays deterministically by `createdAt` ascending and then `id` ascending. Restore equivalence concerns logical record content, not IndexedDB iteration order. Backup format evolution is separate from database migration: future database versions must not redefine version 1, and future format migration belongs at the import boundary.
+
+M12 introduces no new store, field, index, migration, rollback path, storage technology, permission, dependency, or configuration. Any implementation pressure to change schema version 2 conflicts with Decision 33 and requires architecture review.
+
 ## Future Capability Guidance
 
 ### Structured Knowledge
@@ -262,4 +282,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 11 are complete. Database `ai-support-workspace` now uses schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. Automated migration coverage proved that representative version 1 Knowledge and Snippet records survive unchanged, no Settings record is created automatically, `global` saves and reloads across reopen, and `null` remains a persisted clear state. The M9 Output Workspace and M10 Keyboard Shortcut still keep Context, Guidance, generated or edited Output, capture results, delivery IDs, status, and feedback transient; only the optional default model is persisted through Settings. M12 — Import / Export is current and has not defined another schema change.
+Milestones 3 through 11 are complete. Database `ai-support-workspace` now uses schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. Automated migration coverage proved that representative version 1 Knowledge and Snippet records survive unchanged, no Settings record is created automatically, `global` saves and reloads across reopen, and `null` remains a persisted clear state. The M9 Output Workspace and M10 Keyboard Shortcut still keep Context, Guidance, generated or edited Output, capture results, delivery IDs, status, and feedback transient; only the optional default model is persisted through Settings. M12-C defines the independently versioned backup DTO, snapshot boundary, and atomic three-store replace port without changing schema version 2; M12-D implementation has not started.

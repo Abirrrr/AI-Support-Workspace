@@ -62,6 +62,23 @@ The libraries may both contribute to a support response, but they have different
 - M11 includes no provider selector, configurable endpoint, remote or LAN Ollama, OpenAI, credentials, model discovery, generation tuning, writing preferences, editable grounding instructions, theme, shortcut setting, Workspace persistence, history, reset, import, or export.
 - The existing provider boundary, fixed `http://localhost:11434` endpoint, Chrome-native shortcut management, popup behavior, M9 Workspace behavior, M10 capture behavior, and manifest permissions remain unchanged.
 
+## Import / Export v1
+
+- M12 provides manual local backup, recovery after reinstall or browser-data loss, and user-mediated transfer to another Chrome profile or computer. It does not provide cloud sync, collaboration, sharing, bulk editing, automatic backup, or scheduled backup.
+- Export produces one JSON file with exact format identifier `ai-support-workspace-backup`, independently versioned `formatVersion: 1`, UTC `exportedAt`, and required Knowledge, Snippet, and Settings data. Database and application versions, physical table names, and the Settings record ID are not public backup data.
+- Knowledge includes exactly `id`, `title`, `body`, `tags`, `createdAt`, `updatedAt`, and `source`; Snippets include exactly `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`; Settings always includes exactly `defaultModel`, including `null` when no default is saved.
+- Transient Merchant Context, Guidance, Output, Workspace model overrides, capture state, webpage or browser state, Ollama models or availability, secrets, credentials, screenshots, M14 attachments, and M15 rich-Snippet content or triggers are excluded.
+- Export preserves all logical values, tag order, IDs, timestamps, and metadata, and orders each Library by `createdAt` then `id`, both ascending. The UTC download name is `ai-support-workspace-backup-YYYY-MM-DDTHH-mm-ssZ.json`.
+- Import treats the file as untrusted and accepts it only after the complete strict version 1 contract, every domain value, dangerous-key exclusion, and duplicate-ID requirements pass. It never repairs a partially invalid backup and never writes before validation succeeds.
+- Files above 25 MiB are rejected before import reading; export applies the same limit to serialized UTF-8 bytes. M12 adds no record-count, per-store, or field-length limit.
+- Restore is replace-only and all-or-nothing across Knowledge, Snippets, and Settings. It preserves imported IDs and timestamps rather than applying normal create/update semantics. An imported `defaultModel: null` clears Settings; a valid backup with empty Libraries clears both current Libraries.
+- Import / Export is the fourth section in the existing options page. Export uses one explicit button. Import uses one labelled JSON file input, preview, warning, acknowledgement checkbox, Restore button, Cancel, busy state, and accessible status; it provides no drag-and-drop, pasted JSON, merge control, per-Library restore, or raw JSON editor.
+- The preview shows only filename, exported timestamp, Knowledge count, Snippet count, and saved model or `No saved default model`. It never displays Knowledge bodies, Snippet content, or a record diff.
+- Restore warns `Restoring this backup will replace your current Knowledge, Snippets, and saved Settings.` and requires `I understand that my current local data will be replaced.` before the native Restore control becomes enabled.
+- Success and failure feedback is safe and specific without raw parser or persistence details. A successful restore refreshes options-page-local Knowledge, Snippets, and Settings, but an already-mounted Side Panel does not live-sync; a recreated panel loads the restored default.
+- The UI warns `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.` Backup files are unencrypted JSON; encryption, passwords, compression, ZIP, signing, cloud storage, scheduling, merge, selective restore, and future-domain support are deferred.
+- M12 requires no manifest, permission, host, database schema, dependency, or configuration change. Database schema remains version 2.
+
 ## M14 — Multimodal Context Attachments
 
 Multimodal Context Attachments are assigned to M14. This roadmap assignment does not define detailed architecture, reopen M9, or change the current text-only M9 implementation.
