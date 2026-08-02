@@ -94,7 +94,9 @@ Add a keyboard shortcut for quick access to the extension experience.
 
 ## Milestone 11 — Settings (Current)
 
-Add user settings for provider selection, model choice, and behavior tuning.
+Provide a local Settings UI where the user can save one optional default Ollama model and have each new Workspace Side Panel session initialize its transient model field from that saved value. Establish the typed Settings persistence boundary and the Dexie version 2 migration that adds only the singleton Settings record.
+
+Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 13 — OpenAI Provider, when more than one provider exists.
 
 ## Milestone 12 — Import / Export
 
@@ -102,7 +104,7 @@ Add support for importing and exporting local data.
 
 ## Milestone 13 — OpenAI Provider
 
-Add OpenAI as a later provider integration.
+Add OpenAI as a later provider integration and define provider selection when more than one provider exists.
 
 ## Milestone 14 — Polish
 

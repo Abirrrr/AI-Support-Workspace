@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Milestone 11 — Settings Architecture Definition
+
+- Replaced the broad M11 provider-selection/model-choice/behavior-tuning wording with one deterministic capability: a local options-page Settings form that saves `defaultModel: string | null` and initializes each new Workspace Side Panel session's transient model field from that value.
+- Defined `null` as the application default, retained `qwen2.5:7b` only as possible example text, approved trim-on-save and whitespace-to-null clearing, and kept model identifiers opaque without discovery, availability checks, model pulls, health checks, retries, timeouts, or Ollama calls during save.
+- Added Settings as the third section in the existing options-page shell with one labelled input, concise help, an explicit normalized dirty-state Save action, accessible loading and status feedback, no autosave or unsaved-change prompt, and no new popup action, page, router, generic Settings renderer, or preference framework.
+- Defined one typed application-owned Settings aggregate, focused load/save application boundaries, a minimal singleton `SettingsRepository`, and a Dexie adapter whose physical record is `{ id: 'global', defaultModel }`. React, Prompt Builder, and `OllamaProvider` do not access Settings persistence.
+- Approved the future implementation's forward-only Dexie schema version 1 to version 2 migration, adding only `settings: 'id'` with no timestamps or secondary indexes, no automatic record, no existing Library transformation, and mandatory preservation of all Knowledge and Snippet records.
+- Defined one-time Side Panel startup loading before editable model state, blank fallback for missing/null/failed Settings load, exact non-blocking failure feedback, transient session overrides, reload-on-new-session behavior, no live synchronization for mounted panels, and unchanged `GenerationRequest`, M9 state, and M10 capture semantics.
+- Deferred provider selection to M13 and deferred endpoint configuration to provider expansion or a dedicated security/permissions review. Excluded behavior tuning, persistent writing preferences, editable grounding instructions, theme, shortcut settings, credentials, Workspace persistence, history, reset, import/export, multimodal Context, and Rich Snippets from M11.
+- Preserved the existing fixed Ollama endpoint, provider identity, Chrome-native shortcut management, popup behavior, permissions, host access, dependencies, configuration, and physical version 1 database during this documentation-only task.
+- Defined deterministic automated and real Chrome validation contracts for the future implementation. Normal tests require no live Ollama.
+- Completed the Documentation Impact Review. Project state, architecture, decisions, product requirements, UI workflow, roadmap, backlog, database schema planning, testing strategy, changelog, and README required synchronization. Engineering principles and coding-agent rules were reviewed and required no change. No implementation, test, dependency, configuration, permission, or physical database change was made, and M11 remains current rather than complete.
+
 ### Repository Continuity Correction — M10 Implementation Checkpoint
 
 - Corrected active repository continuity to record `6093361` (`feat: add selected-text capture shortcut`) as the completed Milestone 10 implementation checkpoint, committed and pushed with local `master` synchronized to `origin/master`; verified preflight found a clean working tree at that checkpoint.

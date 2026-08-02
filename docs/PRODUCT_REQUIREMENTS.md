@@ -51,6 +51,17 @@ The libraries may both contribute to a support response, but they have different
 - The suggested shortcut is `Ctrl+Shift+Space` by default and `Command+Shift+Space` on macOS. Chrome's native extension shortcut manager owns remapping, collision handling, and unassigned commands; M10 adds no in-app shortcut editor or Settings persistence.
 - M10 adds no Generate shortcut, Copy shortcut, toggle command, OS-global behavior, persistent Workspace state, Snippet expansion, or multimodal capture.
 
+## Settings v1
+
+- M11 provides one Settings section in the existing options-page experience. Its only configurable value is `defaultModel: string | null`, representing an optional saved default Ollama model for the current Chrome browser profile.
+- The initial application default is `null`. No model is selected automatically, and example or placeholder text such as `qwen2.5:7b` is not persisted or treated as a default.
+- Saving trims leading and trailing whitespace. Non-empty trimmed text is stored as an opaque Ollama model identifier; empty or whitespace-only input clears the saved default to `null`. Saving performs no model discovery, model pull, health check, or availability request.
+- A new Workspace Side Panel session loads Settings once and initializes its transient model field from the saved value. Missing Settings or `null` initializes blank. A load failure also initializes blank and provides safe non-blocking feedback while keeping Workspace usable.
+- Workspace model edits remain transient, do not update Settings, and are used by the next Generate action. Closing and reopening the Side Panel reloads the latest saved default. An already-mounted panel does not live-sync Settings changes.
+- Settings are local and extension-wide within the current Chrome profile. M11 persists them through a typed project-owned boundary backed by one Dexie singleton record and a version 2 schema migration that preserves all Knowledge and Snippet data.
+- M11 includes no provider selector, configurable endpoint, remote or LAN Ollama, OpenAI, credentials, model discovery, generation tuning, writing preferences, editable grounding instructions, theme, shortcut setting, Workspace persistence, history, reset, import, or export.
+- The existing provider boundary, fixed `http://localhost:11434` endpoint, Chrome-native shortcut management, popup behavior, M9 Workspace behavior, M10 capture behavior, and manifest permissions remain unchanged.
+
 ## Future Multimodal Context Attachments
 
 Multimodal Context Attachments are an approved future product direction with no assigned milestone. They do not reopen M9 or change the current text-only M9 implementation.

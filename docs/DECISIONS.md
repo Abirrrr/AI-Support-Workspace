@@ -266,7 +266,7 @@ Exact implementation naming may follow repository conventions, but these semanti
 
 ### Local Endpoint and Request Translation
 
-Ollama v1 is local-only at fixed base URL `http://localhost:11434`. It performs `POST http://localhost:11434/api/chat` using Ollama's native chat API. M8 does not use `/api/generate`, an OpenAI-compatible endpoint, remote or LAN Ollama addresses, cloud fallback, or caller-configurable base URLs. Planned `providerBaseUrl` settings remain deferred to Milestone 11.
+Ollama v1 is local-only at fixed base URL `http://localhost:11434`. It performs `POST http://localhost:11434/api/chat` using Ollama's native chat API. M8 does not use `/api/generate`, an OpenAI-compatible endpoint, remote or LAN Ollama addresses, cloud fallback, or caller-configurable base URLs. Provider endpoint configuration is excluded from M11 and remains deferred until provider expansion or a dedicated provider-configuration architecture review addresses host permissions, localhost versus LAN or remote access, HTTP/HTTPS policy, URL credential rejection, `OLLAMA_ORIGINS`, security, and provider independence.
 
 Every request is non-streaming and includes `stream: false`. M8 introduces no stream reader, chunk type, callback, async iterable, partial-result event, or streaming state.
 
@@ -301,9 +301,9 @@ CORS, extension-origin access, and Ollama `OLLAMA_ORIGINS` configuration are def
 
 ### Model, Availability, and Execution Policy
 
-The caller supplies the model identifier transiently for each request. M8 defines no default, hardcoded model, automatic model selection, model discovery, or model persistence. Settings owns user-configurable model choice later.
+The caller supplies the model identifier transiently for each request. M8 defines no default, hardcoded model, automatic model selection, model discovery, or model persistence. M11 later owns one optional saved default Ollama model used only to initialize a new Workspace session's transient model field; the generation request continues to receive the current caller-supplied model.
 
-Generation itself is the availability check. M8 adds no health endpoint or preliminary request. A connection or network failure before an HTTP response becomes `ProviderUnavailableError`. Later Settings diagnostics may introduce a distinct test-connection workflow when approved.
+Generation itself is the availability check. M8 adds no health endpoint or preliminary request. A connection or network failure before an HTTP response becomes `ProviderUnavailableError`. M11 adds no diagnostic request; a future provider-configuration review may introduce a distinct test-connection workflow only when approved.
 
 M8 never pulls or installs a model. HTTP 404 becomes `ModelUnavailableError`, preserving a safe provider message and cause when available without triggering `/api/pull` or another recovery request.
 
@@ -411,7 +411,7 @@ The Workspace maps expected failures to safe user-facing messages:
 
 Equivalent punctuation and styling may follow existing UI conventions. UI errors expose no stack trace, raw cause, raw Ollama payload or response body, `PromptAssembly`, Merchant Context, or Library content. M9 never pulls or installs a model. Missing-model feedback says only that the model is unavailable locally and must be installed in Ollama before retrying.
 
-M9 provides no full onboarding wizard. Minimal helper text may state that Ollama must be installed, running locally, contain the requested model, and allow browser-extension access. Generation remains the only availability check; detailed Settings and connection management remain deferred.
+M9 provides no full onboarding wizard. Minimal helper text may state that Ollama must be installed, running locally, contain the requested model, and allow browser-extension access. Generation remains the only availability check. M11 adds only an optional saved default model and does not add connection management, discovery, health checks, or endpoint configuration.
 
 ### Layout, Accessibility, Persistence, and Privacy
 
@@ -516,6 +516,48 @@ Real Chrome validation establishes two distinct focus outcomes. On first invocat
 This is a Chrome Side Panel host limitation rather than a failed DOM focus implementation. Chrome currently exposes no supported API that activates or focuses an already-visible Side Panel after the shortcut capture. The implementation must retain `guidanceElement.focus()` followed by `setSelectionRange(end, end)` on every successful capture. M10 must not add `window.focus()` assumptions, focus retries, artificial delays, polling, panel close/reopen, toggle behavior, broader permissions, persistence, notifications, or alternate tab or window surfaces to mask the limitation.
 
 Automated tests, including JSDOM component tests, may prove only Side Panel document state such as `document.activeElement`, the collapsed selection range, preserved values, exact Context replacement, and absence of automatic Generate. They cannot prove Chrome WebContents activation or which surface receives physical keyboard input. Real Chrome validation owns that browser-host observation. Final M10 manual validation passed all first-invocation focus behavior and, on repeated invocation, passed panel visibility, capture, Context replacement, state preservation, and the internal focus/caret implementation and test contract; automatic browser-level focus was unavailable because of the platform limitation. The limitation is non-blocking, M10 is complete, and supported activation of an already-visible Side Panel remains an unassigned future capability.
+
+## Decision 31: M11 Saved Default Ollama Model Settings
+
+Milestone 11 introduces one small local Settings capability. Its only configurable value is the application-owned aggregate `Settings { defaultModel: string | null }`. A non-null string initializes the model field when a new Workspace Side Panel session starts; `null` means no saved default and initializes that field blank. The application default is `null`. Example text such as `qwen2.5:7b` may remain a placeholder but is never an implicit or persisted default, and the extension assumes no model is installed.
+
+The model identifier is opaque. The focused save application boundary trims leading and trailing whitespace, saves non-empty trimmed text unchanged, and saves `null` for empty or whitespace-only input. Saving performs no model discovery, Ollama request, availability check, model pull, health check, retry, timeout, or character restriction. Provider availability remains a Generate-time concern.
+
+### Settings Surface and Save Behavior
+
+Settings is the third top-level section within the existing options-page UI beside Knowledge and Snippets. M11 reuses the current options-page shell and lightweight local navigation, creates no separate extension page or routing dependency, and changes no popup action. The section contains one labelled text input, concise help explaining new-session initialization and transient Workspace overrides, and one explicit `Save settings` button. It adds no generic schema renderer, category framework, provider card, accordion, or generalized preference system.
+
+The form loads before becoming editable. Save is disabled while loading or saving and whenever the normalized input equals the loaded value. It is enabled only for a normalized change. Saving is one atomic single-setting operation; on success the normalized saved value becomes the new loaded baseline. Navigation may discard unsaved edits, no confirmation is required, no cross-page concurrency system is added, and the last successful save wins. Exact feedback is `Settings saved.`, `Couldn't load settings. Reload and try again.`, and `Couldn't save settings. Try again.` through an accessible live status region without raw persistence errors.
+
+### Typed Boundary and Persistence
+
+The domain/application boundary owns the `Settings` type, normalization, default resolution, and focused load/save services. A minimal project-owned `SettingsRepository` loads the optional aggregate and saves the aggregate. React does not call Dexie, the repository exposes no Dexie record identity, and arbitrary string key/value storage is prohibited. The infrastructure adapter maps the application aggregate to the singleton physical record `{ id: 'global', defaultModel }`.
+
+M11 uses Dexie/IndexedDB and no `chrome.storage`, `localStorage`, filesystem, remote storage, or Chrome `storage` permission. Implementation increments database `ai-support-workspace` from schema version 1 to version 2 and adds only `settings: 'id'`. The table has no secondary indexes or timestamps. The forward-only migration preserves all Knowledge and Snippet records without transformation, creates no Settings record automatically, changes no existing store or index, and does not support rollback to version 1.
+
+An absent physical record is normal. The repository reports absence, and the application load boundary resolves it to `{ defaultModel: null }`. The repository supports only singleton load and save; there is no list, create, update-by-ID, delete UI, or unrelated CRUD. Saving blank input is the supported clear operation.
+
+### Workspace Initialization
+
+The Side Panel composition root loads Settings once at startup and resolves the initial model before establishing editable Workspace model state. It passes that initial value into presentation so no later asynchronous result can overwrite text the user has begun typing. A successful non-null default initializes the model field; `null` or a missing record initializes it blank. A load failure also initializes blank, keeps Workspace usable, and shows the non-blocking message `Couldn't load the saved model. Enter a model manually.` without exposing the raw cause.
+
+After initialization, the Workspace model remains transient and editable. Workspace edits do not save Settings. Generate uses the current Workspace field and the existing `GenerationRequest` shape. Closing and reopening the Side Panel reloads the latest saved default; an already-mounted panel does not live-sync options-page changes. M11 adds no runtime message, database subscription, global state framework, or change to Merchant Context, Guidance, Output, M9 generation behavior, or M10 capture state preservation.
+
+The dependency flow is `SettingsRepository` to the focused Settings application boundary to the Side Panel composition root to initial Workspace model state to `GenerationRequest` to `OllamaProvider`. Prompt Builder never reads Settings, `OllamaProvider` never reads Dexie, React presentation never calls Dexie directly, provider identity remains `ollama`, and the provider endpoint remains fixed.
+
+### Scope, Profile, Security, and Permissions
+
+Settings is one extension-wide singleton local to the current Chrome browser profile. M11 adds no merchant-, site-, tab-, provider-, or named-profile configuration. It stores no API key, token, password, remote credential, customer Context, Guidance, or generated Output. A model identifier is not a supported place for a URL or credential, and M11 requires no encryption or secret-storage architecture.
+
+Provider selection is deferred until the provider-expansion milestone, currently M13, when more than one provider exists. Endpoint configuration requires provider expansion or a dedicated architecture review. Behavior tuning, tone, response length, language, structure, terminology, signatures, persistent custom instructions, generation parameters, theme, shortcut enablement, configured-shortcut detection, in-app remapping, Snippet triggers, Rich Snippets, multimodal Context, Workspace persistence, history, reset, import, export, backup, restore, and migration from another extension are excluded. Chrome continues to own shortcut assignment and remapping through `chrome://extensions/shortcuts`; M12 retains import/export ownership.
+
+M11 changes no manifest permission or host. The existing `sidePanel`, `activeTab`, and `scripting` permissions, fixed `http://localhost/*` host access, content-script match, and M10 command contract remain unchanged.
+
+### Validation Contract
+
+Automated coverage must prove application defaults, trim/clear normalization, opaque model preservation, safe load/save failure mapping, schema version 1 to version 2 upgrade, singleton persistence and reopen, absence of automatic record creation, Knowledge and Snippet preservation, no unrelated schema change, Settings UI loading/dirty/saving/success/error/accessibility behavior, Workspace initialization and load-failure fallback, transient overrides, reopen behavior, no live synchronization, current-field generation, and regressions across M9, M10, popup, Libraries, Retrieval Engine, Prompt Builder, `OllamaProvider`, generated manifest, and production build. Normal tests require no live Ollama.
+
+After implementation review, real Chrome validation must cover first-run blank state, save and options-page reload, new Side Panel initialization, transient Workspace override and generation, Side Panel reopen, clear-to-null behavior, safe feedback where practical, Library data preservation through migration, M10 capture, popup navigation, unchanged permissions, and generation with an already installed valid model.
 
 ## Rationale
 

@@ -114,6 +114,20 @@ Production build output reported a cross-world extension-resource mismatch and a
 
 Final M10 validation passed the focused M10 and Workspace tests. The full Vitest suite passed 171 tests with the one opt-in live Ollama test skipped in the normal suite. Lint, `pnpm format --check`, type-checking, Playwright discovery of 1 Chromium infrastructure test, the production WXT Chrome MV3 build, generated-output and manifest validation, and `git diff --check` passed. Only expected Windows LF-to-CRLF notices occurred. No live Ollama test was required or run for M10.
 
+### Saved Default Model Settings v1 Tests
+
+Milestone 11 implementation must add deterministic domain/application coverage proving that a missing Settings record resolves to `{ defaultModel: null }`; save normalization trims outer whitespace; empty or whitespace-only input saves `null`; non-empty opaque model identifiers are otherwise preserved; and persistence load/save failures map through focused safe application behavior without exposing raw Dexie errors.
+
+Dexie integration coverage must start with an isolated version 1 database containing representative Knowledge and Snippet records, open it through the version 2 declaration, and prove that both Library domains remain unchanged. It must prove that the version 2 `settings` table exists with only the `id` primary key, no unrelated table or index changes occur, no Settings record is created automatically, the `global` singleton saves and reloads, `null` persists as the clear state, and database close/reopen retains the saved aggregate. Test databases remain isolated and deterministic through `fake-indexeddb`.
+
+Settings UI coverage must prove the focused loading state; blank first-run input; population from a saved model; disabled Save during loading and saving; normalized unchanged/dirty behavior; explicit successful save; clear-to-null; safe load and save errors; the exact success and failure messages; associated label/help semantics; keyboard-operable Save; natural focus order; live status feedback; and narrow options-page usability. Navigation may discard unsaved changes, no confirmation is required, and last successful save wins.
+
+Workspace coverage must prove that the composition boundary resolves Settings before establishing editable model state; a saved value initializes the model; missing or null Settings initializes blank; load failure initializes blank with `Couldn't load the saved model. Enter a model manually.`; no asynchronous load overwrites typed text; a transient Workspace override is not persisted; Generate receives the current Workspace field through the unchanged `GenerationRequest`; reopening a new instance reloads the saved default; and an already-mounted panel requires no live synchronization, runtime message, or database subscription.
+
+Regression coverage must preserve M9 Workspace generation and state, M10 selected-text capture and focus behavior, popup navigation, Knowledge and Snippet Libraries, Retrieval Engine, Prompt Builder, `OllamaProvider`, the exact generated manifest, and the production build. Normal M11 tests require no live Ollama service or installed model.
+
+After implementation review, real Chrome validation must confirm: options-page and Settings navigation; blank first-run state; save and reload persistence using an already installed example model where available; new Side Panel initialization; transient Workspace override and generation using the current field; close/reopen restoration of the saved default; clear-to-null behavior; safe feedback where realistically testable; Knowledge and Snippet preservation after migration; M10 selected-text capture; popup navigation; no unexpected permissions; and real Ollama generation with a valid installed model.
+
 ## Manual Verification Requirements
 
 Browser-specific interactions such as selection capture, extension permissions, and Intercom behavior require manual verification. These behaviors were not applicable to Milestone 0 and should not be treated as fully automatable when later milestones introduce them.

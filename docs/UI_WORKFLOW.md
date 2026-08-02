@@ -274,7 +274,46 @@ Copy
 - Images shown in the broader planned Support workflow remain deferred from Prompt Builder v1 and require a later architecture decision.
 - Multimodal Context Attachments are now an approved future product direction, while their Prompt Builder, provider-capability, serialization, limit, unsupported-provider, and persistence architecture remains deferred.
 
-## 8. Local Data Workflow
+## 8. Settings Workflow
+
+Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. The popup remains unchanged: Open Workspace opens the global Side Panel, and Open Libraries opens the existing options page, where local navigation can reach Settings.
+
+```text
+Open Options Page
+
+↓
+
+Settings
+
+↓
+
+Default Ollama model
+
+↓
+
+Save settings
+
+↓
+
+Open a New Workspace Side Panel Session
+
+↓
+
+Transient Model Field Starts with Saved Default
+```
+
+### Workflow Notes
+
+- The Settings section contains one visibly labelled text input, concise help text, one explicit `Save settings` button, and an accessible live status region. It uses the existing lightweight options-page navigation and requires no separate extension page, router, category system, or generic settings framework.
+- The initial value is blank when no Settings record exists. `qwen2.5:7b` may be shown only as example text and is not an automatic default.
+- Save trims outer whitespace. Non-empty trimmed text is saved as the opaque model identifier; empty or whitespace-only text saves `null` and clears the default. Save never contacts Ollama or verifies that the model exists.
+- Save is disabled during load and save and while the normalized form value matches the loaded value. Navigation may discard unsaved edits without confirmation. The last successful save wins.
+- The page reports `Settings saved.`, `Couldn't load settings. Reload and try again.`, or `Couldn't save settings. Try again.` without exposing raw persistence errors.
+- A new Side Panel session loads Settings once before establishing editable model state. The saved model initializes that field; missing, null, or failed Settings load initializes blank. Failure shows `Couldn't load the saved model. Enter a model manually.` without blocking the rest of Workspace.
+- Workspace model edits remain transient and never save Settings. Generate uses the current Workspace value. Closing and reopening reloads the latest saved default, while an already-mounted panel does not live-sync changes.
+- Provider selection, endpoint configuration, behavior tuning, writing preferences, theme, shortcut settings, Workspace persistence, reset, import, and export are outside M11.
+
+## 9. Local Data Workflow
 
 The application is local-first. User data should remain under local control and be available without a backend.
 
@@ -304,7 +343,7 @@ Local persistence
 - The product should remain usable even when the user is offline.
 - Local data access should be fast, predictable, and reliable.
 
-## 9. Future Workflows
+## 10. Future Workflows
 
 ### Approved Unassigned Product Directions
 
@@ -317,7 +356,9 @@ The following potential workflows are not part of the current core user experien
 
 - Import Library
 - Export Library
-- Provider Selection
+- Provider Selection, deferred to Milestone 13 when more than one provider exists
+- Provider endpoint configuration after a dedicated security and permissions architecture review
+- Persistent Prompt Profiles or writing preferences after a separate product and precedence decision
 - Prompt Management
 - Advanced Search
 
