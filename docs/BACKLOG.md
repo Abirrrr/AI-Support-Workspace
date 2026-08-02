@@ -36,8 +36,14 @@
 - Preserve the image/reference's semantic position. Rich editors may receive inline rich content; plain-text editors require a deterministic positional link/reference fallback and explicit handling for local assets without public URLs.
 - Introduce a future expansion engine and focused editor-adapter capability boundary for textarea/input, `contenteditable`, and genuinely required destination-specific rich editors.
 - Preserve surrounding content, define the exact replacement range and post-expansion caret position, and fail safely in unsupported editors.
+
 - Keep existing plain-text Snippets valid and define backward compatibility before any future storage migration.
 - Defer schema, image representation, reusable asset ownership, trigger validation and uniqueness, database migration, rich content model, editor compatibility, insertion mechanics, and fallback syntax to future architecture review.
+
+### Chrome Side Panel Focus Activation
+
+- Activate/focus an already-visible Chrome Side Panel after shortcut capture when Chrome exposes a supported API.
+- This capability is unassigned, has no milestone, and does not authorize M10 retries, delays, polling, panel close/reopen, toggle behavior, broader permissions, persistence, notifications, or alternate tab or window workarounds.
 
 Context screenshots and Snippet images remain separate domains: Context images are transient inputs to generation, while Snippet images are reusable Library-owned response content for editor expansion.
 

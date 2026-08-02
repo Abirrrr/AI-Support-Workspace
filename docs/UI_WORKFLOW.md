@@ -187,7 +187,7 @@ Deliver Selected Text to Merchant Context
 
 ↓
 
-Focus Guidance at End
+Request Guidance DOM Focus at End
 
 ↓
 
@@ -201,7 +201,8 @@ Ready to Generate
 - After both operations have started, capture and panel-open outcomes are handled independently. A successfully opened panel receives success, empty, or safe failure through the existing transient ready/acknowledgement delivery contract.
 - Non-whitespace selected text replaces Merchant Context exactly, including line breaks, Unicode, and surrounding whitespace; Guidance, model, generated or edited Output, and any active generation request remain unchanged.
 - The global Side Panel opens when closed and remains open when already open. Repeated invocation never toggles it closed.
-- After successful delivery, Guidance receives focus with a collapsed caret at the end of its preserved value. Empty Guidance is ready for immediate typing; existing Guidance is not selected, replaced, or otherwise modified. Merchant Context does not receive final focus. Generate remains manual and is never invoked by the shortcut.
+- After every successful delivery, Workspace requests Guidance DOM focus and places a collapsed caret at the end of its preserved value. Empty Guidance is ready for immediate typing when the command opens a closed Side Panel; existing Guidance is not selected, replaced, or otherwise modified. Merchant Context does not receive requested final DOM focus. Generate remains manual and is never invoked by the shortcut.
+- When the Side Panel is already visible and the webpage owns keyboard focus, Chrome may keep physical keyboard input routed to the webpage even though Guidance is the active element inside the panel document with the correct caret. The user may need to click Guidance. The shortcut does not retry, delay, poll, close and reopen, toggle, or use another browser surface to force activation.
 - Empty selection preserves Context and asks the user to select page text. Restricted or failed page capture preserves Context and asks the user to copy and paste instead. These paths do not force Guidance focus, and raw Chrome errors are not shown.
 - The shortcut workflow is intended to reduce friction and accelerate the support task.
 - Selection capture is text-only, main-frame-only, transient, and user-invoked. It does not scrape surrounding page content, read cross-origin frames, expand persistent content-script matches, or capture screenshots.

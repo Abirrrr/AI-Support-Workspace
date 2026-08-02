@@ -2,13 +2,24 @@
 
 ## [Unreleased]
 
+### Milestone 10 — Repeated Side Panel Focus Platform Limitation Amendment
+
+- Distinguished first invocation from repeated invocation: opening a closed Side Panel passed capture, exact Context replacement, state preservation, immediately usable Guidance focus, and collapsed end-caret validation.
+- Recorded that repeated invocation while the Side Panel is already visible passes panel visibility, capture, delivery, exact Context replacement, preserved state, and the internal Guidance DOM focus/caret request, while Chrome may keep browser-level keyboard routing on the webpage and require the user to click Guidance.
+- Retained `guidanceElement.focus()` followed by `setSelectionRange(end, end)` on every successful capture. Added no `window.focus()` assumption, retry, delay, polling, close/reopen, toggle, permission, persistence, notification, tab, or window workaround because Chrome exposes no supported API for activating an already-visible Side Panel.
+- Clarified that JSDOM and controlled tests prove document-level focus, caret, and state behavior but cannot prove Chrome WebContents activation or physical keyboard routing; real Chrome manual validation owns the browser-level observation.
+- Classified the observed cross-world preload mismatch and unused generated preloads as non-blocking WXT/Vite/Chrome generated-output warnings with no observed functional impact and no explicit application-source request. No WXT configuration change is authorized; investigate separately only if functional or performance evidence emerges.
+- Added an approved unassigned backlog item to activate or focus an already-visible Chrome Side Panel after shortcut capture if Chrome exposes a supported API. It has no milestone and does not alter M10.
+- Recorded the platform limitation as non-blocking once the remaining M10 functional checks pass. M10 remains current and incomplete; M11 does not begin.
+- Changed documentation only. No source, test, dependency, configuration, permission, persistence, or schema file was changed, and no checkpoint was created or pushed.
+
 ### Milestone 10 — Guidance Focus UX Amendment
 
-- Amended successful shortcut capture so exact Merchant Context replacement is followed by Guidance focus rather than Merchant Context focus, matching the next natural step of entering optional case-specific instructions.
-- Required a collapsed caret at the end of the preserved Guidance value; empty Guidance is ready for immediate typing, while existing Guidance is not selected, replaced, appended to, or otherwise modified.
+- Amended successful shortcut capture so exact Merchant Context replacement is followed by a Guidance DOM focus request rather than a Merchant Context focus request, matching the next natural step of entering optional case-specific instructions. Browser-level behavior for an already-visible panel is qualified by the later platform-limitation amendment above.
+- Required a collapsed caret at the end of the preserved Guidance value; empty Guidance is immediately ready for typing when a closed Side Panel opens, while existing Guidance is not selected, replaced, appended to, or otherwise modified.
 - Preserved exact Context replacement, Guidance/model/Output/active-generation state, manual Generate behavior, runtime sequencing, transient ready/acknowledgement delivery, permissions, persistence, database schema version 1, M11 separation, Snippet-trigger separation, and multimodal separation.
 - Kept empty, restricted-page, and failed-capture feedback unchanged and required those paths not to force Guidance focus.
-- Amended future automated and real Chrome validation to cover Guidance focus and collapsed end-caret placement, Guidance preservation without selection, absence of final Merchant Context focus, failure-path focus behavior, and absence of automatic Generate.
+- Amended future automated validation to cover the internal Guidance DOM focus request and collapsed end-caret placement, Guidance preservation without selection, absence of requested final Merchant Context focus, failure-path focus behavior, and absence of automatic Generate; real Chrome validation separately owns browser-level activation and keyboard-routing observations.
 - Made no implementation, test, dependency, WXT configuration, permission, persistence, or schema change and did not mark M10 complete.
 
 ### Milestone 10 — Runtime Sequencing Architecture Amendment

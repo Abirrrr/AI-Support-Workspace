@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestone 9 — Output Workspace is complete, and the M10 runtime sequencing architecture checkpoint is synchronized at `009a28b` (`docs: amend keyboard shortcut runtime sequencing`). The native WXT global Side Panel provides transient manual Context, Guidance, model input, automatic local retrieval, provider-independent generation through Ollama, editable plain-text output, and Copy beside the active support website. Knowledge and Snippet management remain in the options-page Library surface. Milestone 10 — Keyboard Shortcut is current, with an uncommitted implementation under manual validation. Its amended architecture invokes explicit active-page selection capture first, immediately opens or activates Workspace without awaiting capture, replaces Merchant Context after delivery, focuses Guidance with a collapsed caret at the end of its preserved value, and leaves Generate manual.
+Milestone 9 — Output Workspace is complete, and the latest existing checkpoint is `33e4f54` (`docs: focus guidance after text capture`). The native WXT global Side Panel provides transient manual Context, Guidance, model input, automatic local retrieval, provider-independent generation through Ollama, editable plain-text output, and Copy beside the active support website. Knowledge and Snippet management remain in the options-page Library surface. Milestone 10 — Keyboard Shortcut is current, with an uncommitted implementation under manual validation. Its architecture invokes explicit active-page selection capture first, immediately opens or activates Workspace without awaiting capture, replaces Merchant Context after delivery, requests Guidance DOM focus with a collapsed caret at the end of its preserved value, and leaves Generate manual. When the command opens a closed panel, Guidance is expected to be immediately usable and this has passed manual validation. When the panel is already visible and the webpage owns keyboard focus, Chrome may keep keyboard routing on the webpage despite the successful DOM focus request, so the user may need to click Guidance.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Review and authorize the documentation-only M10 Guidance-focus UX amendment, checkpoint it only when explicitly approved, then update the uncommitted implementation and regression coverage before repeating real Chrome validation.
+Complete the remaining M10 functional manual checks and implementation review. Treat repeated-invocation browser-level Guidance activation as a documented Chrome platform limitation, not as an implementation workaround requirement or an M10 blocker once the remaining functional checks pass. Do not advance to M11 or create and push a checkpoint without explicit approval.
