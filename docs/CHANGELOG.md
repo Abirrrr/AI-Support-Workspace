@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M12-D Principal Review Rejection and M12-D.1 Activation
+
+- Recorded that M12-C — Import / Export Architecture Definition is committed and synchronized at checkpoint `7ebe874` (`docs: define import and export architecture`).
+- Recorded execution of M12-D — Import / Export Implementation in the working tree. The implementation and tests remain uncommitted, and no M12 implementation checkpoint exists.
+- Recorded the Principal Engineer source-review rejection of M12-D. The public Backup Format v1 boundary directly reused live `KnowledgeEntry`, `SnippetEntry`, and `Settings` domain types and used record-level object spreads, so future domain fields could silently enter or invalidate the frozen independently versioned format.
+- Activated M12-D.1 — Backup Format v1 DTO Isolation Correction as the focused corrective continuation of M12-D. The correction must introduce dedicated exact version 1 DTOs, explicitly map every approved field during export and restore, remove record-level spreads at the versioned boundary, and add regression coverage proving future domain fields are excluded.
+- Blocked manual Chrome validation, M12 implementation approval, and any implementation checkpoint until M12-D.1 passes Principal Engineer source review.
+- This continuity update changes documentation only. It does not modify the existing M12-D implementation, tests, architecture, database schema version 2, manifest, permissions, dependencies, or configuration, and it does not mark M12 complete or advance to M13.
+
 ### M12-C — Import / Export Architecture Definition
 
 - Recorded completion of M12-B — Import / Export Architecture Readiness Review with verdict `ARCHITECTURE DEFINITION REQUIRED`, followed by M12-C's approved architecture definition. M12 remains current and incomplete.
@@ -15,7 +24,7 @@
 - Deferred merge, selective or per-Library restore, drag-and-drop, pasted JSON, raw editor, history, scheduling, cloud behavior, encryption, password protection, compression, ZIP, signing, generalized data-management infrastructure, future-format migration implementation, M14 data, and M15 data.
 - Added Decision 33 and synchronized project state, architecture, product requirements, UI workflow, roadmap, backlog, database schema, testing strategy, changelog, and README. Engineering principles and coding-agent rules were reviewed and required no change.
 - This documentation-only definition changes no implementation, test, database schema version 2, manifest, permission, host access, dependency, or configuration.
-- M12-C passed Principal Engineer review and is complete. The M12 architecture is implementation-ready, its shared architecture documentation checkpoint remains uncommitted, and M12-D is active as the next authorized implementation task but has not started. No M12 implementation checkpoint exists.
+- M12-C passed Principal Engineer review and was later committed and synchronized at checkpoint `7ebe874` (`docs: define import and export architecture`). M12-D was subsequently executed in the working tree and rejected during Principal Engineer source review; the current corrective state is recorded in the M12-D.1 section above. No M12 implementation checkpoint exists.
 
 ### M12-A.1 — Task Identification and Future Capability Roadmap Alignment
 
