@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
+import type { ImportExportActions } from '../../src/ui/import-export/ImportExportView';
 import { OptionsShell } from '../../src/ui/options/OptionsShell';
 import { PopupShell } from '../../src/ui/popup/PopupShell';
 
@@ -34,6 +35,14 @@ const settings: SettingsApplication = {
   save: async () => ({ defaultModel: null }),
 };
 
+const importExport: ImportExportActions = {
+  exportBackup: async () => undefined,
+  prepareImport: async () => {
+    throw new Error('Not used by this render test.');
+  },
+  restoreBackup: async () => undefined,
+};
+
 describe('extension UI shells', () => {
   it('renders popup navigation to the Workspace and Libraries', () => {
     const markup = renderToStaticMarkup(
@@ -48,9 +57,10 @@ describe('extension UI shells', () => {
     expect(markup).toContain('href="/options.html"');
   });
 
-  it('renders Knowledge, Snippet, and Settings navigation in the options page', () => {
+  it('renders all four navigation sections in the options page', () => {
     const markup = renderToStaticMarkup(
       <OptionsShell
+        importExport={importExport}
         knowledgeLibrary={knowledgeLibrary}
         settings={settings}
         snippetLibrary={snippetLibrary}
@@ -60,6 +70,7 @@ describe('extension UI shells', () => {
     expect(markup).toContain('Knowledge Library');
     expect(markup).toContain('Snippet Library');
     expect(markup).toContain('Settings');
+    expect(markup).toContain('Import / Export');
     expect(markup).toContain('flex-wrap');
     expect(markup).toContain('Loading knowledge');
     expect(markup).not.toContain('<input');

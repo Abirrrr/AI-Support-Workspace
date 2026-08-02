@@ -3,6 +3,10 @@ import { useState } from 'react';
 import type { KnowledgeLibrary } from '../../application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../application/settings/settings-service';
 import type { SnippetLibrary } from '../../application/snippet/snippet-library';
+import {
+  ImportExportView,
+  type ImportExportActions,
+} from '../import-export/ImportExportView';
 import { KnowledgeLibraryView } from '../knowledge/KnowledgeLibraryView';
 import { SettingsView } from '../settings/SettingsView';
 import { SnippetLibraryView } from '../snippet/SnippetLibraryView';
@@ -11,31 +15,38 @@ interface OptionsShellProps {
   knowledgeLibrary: KnowledgeLibrary;
   settings: SettingsApplication;
   snippetLibrary: SnippetLibrary;
+  importExport: ImportExportActions;
 }
 
 export function OptionsShell({
   knowledgeLibrary,
   settings,
   snippetLibrary,
+  importExport,
 }: OptionsShellProps) {
   const [activeSection, setActiveSection] = useState<
-    'knowledge' | 'snippets' | 'settings'
+    'knowledge' | 'snippets' | 'settings' | 'import-export'
   >('knowledge');
   const [snippetsVisited, setSnippetsVisited] = useState(false);
   const [settingsVisited, setSettingsVisited] = useState(false);
+  const [importExportVisited, setImportExportVisited] = useState(false);
+  const [dataRevision, setDataRevision] = useState(0);
 
-  function openSection(section: 'knowledge' | 'snippets' | 'settings') {
+  function openSection(
+    section: 'knowledge' | 'snippets' | 'settings' | 'import-export',
+  ) {
     setActiveSection(section);
     if (section === 'snippets') setSnippetsVisited(true);
     if (section === 'settings') setSettingsVisited(true);
+    if (section === 'import-export') setImportExportVisited(true);
   }
 
   return (
     <main className="mx-auto max-w-2xl p-8 text-slate-900">
       <h1 className="text-2xl font-semibold">AI Support Workspace</h1>
       <p className="mt-3 text-slate-600">
-        Manage local knowledge, reusable response snippets, and Workspace
-        defaults.
+        Manage local knowledge, reusable response snippets, Workspace defaults,
+        and local backups.
       </p>
 
       <nav
@@ -88,6 +99,21 @@ export function OptionsShell({
         >
           Settings
         </button>
+        <button
+          aria-controls="import-export-panel"
+          aria-selected={activeSection === 'import-export'}
+          className={`min-w-24 flex-1 rounded-md px-4 py-2 text-sm font-semibold ${
+            activeSection === 'import-export'
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-950'
+          }`}
+          id="import-export-tab"
+          onClick={() => openSection('import-export')}
+          role="tab"
+          type="button"
+        >
+          Import / Export
+        </button>
       </nav>
 
       <div
@@ -96,7 +122,10 @@ export function OptionsShell({
         id="knowledge-library-panel"
         role="tabpanel"
       >
-        <KnowledgeLibraryView knowledgeLibrary={knowledgeLibrary} />
+        <KnowledgeLibraryView
+          key={`knowledge-${dataRevision}`}
+          knowledgeLibrary={knowledgeLibrary}
+        />
       </div>
       {snippetsVisited ? (
         <div
@@ -105,7 +134,10 @@ export function OptionsShell({
           id="snippet-library-panel"
           role="tabpanel"
         >
-          <SnippetLibraryView snippetLibrary={snippetLibrary} />
+          <SnippetLibraryView
+            key={`snippets-${dataRevision}`}
+            snippetLibrary={snippetLibrary}
+          />
         </div>
       ) : null}
       {settingsVisited ? (
@@ -115,7 +147,20 @@ export function OptionsShell({
           id="settings-panel"
           role="tabpanel"
         >
-          <SettingsView settings={settings} />
+          <SettingsView key={`settings-${dataRevision}`} settings={settings} />
+        </div>
+      ) : null}
+      {importExportVisited ? (
+        <div
+          aria-labelledby="import-export-tab"
+          hidden={activeSection !== 'import-export'}
+          id="import-export-panel"
+          role="tabpanel"
+        >
+          <ImportExportView
+            actions={importExport}
+            onRestored={() => setDataRevision((revision) => revision + 1)}
+          />
         </div>
       ) : null}
     </main>

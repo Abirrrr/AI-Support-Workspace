@@ -13,6 +13,7 @@ import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import type { ImportExportActions } from '../../src/ui/import-export/ImportExportView';
 import { OptionsShell } from '../../src/ui/options/OptionsShell';
 import { SnippetLibraryView } from '../../src/ui/snippet/SnippetLibraryView';
 
@@ -23,6 +24,14 @@ const entry: SnippetEntry = {
   tags: ['orders', 'confirmation'],
   createdAt: '2026-07-26T12:00:00.000Z',
   updatedAt: '2026-07-26T12:00:00.000Z',
+};
+
+const importExport: ImportExportActions = {
+  exportBackup: async () => undefined,
+  prepareImport: async () => {
+    throw new Error('Not used by this navigation test.');
+  },
+  restoreBackup: async () => undefined,
 };
 
 function createSnippetLibrary(overrides: Partial<SnippetLibrary> = {}) {
@@ -224,6 +233,7 @@ describe('SnippetLibraryView', () => {
     const snippetLibrary = createSnippetLibrary();
     render(
       <OptionsShell
+        importExport={importExport}
         knowledgeLibrary={knowledgeLibrary}
         settings={settings}
         snippetLibrary={snippetLibrary}
