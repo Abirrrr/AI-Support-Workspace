@@ -133,7 +133,7 @@ Create Snippet
 
 ↓
 
-Add Content and Organization Details
+Add Content, Organization Details, and Optional Trigger
 
 ↓
 
@@ -153,11 +153,46 @@ Expand Snippet into Response
 - Snippets are intended for reusable short content.
 - Knowledge and snippets are related but distinct: knowledge is broader and more contextual, while snippets are compact and reusable.
 - Users should be able to create, edit, organize, and reuse snippets.
-- Snippets should support future variable-based expansion, but that capability is not part of the current core workflow definition.
-- The approved future Rich Snippet direction adds a Shortcut or Trigger field such as `;shopify-limit` and ordered structured content whose text, image/reference, and following text positions are preserved.
-- Trigger expansion should replace only the typed trigger, preserve surrounding editor content, and place the caret predictably. Rich editors may receive inline images; plain-text editors require a deterministic positional fallback rather than silently losing image references.
+- M13 defines one optional canonical trigger per Snippet. Existing Snippets without triggers remain valid and editable.
+- Trigger guidance shows that values begin with `;`, are 2–32 characters including that semicolon, and use letters, numbers, and single hyphens. Uppercase is stored lowercase; whitespace and unsupported punctuation are rejected.
+- Create and edit show inline invalid-format and duplicate-trigger feedback. The list displays a configured trigger and omits trigger decoration for `null`.
+- M13 keeps Snippet content plain text. Variables, rich text, images, and template blocks remain future M14 work.
 
-## 6. Keyboard Shortcut Workflow
+## 6. Snippet Trigger Expansion Workflow
+
+```text
+Focus a Supported Web Editor
+
+↓
+
+Type a Complete Trigger such as ;hello
+
+↓
+
+Press Space
+
+↓
+
+Replace Only the Trigger with Saved Plain-Text Snippet + Space
+
+↓
+
+Caret Rests after the Inserted Space
+```
+
+### Workflow Notes
+
+- Expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on an explicitly allowlisted content-script origin. Textarea supports complete single-line and multiline Snippets. Contenteditable supports complete single-line and multiline Snippets through safe text-node and `<br>` insertion.
+- The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
+- A match replaces exactly the trigger range, inserts the saved content as plain text plus the intended single space, preserves surrounding content and line breaks, emits the normal bubbling composed host `input` notification without synthesizing `change`, and places the caret after the inserted space.
+- A supported single-line input expands only Snippets containing no `\r` or `\n`. For multiline content its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit the input.
+- A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
+- Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port`. Its transient cache is enabled only while the port is connected and holds a complete validated current-epoch snapshot; ordered invalidation and complete-snapshot messages use that port. Disconnection immediately clears and disables the cache, so no former snapshot can expand. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and stale epochs are rejected.
+- Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame and each clears immediately. Success publishes one rebuilt complete snapshot; persistence failure republishes the unchanged snapshot; publication failure leaves affected frames disabled until reconnect or successful refresh. Content scripts never open Dexie, and no persistent browser-storage catalog, durable queue, polling loop, or per-keystroke worker lookup is created.
+- Intercom is a required real-world validation target, but editor detection and replacement remain behind generic adapters. Destination-specific adaptation may be added only behind that interface when real evidence shows the generic adapter is insufficient.
+- Trigger expansion reads only the bounded text immediately before the caret, logs no editor content, uses no clipboard, sends nothing to an AI provider, and never interprets Snippet text as HTML.
+
+## 7. Keyboard Shortcut Workflow
 
 The keyboard shortcut workflow is designed to make the extension feel fast and responsive during support work.
 
@@ -214,7 +249,7 @@ Ready to Generate
 - This application-level keyboard shortcut is distinct from future Snippet Trigger Expansion. M10 opens or invokes extension behavior through a key combination; typed text such as `;hello` expands saved Snippet content inside a supported editor.
 - M10 real Chrome validation passed normal document, textarea, and contenteditable selection; first and repeated capture; empty and restricted-page feedback; state preservation; manual Generate using the new Context and existing Guidance; exact edited-output Copy with line breaks; popup Workspace and Library navigation; and both Knowledge and Snippet Library regressions. The already-visible-panel keyboard-routing limitation remains the only documented focus caveat and is not an implementation failure.
 
-## 7. AI Generation Workflow
+## 8. AI Generation Workflow
 
 The AI generation workflow describes the logical flow from context to draft output.
 
@@ -275,7 +310,7 @@ Copy
 - Images shown in the broader planned Support workflow remain deferred from Prompt Builder v1 and require a later architecture decision.
 - Multimodal Context Attachments are now an approved future product direction, while their Prompt Builder, provider-capability, serialization, limit, unsupported-provider, and persistence architecture remains deferred.
 
-## 8. Settings Workflow
+## 9. Settings Workflow
 
 Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. The popup remains unchanged: Open Workspace opens the global Side Panel, and Open Libraries opens the existing options page, where local navigation can reach Settings.
 
@@ -317,7 +352,7 @@ Transient Model Field Starts with Saved Default
 - Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
 - Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
 
-## 9. Import / Export Workflow
+## 10. Import / Export Workflow
 
 Import / Export is the fourth top-level section in the existing options-page shell. It adds no popup action, Side Panel control, separate extension page, or router.
 
@@ -328,7 +363,7 @@ Import / Export
 ↓
 Export backup
 ↓
-Browser downloads version 1 JSON file
+Browser downloads current version 2 JSON file
 ```
 
 ```text
@@ -348,6 +383,7 @@ Atomically replace Knowledge, Snippets, and Settings
 ### Workflow Notes
 
 - Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
+- After M13 ships, new exports use Backup Format v2 and include each Snippet's required `trigger: string | null`. Version 1 files remain importable and restore their Snippets without triggers. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
 - The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
 - Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Export over the 25 MiB serialized UTF-8 limit uses `This backup file is too large. Choose a file smaller than 25 MB.`
 - Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.
@@ -361,7 +397,7 @@ Atomically replace Knowledge, Snippets, and Settings
 - An already-mounted Side Panel does not live-sync restored Settings and does not change transient Merchant Context, Guidance, Output, or model state. A recreated Side Panel loads the restored default through the existing M11 workflow.
 - Controls have visible labels and explanations, keyboard operation, natural focus order, accessible busy states and live announcements, native disabled semantics, focus on the preview after validation, and focus or equivalent announcement for validation errors. The layout remains usable at narrow options-page widths.
 
-## 10. Local Data Workflow
+## 11. Local Data Workflow
 
 The application is local-first. User data should remain under local control and be available without a backend.
 
@@ -391,18 +427,19 @@ Local persistence
 - The product should remain usable even when the user is offline.
 - Local data access should be fast, predictable, and reliable.
 
-## 11. Future Workflows
+## 12. Future Workflows
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Multimodal Context Attachments:** combine text with one or more transient clipboard screenshots or visual assets for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
-- **M15 — Rich Snippet Templates & Trigger Expansion:** expand semicolon triggers into ordered structured Snippet content through a destination-aware editor boundary, with safe positional fallback for editors that cannot insert rich content. Detailed architecture remains deferred.
+- **M14 — Rich Snippet Templates:** add ordered structured Snippet content through the M13 destination-aware editor boundary, with safe positional fallback for editors that cannot insert rich content. Detailed architecture remains deferred.
+- **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
+- **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
 Context images provide transient visual information to generation. Snippet images are reusable Library-owned response content intended for editor expansion. Their domain ownership must remain separate.
 
 The following potential workflows are not part of the current core user experience definition and require their own approved scope before implementation:
 
-- Provider Selection, deferred to Milestone 13 Provider Expansion / OpenAI when more than one provider exists
+- Provider Selection, deferred to Milestone 16 OpenAI Provider Expansion when more than one provider exists
 - Provider endpoint configuration after a dedicated security and permissions architecture review
 - Persistent Prompt Profiles or writing preferences after a separate product and precedence decision
 - Prompt Management

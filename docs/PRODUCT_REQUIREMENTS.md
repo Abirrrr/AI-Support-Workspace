@@ -9,6 +9,7 @@ The product will eventually provide an integrated support workspace for Intercom
 - Capture support context from the browser and local workspace.
 - Store reusable knowledge entries locally as a Knowledge Library.
 - Store reusable snippets locally as a Snippet Library.
+- Expand an optional unique Snippet trigger into saved plain-text content in a supported focused web editor.
 - Retrieve relevant content quickly during support work.
 - Build prompts for AI assistance without coupling business logic to a specific provider.
 - Allow users to review and edit AI-generated drafts before use.
@@ -79,9 +80,35 @@ The libraries may both contribute to a support response, but they have different
 - The UI warns `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.` Backup files are unencrypted JSON; encryption, passwords, compression, ZIP, signing, cloud storage, scheduling, merge, selective restore, and future-domain support are deferred.
 - M12 requires no manifest, permission, host, database schema, dependency, or configuration change. Database schema remains version 2.
 
-## M14 — Multimodal Context Attachments
+## M13 — Snippet Trigger Expansion v1
 
-Multimodal Context Attachments are assigned to M14. This roadmap assignment does not define detailed architecture, reopen M9, or change the current text-only M9 implementation.
+- Every Snippet has `trigger: string | null`; existing Snippets remain valid with `null`.
+- A blank Trigger field maps to `null`. A non-null trigger is 2–32 ASCII characters including the leading semicolon and, after lowercase canonicalization, must match `^;[a-z0-9]+(?:-[a-z0-9]+)*$`. Uppercase input is accepted and stored lowercase. Non-empty input is not trimmed; whitespace, underscores, consecutive or trailing hyphens, and other punctuation are rejected rather than repaired.
+- Canonical triggers are unique. Create and edit provide inline format and duplicate feedback; editing or deleting a Snippet changes trigger availability immediately.
+- Expansion occurs only for an actively focused supported editor with a collapsed caret. When the user types a complete trigger immediately after the start of the editor or whitespace and presses Space, the extension replaces exactly that trigger with the saved plain-text Snippet plus one ordinary space and places the caret after the inserted space.
+- Partial triggers, missing triggers, selected text, composition input, pasted or programmatic text, triggers away from the caret, and trigger-shaped text without the required left boundary do not expand. Missing and unsupported cases preserve the host editor's normal Space behavior.
+- V1 supports native `textarea`, free-form `input` elements whose type is absent, `text`, or `search`, and generic `contenteditable` editors in explicitly supported content-script origins. Textarea and contenteditable support complete single-line and multiline Snippet content; contenteditable inserts only safe text nodes and `<br>` boundaries. Supported inputs may expand only Snippets containing no `\r` or `\n`. A multiline match in a single-line input must decline before preventing Space, leave the host value unchanged, and preserve normal Space behavior; content must never be flattened, truncated, normalized, or partially inserted to fit.
+- Expansion preserves surrounding content and line breaks and inserts Snippet content only as text, never executable HTML. It produces the host's expected bubbling composed input notification, prevents recursion from inserted text, uses no clipboard, and never reads or logs unrelated editor content.
+- A transient extension-owned trigger catalog supplies synchronous content-script lookup. Dexie remains the only persistent Snippet source of truth; content scripts never access it, and neither `chrome.storage` nor another persistent cache duplicates Snippet ownership. Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port` and enables its cache only while that port is connected and a complete validated snapshot for the current worker epoch is installed. Invalidation and complete-snapshot messages travel in order through the port.
+- Port disconnection immediately clears and disables the frame cache, and a disconnected frame cannot expand from its former snapshot. Reconnection requires a complete snapshot before expansion resumes. Worker restart creates a new epoch and older-epoch snapshots are rejected. Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame; success publishes one rebuilt complete snapshot, persistence failure republishes the unchanged snapshot, and publication failure leaves affected frames disabled until reconnect or successful refresh. Ordinary typing remains unchanged, with no durable queue, browser-storage catalog, polling loop, or per-keystroke service-worker lookup.
+- M13 advances Dexie from version 2 to version 3 by adding optional physical `trigger` data and a unique `&trigger` index to `snippetEntries`. Triggerless records omit the indexed property physically and map to domain `null`; the forward-only migration preserves every existing record without data loss.
+- New exports use strict Backup Format v2. Version 2 adds required `trigger: string | null` to every exact Snippet DTO. Version 1 remains frozen and importable; its Snippets restore with `trigger: null`, and preview warns that restored v1 Snippets will have no triggers. Both versions retain strict validation, explicit mapping, the 25 MiB guard, and atomic replacement of Knowledge, Snippets, and Settings.
+- M13 adds no rich content, images, variables, AI-generated Snippets, provider behavior, Prompt Builder behavior, OpenAI, provider selection, cloud behavior, analytics, autocomplete, mobile support, or generalized browser automation.
+
+## M14 — Rich Snippet Templates
+
+Rich Snippet Templates are assigned to M14 and build on the M13 plain-text trigger and editor-adapter foundation. This roadmap assignment does not define detailed rich-content architecture.
+
+- Future Snippets may support an ordered sequence of structured blocks, including paragraphs, links, emphasis, images or image references, and later supported block types. A sequence such as text → image/reference → following text must retain that exact semantic order.
+- Image representation may later use a local reusable asset, structured reference, or appropriate URL. The final storage representation and asset ownership are unresolved, and arbitrary executable HTML is not an approved content model.
+- Expansion remains target-aware. Rich editors may receive approved rich content where supported; plain-text editors require a deterministic safe fallback that preserves every image/reference's semantic position. Local assets without usable public URLs require an explicit future decision and must not silently disappear.
+- Existing plain-text Snippets, canonical triggers, and v1 editor behavior remain compatible unless a later approved architecture explicitly migrates them.
+
+Representative future rich-template example: a `;shopify-limit` Snippet may preserve the ordered sequence `text → explanatory image/reference → following text`. The exact rich schema and deterministic plain-text fallback remain M14 decisions.
+
+## M15 — Multimodal Screenshot Context
+
+Multimodal Screenshot Context is assigned to M15. This roadmap assignment does not define detailed architecture, reopen M9, or change the current text-only M9 implementation.
 
 - Merchant Context should eventually accept ordinary text plus one or more pasted screenshots or other visual context assets. Text and images may appear together in the current Context workflow, including text before and after an image, with separate Guidance supplied for the task.
 - A user should be able to paste screenshot or image clipboard content directly into Context without first saving every image to disk or uploading it to a cloud service. Exact browser clipboard mechanics remain future architecture work.
@@ -102,50 +129,13 @@ Guidance
 
 Context images are generation inputs, not reusable response assets. They must remain conceptually distinct from future Snippet images even if later implementations can share low-level utilities.
 
-## M15 — Rich Snippet Templates & Trigger Expansion
+## M16 — OpenAI Provider Expansion
 
-Rich Snippet Templates & Trigger Expansion is assigned to M15 as a separate approved future product direction. This roadmap assignment does not define detailed architecture.
-
-- Snippets should eventually expose a Shortcut or Trigger field for text-expansion triggers such as `;hello`, `;refund`, `;shipping`, or `;shopify-limit`.
-- Typing a configured trigger in a supported support editor should replace the trigger range with the associated saved Snippet content.
-- Snippet triggers are not Milestone 10 keyboard shortcuts. M10 concerns application-level key combinations that invoke extension behavior; a Snippet trigger is typed text such as `;hello` that expands inside an editor.
-- Trigger uniqueness, case sensitivity, permitted characters, maximum length, and exact validation remain unresolved.
-- Future Snippets should support an ordered sequence of structured blocks, including paragraphs, links, emphasis, images or image references, and later supported block types. A sequence such as text → image/reference → following text must retain that exact semantic order.
-- Image representation may later use a local reusable asset, structured reference, or appropriate URL. The final storage representation and asset ownership are unresolved, and arbitrary executable HTML is not an approved content model.
-- Expansion must be target-aware. A focused expansion boundary should adapt structured content to plain text inputs, `contenteditable` surfaces, or genuinely necessary destination-specific rich editors without spreading DOM behavior through business logic.
-- Rich editors should receive rich text and inline images where supported. Plain-text editors require a deterministic safe fallback that preserves every image/reference's semantic position and uses a usable link or reference when available. Behavior for local assets without public URLs remains unresolved; images must not silently disappear.
-- Expansion must preserve surrounding editor content, replace only the intended trigger range, place the caret predictably after expansion, and handle unsupported editors safely.
-- Existing plain-text Snippets remain valid product data. Future architecture must define backward compatibility and any required migration before changing persistence.
-
-Representative behavior-only example:
-
-```text
-Title: Shopify ecosystem limitation
-Shortcut: ;shopify-limit
-
-Text: Thank you for reaching out.
-Text: This is a limitation of the Shopify ecosystem.
-Image: [reference to explanatory screenshot]
-Text: Here is what I recommend doing instead...
-```
-
-In a supported rich editor, `;shopify-limit` expands to the ordered text, inline screenshot, and following text. A conceptual plain-text fallback retains the same position:
-
-```text
-Thank you for reaching out.
-
-This is a limitation of the Shopify ecosystem.
-
-[Screenshot/reference: usable future link or reference]
-
-Here is what I recommend doing instead...
-```
-
-The exact fallback syntax is not frozen, and local assets without a usable public URL require an explicit future decision. The wording above is illustrative rather than shipped product content.
+OpenAI Provider Expansion is assigned to M16. It will add OpenAI behind the existing project-owned provider boundary and define provider selection when more than one provider exists. Credentials, endpoint and permission policy, model behavior, privacy, errors, and Settings changes remain unresolved until M16 architecture work.
 
 ## Deferred Future Architecture
 
-This documentation approves product direction only. Future architecture reviews must still define multimodal image representation, provider capability interfaces, unsupported-provider UX, limits, persistence, and provider serialization; and rich-Snippet schema, trigger validation, database migration, content model, reusable asset ownership, expansion engine, editor adapters, insertion mechanics, caret behavior, destination compatibility, and local-asset fallback.
+M13 trigger architecture is defined above. Future reviews must still define rich-Snippet content and asset representation, rich destination serialization and plain-text fallback; multimodal screenshot representation, provider capability interfaces, unsupported-provider UX, limits, persistence, and serialization; and OpenAI credentials, provider selection, permissions, models, errors, and privacy.
 
 ## Quality Requirements
 

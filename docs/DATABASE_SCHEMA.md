@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, and Milestone 11 added the approved version 2 singleton Settings store without modifying the version 1 declarations.
+This document defines the local data model, implemented physical persistence schema, and approved forward migration. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the implemented version 2 singleton Settings store, and M13 approves a future version 3 optional unique Snippet-trigger index without rewriting either historical declaration.
 
 ## Planned Domain Schema
 
@@ -34,6 +34,9 @@ Fields:
 - tags: string[]
 - createdAt: string
 - updatedAt: string
+- trigger: string | null
+
+`trigger` is the optional M13 plain-text expansion identity. A non-null value is stored in canonical lowercase, includes its leading semicolon, is unique, is 2–32 ASCII characters in total, and matches `^;[a-z0-9]+(?:-[a-z0-9]+)*$`. `null` means the Snippet has no expansion trigger.
 
 ### Settings
 
@@ -118,7 +121,33 @@ interface SettingsRecord {
 
 The version 1 to version 2 migration performs no Knowledge or Snippet transformation and preserves every existing Library record. It does not create a Settings record automatically. Absence of the singleton record is normal and is resolved by the application layer to `{ defaultModel: null }`. Dexie schema rollback from version 2 to version 1 is not supported; migration is forward-only. No other table, field, or index changes were made in M11.
 
-All persisted fields are required. Milestone 3 does not add fields to either record type.
+All version 1 and version 2 persisted fields are required. M13's version 3 physical Snippet record adds only an optional omitted-when-null `trigger` property as defined below.
+
+## Approved Milestone 13 Physical Schema Migration
+
+M13 advances database `ai-support-workspace` from Dexie schema version 2 to version 3. It preserves the historical version 1 and version 2 declarations and changes only the current `snippetEntries` declaration:
+
+```text
+knowledgeEntries: 'id, createdAt'
+snippetEntries: 'id, createdAt, &trigger'
+settings: 'id'
+```
+
+`&trigger` is a unique secondary index over canonical non-null triggers. A physical Snippet with no trigger omits the `trigger` property, because indexing a shared `null` value would conflict with uniqueness. The Dexie adapter maps an omitted physical property to domain `trigger: null` and maps domain `null` back to an omitted property. A non-null physical value is the canonical trigger string.
+
+```ts
+interface SnippetEntryRecordV3 {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  trigger?: string;
+}
+```
+
+The forward-only version 2 to version 3 migration preserves every existing Knowledge, Snippet, and Settings record and does not synthesize a trigger. Existing Snippet records remain physically unchanged and read as `trigger: null`. No table, primary key, other field, or other index changes. Rollback to version 2 is unsupported.
 
 ## Record Identity
 
@@ -137,11 +166,12 @@ All persisted fields are required. Milestone 3 does not add fields to either rec
 
 ## Defaults and Record Semantics
 
-- Create and update inputs require every caller-authored field for their entity. The persistence boundary supplies only `id`, `createdAt`, and `updatedAt`.
+- Create and update inputs require every caller-authored field for their entity. The persistence boundary supplies only `id`, `createdAt`, and `updatedAt`; M13 Snippet input includes explicit `trigger: string | null`.
 - Milestone 3 defines no default title, body, content, source, or tag values.
 - `tags` is required and may be an empty array. An empty array is stored as supplied. The persistence layer does not trim, deduplicate, rank, or otherwise reinterpret tags.
 - Strings are stored as supplied. Product validation such as non-empty content rules belongs to the product milestones that own the corresponding workflows.
-- Update uses full replacement semantics for all caller-authored mutable fields. Knowledge Entry updates provide `title`, `body`, `tags`, and `source`; Snippet Entry updates provide `title`, `content`, and `tags`.
+- Update uses full replacement semantics for all caller-authored mutable fields. Knowledge Entry updates provide `title`, `body`, `tags`, and `source`; M13 Snippet Entry updates provide `title`, `content`, `tags`, and `trigger`.
+- The Snippet application boundary validates and canonicalizes triggers before persistence. The adapter stores only canonical non-null values and omits the physical field for `null`; it does not trim, repair, or independently reinterpret trigger text.
 - Generic `list` results are ordered by `createdAt` ascending, then by `id` ascending when timestamps are equal. This is deterministic storage ordering, not relevance ranking.
 
 ## Project-Owned Persistence Contracts
@@ -158,7 +188,7 @@ type KnowledgeEntryInput = Pick<
 
 type SnippetEntryInput = Pick<
   SnippetEntry,
-  'title' | 'content' | 'tags'
+  'title' | 'content' | 'tags' | 'trigger'
 >;
 
 interface KnowledgeEntryRepository {
@@ -173,6 +203,7 @@ interface SnippetEntryRepository {
   create(input: SnippetEntryInput): Promise<SnippetEntry>;
   get(id: string): Promise<SnippetEntry | undefined>;
   list(): Promise<readonly SnippetEntry[]>;
+  findByTrigger(trigger: string): Promise<SnippetEntry | undefined>;
   update(id: string, input: SnippetEntryInput): Promise<SnippetEntry>;
   delete(id: string): Promise<boolean>;
 }
@@ -189,17 +220,18 @@ interface SettingsRepository {
 
 `SettingsRepository.load()` returns `undefined` when the physical singleton record is absent. A focused application load service resolves that normal result to `{ defaultModel: null }`. `save()` upserts the one global record and returns the saved application aggregate. A focused save service trims leading and trailing model whitespace, saves a non-empty result, and saves `null` for empty or whitespace-only input. No Settings list, create, update-by-ID, delete, search, or generic CRUD operation is approved.
 
-The Knowledge and Snippet repositories expose only these operations:
+The Knowledge repository retains its existing operations. M13 adds only canonical `findByTrigger` lookup to the Snippet repository:
 
 | Operation | Semantics |
 | --- | --- |
 | `create(input)` | Generates identity and timestamps, persists the record, and resolves with the complete created record. |
 | `get(id)` | Resolves with the record when present or `undefined` when absent. |
 | `list()` | Resolves with all records in the deterministic generic order defined above. |
+| `findByTrigger(trigger)` | Resolves with the Snippet carrying the supplied canonical trigger or `undefined`; callers normalize and validate before lookup. |
 | `update(id, input)` | Fully replaces caller-authored mutable fields, preserves `id` and `createdAt`, advances `updatedAt`, and resolves with the complete updated record. |
 | `delete(id)` | Deletes the record and resolves with `true`; resolves with `false` when the record did not exist. |
 
-The contract does not include search, retrieval, ranking, pagination, synchronization, provider-specific operations, bulk operations, or cross-entity workflows.
+The contract does not include fuzzy or prefix trigger search, retrieval ranking, pagination, synchronization, provider-specific operations, bulk operations, or cross-entity workflows.
 
 ## Error Behavior
 
@@ -207,6 +239,7 @@ The contract does not include search, retrieval, ranking, pagination, synchroniz
 - A missing Settings singleton is also normal: the Settings repository resolves `undefined`, and the application load boundary supplies `{ defaultModel: null }`.
 - Updating a missing ID rejects with one project-owned `RecordNotFoundError` carrying the entity kind (`knowledgeEntry` or `snippetEntry`) and requested ID.
 - Underlying IndexedDB or Dexie failures reject with a project-owned `PersistenceError` that preserves the original failure as its cause.
+- A unique-index conflict maps to a focused duplicate-trigger application error so create, edit, and restore never expose raw Dexie constraint details. Preflight duplicate checks improve UI feedback, while the unique index remains authoritative for races.
 - Persistence failures are never silently swallowed.
 - Settings load/save presentation maps persistence failures to the exact safe M11 messages without exposing the raw error or cause. M11 does not introduce a broader application error framework.
 
@@ -235,12 +268,13 @@ Milestone 3 validation passed all 13 persistence integration tests, including da
 - Existing version declarations must not be silently rewritten to apply later schema changes.
 - No migration implementation was required for the initial version 1 schema. M11 implemented the first migration when it introduced a physical schema change.
 - Version 2 adds only the singleton `settings` table, preserves the two version 1 stores and all their records, performs no Library transformation, creates no default record, and does not support rollback to version 1.
+- Version 3 adds only optional Snippet `trigger` data and unique index `&trigger`, preserves every version 2 record without generating triggers, and does not support rollback to version 2.
 
 ## Storage Approach
 
 Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers depend on project-owned storage contracts rather than Dexie directly. The schema remains intentionally minimal; search and retrieval access patterns and any indexes they require belong to later milestones.
 
-The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition described above without changing the version 1 declarations or existing Library contracts. Dexie configuration remains centralized in the infrastructure layer.
+The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition. M13 approves the focused version 3 Snippet-trigger extension described above. Dexie configuration remains centralized in the infrastructure layer.
 
 ## Milestone 12 Backup and Restore Contract
 
@@ -260,7 +294,25 @@ Restore is replace-only. After complete validation, infrastructure clears and wr
 
 Export orders public Knowledge and Snippet arrays deterministically by `createdAt` ascending and then `id` ascending. Restore equivalence concerns logical record content, not IndexedDB iteration order. Backup format evolution is separate from database migration: future database versions must not redefine version 1, and future format migration belongs at the import boundary.
 
-M12 introduces no new store, field, index, migration, rollback path, storage technology, permission, dependency, or configuration. Any implementation pressure to change schema version 2 conflicts with Decision 33 and requires architecture review.
+M12 introduced no new store, field, index, migration, rollback path, storage technology, permission, dependency, or configuration. M13 now explicitly supersedes only the earlier “future field” deferral by approving database version 3 and Backup Format v2; it does not redefine frozen Backup Format v1.
+
+## Milestone 13 Backup Format Evolution
+
+Backup Format v1 remains byte-contract frozen: its Snippet DTO still has exactly `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`. The importer continues accepting valid v1 files and maps each trusted v1 Snippet to the current domain with `trigger: null` before the transactional restore port.
+
+After M13 implementation, every new export uses `formatVersion: 2`. The envelope identifier, `exportedAt`, Knowledge DTO, Settings DTO, ordering, filename, 25 MiB limits, explicit mapping, validation security, preview, acknowledgement, and replace-only transaction policy remain unchanged. A version 2 Snippet DTO contains exactly:
+
+- `id: string`
+- `title: string`
+- `content: string`
+- `tags: string[]`
+- `createdAt: string`
+- `updatedAt: string`
+- `trigger: string | null`
+
+The `trigger` key is required even when `null`. A non-null value must already be canonical lowercase, satisfy the M13 pattern and length, and be unique across the complete v2 Snippet array. Version 2 validation rejects missing or unexpected keys, noncanonical or duplicate triggers, invalid values, and unsupported future versions without normalization or repair.
+
+Both v1 and v2 import paths construct trusted current-domain records before persistence. Restore remains one atomic Dexie read/write transaction across Knowledge, Snippets, and Settings; v1 sets every Snippet trigger to `null` and triggers an explicit preview warning, while v2 preserves each trigger exactly. The adapter maps `null` to an omitted physical property and non-null to the unique indexed property. Any validation or persistence failure preserves all existing data.
 
 ## Future Capability Guidance
 
@@ -270,7 +322,7 @@ Knowledge should evolve beyond a single body-text field into structured troubles
 
 ### Richer Snippets
 
-Snippets should eventually support reusable text with metadata such as variables, categories, and usage statistics. The exact field design remains a future decision.
+M14 may extend the M13 plain-text Snippet and trigger foundation with ordered rich content and reusable assets. Variables, categories, usage statistics, image ownership, block schema, and fallback representation remain future decisions.
 
 ### Prompt Templates
 
@@ -282,4 +334,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 11 are complete. Database `ai-support-workspace` now uses schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. Automated migration coverage proved that representative version 1 Knowledge and Snippet records survive unchanged, no Settings record is created automatically, `global` saves and reloads across reopen, and `null` remains a persisted clear state. The M9 Output Workspace and M10 Keyboard Shortcut still keep Context, Guidance, generated or edited Output, capture results, delivery IDs, status, and feedback transient; only the optional default model is persisted through Settings. M12-C defines the independently versioned backup DTO, snapshot boundary, and atomic three-store replace port without changing schema version 2; M12-D implementation has not started.
+Milestones 3 through 12 are complete. Database `ai-support-workspace` currently uses implemented schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. M13-A.1 is complete and Principal Engineer approved; it defines, but does not implement, forward-only schema version 3 with optional unique Snippet triggers and Backup Format v2 while preserving v1 import. M13-B — Snippet Trigger Expansion Implementation is active but has not started, and no M13 source implementation or migration exists yet; the existing Ollama, Workspace, shortcut, and M12 integrity boundaries remain unchanged.

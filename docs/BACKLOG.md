@@ -11,38 +11,40 @@
 
 ## Future Considerations
 
-- Implement the approved M12 Import / Export architecture only through the unstarted M12-D implementation task after the M12-C documentation checkpoint is approved.
+- Preserve the completed M12 backup and restore guarantees while M13 evolves Snippets and Backup Format v2.
 - Preserve the application-owned backup format independently from Dexie schema versioning; future format evolution must not silently redefine format version 1.
 - Reconsider provider endpoint configuration only with provider expansion or a dedicated security and permissions architecture review.
 - Consider persistent Prompt Profiles or writing preferences only through a separate product and precedence decision; they are not M11 behavior tuning.
 - Refine the UI around Intercom support workflows.
 - Evaluate prompt and local-model quality improvements for cases where generated wording implies unsupported commitments or timelines despite contrary Guidance.
 - Expand testing coverage as implementation matures.
-- Continue generic quality, usability, performance, and documentation polish as ongoing backlog work rather than a separately assigned M14 capability.
+- Continue generic quality, usability, performance, and documentation polish as ongoing backlog work and a possible later milestone rather than folding it into M13–M16.
 - Consider merge import, selective import/export, encrypted backup, compression, backup history, or scheduling only through separate future product and architecture decisions; none is part of M12.
 
 ## Approved Future Capabilities
 
-### M14 — Multimodal Context Attachments
+### M14 — Rich Snippet Templates
 
-- Extend Merchant Context beyond ordinary text to one or more screenshots or visual context assets for AI generation when the selected provider and model support image understanding.
-- Allow direct screenshot/image clipboard paste without requiring a disk save or cloud upload first.
-- Provide visible attachment indication, appropriate preview, and removal before generation. Image reordering remains unresolved.
-- Keep Context images transient and local-first by default; no persistence or image table is currently approved.
-- Preserve provider independence through a future capability boundary and never silently discard images when a provider is text-only.
-- Defer image representation, unsupported-provider UX details, count/size/format limits, persistence, Prompt Builder changes, provider serialization, and implementation tasks to future M14 architecture work.
-
-### M15 — Rich Snippet Templates & Trigger Expansion
-
-- Add a future Shortcut or Trigger field with semicolon-style expansion such as `;hello`, `;refund`, or `;shopify-limit`.
-- Keep Snippet triggers separate from M10 application keyboard shortcuts.
+- Build on the M13 optional-trigger and plain-text expansion foundation without redefining its canonical trigger or editor-adapter contracts unnecessarily.
 - Support ordered structured content such as text → image/reference → following text, with later support for appropriate paragraphs, links, emphasis, and images.
 - Preserve the image/reference's semantic position. Rich editors may receive inline rich content; plain-text editors require a deterministic positional link/reference fallback and explicit handling for local assets without public URLs.
-- Introduce a future expansion engine and focused editor-adapter capability boundary for textarea/input, `contenteditable`, and genuinely required destination-specific rich editors.
-- Preserve surrounding content, define the exact replacement range and post-expansion caret position, and fail safely in unsupported editors.
-
 - Keep existing plain-text Snippets valid and define backward compatibility before any future storage migration.
-- Defer schema, image representation, reusable asset ownership, trigger validation and uniqueness, database migration, rich content model, editor compatibility, insertion mechanics, fallback syntax, and implementation tasks to future M15 architecture work.
+- Defer rich schema, image representation, reusable asset ownership, rich-editor serialization, fallback syntax, and implementation tasks to future M14 architecture work.
+
+### M15 — Multimodal Screenshot Context
+
+- Extend Merchant Context beyond ordinary text to one or more screenshots for AI generation when the selected provider and model support image understanding.
+- Allow direct screenshot clipboard paste without requiring a disk save or cloud upload first.
+- Provide visible attachment indication, appropriate preview, and removal before generation. Image reordering remains unresolved.
+- Keep screenshots transient and local-first by default; no persistence or image table is currently approved.
+- Preserve provider independence through a future capability boundary and never silently discard screenshots when a provider is text-only.
+- Defer representation, unsupported-provider UX details, count/size/format limits, persistence, Prompt Builder changes, provider serialization, and implementation tasks to future M15 architecture work.
+
+### M16 — OpenAI Provider Expansion
+
+- Add OpenAI behind the existing project-owned generation-provider boundary.
+- Define provider selection, credential storage, endpoint and permission policy, model selection, errors, privacy, and migration behavior before implementation.
+- Preserve existing Ollama and provider-independent Prompt Builder behavior.
 
 ### Chrome Side Panel Focus Activation
 
@@ -53,4 +55,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M12 remains Import / Export, M13 remains provider expansion, Multimodal Context Attachments is assigned to M14, and Rich Snippet Templates & Trigger Expansion is assigned to M15. These assignments do not alter M9, M10, or M11 and do not authorize implementation before the applicable milestone architecture is defined.
+M13 is Snippet Trigger Expansion v1, M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion. Workflow polish and additional integrations remain later work. The original unstarted M13-A OpenAI readiness review was superseded by this priority order. M13-A.1 architecture is complete and Principal Engineer approved; M13-B — Snippet Trigger Expansion Implementation is active but has not started, and no M13 source implementation exists yet.

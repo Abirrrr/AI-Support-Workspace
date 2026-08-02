@@ -96,7 +96,7 @@ Add a keyboard shortcut for quick access to the extension experience.
 
 Provide a local Settings UI where the user can save one optional default Ollama model and have each new Workspace Side Panel session initialize its transient model field from that saved value. Establish the typed Settings persistence boundary and the Dexie version 2 migration that adds only the singleton Settings record.
 
-Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 13 — Provider Expansion / OpenAI, when more than one provider exists.
+Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 16 — OpenAI Provider Expansion, when more than one provider exists.
 
 ## Milestone 12 — Import / Export (Completed)
 
@@ -106,19 +106,27 @@ M12 provides manual local backup, restore after reinstall or local browser-data 
 
 Cloud synchronization, collaboration, sharing workflows, bulk editing, automatic or scheduled backups, merge import, encryption, compression, screenshot Context, and Rich Snippet data are outside M12.
 
-## Milestone 13 — Provider Expansion / OpenAI (Current)
+## Milestone 13 — Snippet Trigger Expansion v1 (Current)
 
-Add OpenAI as a later provider integration and define provider selection when more than one provider exists.
+Add optional unique semicolon triggers to existing plain-text Snippets and expand a complete trigger when the user presses Space in an actively focused supported web editor. M13 preserves surrounding content, plain text, normal host-editor input behavior, and predictable caret placement through focused generic editor adapters and an extension-owned transient trigger catalog.
 
-M13-A — Provider Expansion / OpenAI Architecture Readiness Review is the active task and has not started. No M13 implementation is authorized yet. The exact next action is to perform the read-only M13-A architecture readiness review.
+The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition is complete and Principal Engineer approved. M13-B — Snippet Trigger Expansion Implementation is active but has not started; no M13 source implementation exists yet, and M13-B is the exact next engineering action.
 
-## Milestone 14 — Multimodal Context Attachments
+## Milestone 14 — Rich Snippet Templates
 
-Allow one or more screenshots or images to be pasted into Merchant Context with transient, local-first behavior by default, a provider-independent attachment boundary, provider capability checks, and explicit feedback when a provider cannot use or omits an attachment. Detailed architecture remains deferred to future M14 tasks.
+Extend the M13 plain-text Snippet and trigger foundation with ordered rich template content, destination-aware rich insertion, deterministic plain-text fallback, and explicit reusable-asset handling. Detailed architecture remains deferred to future M14 tasks.
 
-## Milestone 15 — Rich Snippet Templates & Trigger Expansion
+## Milestone 15 — Multimodal Screenshot Context
 
-Add semicolon triggers such as `;hello`, ordered rich content such as text → image/reference → text, rich-editor insertion where supported, deterministic plain-text fallback, an editor capability or adapter boundary, and compatibility with existing plain Snippets. Detailed architecture remains deferred to future M15 tasks.
+Allow one or more screenshots to be pasted into Merchant Context with transient, local-first behavior by default, a provider-independent attachment boundary, provider capability checks, and explicit feedback when a provider cannot use or omits an attachment. Detailed architecture remains deferred to future M15 tasks.
+
+## Milestone 16 — OpenAI Provider Expansion
+
+Add OpenAI as a later provider integration and define provider selection when more than one provider exists. Provider credentials, endpoint policy, model selection, permissions, and security require their own implementation-ready architecture before work begins.
+
+## Later Milestone — Workflow Polish and Additional Integrations
+
+Continue product polish and add further support-platform or workflow integrations only through separately approved, small milestones.
 
 ## Planning Note
 

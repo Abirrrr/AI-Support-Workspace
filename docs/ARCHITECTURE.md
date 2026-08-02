@@ -14,6 +14,7 @@ The project is expected to evolve around a small set of responsibilities:
 - Prompt builder: deterministically composes typed, provider-independent prompt assemblies.
 - Provider adapters: preserve a provider-independent boundary, with Ollama as the initial implementation target and other providers added later.
 - Output workspace: lets the user review and refine generated content.
+- Snippet trigger expansion: expands locally stored plain-text Snippets through focused page-editor adapters without coupling domain logic to merchant-platform DOM.
 
 ## Design Principles
 
@@ -105,7 +106,7 @@ Infrastructure should run within the WXT extension and the user's browser wherev
 
 Dexie is the approved storage abstraction over browser-local IndexedDB. The application depends on project-owned persistence contracts so domain and application logic remain independent of Dexie and the browser persistence mechanism. Dexie database declaration, typed tables, schema versions, and transaction mechanics remain centralized in the infrastructure layer.
 
-`DATABASE_SCHEMA.md` is authoritative for the implemented physical schema, repository semantics, errors, transactions, testing, and migration policy. The Milestone 3 physical schema introduced Knowledge Entry and Snippet Entry records. M11 implemented the typed Settings aggregate and advanced the physical database to version 2 by adding only the singleton Settings store while preserving both Library stores.
+`DATABASE_SCHEMA.md` is authoritative for the implemented physical schema, repository semantics, errors, transactions, testing, and migration policy. The Milestone 3 physical schema introduced Knowledge Entry and Snippet Entry records. M11 implemented the typed Settings aggregate and advanced the physical database to version 2 by adding only the singleton Settings store while preserving both Library stores. M13 approves a future forward-only version 3 that adds only optional canonical Snippet trigger data and a unique trigger index.
 
 History remains an intentionally undecided capability and is not part of the planned storage architecture.
 
@@ -212,7 +213,7 @@ Every displayed key is required, and strict version 1 validation rejects every u
 
 Knowledge records contain exactly non-nullable strings `id`, `title`, `body`, `createdAt`, `updatedAt`, and `source`, plus non-nullable `tags: string[]`. Snippet records contain exactly non-nullable strings `id`, `title`, `content`, `createdAt`, and `updatedAt`, plus non-nullable `tags: string[]`. Version 1 contains no usage counts, Snippet triggers, rich content, images, or future fields.
 
-Backup-format versioning is independent from Dexie schema versioning. M12 accepts only version 1; unknown versions are rejected safely, and there is no older supported version. Future format migrations belong inside the parser/import boundary. Future database migrations must not redefine version 1, and future M14 or M15 persisted data requires a later backup-format decision, normally a new version.
+Backup-format versioning is independent from Dexie schema versioning. The completed M12 implementation exports and accepts version 1. M13 keeps version 1 frozen and importable, adds strict version 2 for Snippet triggers, and continues rejecting unsupported future versions. Future format migrations belong inside the parser/import boundary and never redefine an earlier version.
 
 Export orders Knowledge and Snippet arrays by `createdAt` ascending and then `id` ascending, preserves tag order and all text exactly, and produces filename `ai-support-workspace-backup-YYYY-MM-DDTHH-mm-ssZ.json` using UTC without colons. Object-key order is not semantically significant, and database iteration order is not part of restore equivalence. Normal browser collision behavior applies. Serialization occurs in memory, followed by a JSON Blob, object URL, temporary-anchor download, and object-URL revocation. No Chrome downloads or filesystem permission is used.
 
@@ -270,6 +271,75 @@ Backup files may contain merchant knowledge, internal notes, reusable support re
 
 M12 changes no manifest, Chrome permission, host permission, Dexie schema, dependency, or configuration. Database schema remains version 2. Any later implementation need for such a change is an architecture conflict requiring review.
 
+### Snippet Trigger Expansion v1
+
+Milestone 13 adds one optional plain-text expansion trigger to each existing Snippet. It does not create a second Snippet domain, rich template model, provider workflow, or generalized browser automation framework. The domain shape becomes `SnippetEntry { ...existingFields, trigger: string | null }`; existing records resolve to `null` and remain fully editable.
+
+#### Trigger Contract
+
+A blank Trigger field maps to `null`. Otherwise, a trigger contains 2–32 ASCII characters including its leading semicolon. User input is lowercased with locale-independent `toLowerCase()` and must then match `^;[a-z0-9]+(?:-[a-z0-9]+)*$`. Uppercase input is accepted and stored canonically; non-empty input is not trimmed, and whitespace, underscores, non-ASCII characters, unsupported punctuation, consecutive hyphens, and a trailing hyphen are rejected. Examples include `;hello`, `;refund2`, and `;shopify-limit`.
+
+Canonical triggers are unique across Snippets. The application boundary owns normalization and validation, checks duplicate availability for actionable UI feedback, and maps the authoritative unique-index conflict for concurrent writes into one focused duplicate-trigger error. Create and update accept explicit `trigger: string | null`; delete releases the trigger when the record is removed.
+
+#### Activation and Editor Adapters
+
+Expansion is activated only by a trusted, cancelable `beforeinput` event with `inputType: 'insertText'`, `data: ' '`, no active composition, and an actively focused supported editor. The editor selection must be collapsed. Immediately before the caret must be one complete trigger-shaped candidate whose left boundary is the editor start or Unicode whitespace. The candidate is lowercased only for catalog lookup, so typed matching is case-insensitive while the original typed range remains the exact replacement range. At most the 32 trigger characters plus the boundary are inspected; unrelated editor text is never scanned.
+
+On a catalog hit, the event's default Space insertion is prevented and the adapter replaces exactly the trigger range with the saved Snippet `content` followed by one U+0020 space. The content is preserved exactly as plain text, surrounding text and existing line breaks remain unchanged, and the caret is collapsed after the inserted space. The adapter produces the bubbling, composed `input` notification expected by the host editor; it does not synthesize `change`, whose normal focus/commit lifecycle remains host-owned. Inserted content is guarded so its text cannot recursively trigger expansion.
+
+Partial or unknown triggers; selected text; composition; paste; programmatic changes; non-Space input; a missing left boundary; a match away from the caret; a noncancelable event; an unavailable catalog; and unsupported editors all preserve the browser or host application's normal behavior. The extension does not prevent the Space event in those cases and presents no disruptive page UI.
+
+The focused adapter contract is conceptually:
+
+```ts
+interface EditorAdapter {
+  readonly kind: 'textarea' | 'textInput' | 'contenteditable';
+  readTriggerCandidate(maxLength: number): TriggerCandidate | undefined;
+  replaceTriggerWithPlainText(candidate: TriggerCandidate, text: string): boolean;
+}
+```
+
+Native `textarea` supports single-line and multiline Snippet content through selection ranges and native value replacement. Free-form `input` elements with absent, `text`, or `search` type use the same range mechanism but may expand only Snippets whose content contains neither carriage-return nor line-feed characters. When a matched Snippet contains `\r` or `\n`, the single-line input adapter declines before preventing Space, leaves the host value untouched, and allows normal Space behavior to continue unchanged. It must never flatten, truncate, normalize, or partially insert the Snippet merely to fit the input. Password, email, URL, telephone, number, date, and other specialized inputs are unsupported.
+
+Generic `contenteditable` supports single-line and multiline Snippet content through the active editing root and a DOM `Range`: it walks backward only through adjacent text nodes within that root, stops at block, `<br>`, embedded-element, or root boundaries, and deletes the exact candidate range. It inserts a fragment of safe text nodes plus extension-created `<br>` boundaries corresponding to the Snippet's plain-text line breaks; it never parses Snippet content as HTML. It then places the Selection after the appended space. If a safe exact range or expected input notification cannot be produced, the adapter declines before preventing Space.
+
+Intercom is the required primary real-world target, but its DOM does not enter domain or application contracts. The implementation configures the generic content script with exactly `matches: ['https://example.com/*', 'https://app.intercom.com/*']` and `allFrames: true`. Each injected matching frame operates locally; there is no cross-frame traversal, `match_about_blank`, or fallback-origin injection. It adds no `<all_urls>`, arbitrary-site matching, `tabs`, clipboard, storage, or new AI host permission. A destination-specific editor adapter requires observed evidence that the generic adapter cannot satisfy a supported editor and must remain behind the same interface.
+
+#### Runtime and Trigger Catalog
+
+The dependency flow is:
+
+```text
+Dexie Snippet repository
+→ trigger catalog application service
+→ service-worker transient catalog coordinator
+→ one ordered typed runtime Port per matched frame
+→ frame-local content-script cache
+→ editor adapter
+```
+
+Dexie remains the only persistent source of truth. The service worker may hold one derived in-memory map from canonical trigger to only the Snippet ID and plain-text content. Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port` connection and may enable its frame-local cache only while that port is connected and the frame holds one completely validated atomic snapshot identified by the current worker-session epoch and catalog revision. Invalidation and complete-snapshot messages travel in order through that port. Neither layer writes the catalog to `chrome.storage`, `localStorage`, IndexedDB, or another durable store, and the content script never imports Dexie or a repository implementation.
+
+Port disconnection immediately clears and disables the frame cache, so a disconnected frame cannot expand from its former snapshot and normal editor input continues unchanged. Reconnection requests a complete snapshot and does not re-enable expansion until that snapshot is completely validated and atomically installed. A service-worker restart creates a new epoch and rebuilds from the repository; frames reject older-epoch snapshots. Unknown messages, invalid or stale snapshots, revision regression, extension reload, disconnection, or messaging failure clears or leaves the local cache disabled.
+
+Before Snippet create, edit, delete, import, or restore persistence, the coordinator sends invalidation through the ordered runtime port to every currently connected frame, and each connected frame clears its cache immediately. After successful persistence, the coordinator rebuilds from Dexie and publishes one complete new snapshot. If persistence fails, it republishes the unchanged snapshot. Publication failure leaves each affected frame disabled until reconnect or a successful refresh; the persisted operation is reported accurately and the options page provides safe temporary-unavailability feedback. No stale cache is knowingly used, and no durable queue, browser-storage catalog, polling loop, or per-keystroke service-worker lookup is introduced.
+
+The service worker owns only transient catalog distribution and the existing M10 browser coordination. It does not own Snippet CRUD, React state, provider execution, Prompt Builder, Retrieval Engine, or a durable queue. Trigger expansion sends no editor content, Snippet content, or trigger usage to Ollama, OpenAI, analytics, or telemetry.
+
+#### Persistence and Backup Evolution
+
+M13 advances Dexie schema version 2 to version 3 by changing only `snippetEntries` to `id, createdAt, &trigger`. Triggerless physical records omit the indexed property and map to domain `null`; the migration preserves every existing Knowledge, Snippet, and Settings record without generating triggers. `DATABASE_SCHEMA.md` is authoritative for mapping, repository additions, uniqueness, migration, and errors.
+
+Backup Format v1 remains frozen. The import boundary continues accepting valid v1 files and maps every v1 Snippet to `trigger: null`. New exports after M13 use Backup Format v2. Its envelope, identifier, timestamp, Knowledge, Settings, limits, ordering, filename, UI, and security rules remain as in v1, while each exact v2 Snippet DTO adds required `trigger: string | null`. Non-null triggers must already be canonical, valid, and unique. V2 rejects unexpected fields and unsupported future versions.
+
+Both import versions construct current trusted models only after complete validation. Restore remains one atomic replacement transaction across Knowledge, Snippets, and Settings, with explicit DTO-to-domain-to-physical mappings and complete rollback on failure. V1 clears all restored trigger values to `null`; its preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.` V2 preserves triggers. Trigger data is never silently omitted from new exports.
+
+#### Snippet Library, Security, and Scope
+
+The existing Snippet create/edit form adds one optional Trigger input. Guidance is `Optional. Use 2–32 characters starting with ;. Letters, numbers, and single hyphens only.` Invalid input shows `Use 2–32 characters starting with ;. Use only letters, numbers, and single hyphens.` A collision shows `That trigger is already used by another Snippet.` A canonical trigger is shown in each configured Snippet list item. Existing `null` records display no trigger and remain editable. No rich editor, variable UI, suggestion menu, autocomplete, analytics, or additional top-level navigation is added.
+
+Insertion is plain text only: no `innerHTML`, script, markup execution, external-resource loading, clipboard read/write, password input handling, secret capture, editor-content logging, provider transmission, or expansion outside the actively focused supported editor. M13 does not change Ollama, `GenerationProvider`, `OutputWorkflow`, Retrieval Engine, Prompt Builder, Side Panel generation, M10 capture, or Settings behavior. Rich Snippets move to M14, Multimodal Screenshot Context to M15, and OpenAI/provider selection to M16.
+
 ### Project Layer Responsibilities
 
 - Extension platform layer: owns WXT and Manifest V3 entry points, Chrome API integration, permissions, messaging, and extension lifecycle behavior.
@@ -306,4 +376,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 11 are implemented and validated. M12-C defines the implementation-ready Import / Export v1 architecture above without changing the implemented platform, source, tests, database schema version 2, manifest, permissions, dependencies, or configuration. M12-D implementation has not started, and M12 is not complete.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 12 are implemented, validated, and synchronized. M13-A.1 defines the Snippet Trigger Expansion v1 architecture, Dexie version 3 migration, and Backup Format v2 evolution without implementation; it is complete and Principal Engineer approved. The original unstarted M13-A OpenAI readiness review is superseded. M13-B — Snippet Trigger Expansion Implementation is active but has not started, no M13 source implementation exists yet, and M13-B is the exact next engineering action.

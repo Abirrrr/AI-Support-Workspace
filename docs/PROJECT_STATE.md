@@ -2,12 +2,12 @@
 
 ## Current Milestone
 
-- Milestone 13 — Provider Expansion / OpenAI
+- Milestone 13 — Snippet Trigger Expansion v1
 
 ## Task State
 
-- Last completed task: M12-D.1 — Backup Format v1 DTO Isolation Correction.
-- Active task: M13-A — Provider Expansion / OpenAI Architecture Readiness Review. M13-A has not started, and no M13 implementation is authorized.
+- Last completed task: M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition.
+- Active task: M13-B — Snippet Trigger Expansion Implementation. M13-B has not started, no M13 source implementation exists yet, and M13-B is the exact next engineering action. The original M13-A OpenAI readiness review did not start and is superseded by the product-priority decision.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
 - M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
@@ -36,7 +36,7 @@
 
 ## Project Status
 
-- Status: Milestone 12 — Import / Export is implemented, validated, complete, and synchronized at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`). Principal Engineer source review approved the corrected implementation, whose frozen dedicated Backup Format v1 DTOs and explicit mappings keep the public file contract isolated from live domain and persistence models. Milestone 13 — Provider Expansion / OpenAI is current; M13-A is the active but unstarted read-only architecture readiness review, and no M13 implementation is authorized.
+- Status: Milestone 12 — Import / Export is implemented, validated, complete, and synchronized at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`), with closeout documentation synchronized at `ea3e90d` (`docs: close milestone 12 and advance to milestone 13`). Milestone 13 — Snippet Trigger Expansion v1 is current. M13-A.1 defined its roadmap and implementation-ready architecture and is complete and Principal Engineer approved. M13-B is active but unstarted, and no M13 source implementation exists yet.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -44,10 +44,11 @@
 
 ## Approved Future Product Directions
 
-- **M14 — Multimodal Context Attachments:** Merchant Context should eventually combine text with one or more transient clipboard screenshots or visual assets for generation through a provider-independent capability boundary. Provider capability checks and explicit unsupported-provider or omission feedback must ensure unsupported images never disappear silently. Detailed M14 architecture remains deferred.
-- **M15 — Rich Snippet Templates & Trigger Expansion:** Snippets should eventually support semicolon triggers, ordered structured text/image/reference content, target-aware rich-editor insertion, deterministic plain-text fallback, and compatibility with existing plain Snippets. Detailed M15 architecture remains deferred.
+- **M14 — Rich Snippet Templates:** Build ordered structured Snippet content, rich-editor insertion, deterministic plain-text fallback, reusable-asset rules, and backward compatibility on the M13 trigger/editor foundation. Detailed M14 architecture remains deferred.
+- **M15 — Multimodal Screenshot Context:** Merchant Context should eventually combine text with one or more transient clipboard screenshots for generation through a provider-independent capability boundary. Unsupported screenshots must never disappear silently. Detailed M15 architecture remains deferred.
+- **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
-- The Side Panel focus direction remains unassigned. The M14 and M15 assignments define roadmap ownership only, not implementation architecture. These directions do not reopen M9, redefine M10 Keyboard Shortcut, redefine completed M11 Settings, authorize persistence changes, or change database schema version 2. `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, and `BACKLOG.md` preserve the approved intent and unresolved architecture questions.
+- The Side Panel focus direction remains unassigned. M14–M16 assignments define roadmap ownership only. M13 alone approves the focused trigger persistence, editor, runtime, and Backup Format v2 architecture described below; it does not reopen M9, redefine M10, or change the existing Ollama/AI workflow.
 
 ## Milestone 12 Architecture
 
@@ -58,7 +59,18 @@
 - M12 supports replace-only restore after strict all-or-nothing validation and an explicit destructive acknowledgement. One Dexie transaction clears and replaces Knowledge, Snippets, and Settings atomically through a focused restore port.
 - Import and export share a 25 MiB (`26,214,400` byte) guard. Export uses in-memory JSON, a Blob, an object URL, and a temporary anchor; import uses one labelled JSON file input. No permission, schema, dependency, or manifest change is approved.
 - Import / Export is the fourth options-page section. Valid files show filename, export timestamp, Knowledge and Snippet counts, and saved-model summary before confirmation. Options-page-local navigation must reload restored data; mounted Side Panels do not live-sync Settings.
-- Merchant Context, Guidance, generated Output, Workspace overrides and active state, M10 deliveries, screenshots, clipboard/browser state, logs, Ollama data, secrets, unrelated storage, and future M14/M15 data are excluded. Encryption, passwords, compression, ZIP, merge, selective import/export, backup history, and scheduling are also excluded.
+- Merchant Context, Guidance, generated Output, Workspace overrides and active state, M10 deliveries, screenshots, clipboard/browser state, logs, Ollama data, secrets, unrelated storage, and then-future Snippet trigger/rich/multimodal data are excluded from frozen Backup Format v1. Encryption, passwords, compression, ZIP, merge, selective import/export, backup history, and scheduling are also excluded.
+
+## Milestone 13 Architecture
+
+- Each plain-text Snippet gains optional domain `trigger: string | null`; existing records resolve to `null`. Non-null triggers are 2–32 ASCII characters including `;`, canonical lowercase, unique, and match `^;[a-z0-9]+(?:-[a-z0-9]+)*$` after lowercase conversion. Whitespace is rejected, not trimmed.
+- A trusted cancelable Space `beforeinput` expands only a complete catalog trigger immediately before a collapsed caret with editor-start or whitespace left boundary. It replaces exactly that range with preserved plain-text Snippet content plus one space and places the caret afterward. Misses, selection, composition, paste, unsafe range, unsupported editor, and cache/runtime failure preserve normal Space behavior.
+- Focused adapters support `textarea`, free-form absent/text/search inputs, and generic `contenteditable`. Textarea supports complete single-line and multiline Snippet content. Contenteditable supports complete single-line and multiline content through safe text-node and `<br>` insertion. Supported single-line inputs expand only content with no `\r` or `\n`; for a multiline match the input adapter declines before preventing Space, leaves the host value unchanged, and preserves normal Space behavior. Content is never flattened, truncated, normalized, or partially inserted to fit an input.
+- The content script uses only explicit `https://example.com/*` and `https://app.intercom.com/*` matches with `allFrames: true` and frame-local operation. Intercom is a required manual-validation target, not a hard-coded domain model. No fallback-origin injection, `<all_urls>`, arbitrary-site automation, clipboard/storage permission, editor logging, password capture, or provider transmission is approved.
+- Dexie remains the sole persistent source of truth. Every matched content-script frame maintains one long-lived typed `chrome.runtime.Port` and enables its transient cache only while that port is connected and holds a completely validated current-epoch snapshot. Invalidation and complete snapshots travel in order through the port. Disconnection immediately clears and disables the cache; a disconnected frame cannot use its former snapshot. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and older-epoch snapshots are rejected. Before Snippet create/edit/delete or import/restore persistence, the coordinator invalidates every connected frame and each clears immediately. Success publishes one rebuilt complete snapshot, persistence failure republishes the unchanged snapshot, and publication failure leaves affected frames disabled until reconnect or successful refresh. Normal typing continues, and no durable queue, browser-storage catalog, polling loop, or per-keystroke service-worker lookup is approved.
+- M13 approves forward-only database schema version 3 with only `snippetEntries: 'id, createdAt, &trigger'` changed. Triggerless physical records omit the indexed property and map to domain `null`; existing Knowledge, Snippets, and Settings migrate without data loss.
+- Backup Format v1 remains frozen and importable, with v1 Snippets restored as `trigger: null`. New exports use strict Backup Format v2, whose exact Snippet DTO adds required `trigger: string | null`; all M12 size, explicit mapping, security, preview, acknowledgement, identity, atomic transaction, rollback, and failed-validation guarantees remain.
+- The Snippet form adds one optional Trigger field, format guidance, inline invalid/duplicate feedback, and list display. Rich content, images, variables, autocomplete, analytics, providers, Prompt Builder changes, Screenshot Context, OpenAI, cloud sync, team sharing, and generalized automation are excluded.
 
 ## Architecture Status
 
@@ -91,7 +103,7 @@
 - Settings is the third top-level section in the existing options page alongside Knowledge and Snippets. It provides one explicit-save form, accessible loading and status feedback, and no separate page, router, generic preference system, popup action, autosave, reset, import, or export.
 - M11 implements a project-owned typed Settings aggregate, minimal singleton load/save repository, focused application normalization/default boundaries, and a Dexie infrastructure adapter. The implemented schema migrated from version 1 to version 2 by adding only `settings: 'id'` with physical record `{ id: 'global', defaultModel }`, no timestamps or indexes, no automatic record, and no Knowledge or Snippet transformation.
 - Each Side Panel session loads Settings once before establishing editable model state. The saved default initializes the transient field; missing, null, or failed load initializes blank, with safe non-blocking failure feedback. Workspace overrides remain transient, do not persist or live-sync, and Generate continues using the current field through the unchanged provider boundary.
-- M11 defers provider selection to M13, keeps `http://localhost:11434` fixed, and excludes endpoint configuration, remote or LAN Ollama, OpenAI, credentials, discovery, health checks, behavior tuning, writing preferences, editable grounding instructions, theme, shortcut settings, Workspace persistence, multimodal Context, Rich Snippets, history, and manifest changes.
+- M11 defers provider selection to M16, keeps `http://localhost:11434` fixed, and excludes endpoint configuration, remote or LAN Ollama, OpenAI, credentials, discovery, health checks, behavior tuning, writing preferences, editable grounding instructions, theme, shortcut settings, Workspace persistence, multimodal Context, Rich Snippets, history, and manifest changes.
 
 ## Completed Work
 
@@ -214,10 +226,13 @@
 - Applied the permanent risk-based manual-validation standard: destructive, persistence, data-loss or corruption, security-sensitive, external-integration, and core browser-only risks receive manual validation; reliable automation may carry low-risk, reversible, readily detectable edge cases. The already-mounted Side Panel live-refresh edge case and manual oversized-file exercise were not repeated manually because source review, automated coverage, and existing regression evidence made them non-blocking.
 - Completed the Documentation Impact Review. No updates are required to `ARCHITECTURE.md`, `DECISIONS.md`, `DATABASE_SCHEMA.md`, `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, `BACKLOG.md`, `ENGINEERING_PRINCIPLES.md`, or `CODING_AGENT_RULES.md`. The closeout restores and completes the approved architecture and creates no new architecture decision. No schema, manifest, permission, dependency, provider, architecture, or configuration change occurred.
 - Created and pushed final Milestone 12 implementation checkpoint `d304f90` (`feat: add import and export backup workflow`). The working tree was clean after the checkpoint, and local `master` and `origin/master` were synchronized.
+- Synchronized Milestone 12 closeout documentation at `ea3e90d` (`docs: close milestone 12 and advance to milestone 13`). The original M13-A OpenAI readiness review did not start and was superseded by the product owner's new milestone priority.
+- Completed M13-A.1 as a documentation-only corrective roadmap and architecture definition. It realigns M13–M16, defines the canonical trigger, Space activation, generic editor adapters, transient catalog coordination, Dexie version 3 migration, strict Backup Format v2, Snippet UI, safety, and validation contracts, and changes no implementation, tests, dependency, or configuration. Principal Engineer approved the corrected architecture, including the single-line input capability boundary and reliable port-connected transient-cache invalidation protocol.
+- M13-A.1 Documentation Impact Review: `PROJECT_STATE.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `PRODUCT_REQUIREMENTS.md`, `DATABASE_SCHEMA.md`, `UI_WORKFLOW.md`, `ROADMAP.md`, `TESTING_STRATEGY.md`, `CHANGELOG.md`, `BACKLOG.md`, and `README.md` require synchronization. `PRODUCT_VISION.md`, `ENGINEERING_PRINCIPLES.md`, and `CODING_AGENT_RULES.md` were reviewed and require no change.
 
 ## Next Engineering Action
 
-- Perform the read-only M13-A — Provider Expansion / OpenAI Architecture Readiness Review. M13-A has not started, and no M13 implementation is authorized yet.
+- Begin M13-B — Snippet Trigger Expansion Implementation. M13-B has not started; it is the exact next engineering action.
 
 ## Repository Status
 
@@ -226,20 +241,20 @@
 - The approved platform may not be substituted without an explicit architecture review.
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
-- The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 2, the unchanged Knowledge and Snippet stores, the singleton Settings store, and project-owned repository contracts.
+- The implemented Dexie-backed persistence foundation remains at database schema version 2. M13-A.1 approves a future version 3 unique optional Snippet-trigger index, but no migration has been implemented. No M13 source implementation exists yet.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
 - The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the M11 implementation checkpoint is `d40e031` (`feat: add default Ollama model settings`).
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
-- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. M11 Settings now initializes the transient model through a separate persistence/application boundary without changing `GenerationRequest`, Prompt Builder, or `OllamaProvider`. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, or Prompt Templates are implemented. Multimodal Context Attachments is assigned to M14, Rich Snippet Templates & Trigger Expansion is assigned to M15, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
+- The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and remain unchanged. Rich Snippet Templates is assigned to M14, Multimodal Screenshot Context to M15, OpenAI Provider Expansion to M16, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
 
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 13 — Provider Expansion / OpenAI. Last completed task: M12-D.1 — Backup Format v1 DTO Isolation Correction. Active task: M13-A — Provider Expansion / OpenAI Architecture Readiness Review; it has not started, and no M13 implementation is authorized.
-- Final Milestone 12 implementation checkpoint: HEAD and `origin/master` were synchronized at `d304f90` (`feat: add import and export backup workflow`) with a clean working tree before this documentation-only closeout task began.
-- Next action: perform the read-only M13-A architecture readiness review.
+- Current roadmap milestone: Milestone 13 — Snippet Trigger Expansion v1. Last completed task: M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition. Active task: M13-B — Snippet Trigger Expansion Implementation; M13-B has not started, and the original unstarted M13-A OpenAI review is superseded.
+- Repository base checkpoint: HEAD and `origin/master` were synchronized at `ea3e90d` (`docs: close milestone 12 and advance to milestone 13`) with a clean working tree before M13-A.1 began.
+- Next action: perform M13-B — Snippet Trigger Expansion Implementation. No M13 source implementation exists yet.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -247,14 +262,15 @@
 - Browser-specific behaviors introduced by future milestones will require their own automated and manual validation. JSDOM focus assertions do not prove Chrome WebContents activation or browser-level keyboard routing.
 - Chrome may retain webpage keyboard routing when an already-visible Side Panel receives an internal Guidance focus/caret request. The user may need to click Guidance until Chrome exposes a supported panel-activation API; no M10 workaround is authorized.
 - Cross-world preload mismatch and unused generated preload warnings are currently classified as non-blocking WXT/Vite/Chrome generated-output observations with no functional impact. Revisit only with functional or performance evidence.
-- The Milestone 2 content script intentionally matches only `https://example.com/*`; production merchant-platform behavior remains future scope.
+- The implemented Milestone 2 content script still matches only `https://example.com/*`. M13 architecture approves adding explicit `https://app.intercom.com/*` matching for generic frame-local trigger expansion; implementation and real-browser permission review remain pending.
 - Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration. These boundaries passed manual Chrome validation, but environment setup remains external and must not be changed automatically.
 - Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
-- Detailed M14 multimodal and M15 rich-Snippet architecture remains deliberately unresolved, including image and rich-content representation, provider and editor capability details, unsupported-image behavior, limits, reusable asset ownership, trigger validation, migration, insertion, caret handling, and plain-text fallback details for local assets.
+- Detailed M14 rich-template, M15 multimodal-screenshot, and M16 OpenAI architecture remains unresolved. M13 defines only plain-text triggers, generic editor insertion, schema version 3, and Backup Format v2.
+- Generic contenteditable behavior must be verified against Intercom. If its editor requires destination-specific handling, that adapter must stay behind the approved editor interface and may not broaden host access or introduce executable HTML. Risk-based validation must also prove the single-line input multiline-decline boundary without host mutation and the frame-cache disconnect/invalidation safety rules.
 - History remains intentionally undecided and must not be assumed to be in scope.
 - The already-mounted Side Panel does not live-refresh a restored default model; recreating the Side Panel loads the restored value. This edge case and a manual oversized-file exercise were not repeated during M12 closeout and are non-blocking because their required behavior is covered by source review and automated tests.
 
 ## Current Git Checkpoint
 
-- Latest committed and pushed checkpoint: `d304f90` (`feat: add import and export backup workflow`), the final Milestone 12 implementation checkpoint. The working tree was clean after that checkpoint, and local `master` and `origin/master` were synchronized.
-- This M12-D.1 closeout changes only the five authorized documentation files and must not be committed or pushed without separate authorization.
+- Latest committed and pushed checkpoint: `ea3e90d` (`docs: close milestone 12 and advance to milestone 13`). Local `master` and `origin/master` were synchronized with a clean working tree before M13-A.1.
+- `ea3e90d` remains the repository base checkpoint before the uncommitted M13-A.1 documentation. M13-A.1 is documentation-only, complete, and Principal Engineer approved. M13-B has not started; no source, tests, dependency, configuration, commit, or push has been produced for M13.
