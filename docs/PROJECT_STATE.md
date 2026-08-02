@@ -2,18 +2,18 @@
 
 ## Current Milestone
 
-- Milestone 12 — Import / Export
+- Milestone 13 — Provider Expansion / OpenAI
 
 ## Task State
 
-- Last completed task: M12-C — Import / Export Architecture Definition.
-- Active task: M12-D.1 — Backup Format v1 DTO Isolation Correction. The correction is implemented and has passed Principal Engineer source review; manual Chrome validation remains pending.
+- Last completed task: M12-D.1 — Backup Format v1 DTO Isolation Correction.
+- Active task: M13-A — Provider Expansion / OpenAI Architecture Readiness Review. M13-A has not started, and no M13 implementation is authorized.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
 - M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
 - M12-C defined the approved Import / Export architecture, passed Principal Engineer review, and is complete at documentation checkpoint `7ebe874` (`docs: define import and export architecture`).
-- M12-D implemented the approved Import / Export scope in the working tree and passed automated validation, but Principal Engineer source review rejected it because Backup Format v1 reused live domain entity types and record spreads instead of frozen version-specific DTOs. The implementation remains uncommitted, manual Chrome validation is blocked, and no M12 implementation checkpoint exists.
-- M12-D.1 is the focused corrective continuation of M12-D. It now isolates Backup Format v1 behind dedicated exact DTOs and explicit export, validation, restore, and persistence mappings. Principal Engineer source review approved the correction and verified regression coverage proving simulated future domain fields cannot enter format version 1. The corrected implementation remains uncommitted pending manual Chrome validation.
+- M12-D implemented the approved Import / Export scope, but its initial Principal Engineer source review rejected direct reuse of live domain entity types and record spreads at the public Backup Format v1 boundary.
+- M12-D.1 corrected that defect with frozen dedicated version 1 DTOs and explicit export, validation, restore, and persistence mappings. Principal Engineer source review approved the corrected implementation, required automated and risk-based real Chrome validation passed, and the completed M12 implementation was committed and pushed at `d304f90` (`feat: add import and export backup workflow`).
 
 ## Previous Milestones
 
@@ -32,10 +32,11 @@
 - Milestone 9 — Output Workspace: Completed
 - Milestone 10 — Keyboard Shortcut: Completed
 - Milestone 11 — Settings: Completed
+- Milestone 12 — Import / Export: Completed
 
 ## Project Status
 
-- Status: Milestone 11 — Settings is implemented, validated, complete, and synchronized at checkpoint `d40e031` (`feat: add default Ollama model settings`). Milestone 12 — Import / Export is current and incomplete. M12-C is complete at architecture checkpoint `7ebe874` (`docs: define import and export architecture`). M12-D was rejected because the public Backup Format v1 contract was coupled to live domain entities. M12-D.1 corrected that defect with frozen version-specific DTOs and explicit field mappings, passed Principal Engineer source review, and remains active pending manual Chrome validation and an authorized implementation checkpoint.
+- Status: Milestone 12 — Import / Export is implemented, validated, complete, and synchronized at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`). Principal Engineer source review approved the corrected implementation, whose frozen dedicated Backup Format v1 DTOs and explicit mappings keep the public file contract isolated from live domain and persistence models. Milestone 13 — Provider Expansion / OpenAI is current; M13-A is the active but unstarted read-only architecture readiness review, and no M13 implementation is authorized.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -206,12 +207,17 @@
 - Completed M12-A.1 as the corrective documentation-only execution of M12-A after the original M12-A produced no repository changes. M12-A.1 passed Principal review, introduced task governance, assigned M14 and M15 without defining their detailed architecture, and was committed and synchronized at `f09e776` (`docs: add task identifiers and assign future milestones`).
 - Completed M12-B as a read-only Import / Export architecture-readiness review. It changed no files and concluded `ARCHITECTURE DEFINITION REQUIRED` because deterministic data, format, validation, restore, transaction, UI, and acceptance behavior remained undecided.
 - Completed M12-C as the documentation-only definition of the implementation-ready M12 architecture. M12-C passed Principal Engineer review and is committed and synchronized at `7ebe874` (`docs: define import and export architecture`); it changed no source, test, database, schema, manifest, permission, dependency, or configuration.
-- Executed M12-D as the approved Import / Export implementation task. The working tree contains the uncommitted implementation and tests, and the reported automated suite passed. Principal Engineer source review rejected the implementation because Backup Format v1 directly reused live `KnowledgeEntry`, `SnippetEntry`, and `Settings` types and object spreads, allowing future domain fields to silently enter the frozen version 1 contract.
-- Implemented M12-D.1 — Backup Format v1 DTO Isolation Correction as the focused corrective continuation. Dedicated exact v1 DTOs now replace live domain types at the public file contract, and export, validator, restore, and Dexie boundaries map approved fields explicitly. Regression tests prove simulated future Knowledge, Snippet, Settings, and persistence fields are excluded. Principal Engineer source review approved the correction; manual Chrome validation remains pending, the implementation remains uncommitted, and no M12 implementation checkpoint exists.
+- Executed M12-D as the approved Import / Export implementation task. Principal Engineer source review rejected the initial implementation because Backup Format v1 directly reused live `KnowledgeEntry`, `SnippetEntry`, and `Settings` types and object spreads, allowing future domain fields to silently enter the frozen version 1 contract.
+- Completed M12-D.1 as the focused corrective continuation and Milestone 12 closeout. Dedicated frozen v1 DTOs replace live domain types at the public file contract, and export, validator, restore, and Dexie boundaries map every approved field explicitly. Principal Engineer source review approved the corrected implementation and its regression coverage.
+- Completed automated M12 validation: 48 focused tests passed; the full suite passed 251 tests with 1 existing opt-in test skipped; lint, formatting, type-checking, Playwright discovery, production build and output validation, and `git diff --check` passed. Source review and automated integration tests verified atomic transaction and rollback behavior.
+- Completed risk-based real Chrome validation for backup export and download; filename, envelope, version, and exact approved keys; preview and destructive acknowledgement; successful full restore; Knowledge, Snippets, and Settings restoration; round-trip equality including IDs, timestamps, tags, and source; invalid JSON and unsupported-version rejection; failed-validation preservation; valid empty-backup replacement; subsequent normal-backup restoration; and restored default-model loading in a recreated Side Panel.
+- Applied the permanent risk-based manual-validation standard: destructive, persistence, data-loss or corruption, security-sensitive, external-integration, and core browser-only risks receive manual validation; reliable automation may carry low-risk, reversible, readily detectable edge cases. The already-mounted Side Panel live-refresh edge case and manual oversized-file exercise were not repeated manually because source review, automated coverage, and existing regression evidence made them non-blocking.
+- Completed the Documentation Impact Review. No updates are required to `ARCHITECTURE.md`, `DECISIONS.md`, `DATABASE_SCHEMA.md`, `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, `BACKLOG.md`, `ENGINEERING_PRINCIPLES.md`, or `CODING_AGENT_RULES.md`. The closeout restores and completes the approved architecture and creates no new architecture decision. No schema, manifest, permission, dependency, provider, architecture, or configuration change occurred.
+- Created and pushed final Milestone 12 implementation checkpoint `d304f90` (`feat: add import and export backup workflow`). The working tree was clean after the checkpoint, and local `master` and `origin/master` were synchronized.
 
 ## Next Engineering Action
 
-- Create and synchronize this documentation-only source-review approval checkpoint, then perform the required manual Chrome validation of the corrected M12 Import / Export workflow. Do not commit the implementation until manual validation succeeds and Principal Engineer approval is given. M12 remains incomplete.
+- Perform the read-only M13-A — Provider Expansion / OpenAI Architecture Readiness Review. M13-A has not started, and no M13 implementation is authorized yet.
 
 ## Repository Status
 
@@ -222,8 +228,8 @@
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
 - The approved Dexie-backed local persistence foundation exists with database `ai-support-workspace`, schema version 2, the unchanged Knowledge and Snippet stores, the singleton Settings store, and project-owned repository contracts.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
-- The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`). The latest committed and pushed repository checkpoint is the completed M11 implementation at `d40e031` (`feat: add default Ollama model settings`).
-- M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected M12-D/M12-D.1 implementation and tests remain uncommitted after passing Principal Engineer source review. This documentation-only source-review approval update must be checkpointed separately before manual Chrome validation begins. No M12 implementation checkpoint exists.
+- The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the M11 implementation checkpoint is `d40e031` (`feat: add default Ollama model settings`).
+- M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and have been validated in the foreground Side Panel workflow. M11 Settings now initializes the transient model through a separate persistence/application boundary without changing `GenerationRequest`, Prompt Builder, or `OllamaProvider`. No semantic or vector retrieval, embeddings, fuzzy, prefix, or stemming behavior, search UI, token handling, or Prompt Templates are implemented. Multimodal Context Attachments is assigned to M14, Rich Snippet Templates & Trigger Expansion is assigned to M15, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
@@ -231,9 +237,9 @@
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 12 — Import / Export. Last completed task: M12-C — Import / Export Architecture Definition. Rejected implementation task: M12-D — Import / Export Implementation. Active task: M12-D.1 — Backup Format v1 DTO Isolation Correction; implementation and source review are complete, while manual Chrome validation and checkpoint completion remain pending.
-- Repository base checkpoint for this source-review approval update: HEAD and `origin/master` are synchronized at `87ae004` (`docs: record M12-D review correction`). The corrected M12 implementation and tests remain uncommitted and must not be included in this documentation-only checkpoint.
-- Next action: create and synchronize this documentation-only source-review approval checkpoint, then perform manual Chrome validation against the corrected uncommitted implementation. M12 is not complete.
+- Current roadmap milestone: Milestone 13 — Provider Expansion / OpenAI. Last completed task: M12-D.1 — Backup Format v1 DTO Isolation Correction. Active task: M13-A — Provider Expansion / OpenAI Architecture Readiness Review; it has not started, and no M13 implementation is authorized.
+- Final Milestone 12 implementation checkpoint: HEAD and `origin/master` were synchronized at `d304f90` (`feat: add import and export backup workflow`) with a clean working tree before this documentation-only closeout task began.
+- Next action: perform the read-only M13-A architecture readiness review.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -246,8 +252,9 @@
 - Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
 - Detailed M14 multimodal and M15 rich-Snippet architecture remains deliberately unresolved, including image and rich-content representation, provider and editor capability details, unsupported-image behavior, limits, reusable asset ownership, trigger validation, migration, insertion, caret handling, and plain-text fallback details for local assets.
 - History remains intentionally undecided and must not be assumed to be in scope.
+- The already-mounted Side Panel does not live-refresh a restored default model; recreating the Side Panel loads the restored value. This edge case and a manual oversized-file exercise were not repeated during M12 closeout and are non-blocking because their required behavior is covered by source review and automated tests.
 
 ## Current Git Checkpoint
 
-- Latest committed and pushed documentation checkpoint: `87ae004` (`docs: record M12-D review correction`). M12-C architecture remains complete at `7ebe874` (`docs: define import and export architecture`).
-- The corrected M12-D/M12-D.1 implementation and tests remain uncommitted. M12-D.1 passed Principal Engineer source review, but manual Chrome validation has not started; no M12 implementation checkpoint or push exists.
+- Latest committed and pushed checkpoint: `d304f90` (`feat: add import and export backup workflow`), the final Milestone 12 implementation checkpoint. The working tree was clean after that checkpoint, and local `master` and `origin/master` were synchronized.
+- This M12-D.1 closeout changes only the five authorized documentation files and must not be committed or pushed without separate authorization.

@@ -98,17 +98,19 @@ Provide a local Settings UI where the user can save one optional default Ollama 
 
 Provider selection, provider endpoint configuration, behavior tuning, theme, shortcut settings, persistent writing preferences, and other generic configuration are not part of M11. Provider selection remains deferred until Milestone 13 — Provider Expansion / OpenAI, when more than one provider exists.
 
-## Milestone 12 — Import / Export (Current)
+## Milestone 12 — Import / Export (Completed)
 
 Add support for importing and exporting local data.
 
-M12 provides manual local backup, restore after reinstall or local browser-data loss, and file transfer between profiles or computers. M12-C defines one strict, independently versioned JSON format containing current Knowledge, Snippets, and Settings; deterministic export; a 25 MiB guard; replace-only, identity-preserving atomic restore; preview and destructive acknowledgement; and a fourth options-page section without permissions, schema changes, or dependencies. M12-D implementation is next and has not started.
+M12 provides manual local backup, restore after reinstall or local browser-data loss, and file transfer between profiles or computers. It implements one strict, independently versioned JSON format containing current Knowledge, Snippets, and Settings; frozen dedicated version 1 DTOs and explicit mappings; deterministic export; a 25 MiB guard; replace-only, identity-preserving atomic restore; preview and destructive acknowledgement; and a fourth options-page section without permissions, schema changes, or dependencies. Principal Engineer source review and automated and risk-based real Chrome validation passed. M12-D.1 and Milestone 12 are complete at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`).
 
 Cloud synchronization, collaboration, sharing workflows, bulk editing, automatic or scheduled backups, merge import, encryption, compression, screenshot Context, and Rich Snippet data are outside M12.
 
-## Milestone 13 — Provider Expansion / OpenAI
+## Milestone 13 — Provider Expansion / OpenAI (Current)
 
 Add OpenAI as a later provider integration and define provider selection when more than one provider exists.
+
+M13-A — Provider Expansion / OpenAI Architecture Readiness Review is the active task and has not started. No M13 implementation is authorized yet. The exact next action is to perform the read-only M13-A architecture readiness review.
 
 ## Milestone 14 — Multimodal Context Attachments
 

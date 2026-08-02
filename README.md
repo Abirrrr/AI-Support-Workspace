@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, and 11 — Settings are complete. The latest committed and pushed checkpoint is `f09e776` (`docs: add task identifiers and assign future milestones`). Milestone 12 — Import / Export is current and incomplete. M12-B completed its readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`. M12-C completed the approved implementation-ready architecture and passed Principal Engineer review. M12-D is active as the next authorized implementation task but has not started. M13 remains Provider Expansion / OpenAI, M14 remains Multimodal Context Attachments, and M15 remains Rich Snippet Templates & Trigger Expansion.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, and 12 — Import / Export are complete. Milestone 12 closed with Principal Engineer approval, frozen dedicated Backup Format v1 DTOs and explicit mappings, successful automated and risk-based real Chrome validation, and final committed and pushed implementation checkpoint `d304f90` (`feat: add import and export backup workflow`). Milestone 13 — Provider Expansion / OpenAI is current. M13-A — Provider Expansion / OpenAI Architecture Readiness Review is active but has not started, and no M13 implementation is authorized. M14 remains Multimodal Context Attachments, and M15 remains Rich Snippet Templates & Trigger Expansion.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Create and synchronize the shared M12-C architecture documentation checkpoint when authorized, then begin the active but unstarted M12-D implementation task. M12 is not complete, and no implementation checkpoint exists.
+Perform the read-only M13-A — Provider Expansion / OpenAI Architecture Readiness Review. Do not begin M13 implementation until architecture readiness has been reviewed and implementation is explicitly authorized.

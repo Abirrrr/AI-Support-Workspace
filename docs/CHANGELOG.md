@@ -2,20 +2,25 @@
 
 ## [Unreleased]
 
-### M12-D.1 — Backup Format v1 DTO Isolation Source Review Approval
+### M12-D.1 — Backup Format v1 DTO Isolation Correction and Milestone 12 Closeout
 
-- Implemented the focused correction after M12-D source review rejected direct reuse of live `KnowledgeEntry`, `SnippetEntry`, and `Settings` types at the public versioned backup boundary.
-- Added dedicated exact `BackupKnowledgeRecordV1`, `BackupSnippetRecordV1`, and `BackupSettingsV1` DTOs so Backup Format v1 remains frozen and independently versioned from live domain and persistence models.
-- Replaced record-level spreads at export, validation, restore, persistence-snapshot, and persistence-write boundaries with explicit approved-field mappings while preserving deterministic ordering, tag order, IDs, timestamps, text, source, Settings semantics, and JSON format version 1.
-- Added regression coverage proving simulated future Knowledge, Snippet, Settings, DTO, and persisted-record fields cannot enter serialized version 1 backups or restored IndexedDB records; strict imported JSON continues rejecting unexpected keys.
-- Recorded reported validation success: 48 focused tests passed; the full suite passed 251 tests with 1 existing opt-in test skipped; lint, formatting, type-checking, Playwright discovery, production build and generated-output validation, and `git diff --check` passed.
-- Principal Engineer source review approved M12-D.1 and found no remaining architecture correction. Manual Chrome validation remains pending, the corrected implementation and tests remain uncommitted, and no M12 implementation checkpoint exists.
-- This documentation-only source-review approval update changes no source, test, architecture, decision, database schema version 2, manifest, permission, dependency, or configuration and does not mark M12-D.1 or Milestone 12 complete.
+- Completed the focused correction after M12-D source review rejected direct reuse of live `KnowledgeEntry`, `SnippetEntry`, and `Settings` types at the public versioned backup boundary. Dedicated exact `BackupKnowledgeRecordV1`, `BackupSnippetRecordV1`, and `BackupSettingsV1` DTOs now freeze Backup Format v1 independently from live domain and persistence models.
+- Replaced record-level spreads at export, validation, restore, persistence-snapshot, and persistence-write boundaries with explicit approved-field mappings while preserving deterministic ordering, tag order, IDs, timestamps, text, source, Settings semantics, and JSON format version 1. Regression coverage proves simulated future domain and persistence fields cannot enter serialized v1 backups or restored IndexedDB records.
+- Principal Engineer source review approved the corrected implementation with no remaining architecture correction.
+- Completed automated validation: 48 focused tests passed; the full suite passed 251 tests with 1 existing opt-in test skipped; lint, formatting, type-checking, Playwright discovery, production build and output validation, and `git diff --check` passed. Source review and automated integration tests verified atomic transaction and rollback behavior.
+- Completed risk-based real Chrome validation of backup export and download; the filename, envelope, version, and exact approved keys; preview and destructive acknowledgement; successful full restore; Knowledge, Snippets, and Settings restoration; round-trip data equality including IDs, timestamps, tags, and source; invalid JSON rejection; unsupported-version rejection; failed-validation preservation of existing data; valid empty-backup replacement; subsequent normal-backup restoration; and restored default-model loading in a recreated Side Panel.
+- Did not manually repeat the already-mounted Side Panel live-refresh edge case or the oversized-file exercise. Both are low-risk or readily detectable at the manual layer, their required behavior remains covered by source review and automated tests, and they are non-blocking under the permanent risk-based validation standard.
+- Recorded the permanent manual-validation policy: manually validate destructive operations, data-loss or corruption risks, persistence, security-sensitive behavior, external integrations, and core browser-only workflows; permit reliable automation to carry low-risk, reversible, readily detectable edge cases; record manual coverage and omissions at closeout; and avoid exhaustive manual repetition that does not materially reduce project risk.
+- Completed the Documentation Impact Review. No updates are required to `ARCHITECTURE.md`, `DECISIONS.md`, `DATABASE_SCHEMA.md`, `PRODUCT_REQUIREMENTS.md`, `UI_WORKFLOW.md`, `BACKLOG.md`, `ENGINEERING_PRINCIPLES.md`, or `CODING_AGENT_RULES.md`. This closeout restores and completes the approved architecture and creates no new architecture decision.
+- Confirmed that no schema, manifest, permission, dependency, provider, architecture, or configuration change occurred.
+- Recorded final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`) as committed and pushed to GitHub. The working tree was clean after the checkpoint, and local `master` and `origin/master` were synchronized.
+- Marked M12-D.1 and Milestone 12 complete. Advanced the current milestone to Milestone 13 — Provider Expansion / OpenAI and activated the unstarted M13-A — Provider Expansion / OpenAI Architecture Readiness Review. No M13 implementation is authorized; the exact next action is the read-only M13-A review.
+- This closeout task changes only `PROJECT_STATE.md`, `CHANGELOG.md`, `ROADMAP.md`, `TESTING_STRATEGY.md`, and `README.md`; it changes no source or tests and creates no commit or push.
 
 ### M12-D Principal Review Rejection and M12-D.1 Activation
 
 - Recorded that M12-C — Import / Export Architecture Definition is committed and synchronized at checkpoint `7ebe874` (`docs: define import and export architecture`).
-- Recorded execution of M12-D — Import / Export Implementation in the working tree. The implementation and tests remain uncommitted, and no M12 implementation checkpoint exists.
+- Recorded execution of M12-D — Import / Export Implementation in the working tree. At that review point, the implementation and tests remained uncommitted and no M12 implementation checkpoint existed; the later M12-D.1 closeout above supersedes that repository state.
 - Recorded the Principal Engineer source-review rejection of M12-D. The public Backup Format v1 boundary directly reused live `KnowledgeEntry`, `SnippetEntry`, and `Settings` domain types and used record-level object spreads, so future domain fields could silently enter or invalidate the frozen independently versioned format.
 - Activated M12-D.1 — Backup Format v1 DTO Isolation Correction as the focused corrective continuation of M12-D. The correction must introduce dedicated exact version 1 DTOs, explicitly map every approved field during export and restore, remove record-level spreads at the versioned boundary, and add regression coverage proving future domain fields are excluded.
 - Blocked manual Chrome validation, M12 implementation approval, and any implementation checkpoint until M12-D.1 passes Principal Engineer source review.
@@ -23,7 +28,7 @@
 
 ### M12-C — Import / Export Architecture Definition
 
-- Recorded completion of M12-B — Import / Export Architecture Readiness Review with verdict `ARCHITECTURE DEFINITION REQUIRED`, followed by M12-C's approved architecture definition. M12 remains current and incomplete.
+- Recorded completion of M12-B — Import / Export Architecture Readiness Review with verdict `ARCHITECTURE DEFINITION REQUIRED`, followed by M12-C's approved architecture definition. M12 was current and incomplete at that architecture-definition point; the later M12-D.1 closeout above records completion.
 - Defined manual local backup for recovery after reinstall or browser-data loss and user-mediated transfer between Chrome profiles or computers. Excluded cloud sync, collaboration, sharing, bulk editing, automatic backup, and scheduled backup.
 - Defined strict public JSON format version 1 with identifier `ai-support-workspace-backup`, UTC export timestamp, and exact Knowledge, Snippet, and always-present Settings data. Kept format versioning independent of application and Dexie schema versions and excluded physical persistence details, transient state, provider state, secrets, and future M14/M15 data.
 - Defined deterministic export ordering, exact logical-value preservation, UTC filename pattern, in-memory JSON Blob/object-URL delivery, aligned 25 MiB import and serialized UTF-8 export limits, and no downloads or filesystem permission.
