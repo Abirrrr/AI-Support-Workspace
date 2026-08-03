@@ -6,7 +6,7 @@ import { SettingsService } from '../../../src/application/settings/settings-serv
 import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
-  type BackupFileV1,
+  type BackupFileV2,
 } from '../../../src/domain/backup-file';
 import type { KnowledgeEntry } from '../../../src/domain/knowledge-entry';
 import type { SnippetEntry } from '../../../src/domain/snippet-entry';
@@ -22,6 +22,7 @@ import {
 } from '../../../src/infrastructure/persistence/dexie-backup-persistence';
 import { DexieSettingsRepository } from '../../../src/infrastructure/persistence/dexie-settings-repository';
 import { GLOBAL_SETTINGS_ID } from '../../../src/infrastructure/persistence/settings-record';
+import { toSnippetEntryRecord } from '../../../src/infrastructure/persistence/snippet-entry-record';
 import {
   createIsolatedDatabase,
   deleteIsolatedDatabase,
@@ -44,6 +45,7 @@ const originalSnippet: SnippetEntry = {
   tags: ['original'],
   createdAt: '2026-08-01T08:00:02.000Z',
   updatedAt: '2026-08-01T08:00:03.000Z',
+  trigger: null,
 };
 
 const restoredData: BackupRestoreData = {
@@ -66,6 +68,7 @@ const restoredData: BackupRestoreData = {
       tags: ['z', 'a'],
       createdAt: '2026-08-02T08:00:02.000Z',
       updatedAt: '2026-08-02T08:00:03.000Z',
+      trigger: ';restored',
     },
   ],
   settings: { defaultModel: 'qwen2.5:7b' },
@@ -102,7 +105,9 @@ describe('Dexie backup snapshot and atomic restore', () => {
         await database.snippetEntries.clear();
         await database.settings.clear();
         await database.knowledgeEntries.add(originalKnowledge);
-        await database.snippetEntries.add(originalSnippet);
+        await database.snippetEntries.add(
+          toSnippetEntryRecord(originalSnippet),
+        );
         await database.settings.add({
           id: GLOBAL_SETTINGS_ID,
           defaultModel: 'original-model',
@@ -115,7 +120,9 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(await database.knowledgeEntries.toArray()).toEqual([
       originalKnowledge,
     ]);
-    expect(await database.snippetEntries.toArray()).toEqual([originalSnippet]);
+    expect(await database.snippetEntries.toArray()).toEqual([
+      toSnippetEntryRecord(originalSnippet),
+    ]);
     expect(await database.settings.toArray()).toEqual([
       { id: GLOBAL_SETTINGS_ID, defaultModel: 'original-model' },
     ]);
@@ -144,7 +151,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     );
     await database.snippetEntries.put(
       Object.assign({}, originalSnippet, {
-        trigger: '/future',
+        trigger: ';future',
         richContent: { blocks: [] },
       }),
     );
@@ -169,12 +176,20 @@ describe('Dexie backup snapshot and atomic restore', () => {
       ].sort(),
     );
     expect(Object.keys(snapshot.snippets[0] ?? {}).sort()).toEqual(
-      ['id', 'title', 'content', 'tags', 'createdAt', 'updatedAt'].sort(),
+      [
+        'id',
+        'title',
+        'content',
+        'tags',
+        'createdAt',
+        'updatedAt',
+        'trigger',
+      ].sort(),
     );
     expect(Object.keys(snapshot.settings)).toEqual(['defaultModel']);
     expect(JSON.stringify(snapshot)).not.toContain('futureKnowledgeField');
     expect(JSON.stringify(snapshot)).not.toContain('usageCount');
-    expect(JSON.stringify(snapshot)).not.toContain('trigger');
+    expect(snapshot.snippets[0]?.trigger).toBe(';future');
     expect(JSON.stringify(snapshot)).not.toContain('richContent');
     expect(JSON.stringify(snapshot)).not.toContain('futureSettingsField');
   });
@@ -231,7 +246,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
       {},
       requireValue(restoredData.snippets[0], 'restored Snippet entry'),
       {
-        trigger: '/future',
+        futureSnippetField: '/future',
         richContent: { blocks: [] },
       },
     );
@@ -243,7 +258,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
       formatVersion: BACKUP_FORMAT_VERSION,
       exportedAt: '2026-08-02T09:00:00.000Z',
       data: { knowledge: [knowledge], snippets: [snippet], settings },
-    } as BackupFileV1;
+    } as BackupFileV2;
 
     await new BackupRestoreService(
       new DexieTransactionalBackupRestorePort(database),
@@ -264,7 +279,15 @@ describe('Dexie backup snapshot and atomic restore', () => {
       ].sort(),
     );
     expect(Object.keys(persistedSnippets[0] ?? {}).sort()).toEqual(
-      ['id', 'title', 'content', 'tags', 'createdAt', 'updatedAt'].sort(),
+      [
+        'id',
+        'title',
+        'content',
+        'tags',
+        'createdAt',
+        'updatedAt',
+        'trigger',
+      ].sort(),
     );
     expect(Object.keys(persistedSettings[0] ?? {}).sort()).toEqual(
       ['id', 'defaultModel'].sort(),
@@ -273,7 +296,9 @@ describe('Dexie backup snapshot and atomic restore', () => {
       'futureKnowledgeField',
     );
     expect(JSON.stringify(persistedKnowledge)).not.toContain('usageCount');
-    expect(JSON.stringify(persistedSnippets)).not.toContain('trigger');
+    expect(JSON.stringify(persistedSnippets)).not.toContain(
+      'futureSnippetField',
+    );
     expect(JSON.stringify(persistedSnippets)).not.toContain('richContent');
     expect(JSON.stringify(persistedSettings)).not.toContain(
       'futureSettingsField',

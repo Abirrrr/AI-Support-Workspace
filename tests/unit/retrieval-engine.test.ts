@@ -33,6 +33,7 @@ function createSnippetEntry(
     tags: [],
     createdAt: timestamp,
     updatedAt: timestamp,
+    trigger: null,
     ...overrides,
   };
 }
@@ -59,6 +60,7 @@ function createRepositories(
     }),
     get: vi.fn(async () => undefined),
     list: vi.fn(async () => snippets),
+    findByTrigger: vi.fn(async () => undefined),
     update: vi.fn(async () => {
       throw new Error('Not used by retrieval.');
     }),

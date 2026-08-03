@@ -12,6 +12,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
+import {
+  DuplicateSnippetTriggerError,
+  InvalidSnippetTriggerError,
+} from '../../src/application/snippet/snippet-trigger';
+import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
 import type { ImportExportActions } from '../../src/ui/import-export/ImportExportView';
 import { OptionsShell } from '../../src/ui/options/OptionsShell';
@@ -24,6 +29,7 @@ const entry: SnippetEntry = {
   tags: ['orders', 'confirmation'],
   createdAt: '2026-07-26T12:00:00.000Z',
   updatedAt: '2026-07-26T12:00:00.000Z',
+  trigger: null,
 };
 
 const importExport: ImportExportActions = {
@@ -120,11 +126,83 @@ describe('SnippetLibraryView', () => {
         title: 'Refund confirmation',
         content: 'Your refund has been processed.',
         tags: ['billing', 'refunds'],
+        trigger: null,
       }),
     );
     expect(await screen.findByText('Refund confirmation')).toBeTruthy();
     expect(screen.getByText('Snippet created.')).toBeTruthy();
     expect(library.load).toHaveBeenCalledOnce();
+  });
+
+  it('creates, displays, prepopulates, and clears an optional trigger', async () => {
+    const triggered = { ...entry, trigger: ';refund' };
+    const cleared = { ...triggered, trigger: null };
+    const library = createSnippetLibrary({
+      load: vi.fn(async () => [triggered]),
+      update: vi.fn(async () => cleared),
+    });
+    render(<SnippetLibraryView snippetLibrary={library} />);
+
+    expect(await screen.findByText(';refund')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const triggerInput = screen.getByLabelText(/^Trigger \(optional\)/);
+    expect(triggerInput).toHaveProperty('value', ';refund');
+    expect(triggerInput.getAttribute('aria-describedby')).toContain(
+      'snippet-trigger-guidance',
+    );
+    expect(screen.getByText(/characters starting with ;/)).toBeTruthy();
+    fireEvent.change(triggerInput, { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(library.update).toHaveBeenCalledWith(
+        triggered.id,
+        expect.objectContaining({ trigger: null }),
+      ),
+    );
+    await waitFor(() => expect(screen.queryByText(';refund')).toBeNull());
+  });
+
+  it.each([
+    ['invalid format', new InvalidSnippetTriggerError()],
+    ['duplicate trigger', new DuplicateSnippetTriggerError(';used')],
+  ])('shows focused inline %s feedback', async (_label, error) => {
+    const library = createSnippetLibrary({
+      create: vi.fn(async () => {
+        throw error;
+      }),
+    });
+    render(<SnippetLibraryView snippetLibrary={library} />);
+    await screen.findByText('No snippets saved yet.');
+    const triggerInput = screen.getByLabelText(/^Trigger \(optional\)/);
+    fireEvent.change(triggerInput, { target: { value: ';candidate' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
+
+    expect(await screen.findByText(error.message)).toBeTruthy();
+    expect(triggerInput.getAttribute('aria-invalid')).toBe('true');
+    expect(triggerInput.getAttribute('aria-describedby')).toContain(
+      'snippet-trigger-error',
+    );
+  });
+
+  it('reports a saved Snippet accurately when catalog publication is unavailable', async () => {
+    const persisted = { ...entry, id: 'persisted', trigger: ';saved' };
+    const library = createSnippetLibrary({
+      create: vi.fn(async () => {
+        throw new CatalogUnavailableAfterMutationError(persisted);
+      }),
+    });
+    render(<SnippetLibraryView snippetLibrary={library} />);
+    await screen.findByText('No snippets saved yet.');
+    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
+
+    expect(await screen.findByText(persisted.title)).toBeTruthy();
+    expect(
+      screen.getByText(
+        'Snippet saved. Trigger expansion is temporarily unavailable.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/could not create/i)).toBeNull();
   });
 
   it('edits a snippet and immediately renders the repository result', async () => {
@@ -160,6 +238,7 @@ describe('SnippetLibraryView', () => {
         title: updatedEntry.title,
         content: updatedEntry.content,
         tags: ['orders'],
+        trigger: null,
       }),
     );
     expect(await screen.findByText(updatedEntry.title)).toBeTruthy();

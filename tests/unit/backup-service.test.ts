@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { BackupRestoreError } from '../../src/application/backup/backup-errors';
+import type { CatalogMutationPort } from '../../src/application/snippet/catalog-mutation';
 import type {
   BackupDownloadPort,
   BackupFileSource,
@@ -15,12 +16,17 @@ import {
   createBackupFilename,
   measureUtf8Bytes,
 } from '../../src/application/backup/backup-service';
-import { parseBackupFileV1 } from '../../src/application/backup/backup-validator';
+import {
+  parseBackupFile,
+  parseBackupFileV1,
+} from '../../src/application/backup/backup-validator';
 import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
+  BACKUP_FORMAT_VERSION_1,
   MAX_BACKUP_BYTES,
   type BackupFileV1,
+  type BackupFileV2,
 } from '../../src/domain/backup-file';
 
 const KNOWLEDGE_ID = '123e4567-e89b-42d3-a456-426614174000';
@@ -48,6 +54,7 @@ function createData(): BackupSnapshot {
         tags: ['z', 'a'],
         createdAt: '2026-08-02T07:02:00.000Z',
         updatedAt: '2026-08-02T07:03:00.000Z',
+        trigger: ';snippet',
       },
     ],
     settings: { defaultModel: 'qwen2.5:7b' },
@@ -55,12 +62,64 @@ function createData(): BackupSnapshot {
 }
 
 function createBackup(overrides: Partial<BackupFileV1> = {}): BackupFileV1 {
+  const data = createData();
+  const snippet = requireValue(data.snippets[0], 'Snippet entry');
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_1,
+    exportedAt: EXPORTED_AT,
+    data: {
+      knowledge: data.knowledge.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        body: entry.body,
+        tags: [...entry.tags],
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+        source: entry.source,
+      })),
+      snippets: [
+        {
+          id: snippet.id,
+          title: snippet.title,
+          content: snippet.content,
+          tags: [...snippet.tags],
+          createdAt: snippet.createdAt,
+          updatedAt: snippet.updatedAt,
+        },
+      ],
+      settings: { defaultModel: data.settings.defaultModel },
+    },
+    ...overrides,
+  };
+}
+
+function createCurrentBackup(data = createData()): BackupFileV2 {
   return {
     format: BACKUP_FORMAT,
     formatVersion: BACKUP_FORMAT_VERSION,
     exportedAt: EXPORTED_AT,
-    data: createData(),
-    ...overrides,
+    data: {
+      knowledge: data.knowledge.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        body: entry.body,
+        tags: [...entry.tags],
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+        source: entry.source,
+      })),
+      snippets: data.snippets.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        content: entry.content,
+        tags: [...entry.tags],
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+        trigger: entry.trigger,
+      })),
+      settings: { defaultModel: data.settings.defaultModel },
+    },
   };
 }
 
@@ -93,14 +152,25 @@ describe('BackupFileV1 parser and validator', () => {
 
   it('accepts empty arrays, null Settings, and the same ID across domains', () => {
     const sameIdData = createData();
-    const snippet = sameIdData.snippets[0];
-    expect(snippet).toBeDefined();
+    const snippet = requireValue(
+      sameIdData.snippets[0],
+      'same-ID Snippet entry',
+    );
     const parsed = parseBackupFileV1(
       JSON.stringify({
         ...createBackup(),
         data: {
           knowledge: sameIdData.knowledge,
-          snippets: [{ ...snippet, id: KNOWLEDGE_ID }],
+          snippets: [
+            {
+              id: KNOWLEDGE_ID,
+              title: snippet.title,
+              content: snippet.content,
+              tags: snippet.tags,
+              createdAt: snippet.createdAt,
+              updatedAt: snippet.updatedAt,
+            },
+          ],
           settings: { defaultModel: null },
         },
       }),
@@ -213,8 +283,121 @@ describe('BackupFileV1 parser and validator', () => {
 
   it('distinguishes an unsupported integer version', () => {
     expect(() =>
+      parseBackupFileV1(JSON.stringify(createCurrentBackup())),
+    ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
+    expect(() =>
       parseBackupFileV1(
-        JSON.stringify({ ...createBackup(), formatVersion: 2 }),
+        JSON.stringify({ format: BACKUP_FORMAT, formatVersion: 2 }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
+  });
+
+  it('keeps version 1 exact by rejecting simulated future DTO fields', () => {
+    const backup = createBackup();
+    const snippet = requireValue(backup.data.snippets[0], 'Snippet entry');
+    expect(() =>
+      parseBackupFileV1(
+        JSON.stringify({
+          ...backup,
+          data: {
+            ...backup.data,
+            snippets: [{ ...snippet, futureSnippetField: 'not-v1' }],
+          },
+        }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: 'invalid' }));
+  });
+});
+
+describe('Backup Format v2 parser and validator', () => {
+  it('accepts exact v2 DTOs and preserves canonical unique triggers', () => {
+    const backup = createCurrentBackup();
+    expect(parseBackupFile(JSON.stringify(backup))).toEqual(backup);
+  });
+
+  it.each([
+    [
+      'missing trigger',
+      (backup: BackupFileV2) => {
+        const snippet = requireValue(backup.data.snippets[0], 'Snippet entry');
+        const withoutTrigger = {
+          id: snippet.id,
+          title: snippet.title,
+          content: snippet.content,
+          tags: snippet.tags,
+          createdAt: snippet.createdAt,
+          updatedAt: snippet.updatedAt,
+        };
+        return {
+          ...backup,
+          data: { ...backup.data, snippets: [withoutTrigger] },
+        };
+      },
+    ],
+    [
+      'uppercase trigger',
+      (backup: BackupFileV2) => ({
+        ...backup,
+        data: {
+          ...backup.data,
+          snippets: [{ ...backup.data.snippets[0], trigger: ';HELLO' }],
+        },
+      }),
+    ],
+    [
+      'unexpected Snippet field',
+      (backup: BackupFileV2) => ({
+        ...backup,
+        data: {
+          ...backup.data,
+          snippets: [
+            { ...backup.data.snippets[0], futureField: 'not-approved' },
+          ],
+        },
+      }),
+    ],
+  ])('rejects %s', (_label, mutate) => {
+    expect(() =>
+      parseBackupFile(JSON.stringify(mutate(createCurrentBackup()))),
+    ).toThrowError(expect.objectContaining({ code: 'invalid' }));
+  });
+
+  it('rejects duplicate non-null triggers while allowing repeated null', () => {
+    const backup = createCurrentBackup();
+    const snippet = requireValue(backup.data.snippets[0], 'Snippet entry');
+    const duplicate = {
+      ...snippet,
+      id: '323e4567-e89b-42d3-a456-426614174000',
+    };
+    expect(() =>
+      parseBackupFile(
+        JSON.stringify({
+          ...backup,
+          data: { ...backup.data, snippets: [snippet, duplicate] },
+        }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: 'invalid' }));
+
+    expect(() =>
+      parseBackupFile(
+        JSON.stringify({
+          ...backup,
+          data: {
+            ...backup.data,
+            snippets: [
+              { ...snippet, trigger: null },
+              { ...duplicate, trigger: null },
+            ],
+          },
+        }),
+      ),
+    ).not.toThrow();
+  });
+
+  it('rejects unsupported future versions explicitly', () => {
+    expect(() =>
+      parseBackupFile(
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 3 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
@@ -277,9 +460,9 @@ describe('backup application services', () => {
     expect(filename).toBe(
       'ai-support-workspace-backup-2026-08-02T08-15-30Z.json',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV1;
+    const parsed = JSON.parse(serialized) as BackupFileV2;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(1);
+    expect(parsed.formatVersion).toBe(2);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -291,6 +474,7 @@ describe('backup application services', () => {
       earlierSnippet.id,
       laterSnippet.id,
     ]);
+    expect(parsed.data.snippets[0]?.trigger).toBe(';snippet');
     expect(serialized).not.toContain('global');
     expect(serialized).not.toContain('schemaVersion');
   });
@@ -312,7 +496,7 @@ describe('backup application services', () => {
     ).exportBackup();
 
     const downloadCall = requireValue(download.mock.calls[0], 'download call');
-    const parsed = JSON.parse(downloadCall[0]) as BackupFileV1;
+    const parsed = JSON.parse(downloadCall[0]) as BackupFileV2;
     expect(parsed.data).toEqual({
       knowledge: [],
       snippets: [],
@@ -320,7 +504,36 @@ describe('backup application services', () => {
     });
   });
 
-  it('excludes simulated future live-domain fields from serialized format v1', async () => {
+  it('round-trips a version 2 export through validation and restore mappings', async () => {
+    const original = createData();
+    const download = vi.fn<BackupDownloadPort['download']>(
+      async () => undefined,
+    );
+    await new BackupExportService(
+      { readSnapshot: async () => original },
+      { download },
+      () => new Date(EXPORTED_AT),
+    ).exportBackup();
+    const [serialized] = requireValue(
+      download.mock.calls[0],
+      'round-trip download call',
+    );
+    const prepared = await new BackupImportService().prepareImport(
+      sourceFor(serialized),
+    );
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => undefined,
+    );
+
+    await new BackupRestoreService({ replaceAll }).restoreBackup(
+      prepared.backup,
+    );
+
+    expect(replaceAll).toHaveBeenCalledWith(original);
+    expect(prepared.backup.formatVersion).toBe(2);
+  });
+
+  it('excludes simulated future live-domain fields from serialized format v2', async () => {
     const data = createData();
     const knowledge = Object.assign(
       requireValue(data.knowledge[0], 'Knowledge entry'),
@@ -328,7 +541,7 @@ describe('backup application services', () => {
     );
     const snippet = Object.assign(
       requireValue(data.snippets[0], 'Snippet entry'),
-      { trigger: '/future', richContent: { blocks: [] } },
+      { futureSnippetField: '/future', richContent: { blocks: [] } },
     );
     const settings = Object.assign(
       { defaultModel: data.settings.defaultModel },
@@ -354,7 +567,7 @@ describe('backup application services', () => {
       download.mock.calls[0],
       'future-field download call',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV1;
+    const parsed = JSON.parse(serialized) as BackupFileV2;
     expect(Object.keys(parsed.data.knowledge[0] ?? {}).sort()).toEqual(
       [
         'id',
@@ -367,12 +580,20 @@ describe('backup application services', () => {
       ].sort(),
     );
     expect(Object.keys(parsed.data.snippets[0] ?? {}).sort()).toEqual(
-      ['id', 'title', 'content', 'tags', 'createdAt', 'updatedAt'].sort(),
+      [
+        'id',
+        'title',
+        'content',
+        'tags',
+        'createdAt',
+        'updatedAt',
+        'trigger',
+      ].sort(),
     );
     expect(Object.keys(parsed.data.settings)).toEqual(['defaultModel']);
     expect(serialized).not.toContain('futureKnowledgeField');
     expect(serialized).not.toContain('usageCount');
-    expect(serialized).not.toContain('trigger');
+    expect(serialized).not.toContain('futureSnippetField');
     expect(serialized).not.toContain('richContent');
     expect(serialized).not.toContain('futureSettingsField');
   });
@@ -381,11 +602,9 @@ describe('backup application services', () => {
     expect(measureUtf8Bytes('é')).toBe(2);
     const data = createData();
     const knowledgeFixture = requireValue(data.knowledge[0], 'Knowledge entry');
-    const baseBackup = createBackup({
-      data: {
-        ...data,
-        knowledge: [{ ...knowledgeFixture, body: '' }],
-      },
+    const baseBackup = createCurrentBackup({
+      ...data,
+      knowledge: [{ ...knowledgeFixture, body: '' }],
     });
     const baseSize = measureUtf8Bytes(JSON.stringify(baseBackup));
     const exactBody = 'a'.repeat(MAX_BACKUP_BYTES - baseSize);
@@ -410,11 +629,9 @@ describe('backup application services', () => {
   it('maps above-limit and general export failures safely', async () => {
     const data = createData();
     const knowledgeFixture = requireValue(data.knowledge[0], 'Knowledge entry');
-    const baseBackup = createBackup({
-      data: {
-        ...data,
-        knowledge: [{ ...knowledgeFixture, body: '' }],
-      },
+    const baseBackup = createCurrentBackup({
+      ...data,
+      knowledge: [{ ...knowledgeFixture, body: '' }],
     });
     const baseSize = measureUtf8Bytes(JSON.stringify(baseBackup));
     const oversizedBody = 'a'.repeat(MAX_BACKUP_BYTES - baseSize + 1);
@@ -484,9 +701,30 @@ describe('backup application services', () => {
       knowledgeCount: 1,
       snippetCount: 1,
       defaultModel: 'qwen2.5:7b',
+      triggerWarning:
+        'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.',
     });
     expect(JSON.stringify(prepared.preview)).not.toContain('data only');
     expect(JSON.stringify(prepared.preview)).not.toContain('Line one');
+  });
+
+  it('previews v2 without the legacy warning and restores its trigger exactly', async () => {
+    const backup = createCurrentBackup();
+    const prepared = await new BackupImportService().prepareImport(
+      sourceFor(JSON.stringify(backup)),
+    );
+    expect(prepared.preview.triggerWarning).toBeNull();
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => undefined,
+    );
+    await new BackupRestoreService({ replaceAll }).restoreBackup(
+      prepared.backup,
+    );
+    expect(replaceAll).toHaveBeenCalledWith({
+      knowledge: backup.data.knowledge,
+      snippets: backup.data.snippets,
+      settings: backup.data.settings,
+    });
   });
 
   it('passes only trusted data to replace-only restore and maps failure', async () => {
@@ -496,7 +734,14 @@ describe('backup application services', () => {
     const service = new BackupRestoreService({ replaceAll });
     const backup = createBackup();
     await service.restoreBackup(backup);
-    expect(replaceAll).toHaveBeenCalledWith(backup.data);
+    expect(replaceAll).toHaveBeenCalledWith({
+      knowledge: backup.data.knowledge,
+      snippets: backup.data.snippets.map((entry) => ({
+        ...entry,
+        trigger: null,
+      })),
+      settings: backup.data.settings,
+    });
 
     const failed = new BackupRestoreService({
       replaceAll: async () => {
@@ -506,6 +751,65 @@ describe('backup application services', () => {
     await expect(failed.restoreBackup(backup)).rejects.toBeInstanceOf(
       BackupRestoreError,
     );
+  });
+
+  it('isolates simulated future version 1 DTO fields during restore mapping', async () => {
+    const backup = createBackup();
+    const futureBackup = {
+      ...backup,
+      data: {
+        knowledge: backup.data.knowledge.map((entry) => ({
+          ...entry,
+          futureKnowledgeField: 'not-restored',
+        })),
+        snippets: backup.data.snippets.map((entry) => ({
+          ...entry,
+          futureSnippetField: 'not-restored',
+        })),
+        settings: {
+          ...backup.data.settings,
+          futureSettingsField: 'not-restored',
+        },
+      },
+    } as BackupFileV1;
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => undefined,
+    );
+
+    await new BackupRestoreService({ replaceAll }).restoreBackup(futureBackup);
+
+    const restoreCall = requireValue(replaceAll.mock.calls[0], 'restore call');
+    expect(JSON.stringify(restoreCall[0])).not.toContain('future');
+    expect(restoreCall[0].snippets[0]).toMatchObject({ trigger: null });
+  });
+
+  it('coordinates restore invalidation and publication around atomic persistence', async () => {
+    const order: string[] = [];
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => {
+        order.push('restore');
+      },
+    );
+    const catalogPort: CatalogMutationPort = {
+      invalidateBeforeMutation: async () => {
+        order.push('invalidate');
+        return 'restore-1';
+      },
+      publishAfterMutation: async (id, outcome) => {
+        order.push(`publish-${id}-${outcome}`);
+        return true;
+      },
+    };
+
+    await new BackupRestoreService({ replaceAll }, catalogPort).restoreBackup(
+      createCurrentBackup(),
+    );
+
+    expect(order).toEqual([
+      'invalidate',
+      'restore',
+      'publish-restore-1-succeeded',
+    ]);
   });
 
   it('formats the approved filename independently', () => {

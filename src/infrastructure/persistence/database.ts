@@ -1,11 +1,11 @@
 import Dexie, { type DexieOptions, type Table } from 'dexie';
 
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
-import type { SnippetEntry } from '../../domain/snippet-entry';
 import type { SettingsRecord } from './settings-record';
+import type { SnippetEntryRecord } from './snippet-entry-record';
 
 export const DATABASE_NAME = 'ai-support-workspace';
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 3;
 
 export interface DatabaseConstructionOptions {
   databaseName?: string;
@@ -34,7 +34,7 @@ function getDexieOptions(
 export class AiSupportWorkspaceDatabase extends Dexie {
   readonly knowledgeEntries!: Table<KnowledgeEntry, string>;
   readonly settings!: Table<SettingsRecord, string>;
-  readonly snippetEntries!: Table<SnippetEntry, string>;
+  readonly snippetEntries!: Table<SnippetEntryRecord, string>;
 
   constructor(options: DatabaseConstructionOptions = {}) {
     super(options.databaseName ?? DATABASE_NAME, getDexieOptions(options));
@@ -43,10 +43,15 @@ export class AiSupportWorkspaceDatabase extends Dexie {
       knowledgeEntries: 'id, createdAt',
       snippetEntries: 'id, createdAt',
     });
-    this.version(DATABASE_VERSION).stores({
+    this.version(2).stores({
       knowledgeEntries: 'id, createdAt',
       settings: 'id',
       snippetEntries: 'id, createdAt',
+    });
+    this.version(DATABASE_VERSION).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
     });
 
     this.knowledgeEntries = this.table('knowledgeEntries');

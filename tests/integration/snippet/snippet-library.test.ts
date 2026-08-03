@@ -34,9 +34,18 @@ describe('Snippet Library production persistence integration', () => {
       title: 'Order confirmation',
       content: 'Your order has been confirmed.',
       tags: ['orders'],
+      trigger: ';order',
     });
 
-    expect(await database.snippetEntries.get(created.id)).toEqual(created);
+    expect(await database.snippetEntries.get(created.id)).toEqual({
+      id: created.id,
+      title: created.title,
+      content: created.content,
+      tags: created.tags,
+      createdAt: created.createdAt,
+      updatedAt: created.updatedAt,
+      trigger: ';order',
+    });
     expect(await library.load()).toEqual([created]);
   });
 });

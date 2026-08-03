@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, and 12 — Import / Export are complete. The latest committed and pushed checkpoint is `ea3e90d` (`docs: close milestone 12 and advance to milestone 13`), which remains the repository base before the uncommitted M13-A.1 documentation. Milestone 13 — Snippet Trigger Expansion v1 is current. The unstarted M13-A OpenAI readiness review was superseded by the product-priority realignment. M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition is complete and Principal Engineer approved; M13-B — Snippet Trigger Expansion Implementation is active but has not started, and no M13 source implementation exists yet. M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, and 12 — Import / Export are complete. The latest committed and pushed checkpoint is `043daca` (`docs: define snippet trigger expansion architecture`). Milestone 13 — Snippet Trigger Expansion v1 is current. M13-A.1 is complete and Principal Engineer approved; M13-B and M13-B.1 remain intact as uncommitted implementation work. M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction is active, making expansion available on normal HTTP/HTTPS websites through a realm-safe content-script boundary. Principal Engineer source review and real Chrome validation remain pending, so M13 is not complete. M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Perform M13-B — Snippet Trigger Expansion Implementation. It has not started and is the exact next engineering action.
+Complete M13-B.2 source review and automated validation, then perform product-owner real Chrome validation with the rebuilt and reloaded extension. Do not mark M13 complete or create a checkpoint before those gates pass.

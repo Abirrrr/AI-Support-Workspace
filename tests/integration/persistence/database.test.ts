@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { PersistenceError } from '../../../src/application/persistence/errors';
 import type { KnowledgeEntry } from '../../../src/domain/knowledge-entry';
-import type { SnippetEntry } from '../../../src/domain/snippet-entry';
 import {
   DATABASE_NAME,
   DATABASE_VERSION,
@@ -12,6 +11,7 @@ import {
 } from '../../../src/infrastructure/persistence/database';
 import { DexieKnowledgeEntryRepository } from '../../../src/infrastructure/persistence/dexie-knowledge-entry-repository';
 import { DexieSnippetEntryRepository } from '../../../src/infrastructure/persistence/dexie-snippet-entry-repository';
+import type { SnippetEntryRecord } from '../../../src/infrastructure/persistence/snippet-entry-record';
 import {
   createIsolatedDatabase,
   deleteIsolatedDatabase,
@@ -31,7 +31,7 @@ describe('local database foundation', () => {
     await deleteIsolatedDatabase(databaseName);
   });
 
-  it('opens version 2 with only the approved tables and indexes', async () => {
+  it('opens version 3 with only the approved tables and indexes', async () => {
     await database.open();
 
     expect(database.verno).toBe(DATABASE_VERSION);
@@ -41,23 +41,28 @@ describe('local database foundation', () => {
       'snippetEntries',
     ]);
 
-    for (const table of [database.knowledgeEntries, database.snippetEntries]) {
-      expect(table.schema.primKey).toMatchObject({
-        name: 'id',
-        keyPath: 'id',
-        auto: false,
-        compound: false,
-        multi: false,
-      });
-      expect(table.schema.indexes).toHaveLength(1);
-      expect(table.schema.indexes[0]).toMatchObject({
-        name: 'createdAt',
-        keyPath: 'createdAt',
-        compound: false,
-        multi: false,
-        unique: false,
-      });
-    }
+    expect(database.knowledgeEntries.schema.primKey).toMatchObject({
+      name: 'id',
+      keyPath: 'id',
+      auto: false,
+      compound: false,
+      multi: false,
+    });
+    expect(database.knowledgeEntries.schema.indexes).toHaveLength(1);
+    expect(database.knowledgeEntries.schema.indexes[0]).toMatchObject({
+      name: 'createdAt',
+      keyPath: 'createdAt',
+      compound: false,
+      multi: false,
+      unique: false,
+    });
+    expect(database.snippetEntries.schema.indexes).toHaveLength(2);
+    expect(database.snippetEntries.schema.indexes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'createdAt', unique: false }),
+        expect.objectContaining({ name: 'trigger', unique: true }),
+      ]),
+    );
 
     expect(database.settings.schema.primKey).toMatchObject({
       name: 'id',
@@ -80,7 +85,7 @@ describe('local database foundation', () => {
       updatedAt: '2026-08-01T10:00:00.000Z',
       source: 'migration fixture',
     };
-    const snippet: SnippetEntry = {
+    const snippet: SnippetEntryRecord = {
       id: 'snippet-v1',
       title: 'Version 1 snippet',
       content: 'Preserve this content.',
@@ -95,12 +100,12 @@ describe('local database foundation', () => {
     });
     await versionOne.open();
     await versionOne.table<KnowledgeEntry>('knowledgeEntries').add(knowledge);
-    await versionOne.table<SnippetEntry>('snippetEntries').add(snippet);
+    await versionOne.table<SnippetEntryRecord>('snippetEntries').add(snippet);
     versionOne.close();
 
     await database.open();
 
-    expect(database.verno).toBe(2);
+    expect(database.verno).toBe(3);
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
     expect(await database.snippetEntries.toArray()).toEqual([snippet]);
     expect(await database.settings.count()).toBe(0);
@@ -109,6 +114,55 @@ describe('local database foundation', () => {
       'settings',
       'snippetEntries',
     ]);
+  });
+
+  it('upgrades version 2 to version 3 without changing existing records', async () => {
+    const knowledge: KnowledgeEntry = {
+      id: 'knowledge-v2',
+      title: 'Version 2 knowledge',
+      body: 'Preserved body',
+      tags: ['migration'],
+      createdAt: '2026-08-01T11:00:00.000Z',
+      updatedAt: '2026-08-01T11:00:00.000Z',
+      source: 'migration fixture',
+    };
+    const snippet: SnippetEntryRecord = {
+      id: 'snippet-v2',
+      title: 'Version 2 snippet',
+      content: 'Preserved content',
+      tags: ['migration'],
+      createdAt: '2026-08-01T11:00:01.000Z',
+      updatedAt: '2026-08-01T11:00:01.000Z',
+    };
+    const versionTwo = new Dexie(databaseName, { indexedDB, IDBKeyRange });
+    versionTwo.version(1).stores({
+      knowledgeEntries: 'id, createdAt',
+      snippetEntries: 'id, createdAt',
+    });
+    versionTwo.version(2).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt',
+    });
+    await versionTwo.open();
+    await versionTwo.table<KnowledgeEntry>('knowledgeEntries').add(knowledge);
+    await versionTwo.table<SnippetEntryRecord>('snippetEntries').add(snippet);
+    await versionTwo.table('settings').add({
+      id: 'global',
+      defaultModel: 'preserved-model',
+    });
+    versionTwo.close();
+
+    await database.open();
+
+    expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
+    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.settings.toArray()).toEqual([
+      { id: 'global', defaultModel: 'preserved-model' },
+    ]);
+    database.close();
+    database = createIsolatedDatabase(databaseName);
+    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
   });
 
   it('keeps Knowledge and Snippet records in separate tables', async () => {
@@ -125,10 +179,20 @@ describe('local database foundation', () => {
       title: 'Snippet title',
       content: 'Snippet content',
       tags: ['snippet'],
+      trigger: null,
     });
 
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
-    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.snippetEntries.toArray()).toEqual([
+      {
+        id: snippet.id,
+        title: snippet.title,
+        content: snippet.content,
+        tags: snippet.tags,
+        createdAt: snippet.createdAt,
+        updatedAt: snippet.updatedAt,
+      },
+    ]);
     expect(await knowledgeRepository.get(snippet.id)).toBeUndefined();
     expect(await snippetRepository.get(knowledge.id)).toBeUndefined();
   });

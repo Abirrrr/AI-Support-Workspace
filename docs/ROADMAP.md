@@ -110,7 +110,7 @@ Cloud synchronization, collaboration, sharing workflows, bulk editing, automatic
 
 Add optional unique semicolon triggers to existing plain-text Snippets and expand a complete trigger when the user presses Space in an actively focused supported web editor. M13 preserves surrounding content, plain text, normal host-editor input behavior, and predictable caret placement through focused generic editor adapters and an extension-owned transient trigger catalog.
 
-The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition is complete and Principal Engineer approved. M13-B — Snippet Trigger Expansion Implementation is active but has not started; no M13 source implementation exists yet, and M13-B is the exact next engineering action.
+The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition is complete and Principal Engineer approved. M13-B and its M13-B.1 mutation-barrier correction remain uncommitted implementation work. M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction is the active corrective continuation; it intentionally expands availability to normal HTTP/HTTPS websites and awaits source review and real Chrome validation. M13 is not complete.
 
 ## Milestone 14 — Rich Snippet Templates
 

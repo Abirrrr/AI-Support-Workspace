@@ -6,12 +6,18 @@ import {
   type SnippetLibrary,
 } from '../../application/snippet/snippet-library';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import {
+  DuplicateSnippetTriggerError,
+  InvalidSnippetTriggerError,
+} from '../../application/snippet/snippet-trigger';
+import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
 import { formatTags, parseTags } from '../library/tags';
 
 interface SnippetDraft {
   title: string;
   content: string;
   tags: string;
+  trigger: string;
 }
 
 interface SnippetLibraryViewProps {
@@ -23,6 +29,7 @@ const EMPTY_DRAFT: SnippetDraft = {
   title: '',
   content: '',
   tags: '',
+  trigger: '',
 };
 
 function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
@@ -36,6 +43,7 @@ function draftFromEntry(entry: SnippetEntry): SnippetDraft {
     title: entry.title,
     content: entry.content,
     tags: formatTags(entry.tags),
+    trigger: entry.trigger ?? '',
   };
 }
 
@@ -44,6 +52,7 @@ function inputFromDraft(draft: SnippetDraft): SnippetEntryInput {
     title: draft.title,
     content: draft.content,
     tags: parseTags(draft.tags),
+    trigger: draft.trigger === '' ? null : draft.trigger,
   };
 }
 
@@ -59,6 +68,7 @@ export function SnippetLibraryView({
   const [editingId, setEditingId] = useState<string>();
   const [operation, setOperation] = useState<'saving' | 'deleting'>();
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [triggerErrorMessage, setTriggerErrorMessage] = useState<string>();
   const [statusMessage, setStatusMessage] = useState<string>();
 
   async function loadEntries() {
@@ -103,9 +113,11 @@ export function SnippetLibraryView({
   function resetForm() {
     setDraft(EMPTY_DRAFT);
     setEditingId(undefined);
+    setTriggerErrorMessage(undefined);
   }
 
   function updateDraft(field: keyof SnippetDraft, value: string) {
+    if (field === 'trigger') setTriggerErrorMessage(undefined);
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
@@ -113,6 +125,7 @@ export function SnippetLibraryView({
     setDraft(draftFromEntry(entry));
     setEditingId(entry.id);
     setErrorMessage(undefined);
+    setTriggerErrorMessage(undefined);
     setStatusMessage(undefined);
   }
 
@@ -120,6 +133,7 @@ export function SnippetLibraryView({
     event.preventDefault();
     setOperation('saving');
     setErrorMessage(undefined);
+    setTriggerErrorMessage(undefined);
     setStatusMessage(undefined);
 
     try {
@@ -141,12 +155,34 @@ export function SnippetLibraryView({
       }
 
       resetForm();
-    } catch {
-      setErrorMessage(
-        editingId
-          ? 'We could not update this snippet. Please try again.'
-          : 'We could not create this snippet. Please try again.',
-      );
+    } catch (error) {
+      if (error instanceof CatalogUnavailableAfterMutationError) {
+        const persisted = error.persistedResult as SnippetEntry;
+        setEntries((current) =>
+          orderSnippetEntries(
+            editingId
+              ? current.map((entry) =>
+                  entry.id === persisted.id ? persisted : entry,
+                )
+              : [...current, persisted],
+          ),
+        );
+        resetForm();
+        setStatusMessage(
+          'Snippet saved. Trigger expansion is temporarily unavailable.',
+        );
+      } else if (
+        error instanceof InvalidSnippetTriggerError ||
+        error instanceof DuplicateSnippetTriggerError
+      ) {
+        setTriggerErrorMessage(error.message);
+      } else {
+        setErrorMessage(
+          editingId
+            ? 'We could not update this snippet. Please try again.'
+            : 'We could not create this snippet. Please try again.',
+        );
+      }
     } finally {
       setOperation(undefined);
     }
@@ -169,8 +205,18 @@ export function SnippetLibraryView({
       setStatusMessage(
         existed ? 'Snippet deleted.' : 'This snippet was already removed.',
       );
-    } catch {
-      setErrorMessage('We could not delete this snippet. Please try again.');
+    } catch (error) {
+      if (error instanceof CatalogUnavailableAfterMutationError) {
+        setEntries((current) =>
+          current.filter((candidate) => candidate.id !== entry.id),
+        );
+        if (editingId === entry.id) resetForm();
+        setStatusMessage(
+          'Snippet deleted. Trigger expansion is temporarily unavailable.',
+        );
+      } else {
+        setErrorMessage('We could not delete this snippet. Please try again.');
+      }
     } finally {
       setOperation(undefined);
     }
@@ -277,6 +323,40 @@ export function SnippetLibraryView({
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
+              Trigger (optional)
+              <input
+                aria-describedby={
+                  triggerErrorMessage
+                    ? 'snippet-trigger-guidance snippet-trigger-error'
+                    : 'snippet-trigger-guidance'
+                }
+                aria-invalid={triggerErrorMessage ? true : undefined}
+                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                disabled={isBusy}
+                onChange={(event) => updateDraft('trigger', event.target.value)}
+                placeholder=";refund"
+                type="text"
+                value={draft.trigger}
+              />
+              <span
+                className="mt-1 block text-xs font-normal text-slate-600"
+                id="snippet-trigger-guidance"
+              >
+                Optional. Use 2–32 characters starting with ;. Letters, numbers,
+                and single hyphens only.
+              </span>
+              {triggerErrorMessage ? (
+                <span
+                  className="mt-1 block text-xs font-normal text-red-700"
+                  id="snippet-trigger-error"
+                  role="alert"
+                >
+                  {triggerErrorMessage}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="block text-sm font-medium text-slate-700">
               Tags (comma-separated)
               <input
                 className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -342,6 +422,11 @@ export function SnippetLibraryView({
                         </button>
                       </div>
                     </div>
+                    {entry.trigger ? (
+                      <p className="mt-2 font-mono text-sm font-semibold text-blue-700">
+                        {entry.trigger}
+                      </p>
+                    ) : null}
                     <p className="mt-4 whitespace-pre-wrap text-sm text-slate-700">
                       {entry.content}
                     </p>

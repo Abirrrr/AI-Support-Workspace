@@ -2,6 +2,7 @@ import {
   PersistenceError,
   RecordNotFoundError,
 } from '../../application/persistence/errors';
+import { DuplicateSnippetTriggerError } from '../../application/snippet/snippet-trigger';
 
 interface PersistedRecordOrder {
   id: string;
@@ -39,6 +40,7 @@ export async function runPersistenceOperation<Result>(
   } catch (error) {
     if (
       error instanceof RecordNotFoundError ||
+      error instanceof DuplicateSnippetTriggerError ||
       error instanceof PersistenceError
     ) {
       throw error;

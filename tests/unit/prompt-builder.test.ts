@@ -46,6 +46,7 @@ function createSnippetResult(index: number): SnippetRetrievalResult {
       tags: [`snippet-tag-${index}`],
       createdAt: timestamp,
       updatedAt: timestamp,
+      trigger: null,
     },
   };
 }

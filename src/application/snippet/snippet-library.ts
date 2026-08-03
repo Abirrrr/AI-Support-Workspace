@@ -3,6 +3,14 @@ import type {
   SnippetEntryRepository,
 } from '../persistence/snippet-entry-repository';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import {
+  DuplicateSnippetTriggerError,
+  normalizeSnippetTrigger,
+} from './snippet-trigger';
+import {
+  runCatalogCoordinatedMutation,
+  type CatalogMutationPort,
+} from './catalog-mutation';
 
 export interface SnippetLibrary {
   load(): Promise<readonly SnippetEntry[]>;
@@ -12,22 +20,47 @@ export interface SnippetLibrary {
 }
 
 export class SnippetLibraryService implements SnippetLibrary {
-  constructor(private readonly repository: SnippetEntryRepository) {}
+  constructor(
+    private readonly repository: SnippetEntryRepository,
+    private readonly catalogMutationPort?: CatalogMutationPort,
+  ) {}
 
   load(): Promise<readonly SnippetEntry[]> {
     return this.repository.list();
   }
 
-  create(input: SnippetEntryInput): Promise<SnippetEntry> {
-    return this.repository.create(input);
+  async create(input: SnippetEntryInput): Promise<SnippetEntry> {
+    const trigger = await this.normalizeAndCheckTrigger(input.trigger);
+    return runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
+      this.repository.create({ ...input, trigger }),
+    );
   }
 
-  update(id: string, input: SnippetEntryInput): Promise<SnippetEntry> {
-    return this.repository.update(id, input);
+  async update(id: string, input: SnippetEntryInput): Promise<SnippetEntry> {
+    const trigger = await this.normalizeAndCheckTrigger(input.trigger, id);
+    return runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
+      this.repository.update(id, { ...input, trigger }),
+    );
   }
 
   delete(id: string): Promise<boolean> {
-    return this.repository.delete(id);
+    return runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
+      this.repository.delete(id),
+    );
+  }
+
+  private async normalizeAndCheckTrigger(
+    trigger: string | null,
+    currentId?: string,
+  ): Promise<string | null> {
+    const normalized = normalizeSnippetTrigger(trigger);
+    if (normalized === null) return null;
+
+    const existing = await this.repository.findByTrigger(normalized);
+    if (existing !== undefined && existing.id !== currentId) {
+      throw new DuplicateSnippetTriggerError(normalized);
+    }
+    return normalized;
   }
 }
 

@@ -1,0 +1,25 @@
+import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
+import type { TriggerCatalogEntry } from '../../shared/trigger-catalog-messages';
+
+export interface TriggerCatalogReader {
+  readCatalog(): Promise<readonly TriggerCatalogEntry[]>;
+}
+
+export class TriggerCatalogService implements TriggerCatalogReader {
+  constructor(private readonly repository: SnippetEntryRepository) {}
+
+  async readCatalog(): Promise<readonly TriggerCatalogEntry[]> {
+    const snippets = await this.repository.list();
+    return snippets.flatMap((snippet) =>
+      snippet.trigger === null
+        ? []
+        : [
+            {
+              trigger: snippet.trigger,
+              snippetId: snippet.id,
+              content: snippet.content,
+            },
+          ],
+    );
+  }
+}

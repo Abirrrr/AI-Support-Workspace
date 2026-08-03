@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction
+
+- Preserved the existing uncommitted M13-B implementation and M13-B.1 overlapping-mutation barrier while correcting the real-browser expansion path. Intercom diagnostics confirmed the approved trusted, cancelable Space `beforeinput`, isolating the failure to extension integration rather than the host editor.
+- Replaced the content-script `event instanceof InputEvent` gate with a structurally validated project-owned event-like boundary. Trusted, cancelable, Space, non-composition, and enabled-catalog enforcement remains in the controller; wrong, pasted, programmatic, untrusted, noncancelable, or composing input continues normally without prevention.
+- Removed current-global constructor identity from supported editor, element, text-node, and internally created Range/candidate handling. Realm-safe detection uses node type, local name, owner document, capabilities, and internal candidate identity while preserving the exact textarea/input/contenteditable capability boundary and safe plain-text insertion.
+- Expanded the content-script match set to exactly `http://*/*` and `https://*/*` with `allFrames: true`. Chrome-protected, extension, file, and non-HTTP(S) pages remain unsupported; `<all_urls>`, fallback-origin injection, `match_about_blank`, cross-frame traversal, new permissions, persistent catalogs, logging, analytics, clipboard access, and provider transmission remain excluded.
+- Added focused structural-event, iframe-realm editor, nested framework-style contenteditable, exact range/caret/input, HTML-safety, and generated-manifest regression coverage. M13-B.1 catalog mutation tests remain unchanged and passing.
+- Decision 35 supersedes only Decision 34's restricted-origin clause and records broad normal HTTP/HTTPS access plus the isolated-world-safe integration boundary. M13-B.2 remains uncommitted, M13 is incomplete, and Principal Engineer source review and real Chrome validation are pending. No commit or push was performed.
+
 ### M13-A.1.1 — Snippet Trigger Architecture Review Corrections
 
 - Corrected the editor capability boundary: `textarea` and `contenteditable` preserve complete single-line and multiline Snippet content, with contenteditable using safe text nodes and `<br>` insertion. Supported absent/text/search inputs expand only content containing no `\r` or `\n`; multiline matches decline before Space prevention without host-value mutation, flattening, truncation, normalization, or partial insertion, so normal Space behavior continues unchanged.

@@ -4,6 +4,7 @@ import type {
   SnippetEntryRepository,
 } from '../../application/persistence/snippet-entry-repository';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import { DuplicateSnippetTriggerError } from '../../application/snippet/snippet-trigger';
 import type { AiSupportWorkspaceDatabase } from './database';
 import {
   compareByCreatedAtAndId,
@@ -11,6 +12,14 @@ import {
   createUpdatedTimestamp,
   runPersistenceOperation,
 } from './repository-helpers';
+import { toSnippetEntry, toSnippetEntryRecord } from './snippet-entry-record';
+
+function isConstraintError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.name === 'ConstraintError' || error.name === 'Dexie.ConstraintError')
+  );
+}
 
 export class DexieSnippetEntryRepository implements SnippetEntryRepository {
   constructor(private readonly database: AiSupportWorkspaceDatabase) {}
@@ -18,24 +27,33 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
   async create(input: SnippetEntryInput): Promise<SnippetEntry> {
     return runPersistenceOperation('create snippet entry', async () => {
       const timestamp = createTimestamp();
-      const record: SnippetEntry = {
+      const entry: SnippetEntry = {
         id: crypto.randomUUID(),
         title: input.title,
         content: input.content,
         tags: [...input.tags],
         createdAt: timestamp,
         updatedAt: timestamp,
+        trigger: input.trigger,
       };
 
-      await this.database.snippetEntries.add(record);
-      return record;
+      try {
+        await this.database.snippetEntries.add(toSnippetEntryRecord(entry));
+      } catch (error) {
+        if (input.trigger !== null && isConstraintError(error)) {
+          throw new DuplicateSnippetTriggerError(input.trigger);
+        }
+        throw error;
+      }
+      return entry;
     });
   }
 
   async get(id: string): Promise<SnippetEntry | undefined> {
-    return runPersistenceOperation('get snippet entry', () =>
-      this.database.snippetEntries.get(id),
-    );
+    return runPersistenceOperation('get snippet entry', async () => {
+      const record = await this.database.snippetEntries.get(id);
+      return record === undefined ? undefined : toSnippetEntry(record);
+    });
   }
 
   async list(): Promise<readonly SnippetEntry[]> {
@@ -44,8 +62,21 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
         .orderBy('createdAt')
         .toArray();
 
-      return records.sort(compareByCreatedAtAndId);
+      return records.sort(compareByCreatedAtAndId).map(toSnippetEntry);
     });
+  }
+
+  async findByTrigger(trigger: string): Promise<SnippetEntry | undefined> {
+    return runPersistenceOperation(
+      'find snippet entry by trigger',
+      async () => {
+        const record = await this.database.snippetEntries
+          .where('trigger')
+          .equals(trigger)
+          .first();
+        return record === undefined ? undefined : toSnippetEntry(record);
+      },
+    );
   }
 
   async update(id: string, input: SnippetEntryInput): Promise<SnippetEntry> {
@@ -67,9 +98,19 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
             tags: [...input.tags],
             createdAt: existing.createdAt,
             updatedAt: createUpdatedTimestamp(existing.updatedAt),
+            trigger: input.trigger,
           };
 
-          await this.database.snippetEntries.put(updated);
+          try {
+            await this.database.snippetEntries.put(
+              toSnippetEntryRecord(updated),
+            );
+          } catch (error) {
+            if (input.trigger !== null && isConstraintError(error)) {
+              throw new DuplicateSnippetTriggerError(input.trigger);
+            }
+            throw error;
+          }
           return updated;
         },
       ),

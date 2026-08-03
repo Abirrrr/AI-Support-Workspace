@@ -55,4 +55,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is Snippet Trigger Expansion v1, M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion. Workflow polish and additional integrations remain later work. The original unstarted M13-A OpenAI readiness review was superseded by this priority order. M13-A.1 architecture is complete and Principal Engineer approved; M13-B — Snippet Trigger Expansion Implementation is active but has not started, and no M13 source implementation exists yet.
+M13 is Snippet Trigger Expansion v1, M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion. Workflow polish and additional integrations remain later work. The original unstarted M13-A OpenAI readiness review was superseded by this priority order. M13-A.1 architecture is complete and Principal Engineer approved; M13-B/M13-B.1 remain intact and uncommitted, and M13-B.2 is the active all-sites and isolated-world corrective continuation pending source review and real Chrome validation. M13 is not complete.

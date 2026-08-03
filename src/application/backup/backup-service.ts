@@ -1,11 +1,14 @@
 import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
+  BACKUP_FORMAT_VERSION_1,
   MAX_BACKUP_BYTES,
-  type BackupFileV1,
+  type BackupFile,
+  type BackupFileV2,
   type BackupImportPreview,
-  type BackupKnowledgeRecordV1,
+  type BackupKnowledgeRecordV2,
   type BackupSnippetRecordV1,
+  type BackupSnippetRecordV2,
 } from '../../domain/backup-file';
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
@@ -21,10 +24,18 @@ import type {
   BackupSnapshotReader,
   TransactionalBackupRestorePort,
 } from './backup-ports';
-import { parseBackupFileV1 } from './backup-validator';
+import { parseBackupFile } from './backup-validator';
+import {
+  CatalogUnavailableAfterMutationError,
+  runCatalogCoordinatedMutation,
+  type CatalogMutationPort,
+} from '../snippet/catalog-mutation';
+
+export const VERSION_1_TRIGGER_WARNING =
+  'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.';
 
 export interface PreparedBackupImport {
-  readonly backup: BackupFileV1;
+  readonly backup: BackupFile;
   readonly preview: BackupImportPreview;
 }
 
@@ -37,7 +48,7 @@ export interface BackupImportApplication {
 }
 
 export interface BackupRestoreApplication {
-  restoreBackup(backup: BackupFileV1): Promise<void>;
+  restoreBackup(backup: BackupFile): Promise<void>;
 }
 
 function compareByCreatedAtAndId(
@@ -51,9 +62,9 @@ function compareByCreatedAtAndId(
   return 0;
 }
 
-function toBackupKnowledgeRecordV1(
+function toBackupKnowledgeRecordV2(
   entry: KnowledgeEntry,
-): BackupKnowledgeRecordV1 {
+): BackupKnowledgeRecordV2 {
   return {
     id: entry.id,
     title: entry.title,
@@ -65,7 +76,7 @@ function toBackupKnowledgeRecordV1(
   };
 }
 
-function toBackupSnippetRecordV1(entry: SnippetEntry): BackupSnippetRecordV1 {
+function toBackupSnippetRecordV2(entry: SnippetEntry): BackupSnippetRecordV2 {
   return {
     id: entry.id,
     title: entry.title,
@@ -73,11 +84,12 @@ function toBackupSnippetRecordV1(entry: SnippetEntry): BackupSnippetRecordV1 {
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
+    trigger: entry.trigger,
   };
 }
 
 function toRestoreKnowledgeEntry(
-  entry: BackupKnowledgeRecordV1,
+  entry: BackupKnowledgeRecordV2,
 ): KnowledgeEntry {
   return {
     id: entry.id,
@@ -98,6 +110,19 @@ function toRestoreSnippetEntry(entry: BackupSnippetRecordV1): SnippetEntry {
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
+    trigger: null,
+  };
+}
+
+function toRestoreSnippetEntryV2(entry: BackupSnippetRecordV2): SnippetEntry {
+  return {
+    id: entry.id,
+    title: entry.title,
+    content: entry.content,
+    tags: [...entry.tags],
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
+    trigger: entry.trigger,
   };
 }
 
@@ -121,17 +146,17 @@ export class BackupExportService implements BackupExportApplication {
     try {
       const snapshot = await this.snapshotReader.readSnapshot();
       const exportedAt = this.now().toISOString();
-      const backup: BackupFileV1 = {
+      const backup: BackupFileV2 = {
         format: BACKUP_FORMAT,
         formatVersion: BACKUP_FORMAT_VERSION,
         exportedAt,
         data: {
           knowledge: [...snapshot.knowledge]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupKnowledgeRecordV1),
+            .map(toBackupKnowledgeRecordV2),
           snippets: [...snapshot.snippets]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupSnippetRecordV1),
+            .map(toBackupSnippetRecordV2),
           settings: { defaultModel: snapshot.settings.defaultModel },
         },
       };
@@ -165,7 +190,7 @@ export class BackupImportService implements BackupImportApplication {
       throw new BackupImportError('read-failure', error);
     }
 
-    const backup = parseBackupFileV1(serialized);
+    const backup = parseBackupFile(serialized);
     return {
       backup,
       preview: {
@@ -174,24 +199,37 @@ export class BackupImportService implements BackupImportApplication {
         knowledgeCount: backup.data.knowledge.length,
         snippetCount: backup.data.snippets.length,
         defaultModel: backup.data.settings.defaultModel,
+        triggerWarning:
+          backup.formatVersion === BACKUP_FORMAT_VERSION_1
+            ? VERSION_1_TRIGGER_WARNING
+            : null,
       },
     };
   }
 }
 
 export class BackupRestoreService implements BackupRestoreApplication {
-  constructor(private readonly restorePort: TransactionalBackupRestorePort) {}
+  constructor(
+    private readonly restorePort: TransactionalBackupRestorePort,
+    private readonly catalogMutationPort?: CatalogMutationPort,
+  ) {}
 
-  async restoreBackup(backup: BackupFileV1): Promise<void> {
+  async restoreBackup(backup: BackupFile): Promise<void> {
     try {
       const restoreData: BackupRestoreData = {
         knowledge: backup.data.knowledge.map(toRestoreKnowledgeEntry),
-        snippets: backup.data.snippets.map(toRestoreSnippetEntry),
+        snippets:
+          backup.formatVersion === BACKUP_FORMAT_VERSION_1
+            ? backup.data.snippets.map(toRestoreSnippetEntry)
+            : backup.data.snippets.map(toRestoreSnippetEntryV2),
         settings: { defaultModel: backup.data.settings.defaultModel },
       };
 
-      await this.restorePort.replaceAll(restoreData);
+      await runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
+        this.restorePort.replaceAll(restoreData),
+      );
     } catch (error) {
+      if (error instanceof CatalogUnavailableAfterMutationError) throw error;
       throw new BackupRestoreError(error);
     }
   }

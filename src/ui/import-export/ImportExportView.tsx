@@ -7,6 +7,7 @@ import {
   BackupRestoreError,
 } from '../../application/backup/backup-errors';
 import type { PreparedBackupImport } from '../../application/backup/backup-service';
+import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
 
 export interface ImportExportActions {
   exportBackup(): Promise<void>;
@@ -130,7 +131,26 @@ export function ImportExportView({
       });
       onRestored();
     } catch (error) {
-      setImportFeedback({ kind: 'error', message: safeRestoreMessage(error) });
+      if (error instanceof CatalogUnavailableAfterMutationError) {
+        const { knowledgeCount, snippetCount } = prepared.preview;
+        clearPendingImport(false);
+        setImportFeedback({
+          kind: 'success',
+          message:
+            'Backup restored. Trigger expansion is temporarily unavailable.',
+          summary: [
+            `Knowledge restored: ${knowledgeCount}`,
+            `Snippets restored: ${snippetCount}`,
+            BACKUP_MESSAGES.settingsRestored,
+          ],
+        });
+        onRestored();
+      } else {
+        setImportFeedback({
+          kind: 'error',
+          message: safeRestoreMessage(error),
+        });
+      }
     } finally {
       setRestoring(false);
     }
@@ -275,6 +295,11 @@ export function ImportExportView({
               Restoring this backup will replace your current Knowledge,
               Snippets, and saved Settings.
             </p>
+            {prepared.preview.triggerWarning ? (
+              <p className="mt-3 text-sm font-semibold text-amber-800">
+                {prepared.preview.triggerWarning}
+              </p>
+            ) : null}
             <label className="mt-3 flex items-start gap-2 text-sm text-slate-800">
               <input
                 checked={acknowledged}

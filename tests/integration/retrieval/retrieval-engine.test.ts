@@ -51,11 +51,13 @@ describe('Retrieval Engine production persistence integration', () => {
       title: 'Billing response',
       content: 'Please allow processing time.',
       tags: ['refund'],
+      trigger: null,
     });
     const snippetContentMatch = await snippetRepository.create({
       title: 'Follow-up response',
       content: 'Your refund is being processed.',
       tags: [],
+      trigger: null,
     });
     const engine = new RetrievalEngine(knowledgeRepository, snippetRepository);
     const knowledgeBefore = await knowledgeRepository.list();

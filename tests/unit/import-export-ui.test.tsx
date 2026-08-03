@@ -19,6 +19,7 @@ import type { PreparedBackupImport } from '../../src/application/backup/backup-s
 import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
+import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
 import type { BackupFileV1 } from '../../src/domain/backup-file';
 import {
   ImportExportView,
@@ -64,6 +65,8 @@ const prepared: PreparedBackupImport = {
     knowledgeCount: 1,
     snippetCount: 1,
     defaultModel: null,
+    triggerWarning:
+      'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.',
   },
 };
 
@@ -395,6 +398,36 @@ describe('ImportExportView', () => {
       screen.getByRole('heading', { name: 'Backup preview' }),
     ).toBeTruthy();
   });
+
+  it('reports successful restore accurately when catalog publication is unavailable', async () => {
+    const onRestored = vi.fn();
+    render(
+      <ImportExportView
+        actions={createActions({
+          restoreBackup: vi.fn(async () => {
+            throw new CatalogUnavailableAfterMutationError(undefined);
+          }),
+        })}
+        onRestored={onRestored}
+      />,
+    );
+    selectBackupFile();
+    await screen.findByRole('heading', { name: 'Backup preview' });
+    fireEvent.click(
+      screen.getByLabelText(
+        'I understand that my current local data will be replaced.',
+      ),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Restore backup' }));
+
+    expect(
+      await screen.findByText(
+        'Backup restored. Trigger expansion is temporarily unavailable.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(BACKUP_MESSAGES.restoreFailure)).toBeNull();
+    expect(onRestored).toHaveBeenCalledOnce();
+  });
 });
 
 describe('options-page restore refresh', () => {
@@ -415,6 +448,7 @@ describe('options-page restore refresh', () => {
     const restoredSnippets = backup.data.snippets.map((entry) => ({
       ...entry,
       tags: [...entry.tags],
+      trigger: null,
     }));
     const knowledgeLibrary: KnowledgeLibrary = {
       load: vi.fn(async () =>
@@ -445,6 +479,7 @@ describe('options-page restore refresh', () => {
                 ...snippetFixture,
                 title: 'Before snippet',
                 tags: [...snippetFixture.tags],
+                trigger: null,
               },
             ],
       ),

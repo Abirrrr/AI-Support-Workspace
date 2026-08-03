@@ -7,6 +7,7 @@ import type {
 import type { AiSupportWorkspaceDatabase } from './database';
 import { runPersistenceOperation } from './repository-helpers';
 import { GLOBAL_SETTINGS_ID } from './settings-record';
+import { toSnippetEntry, toSnippetEntryRecord } from './snippet-entry-record';
 
 export type BackupRestoreStage =
   | 'knowledge-cleared'
@@ -54,14 +55,7 @@ export class DexieBackupSnapshotReader implements BackupSnapshotReader {
               updatedAt: entry.updatedAt,
               source: entry.source,
             })),
-            snippets: snippets.map((entry) => ({
-              id: entry.id,
-              title: entry.title,
-              content: entry.content,
-              tags: [...entry.tags],
-              createdAt: entry.createdAt,
-              updatedAt: entry.updatedAt,
-            })),
+            snippets: snippets.map(toSnippetEntry),
             settings: {
               defaultModel: settingsRecord?.defaultModel ?? null,
             },
@@ -110,14 +104,7 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
 
           if (data.snippets.length > 0) {
             await this.database.snippetEntries.bulkAdd(
-              data.snippets.map((entry) => ({
-                id: entry.id,
-                title: entry.title,
-                content: entry.content,
-                tags: [...entry.tags],
-                createdAt: entry.createdAt,
-                updatedAt: entry.updatedAt,
-              })),
+              data.snippets.map(toSnippetEntryRecord),
             );
           }
           await runHook(this.testHooks, 'snippets-written');

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RecordNotFoundError } from '../../../src/application/persistence/errors';
+import { DuplicateSnippetTriggerError } from '../../../src/application/snippet/snippet-trigger';
 import {
   DATABASE_NAME,
   type AiSupportWorkspaceDatabase,
@@ -34,6 +35,7 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Later snippet',
       content: 'Later content',
       tags: [],
+      trigger: null,
     });
 
     now.mockReturnValue(Date.parse('2026-07-25T12:00:00.000Z'));
@@ -41,6 +43,7 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Earlier snippet',
       content: 'Earlier content',
       tags: ['snippet'],
+      trigger: ';earlier',
     });
 
     expect(earlier.createdAt).toBe(earlier.updatedAt);
@@ -58,12 +61,14 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Original snippet',
       content: 'Original content',
       tags: ['original'],
+      trigger: ';original',
     });
 
     const updated = await repository.update(created.id, {
       title: 'Updated snippet',
       content: 'Updated content',
       tags: [],
+      trigger: ';updated',
     });
 
     expect(updated).toEqual({
@@ -73,6 +78,7 @@ describe('DexieSnippetEntryRepository', () => {
       tags: [],
       createdAt: created.createdAt,
       updatedAt: '2026-07-25T12:00:00.001Z',
+      trigger: ';updated',
     });
   });
 
@@ -81,6 +87,7 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Missing',
       content: 'Missing content',
       tags: [],
+      trigger: null,
     });
 
     await expect(missingUpdate).rejects.toMatchObject({
@@ -94,6 +101,7 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Temporary snippet',
       content: 'Temporary content',
       tags: [],
+      trigger: null,
     });
 
     expect(await repository.delete(created.id)).toBe(true);
@@ -106,6 +114,7 @@ describe('DexieSnippetEntryRepository', () => {
       title: 'Persistent snippet',
       content: 'Persistent content',
       tags: ['reopen'],
+      trigger: ';persistent',
     });
 
     database.close({ disableAutoOpen: true });
@@ -113,5 +122,59 @@ describe('DexieSnippetEntryRepository', () => {
     repository = new DexieSnippetEntryRepository(database);
 
     expect(await repository.get(created.id)).toEqual(created);
+  });
+
+  it('omits null physically, finds exact triggers, maps conflicts, and releases triggers', async () => {
+    const first = await repository.create({
+      title: 'First',
+      content: 'First content',
+      tags: [],
+      trigger: ';shared',
+    });
+    const triggerless = await repository.create({
+      title: 'Triggerless',
+      content: 'No trigger',
+      tags: [],
+      trigger: null,
+    });
+
+    expect(await repository.findByTrigger(';shared')).toEqual(first);
+    expect(await repository.findByTrigger(';sha')).toBeUndefined();
+    expect(await repository.findByTrigger(';SHARED')).toBeUndefined();
+    expect(
+      await database.snippetEntries.get(triggerless.id),
+    ).not.toHaveProperty('trigger');
+
+    await expect(
+      repository.create({
+        title: 'Duplicate',
+        content: 'Duplicate content',
+        tags: [],
+        trigger: ';shared',
+      }),
+    ).rejects.toBeInstanceOf(DuplicateSnippetTriggerError);
+
+    await repository.update(first.id, {
+      title: first.title,
+      content: first.content,
+      tags: first.tags,
+      trigger: null,
+    });
+    const reused = await repository.create({
+      title: 'Reused',
+      content: 'Reused content',
+      tags: [],
+      trigger: ';shared',
+    });
+    expect(reused.trigger).toBe(';shared');
+    await repository.delete(reused.id);
+    await expect(
+      repository.create({
+        title: 'Reused after delete',
+        content: 'Reused again',
+        tags: [],
+        trigger: ';shared',
+      }),
+    ).resolves.toMatchObject({ trigger: ';shared' });
   });
 });

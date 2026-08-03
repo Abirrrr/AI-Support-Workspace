@@ -5,4 +5,5 @@ export interface SnippetEntry {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  trigger: string | null;
 }

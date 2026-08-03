@@ -20,6 +20,7 @@ import {
 import { DexieKnowledgeEntryRepository } from '../../infrastructure/persistence/dexie-knowledge-entry-repository';
 import { DexieSettingsRepository } from '../../infrastructure/persistence/dexie-settings-repository';
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
+import { RuntimeCatalogMutationPort } from '../../infrastructure/snippet-trigger/runtime-catalog-mutation-port';
 import { OptionsShell } from '../../ui/options/OptionsShell';
 import '../../ui/styles.css';
 
@@ -30,12 +31,24 @@ if (!root) {
 }
 
 const database = createDatabase();
+const catalogRuntime = (
+  globalThis as typeof globalThis & {
+    chrome?: {
+      runtime?: ConstructorParameters<typeof RuntimeCatalogMutationPort>[0];
+    };
+  }
+).chrome?.runtime;
+const catalogMutationPort =
+  catalogRuntime === undefined
+    ? undefined
+    : new RuntimeCatalogMutationPort(catalogRuntime);
 const knowledgeLibrary = new KnowledgeLibraryService(
   new DexieKnowledgeEntryRepository(database),
 );
 const settings = new SettingsService(new DexieSettingsRepository(database));
 const snippetLibrary = new SnippetLibraryService(
   new DexieSnippetEntryRepository(database),
+  catalogMutationPort,
 );
 const backupExport = new BackupExportService(
   new DexieBackupSnapshotReader(database),
@@ -44,6 +57,7 @@ const backupExport = new BackupExportService(
 const backupImport = new BackupImportService();
 const backupRestore = new BackupRestoreService(
   new DexieTransactionalBackupRestorePort(database),
+  catalogMutationPort,
 );
 const importExport = {
   exportBackup: () => backupExport.exportBackup(),
