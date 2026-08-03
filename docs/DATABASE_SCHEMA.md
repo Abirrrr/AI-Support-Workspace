@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the local data model, implemented physical persistence schema, and approved forward migration. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the implemented version 2 singleton Settings store, and M13 approves a future version 3 optional unique Snippet-trigger index without rewriting either historical declaration.
+This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the version 2 singleton Settings store, and M13 implemented version 3 with an optional unique Snippet-trigger index without rewriting either historical declaration.
 
 ## Planned Domain Schema
 
@@ -334,4 +334,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 12 are complete. Database `ai-support-workspace` currently uses implemented schema version 2 with unchanged `knowledgeEntries` and `snippetEntries` stores plus the singleton `settings` store. M13-A.1 is complete and Principal Engineer approved; it defines, but does not implement, forward-only schema version 3 with optional unique Snippet triggers and Backup Format v2 while preserving v1 import. M13-B — Snippet Trigger Expansion Implementation is active but has not started, and no M13 source implementation or migration exists yet; the existing Ollama, Workspace, shortcut, and M12 integrity boundaries remain unchanged.
+Milestones 3 through 13 are complete. Database `ai-support-workspace` currently uses implemented schema version 3 with unchanged `knowledgeEntries` and `settings` declarations plus `snippetEntries: 'id, createdAt, &trigger'`. The version 2-to-3 migration preserves Knowledge, existing Snippets, and Settings; triggerless physical records omit the indexed property and map to domain `null`. Backup Format v2 preserves triggers while valid version 1 imports remain supported with null triggers. The existing Ollama, Workspace, shortcut, and M12 integrity boundaries remain unchanged. The completed M13 implementation is at checkpoint `b76fcb4`.

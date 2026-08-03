@@ -11,7 +11,7 @@
 
 ## Future Considerations
 
-- Preserve the completed M12 backup and restore guarantees while M13 evolves Snippets and Backup Format v2.
+- Preserve the completed M12 backup and restore guarantees and completed M13 Backup Format v2/v1-compatibility guarantees in all later data-model evolution.
 - Preserve the application-owned backup format independently from Dexie schema versioning; future format evolution must not silently redefine format version 1.
 - Reconsider provider endpoint configuration only with provider expansion or a dedicated security and permissions architecture review.
 - Consider persistent Prompt Profiles or writing preferences only through a separate product and precedence decision; they are not M11 behavior tuning.
@@ -55,4 +55,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is Snippet Trigger Expansion v1, M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion. Workflow polish and additional integrations remain later work. The original unstarted M13-A OpenAI readiness review was superseded by this priority order. M13-A.1 architecture is complete and Principal Engineer approved; M13-B/M13-B.1 remain intact and uncommitted, and M13-B.2 is the active all-sites and isolated-world corrective continuation pending source review and real Chrome validation. M13 is not complete.
+M13 — Snippet Trigger Expansion v1 is complete at `b76fcb4`. M14 — Rich Snippet Templates is current but not started; architecture definition through the future M14-A task is the next action. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and additional integrations remain later work. Existing M14 backlog directions remain deferred inputs to architecture review and are not approved implementation requirements.

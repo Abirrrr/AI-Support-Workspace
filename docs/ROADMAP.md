@@ -106,15 +106,17 @@ M12 provides manual local backup, restore after reinstall or local browser-data 
 
 Cloud synchronization, collaboration, sharing workflows, bulk editing, automatic or scheduled backups, merge import, encryption, compression, screenshot Context, and Rich Snippet data are outside M12.
 
-## Milestone 13 — Snippet Trigger Expansion v1 (Current)
+## Milestone 13 — Snippet Trigger Expansion v1 (Completed)
 
 Add optional unique semicolon triggers to existing plain-text Snippets and expand a complete trigger when the user presses Space in an actively focused supported web editor. M13 preserves surrounding content, plain text, normal host-editor input behavior, and predictable caret placement through focused generic editor adapters and an extension-owned transient trigger catalog.
 
-The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 — Snippet Trigger Expansion Roadmap and Architecture Definition is complete and Principal Engineer approved. M13-B and its M13-B.1 mutation-barrier correction remain uncommitted implementation work. M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction is the active corrective continuation; it intentionally expands availability to normal HTTP/HTTPS websites and awaits source review and real Chrome validation. M13 is not complete.
+The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 defined the approved architecture. M13-B implemented trigger-enabled Snippets, persistence and Backup Format v2, the transient catalog, typed frame synchronization, and supported-editor expansion. M13-B.1 corrected overlapping catalog publication, and M13-B.2 corrected isolated-world/realm handling and intentionally expanded availability to normal HTTP/HTTPS websites. Principal Engineer review, automated validation, and product-owner real Chrome validation passed. M13 is complete at implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
 
-## Milestone 14 — Rich Snippet Templates
+## Milestone 14 — Rich Snippet Templates (Current — Not Started)
 
 Extend the M13 plain-text Snippet and trigger foundation with ordered rich template content, destination-aware rich insertion, deterministic plain-text fallback, and explicit reusable-asset handling. Detailed architecture remains deferred to future M14 tasks.
+
+Status: Not started — architecture definition is the next engineering action. The next Principal Engineer action is to create M14-A — Rich Snippet Templates Architecture and Product Boundary; this roadmap status does not define or authorize its architecture or implementation.
 
 ## Milestone 15 — Multimodal Screenshot Context
 

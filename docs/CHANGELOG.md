@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M13-C — Milestone 13 Closeout and Project Handoff Update
+
+- Closed Milestone 13 after Principal Engineer approval, complete automated validation, product-owner real Chrome validation, and the approved pushed implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
+- Recorded delivery of trigger-enabled Snippets; canonical unique trigger persistence; Dexie version 3; Backup Format v2 with version 1 compatibility; the transient runtime catalog and long-lived typed frame synchronization; and safe exact plain-text expansion with predictable caret behavior in supported editors.
+- Recorded M13-B.1's overlapping-mutation publication barrier and M13-B.2's Intercom isolated-world/realm correction plus intentional `http://*/*` and `https://*/*` content-script scope under Decision 35.
+- Recorded product-owner Chrome validation of real Intercom single-line and multiline expansion, exact surrounding-content and caret behavior, live edit/delete catalog updates, normal typing for unknown/deleted triggers, and expansion on another normal website. This evidence does not claim every website or editor framework was tested.
+- Marked M14 — Rich Snippet Templates current but not started. The exact next Principal Engineer action is to create M14-A — Rich Snippet Templates Architecture and Product Boundary; this documentation-only closeout defines or implements no M14 behavior.
+- Documentation Impact Review updated project continuity, roadmap, backlog, testing/manual evidence, implemented schema/status references, workflow wording, and README status. No application, test, configuration, dependency, schema, manifest, or generated-output file changed, and no commit or push was performed.
+
 ### M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction
 
 - Preserved the existing uncommitted M13-B implementation and M13-B.1 overlapping-mutation barrier while correcting the real-browser expansion path. Intercom diagnostics confirmed the approved trusted, cancelable Space `beforeinput`, isolating the failure to extension integration rather than the host editor.

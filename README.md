@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, and 12 — Import / Export are complete. The latest committed and pushed checkpoint is `043daca` (`docs: define snippet trigger expansion architecture`). Milestone 13 — Snippet Trigger Expansion v1 is current. M13-A.1 is complete and Principal Engineer approved; M13-B and M13-B.1 remain intact as uncommitted implementation work. M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction is active, making expansion available on normal HTTP/HTTPS websites through a realm-safe content-script boundary. Principal Engineer source review and real Chrome validation remain pending, so M13 is not complete. M14 is Rich Snippet Templates, M15 is Multimodal Screenshot Context, and M16 is OpenAI Provider Expansion.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M13 adds optional unique triggers to plain-text Snippets, local trigger persistence and backup, a transient synchronized catalog, and safe expansion in supported focused editors. Normal HTTP and HTTPS websites are eligible; Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable. The latest committed and pushed checkpoint is `b76fcb4` (`feat: add snippet trigger expansion`). M14 — Rich Snippet Templates is current but not started; M15 remains Multimodal Screenshot Context and M16 remains OpenAI Provider Expansion.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Complete M13-B.2 source review and automated validation, then perform product-owner real Chrome validation with the rebuilt and reloaded extension. Do not mark M13 complete or create a checkpoint before those gates pass.
+Create M14-A — Rich Snippet Templates Architecture and Product Boundary. M14 architecture and implementation have not started.

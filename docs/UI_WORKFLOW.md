@@ -384,7 +384,7 @@ Atomically replace Knowledge, Snippets, and Settings
 ### Workflow Notes
 
 - Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
-- After M13 ships, new exports use Backup Format v2 and include each Snippet's required `trigger: string | null`. Version 1 files remain importable and restore their Snippets without triggers. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
+- New exports use Backup Format v2 and include each Snippet's required `trigger: string | null`. Version 1 files remain importable and restore their Snippets without triggers. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
 - The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
 - Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Export over the 25 MiB serialized UTF-8 limit uses `This backup file is too large. Choose a file smaller than 25 MB.`
 - Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.
