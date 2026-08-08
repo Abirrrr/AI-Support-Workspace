@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### M14-A — Rich Snippet Templates Architecture and Product Boundary
+
+- Defined M14 as an extension of the existing `SnippetEntry`, Snippet Library, repository, M13 trigger, transient catalog, and editor-adapter system rather than a second Template entity, Library, or trigger mechanism.
+- Approved one canonical `SnippetContent` discriminated union for exact plain text or ordered rich blocks. Limited rich v1 data to paragraphs with ordered text/link inline nodes and labelled HTTP(S) image-reference blocks; prohibited persisted HTML, arbitrary nesting, executable markup, and unapproved URL schemes.
+- Fixed the reusable-image boundary at explicit URL references only. No Blob, base64 content, local asset table, clipboard ingestion, automatic fetch, file upload, hosting provider, or reuse of M15 screenshot Context is approved.
+- Defined deterministic plain projection as the universal fallback and the only Rich Snippet input to Retrieval Engine and Prompt Builder. Fixed paragraph separation, readable emphasis, link rendering, image-reference rendering, and the rule that no block disappears.
+- Extended destination-aware expansion through M13 adapters while preserving all semicolon-trigger, Space activation, caret, notification, normal-typing, long-lived port, epoch/revision, invalidation, global mutation barrier, and fail-closed guarantees. Constrained generic rich insertion to target-owned safe DOM nodes with no HTML parser or automatic image creation.
+- Approved future Dexie version 4 with unchanged indexes and no new table. The v3-to-v4 migration wraps every string exactly as plain content while preserving identity, metadata, tags, trigger, and timestamps. Version 3 remains implemented; version 4 is not implemented by this task.
+- Kept Backup Formats v1 and v2 frozen and importable and approved strict Backup Format v3 with dedicated exact DTOs, explicit mappings, rich validation, deterministic ordering, and existing atomic restore guarantees. Backup v3 is not implemented by this task.
+- Kept one Snippet Library, default-to-plain authoring, explicit readable-content-preserving plain-to-rich conversion, structured rich editing, and keyboard-accessible block ordering. Deferred rich-to-plain conversion and any third-party rich-editor dependency.
+- Excluded variables, merge fields, scripting, arbitrary HTML/CSS, local binary assets, uploads, automatic remote images, AI-generated fields, page scraping, analytics, alternate trigger syntax, provider changes, OpenAI, collaboration, sync, and new permissions.
+- Added Decision 36 and synchronized project state, architecture, product requirements, database planning, roadmap, backlog, UI workflow, future testing acceptance, changelog, and README. Reviewed `ENGINEERING_PRINCIPLES.md` and `CODING_AGENT_RULES.md`; no changes were required.
+- M14-A is documentation-only. It changes no source, tests, configuration, dependency, schema implementation, backup implementation, manifest, or permission and performs no commit or push. M14 architecture is defined, implementation remains unstarted, and the next action is M14-B — Structured Snippet Content and Backup Foundation.
+
 ### M13-C — Milestone 13 Closeout and Project Handoff Update
 
 - Closed Milestone 13 after Principal Engineer approval, complete automated validation, product-owner real Chrome validation, and the approved pushed implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).

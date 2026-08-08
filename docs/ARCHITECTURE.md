@@ -14,7 +14,7 @@ The project is expected to evolve around a small set of responsibilities:
 - Prompt builder: deterministically composes typed, provider-independent prompt assemblies.
 - Provider adapters: preserve a provider-independent boundary, with Ollama as the initial implementation target and other providers added later.
 - Output workspace: lets the user review and refine generated content.
-- Snippet trigger expansion: expands locally stored plain-text Snippets through focused page-editor adapters without coupling domain logic to merchant-platform DOM.
+- Snippet trigger expansion: expands locally stored plain or structured Snippets through focused capability-aware page-editor adapters without coupling domain logic to merchant-platform DOM; deterministic plain projection is the universal fallback.
 
 ## Design Principles
 
@@ -106,7 +106,7 @@ Infrastructure should run within the WXT extension and the user's browser wherev
 
 Dexie is the approved storage abstraction over browser-local IndexedDB. The application depends on project-owned persistence contracts so domain and application logic remain independent of Dexie and the browser persistence mechanism. Dexie database declaration, typed tables, schema versions, and transaction mechanics remain centralized in the infrastructure layer.
 
-`DATABASE_SCHEMA.md` is authoritative for the implemented physical schema, repository semantics, errors, transactions, testing, and migration policy. The Milestone 3 physical schema introduced Knowledge Entry and Snippet Entry records. M11 implemented the typed Settings aggregate and advanced the physical database to version 2 by adding only the singleton Settings store while preserving both Library stores. M13 implemented forward-only version 3, adding only optional canonical Snippet trigger data and a unique trigger index while preserving Knowledge, existing Snippets, and Settings.
+`DATABASE_SCHEMA.md` is authoritative for the implemented physical schema, repository semantics, errors, transactions, testing, and migration policy. The Milestone 3 physical schema introduced Knowledge Entry and Snippet Entry records. M11 implemented the typed Settings aggregate and advanced the physical database to version 2 by adding only the singleton Settings store while preserving both Library stores. M13 implemented forward-only version 3, adding only optional canonical Snippet trigger data and a unique trigger index while preserving Knowledge, existing Snippets, and Settings. M14-A approves a future forward-only version 4 that changes only the physical Snippet content representation; version 3 remains implemented until M14 code is delivered, and historical declarations remain immutable.
 
 History remains an intentionally undecided capability and is not part of the planned storage architecture.
 
@@ -342,6 +342,122 @@ The existing Snippet create/edit form adds one optional Trigger input. Guidance 
 
 Insertion is plain text only: no `innerHTML`, script, markup execution, external-resource loading, clipboard read/write, password input handling, secret capture, editor-content logging, provider transmission, or expansion outside the actively focused supported editor. M13 does not change Ollama, `GenerationProvider`, `OutputWorkflow`, Retrieval Engine, Prompt Builder, Side Panel generation, M10 capture, or Settings behavior. Rich Snippets move to M14, Multimodal Screenshot Context to M15, and OpenAI/provider selection to M16.
 
+### Rich Snippet Templates
+
+Milestone 14 extends the existing M13 Snippet aggregate, repository, trigger catalog, and editor-adapter foundation. A Rich Snippet is still a `SnippetEntry`: its ID, title, tags, optional canonical trigger, timestamps, repository identity, CRUD lifecycle, and trigger uniqueness retain their current meanings. The product has one Snippet Library and one trigger system; it does not add `TemplateEntry`, a parallel Template Library, or duplicated plain/rich records.
+
+#### Canonical Content and Validation
+
+The approved domain representation has one source of truth:
+
+```ts
+type SnippetContent = PlainSnippetContent | RichSnippetContent;
+
+interface PlainSnippetContent {
+  kind: 'plain';
+  text: string;
+}
+
+interface RichSnippetContent {
+  kind: 'rich';
+  blocks: RichSnippetBlock[];
+}
+```
+
+Rich content is a small, project-owned, ordered document model, never HTML. A paragraph block contains ordered inline nodes. A reference block initially has exactly `type: 'reference'`, `referenceType: 'image'`, a user-readable `label`, and a user-supplied `url`. Paragraph inline nodes are either text or link nodes; both carry explicit `bold` and `italic` booleans, while a link additionally carries its URL. The model is non-recursive and supports no arbitrary nesting, HTML, DOM node, CSS, font, color, table, script, event handler, iframe, video, or embed.
+
+Ordinary link URLs initially allow only `https:`, `http:`, and `mailto:`. Image-reference URLs allow only `https:` and `http:`. Values using `javascript:`, `data:`, `blob:`, `file:`, `chrome:`, `chrome-extension:`, or another unapproved scheme are rejected before persistence and again at untrusted backup import. Imported HTML is never interpreted or converted.
+
+M14 v1 resolves reusable images as references, not binary assets. It persists no Blob, base64 data, local file, clipboard image, fetched response, or upload-provider identity; adds no `snippetAssets` table, extension-managed file store, hosting service, or cloud uploader; and never automatically fetches a supplied URL. Local reusable asset storage requires a separate decision covering ownership, limits, backup, editor upload semantics, portability, and lifecycle. M15 screenshot Context remains a distinct transient generation-input domain and cannot be reused for M14 storage.
+
+#### Deterministic Plain Projection and AI Compatibility
+
+One project-owned domain/application operation, conceptually `renderSnippetPlainText(content: SnippetContent): string`, is the canonical readable representation wherever structured content cannot be consumed. Plain content returns its stored `text` exactly. Rich content preserves block order and joins every adjacent block with exactly `\n\n`. Paragraphs concatenate their inline nodes in order; bold and italic markers are omitted while readable text remains. A link renders as `label (url)` when label and URL differ, otherwise as the URL. An image reference renders exactly `[Image: label] url`. No block may silently disappear.
+
+Retrieval Engine scoring and Prompt Builder composition remain text-only. Their Snippet input comes from the deterministic projection, so indexing, ranking, provider-facing Prompt sections, and AI serialization never receive rich DOM structures or markup merely because M14 exists:
+
+```text
+SnippetContent
+→ deterministic plain projection
+→ Retrieval Engine
+→ Prompt Builder
+```
+
+M14 changes no provider contract, endpoint, provider serialization, model behavior, or AI permission.
+
+#### Expansion and Rendering
+
+Destination-aware expansion extends the M13 adapter boundary:
+
+```text
+Persisted Snippet
+→ Catalog Projection
+→ Service Worker Catalog
+→ Typed Frame Port
+→ Frame Cache
+→ Expansion Controller
+→ Editor Capability Adapter
+  ├── Rich Renderer
+  └── Plain Renderer
+```
+
+The adapter determines target capability; the domain contains no Intercom, Gmail, Shopify, Crisp, or other destination names. A safely supported generic `contenteditable` may render only extension-created text nodes, paragraph separation using `<p>` or an equivalent safe structure, `<strong>`, `<em>`, and validated `<a>` nodes, all created from the target's own `ownerDocument`. Snippet insertion must not use `innerHTML`, `insertAdjacentHTML`, `DOMParser`, or `document.write`. Generic rendering neither creates `<img>` nor fetches a reference URL. An image-reference block retains its position through the deterministic reference text unless a separately approved destination capability safely supports real inline-image insertion.
+
+`textarea` always receives the plain projection. M13's absent/text/search single-line input boundary remains: if the final projection contains `\r` or `\n`, the adapter declines before preventing Space, leaves the host value unchanged, and preserves normal typing. Content is never truncated, flattened, normalized, or partially inserted to fit.
+
+All M13 activation and caret behavior is frozen: canonical semicolon trigger lookup; trusted cancelable Space `beforeinput`; inactive composition; collapsed caret; trigger immediately before the caret with start/whitespace left boundary; exact trigger-range replacement; one trailing U+0020 space; bubbling composed `input`; no synthetic `change`; predictable caret; recursion guard; and fail-safe normal typing. Colon activation is not M14 scope.
+
+#### Transient Catalog Continuity
+
+Dexie remains the sole persistent source. The service worker derives the catalog, and content scripts never access Dexie. M14 may evolve each exact validated catalog entry to include canonical trigger, Snippet ID, deterministic plain projection, and optional validated rich structure. It may not include surrounding editor text, host data, history, provider state, logs, or unrelated Library records.
+
+M13-B.1 remains authoritative: one long-lived typed port per frame; atomic complete snapshots; worker epochs; monotonic revisions; invalidation before Snippet CRUD/import/restore persistence; one global publication barrier; complete rebuild after success or unchanged rebuild after failure; and fail-closed stale, disconnected, invalid, or publication-failed state. No browser-storage catalog, durable queue, polling, or per-keystroke worker lookup is approved.
+
+#### Persistence and Backup Evolution
+
+M14 implementation will add Dexie version 4 while preserving version 1, 2, and 3 declarations unchanged. Version 4 retains `knowledgeEntries: 'id, createdAt'`, `settings: 'id'`, and `snippetEntries: 'id, createdAt, &trigger'`; no new table or index is approved. Its migration maps each v3 `content: string` exactly to `{ kind: 'plain', text: formerContent }` while preserving ID, title, tags and order, trigger, `createdAt`, and `updatedAt`. Triggerless physical records continue omitting the unique indexed property. Database version 4 is approved architecture, not current implementation.
+
+Backup Formats v1 and v2 remain frozen and importable. M14 implementation will create dedicated exact Backup Format v3 DTOs independent from live domain and Dexie records, with explicit field-by-field mappings and no record-level spreads. V1 content strings map to current plain content and `trigger: null`; v2 strings map to plain content and preserve their trigger. New v3 exports contain the existing Knowledge and Settings contracts plus Snippets with metadata, trigger, and exact discriminated content.
+
+V3 validation rejects the complete backup for an inexact envelope, missing or extra keys, dangerous keys, invalid identity/timestamps, duplicate IDs or triggers, invalid discriminants, unknown blocks/inlines/marks/references, invalid field types, or unapproved URLs. It performs no repair and interprets no HTML. The 25 MiB guard, deterministic order, metadata-only preview and acknowledgement, replace-only restore, one-transaction atomicity, and rollback guarantees remain unchanged.
+
+#### Snippet Library and Scope
+
+The existing Snippet Library remains the single surface. Existing and new plain Snippets use the fast plain editor; new Snippets default to plain. `Convert to rich template` is an explicit user action that preserves readable content. A Rich Snippet stays rich during ordinary editing; rich-to-plain conversion is intentionally deferred because it is lossy.
+
+Rich authoring state is extension-owned structured data. A controlled contenteditable may be used as an interaction surface, but its HTML is never persisted or trusted as domain state. Initial authoring covers ordered paragraphs, bold, italic, links, and image references. Block ordering must be keyboard-accessible and cannot require drag-and-drop. No third-party rich-text editor dependency is approved; demonstrated need requires dependency and architecture review before addition.
+
+The layer ownership remains:
+
+```text
+Snippet Library UI
+→ Snippet Application Service
+→ Snippet Domain
+→ Snippet Repository
+→ Dexie Adapter
+```
+
+Backup version ownership remains explicit:
+
+```text
+Domain
+→ explicit field mapping
+→ Backup v3 DTO
+→ strict JSON
+
+Backup v1 / v2
+→ version-specific parser
+→ current PlainSnippetContent
+
+Backup v3
+→ strict parser
+→ current PlainSnippetContent or RichSnippetContent
+```
+
+M14 remains local-first. It captures or logs no surrounding conversation/editor content, trigger usage, history, page data, or provider state; sends no Snippet payload to an AI provider, analytics, or telemetry; reads or writes no clipboard; performs no page scraping; and adds no persistent content-script storage. The Rich Snippet payload is extension-owned user data and content-script inspection remains limited to M13's bounded trigger candidate and exact replacement range.
+
+M14 v1 introduces no variables, placeholders, merge fields, customer interpolation, conditions, loops, scripting, AI-generated fields, arbitrary HTML/CSS, local binary images, clipboard ingestion, file upload, cloud hosting, automatic remote loading, screenshot generation Context, page scraping, usage analytics, trigger autocomplete, alternate trigger syntax, folder redesign, collaboration, sync, provider change, or new Chrome permission. Normal website scope remains exactly `http://*/*` and `https://*/*`; protected pages and other schemes remain unsupported. Existing `sidePanel`, `activeTab`, `scripting`, and localhost Ollama access remain unchanged, and M14 adds no `<all_urls>`, `file://`, `tabs`, clipboard, downloads, `webRequest`, cookies, identity, or new host permission.
+
 ### Project Layer Responsibilities
 
 - Extension platform layer: owns WXT and Manifest V3 entry points, Chrome API integration, permissions, messaging, and extension lifecycle behavior.
@@ -378,4 +494,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 13 are implemented and validated. M13-A.1 defined the architecture; M13-B implemented it; M13-B.1 corrected the catalog publication barrier; and M13-B.2 established isolated-world-safe integration plus all-normal-HTTP/HTTPS availability. Principal Engineer review, automated validation, product-owner real Chrome validation, and implementation checkpoint `b76fcb4` are complete. M14 — Rich Snippet Templates is current but not started; architecture definition is the next engineering action.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 13 are implemented and validated. M13-A.1 defined the architecture; M13-B implemented it; M13-B.1 corrected the catalog publication barrier; and M13-B.2 established isolated-world-safe integration plus all-normal-HTTP/HTTPS availability. Principal Engineer review, automated validation, product-owner real Chrome validation, implementation checkpoint `b76fcb4`, and closeout checkpoint `9a3c7ef` are complete. M14 — Rich Snippet Templates is current. M14-A defines its architecture through Decision 36; application code still uses plain string content, Dexie version 3, Backup Format v2, and plain-only editor insertion, so M14 implementation has not started. The next action is M14-B — Structured Snippet Content and Backup Foundation.

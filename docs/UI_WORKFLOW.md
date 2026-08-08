@@ -133,7 +133,7 @@ Create Snippet
 
 ↓
 
-Add Content, Organization Details, and Optional Trigger
+Choose Plain Content or Explicitly Convert to Rich, then Add Content, Organization Details, and Optional Trigger
 
 ↓
 
@@ -156,7 +156,11 @@ Expand Snippet into Response
 - M13 defines one optional canonical trigger per Snippet. Existing Snippets without triggers remain valid and editable.
 - Trigger guidance shows that values begin with `;`, are 2–32 characters including that semicolon, and use letters, numbers, and single hyphens. Uppercase is stored lowercase; whitespace and unsupported punctuation are rejected.
 - Create and edit show inline invalid-format and duplicate-trigger feedback. The list displays a configured trigger and omits trigger decoration for `null`.
-- M13 keeps Snippet content plain text. Variables, rich text, images, and template blocks remain future M14 work.
+- Existing and new Snippets default to the current fast plain-text editor. The existing Snippet Library remains the only surface; there is no Rich Templates page.
+- An existing plain Snippet may expose `Convert to rich template`. Conversion is explicit, preserves readable content, and does not change the Snippet's identity, metadata, trigger, or CRUD semantics. Ordinary editing never silently changes its content kind.
+- A Rich Snippet remains rich. M14 v1 does not provide a lossy rich-to-plain toggle.
+- Rich authoring uses extension-owned structured state for paragraphs, bold, italic, links, labelled image references, and block order. Editor HTML is not persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
+- Image references accept a readable label and HTTP(S) URL. They do not upload, fetch, preview from the network automatically, or store a local binary image. Variables and dynamic customer fields are not available.
 
 ## 6. Snippet Trigger Expansion Workflow
 
@@ -182,16 +186,18 @@ Caret Rests after the Inserted Space
 
 ### Workflow Notes
 
-- Expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. Textarea supports complete single-line and multiline Snippets. Contenteditable supports complete single-line and multiline Snippets through safe text-node and `<br>` insertion.
+- Expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. M14 preserves the M13 activation boundary while allowing the adapter to select safe rich rendering or deterministic plain fallback.
 - The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
 - A match replaces exactly the trigger range, inserts the saved content as plain text plus the intended single space, preserves surrounding content and line breaks, emits the normal bubbling composed host `input` notification without synthesizing `change`, and places the caret after the inserted space.
-- A supported single-line input expands only Snippets containing no `\r` or `\n`. For multiline content its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit the input.
+- `textarea` always receives the deterministic plain projection. A supported single-line input expands only when that final projection contains no `\r` or `\n`; otherwise its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit.
+- A safely supported generic contenteditable may receive target-owned text, paragraph, bold, italic, and validated-link nodes. It never parses Snippet HTML and never automatically creates or fetches an image. Each image reference remains in position through `[Image: label] url` unless a separately approved destination capability exists.
 - A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
 - Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port`. Its transient cache is enabled only while the port is connected and holds a complete validated current-epoch snapshot; ordered invalidation and complete-snapshot messages use that port. Disconnection immediately clears and disables the cache, so no former snapshot can expand. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and stale epochs are rejected.
 - Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame and each clears immediately. Success publishes one rebuilt complete snapshot; persistence failure republishes the unchanged snapshot; publication failure leaves affected frames disabled until reconnect or successful refresh. Content scripts never open Dexie, and no persistent browser-storage catalog, durable queue, polling loop, or per-keystroke worker lookup is created.
 - Intercom is a required real-world validation target, but editor detection and replacement remain behind generic adapters. Destination-specific adaptation may be added only behind that interface when real evidence shows the generic adapter is insufficient.
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
-- Trigger expansion reads only the bounded text immediately before the caret, logs no editor content, uses no clipboard, sends nothing to an AI provider, and never interprets Snippet text as HTML.
+- Trigger expansion reads only the bounded text immediately before the caret, logs no editor content, uses no clipboard, sends nothing to an AI provider, and never interprets Snippet content as HTML.
+- For rich content, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, and renders an image reference as `[Image: label] url`. No block disappears.
 
 ## 7. Keyboard Shortcut Workflow
 
@@ -432,7 +438,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Rich Snippet Templates:** add ordered structured Snippet content through the M13 destination-aware editor boundary, with safe positional fallback for editors that cannot insert rich content. Detailed architecture remains deferred.
+- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. Dexie v4, Backup v3, and UI implementation remain pending; M14-B is the next task.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 

@@ -30,13 +30,23 @@ Fields:
 
 - id: string
 - title: string
-- content: string
+- content: SnippetContent
 - tags: string[]
 - createdAt: string
 - updatedAt: string
 - trigger: string | null
 
 `trigger` is the optional M13 plain-text expansion identity. A non-null value is stored in canonical lowercase, includes its leading semicolon, is unique, is 2–32 ASCII characters in total, and matches `^;[a-z0-9]+(?:-[a-z0-9]+)*$`. `null` means the Snippet has no expansion trigger.
+
+M14's approved future domain content is one canonical discriminated union:
+
+```ts
+type SnippetContent =
+  | { kind: 'plain'; text: string }
+  | { kind: 'rich'; blocks: RichSnippetBlock[] };
+```
+
+Rich blocks are ordered paragraph blocks with ordered text/link inline nodes or image-reference blocks with a label and HTTP(S) URL. The exact implementation names may be refined, but the discriminated union, non-recursive project-owned structure, and prohibition on persisted HTML are fixed by Decision 36. Current source still implements `content: string`; this planned shape becomes live only through M14 implementation and Dexie version 4.
 
 ### Settings
 
@@ -149,6 +159,39 @@ interface SnippetEntryRecordV3 {
 
 The forward-only version 2 to version 3 migration preserves every existing Knowledge, Snippet, and Settings record and does not synthesize a trigger. Existing Snippet records remain physically unchanged and read as `trigger: null`. No table, primary key, other field, or other index changes. Rollback to version 2 is unsupported.
 
+## Approved Future Milestone 14 Physical Schema Migration
+
+Implemented today: Dexie version 3.
+
+Approved for M14 implementation: Dexie version 4.
+
+Version 4 must preserve historical v1, v2, and v3 declarations unchanged and retain exactly the current indexes:
+
+```text
+knowledgeEntries: 'id, createdAt'
+snippetEntries: 'id, createdAt, &trigger'
+settings: 'id'
+```
+
+No new table, primary key, secondary index, compound index, or multi-entry index is approved. The future v4 physical Snippet record changes only `content` from a string to the exact canonical `SnippetContent` structure. Triggerless records still omit the indexed `trigger` property.
+
+The forward-only v3-to-v4 migration must transform every existing record:
+
+```text
+content: <former string>
+
+→
+
+content: {
+  kind: 'plain',
+  text: <former string exactly>
+}
+```
+
+It must preserve exactly the record's ID, title, tags and tag order, trigger, `createdAt`, and `updatedAt`. Migration alone must not normalize text, synthesize rich blocks, generate or remove a trigger, or rewrite a timestamp. The infrastructure mapper remains explicit between physical records and the project-owned domain; presentation, catalog, Retrieval Engine, and Prompt Builder code must not depend on Dexie record shape.
+
+Dexie version 4 and this migration do not exist in the current source after M14-A. They are approved architecture for later implementation, beginning no earlier than M14-B.
+
 ## Record Identity
 
 - Record IDs are UUID strings generated with the browser-native `crypto.randomUUID()` API.
@@ -169,7 +212,7 @@ The forward-only version 2 to version 3 migration preserves every existing Knowl
 - Create and update inputs require every caller-authored field for their entity. The persistence boundary supplies only `id`, `createdAt`, and `updatedAt`; M13 Snippet input includes explicit `trigger: string | null`.
 - Milestone 3 defines no default title, body, content, source, or tag values.
 - `tags` is required and may be an empty array. An empty array is stored as supplied. The persistence layer does not trim, deduplicate, rank, or otherwise reinterpret tags.
-- Strings are stored as supplied. Product validation such as non-empty content rules belongs to the product milestones that own the corresponding workflows.
+- Strings are stored as supplied. M14 content validation additionally enforces the exact discriminated structure, supported block/inline types, boolean mark fields, and approved URL protocols without interpreting HTML. Product validation such as non-empty content rules belongs to the product milestones that own the corresponding workflows.
 - Update uses full replacement semantics for all caller-authored mutable fields. Knowledge Entry updates provide `title`, `body`, `tags`, and `source`; M13 Snippet Entry updates provide `title`, `content`, `tags`, and `trigger`.
 - The Snippet application boundary validates and canonicalizes triggers before persistence. The adapter stores only canonical non-null values and omits the physical field for `null`; it does not trim, repair, or independently reinterpret trigger text.
 - Generic `list` results are ordered by `createdAt` ascending, then by `id` ascending when timestamps are equal. This is deterministic storage ordering, not relevance ranking.
@@ -269,12 +312,13 @@ Milestone 3 validation passed all 13 persistence integration tests, including da
 - No migration implementation was required for the initial version 1 schema. M11 implemented the first migration when it introduced a physical schema change.
 - Version 2 adds only the singleton `settings` table, preserves the two version 1 stores and all their records, performs no Library transformation, creates no default record, and does not support rollback to version 1.
 - Version 3 adds only optional Snippet `trigger` data and unique index `&trigger`, preserves every version 2 record without generating triggers, and does not support rollback to version 2.
+- Approved future version 4 changes only Snippet `content` from a string to canonical `SnippetContent`, preserves every other logical field and the version 3 indexes, adds no table, and does not support rollback to version 3. Version 4 is not implemented by M14-A.
 
 ## Storage Approach
 
 Dexie is the approved storage abstraction over browser-local IndexedDB. Application and domain layers depend on project-owned storage contracts rather than Dexie directly. The schema remains intentionally minimal; search and retrieval access patterns and any indexes they require belong to later milestones.
 
-The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition. M13 approves the focused version 3 Snippet-trigger extension described above. Dexie configuration remains centralized in the infrastructure layer.
+The version 1 physical schema, Knowledge and Snippet persistence contracts, error behavior, transaction policy, and test environment were implemented in Milestone 3 as approved. M11 implemented the version 2 Settings addition. M13 implemented the focused version 3 Snippet-trigger extension described above. M14-A approves version 4 without implementing it. Dexie configuration remains centralized in the infrastructure layer.
 
 ## Milestone 12 Backup and Restore Contract
 
@@ -314,6 +358,14 @@ The `trigger` key is required even when `null`. A non-null value must already be
 
 Both v1 and v2 import paths construct trusted current-domain records before persistence. Restore remains one atomic Dexie read/write transaction across Knowledge, Snippets, and Settings; v1 sets every Snippet trigger to `null` and triggers an explicit preview warning, while v2 preserves each trigger exactly. The adapter maps `null` to an omitted physical property and non-null to the unique indexed property. Any validation or persistence failure preserves all existing data.
 
+## Approved Milestone 14 Backup Format Evolution
+
+Backup Format v1 and v2 are permanently frozen and remain importable. Their string `content` contracts do not change when the domain migrates. V1 import maps the exact string to `{ kind: 'plain', text }`, maps the trigger to `null`, and retains its existing trigger warning. V2 import maps the exact string to plain content and preserves the validated v2 trigger.
+
+After M14 implementation, new exports will use Backup Format v3. V3 keeps the existing envelope identifier, Knowledge data, Settings data, exported timestamp, deterministic order, filename, 25 MiB limits, metadata-only preview, acknowledgement, replace-only restore, and atomic transaction guarantees. Each exact v3 Snippet DTO contains the existing ID, title, tags, timestamps, and trigger plus the exact discriminated plain or rich content. Dedicated v3 DTOs and field-by-field mappings must remain independent of live domain objects and physical Dexie records; record-level object spreads are prohibited at this versioned public boundary.
+
+Untrusted v3 import strictly validates exact keys and version; record identity and timestamps; duplicate IDs and triggers; content discriminants; exact block, inline, mark, and reference types; strings and boolean mark fields; and allowed URL protocols. An unknown or malformed block, inline, mark, reference, URL, or future field rejects the entire file. The importer performs no repair, HTML interpretation, or partial persistence. Backup Format v3 is approved but not implemented by M14-A.
+
 ## Future Capability Guidance
 
 ### Structured Knowledge
@@ -322,7 +374,7 @@ Knowledge should evolve beyond a single body-text field into structured troubles
 
 ### Richer Snippets
 
-M14 may extend the M13 plain-text Snippet and trigger foundation with ordered rich content and reusable assets. Variables, categories, usage statistics, image ownership, block schema, and fallback representation remain future decisions.
+M14 extends the M13 Snippet and trigger foundation with the Decision 36 structured model, URL-reference-only images, and deterministic fallback. Local binary assets, variables, categories, usage statistics, additional block types, and rich-to-plain conversion remain future decisions.
 
 ### Prompt Templates
 
@@ -334,4 +386,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 13 are complete. Database `ai-support-workspace` currently uses implemented schema version 3 with unchanged `knowledgeEntries` and `settings` declarations plus `snippetEntries: 'id, createdAt, &trigger'`. The version 2-to-3 migration preserves Knowledge, existing Snippets, and Settings; triggerless physical records omit the indexed property and map to domain `null`. Backup Format v2 preserves triggers while valid version 1 imports remain supported with null triggers. The existing Ollama, Workspace, shortcut, and M12 integrity boundaries remain unchanged. The completed M13 implementation is at checkpoint `b76fcb4`.
+Milestones 3 through 13 are complete. Database `ai-support-workspace` currently uses implemented schema version 3 with unchanged `knowledgeEntries` and `settings` declarations plus `snippetEntries: 'id, createdAt, &trigger'`. The version 2-to-3 migration preserves Knowledge, existing Snippets, and Settings; triggerless physical records omit the indexed property and map to domain `null`. Backup Format v2 preserves triggers while valid version 1 imports remain supported with null triggers. M14-A approves Dexie version 4 and Backup Format v3, but neither exists in source yet; string Snippet content remains implemented. The existing Ollama, Workspace, shortcut, and M12/M13 integrity boundaries remain unchanged. The completed M13 implementation is at checkpoint `b76fcb4`, with closeout checkpoint `9a3c7ef`.

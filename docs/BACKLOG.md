@@ -25,11 +25,14 @@
 
 ### M14 — Rich Snippet Templates
 
-- Build on the M13 optional-trigger and plain-text expansion foundation without redefining its canonical trigger or editor-adapter contracts unnecessarily.
-- Support ordered structured content such as text → image/reference → following text, with later support for appropriate paragraphs, links, emphasis, and images.
-- Preserve the image/reference's semantic position. Rich editors may receive inline rich content; plain-text editors require a deterministic positional link/reference fallback and explicit handling for local assets without public URLs.
-- Keep existing plain-text Snippets valid and define backward compatibility before any future storage migration.
-- Defer rich schema, image representation, reusable asset ownership, rich-editor serialization, fallback syntax, and implementation tasks to future M14 architecture work.
+- Implement Decision 36 on the existing `SnippetEntry`, repository, Library, trigger, catalog, and editor-adapter system; do not create a second Template entity or Library.
+- Introduce the canonical plain-or-rich `SnippetContent` union with ordered paragraphs, text/link inline nodes, explicit bold/italic marks, and labelled HTTP(S) image references. Persist no HTML or local binary assets.
+- Make deterministic plain projection the Retrieval Engine, Prompt Builder, textarea, single-line-input capability check, and unsupported-destination boundary. Preserve every block's semantic position.
+- Extend safe contenteditable rendering through target-owned DOM creation while preserving every M13 activation, caret, event, cache, invalidation, and failure guarantee.
+- Implement Dexie version 4 without new indexes/tables and strict Backup Format v3 with v1/v2 frozen import compatibility and explicit DTO mappings.
+- Keep the existing Library. Default new Snippets to plain, provide explicit plain-to-rich conversion, structured rich editing, and keyboard-accessible ordering; defer rich-to-plain conversion and third-party editor dependencies.
+- Keep variables, arbitrary HTML/CSS, local assets, clipboard ingestion, uploads, provider work, M15 screenshots, analytics, alternate triggers, sync, collaboration, and new permissions out of M14 v1.
+- Next task: create M14-B — Structured Snippet Content and Backup Foundation. Implementation has not started.
 
 ### M15 — Multimodal Screenshot Context
 
@@ -55,4 +58,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 — Snippet Trigger Expansion v1 is complete at `b76fcb4`. M14 — Rich Snippet Templates is current but not started; architecture definition through the future M14-A task is the next action. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and additional integrations remain later work. Existing M14 backlog directions remain deferred inputs to architecture review and are not approved implementation requirements.
+M13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. M14 — Rich Snippet Templates is current with architecture defined by M14-A; implementation has not started, and M14-B is the next action. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and additional integrations remain later work.

@@ -229,6 +229,59 @@ The manual evidence covers those tested workflows only. It does not claim every 
 
 Low-risk pattern permutations, forced IndexedDB rollback branches, revision-order combinations, and every unsupported input type may remain automated when deterministic coverage is reliable. Closeout must state the exact manual editors and origin tested, any destination-specific adapter used, what was omitted, and why each omission is non-blocking.
 
+## Rich Snippet Templates Future Validation Contract
+
+M14-A is documentation-only and adds no runtime tests. Later M14 implementation must provide deterministic coverage at the following boundaries.
+
+### Domain and Plain Projection
+
+- Validate exact plain content; the plain/rich discriminants; exact allowed keys; ordered paragraph and reference blocks; ordered text/link inline nodes; explicit bold and italic booleans; and rejection of recursive, unknown, malformed, HTML, or unsupported structures.
+- Validate ordinary-link protocols `https:`, `http:`, and `mailto:` and image-reference protocols `https:` and `http:`. Reject executable and unapproved schemes before persistence.
+- Prove exact plain-text preservation for plain content. For rich content, prove block order, exactly `\n\n` between blocks, inline order, readable emphasis without markers, `label (url)` and equal-label URL behavior, exact `[Image: label] url`, and that no supported block disappears.
+
+### Dexie Version 3 to Version 4 Migration
+
+- Open a representative isolated v3 database through v4 and prove every former content string becomes exactly `{ kind: 'plain', text: formerContent }`.
+- Preserve ID, title, tags and tag order, trigger, `createdAt`, and `updatedAt` exactly; do not rewrite timestamps or generate rich content.
+- Preserve Knowledge and Settings, the exact `id, createdAt, &trigger` Snippet indexes, physical omission of null triggers, unique-trigger behavior, forward-only reopen behavior, and absence of a new table or unrelated index.
+
+### Backup Formats v1, v2, and v3
+
+- Keep exact frozen v1 import behavior, including string-to-plain mapping, null triggers, and the existing warning. Keep exact frozen v2 import behavior with string-to-plain mapping and trigger preservation.
+- Cover exact v3 export/import DTOs, explicit mapping, deterministic ordering, rich round trip, exact plain round trip, and exclusion of simulated future live-domain or physical-record fields.
+- Reject unknown/missing/extra/dangerous keys; unknown discriminants, blocks, inlines, marks, references, and URL types; dangerous protocols; invalid IDs/timestamps/triggers; duplicate IDs/triggers; unsupported future versions; and any partially malformed file without repair or persistence.
+- Preserve the 25 MiB guards, metadata-only preview and acknowledgement, replace-only atomic three-store restore, rollback after forced failure, failed-validation preservation, and options-page refresh behavior.
+
+### Retrieval Engine and Prompt Builder
+
+- Prove rich Snippets are tokenized, scored, and ranked using only deterministic plain projection while preserving M6 scoring and ordering.
+- Prove Prompt Builder receives and emits only projected readable Snippet text, with no content discriminant, block structure, formatting marker, HTML, or DOM leakage and no provider behavior change.
+
+### Transient Catalog
+
+- Validate catalog payloads containing canonical trigger, Snippet ID, plain projection, and optional exact rich structure; reject invalid structure and URLs atomically.
+- Preserve M13-B.1 port connection, complete snapshot, epoch/revision, invalidation-before-create/edit/delete/import/restore, overlapping-mutation publication barrier, successful rebuild, failed-mutation unchanged rebuild, publication failure, disconnect clearing, stale rejection, and normal-typing fail-closed behavior.
+- Prove content scripts remain Dexie-free and no browser-storage catalog, durable queue, polling, surrounding editor data, host data, logs, or provider state enters the payload.
+
+### Editor Expansion
+
+- Regress existing plain M13 expansion unchanged, including Space activation, exact trigger-range replacement, surrounding content, one trailing U+0020 space, caret, one bubbling composed `input`, no synthetic `change`, recursion protection, and normal fallback.
+- Prove `textarea` receives exact plain projection. Prove absent/text/search inputs decline a multiline projection before Space prevention with no value mutation, truncation, normalization, or partial insertion.
+- Prove supported generic contenteditable rich insertion preserves paragraph/block/inline order, emphasis, validated links, surrounding content, exact trigger replacement, caret, and host notification using only the target `ownerDocument` and allowed created nodes.
+- Prove no `innerHTML`, `insertAdjacentHTML`, `DOMParser`, `document.write`, HTML interpretation, automatic external fetch, or generic `<img>` creation occurs. Image references must retain their exact position using deterministic reference text where real image insertion is unavailable.
+- Preserve isolated-world and cross-realm structural behavior and fail closed for unsupported or unsafe editor structures.
+
+### Snippet Library UI
+
+- Cover existing plain create/edit/delete behavior and default-to-plain creation; explicit plain-to-rich conversion preserving readable content, identity, metadata, and trigger; structured rich editing of paragraphs, bold, italic, links, image references, and ordering; protocol errors; and continued rich mode during ordinary edits.
+- Cover keyboard-accessible block ordering without requiring drag-and-drop, accessible labels/status/errors, narrow layout, safe structured-state handling, and absence of rich-to-plain conversion, variables, HTML persistence, local binary images, or a separate Template Library.
+
+### Real Chrome Manual Validation
+
+Future M14 implementation requires risk-based real Chrome validation of an existing plain Snippet regression; explicit plain-to-rich conversion and rich editing; rich expansion in Intercom; deterministic fallback in a normal textarea; expansion on another normal website; exact surrounding content, caret, and input behavior; live catalog refresh after edit/delete; extension/service-worker reload recovery; Backup v3 export and restore; v2 import; v1 import; and appropriate Knowledge, Settings, options-page, Side Panel, M10 capture, generation, and M12 integrity regressions.
+
+Manual validation need not exhaustively test every website. Closeout must identify the exact editors/origins tested, any destination-specific adapter used, omissions, and why each omission is non-blocking.
+
 ## Milestone 0 Status
 
 Milestone 0 added no implementation code, so there were no runtime tests to execute. The testing approach is established for Milestone 1 and later work; each implementation task must define the checks applicable to its scope.

@@ -68,7 +68,7 @@ The libraries may both contribute to a support response, but they have different
 - M12 provides manual local backup, recovery after reinstall or browser-data loss, and user-mediated transfer to another Chrome profile or computer. It does not provide cloud sync, collaboration, sharing, bulk editing, automatic backup, or scheduled backup.
 - Export produces one JSON file with exact format identifier `ai-support-workspace-backup`, independently versioned `formatVersion: 1`, UTC `exportedAt`, and required Knowledge, Snippet, and Settings data. Database and application versions, physical table names, and the Settings record ID are not public backup data.
 - Knowledge includes exactly `id`, `title`, `body`, `tags`, `createdAt`, `updatedAt`, and `source`; Snippets include exactly `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`; Settings always includes exactly `defaultModel`, including `null` when no default is saved.
-- Transient Merchant Context, Guidance, Output, Workspace model overrides, capture state, webpage or browser state, Ollama models or availability, secrets, credentials, screenshots, M14 attachments, and M15 rich-Snippet content or triggers are excluded.
+- Transient Merchant Context, Guidance, Output, Workspace model overrides, capture state, webpage or browser state, Ollama models or availability, secrets, credentials, M15 screenshots, M13 triggers, and M14 rich-Snippet content are excluded from frozen Backup Format v1.
 - Export preserves all logical values, tag order, IDs, timestamps, and metadata, and orders each Library by `createdAt` then `id`, both ascending. The UTC download name is `ai-support-workspace-backup-YYYY-MM-DDTHH-mm-ssZ.json`.
 - Import treats the file as untrusted and accepts it only after the complete strict version 1 contract, every domain value, dangerous-key exclusion, and duplicate-ID requirements pass. It never repairs a partially invalid backup and never writes before validation succeeds.
 - Files above 25 MiB are rejected before import reading; export applies the same limit to serialized UTF-8 bytes. M12 adds no record-count, per-store, or field-length limit.
@@ -98,14 +98,49 @@ The libraries may both contribute to a support response, but they have different
 
 ## M14 — Rich Snippet Templates
 
-Rich Snippet Templates are assigned to M14 and build on the M13 plain-text trigger and editor-adapter foundation. This roadmap assignment does not define detailed rich-content architecture.
+Rich Snippet Templates build on the existing M13 Snippet aggregate, trigger catalog, and editor adapters. M14 does not create a second Template entity, Library, repository, or trigger mechanism.
 
-- Future Snippets may support an ordered sequence of structured blocks, including paragraphs, links, emphasis, images or image references, and later supported block types. A sequence such as text → image/reference → following text must retain that exact semantic order.
-- Image representation may later use a local reusable asset, structured reference, or appropriate URL. The final storage representation and asset ownership are unresolved, and arbitrary executable HTML is not an approved content model.
-- Expansion remains target-aware. Rich editors may receive approved rich content where supported; plain-text editors require a deterministic safe fallback that preserves every image/reference's semantic position. Local assets without usable public URLs require an explicit future decision and must not silently disappear.
-- Existing plain-text Snippets, canonical triggers, and v1 editor behavior remain compatible unless a later approved architecture explicitly migrates them.
+- Every Snippet retains its existing ID, title, tags, optional trigger, timestamps, CRUD behavior, and trigger uniqueness. Existing plain Snippets remain supported, new Snippets default to plain, and an explicit `Convert to rich template` action preserves readable content. M14 v1 provides no rich-to-plain conversion.
+- The canonical content is exactly one discriminated plain-or-rich model. Plain content stores exact text. Rich content stores an ordered, non-recursive sequence of paragraph and image-reference blocks; paragraphs contain ordered text or link nodes with explicit bold and italic marks. Persisted HTML is prohibited.
+- Ordinary links allow only HTTP, HTTPS, or mailto URLs. Image references contain a readable label and explicit HTTP or HTTPS URL. Dangerous or unapproved schemes are rejected before persistence and at backup import.
+- M14 v1 stores no local binary image, Blob, base64 value, clipboard image, fetched resource, or hosted upload. It creates no asset table or cloud service and does not automatically load remote images. M15 screenshot Context remains separate.
+- The deterministic plain projection preserves block order. Adjacent blocks are separated by exactly two line feeds; emphasis emits readable text without markers; labelled links emit `label (url)` unless the label equals the URL; image references emit `[Image: label] url`. No structured block may disappear.
+- Retrieval and Prompt Builder continue consuming text only through that projection. M14 adds no rich markup to AI prompts and changes no provider behavior.
+- Destination-aware adapters may insert safe rich nodes in a supported contenteditable and otherwise use plain projection. Textareas always use plain projection. A single-line input declines expansion when that projection is multiline. M13 activation, replacement, trailing-space, caret, input-notification, catalog freshness, and normal-typing fallback behavior remains unchanged.
+- The Snippet Library remains one surface. Rich authoring supports paragraphs, bold, italic, links, image references, and keyboard-accessible block ordering through extension-owned structured state; editor HTML is neither trusted nor persisted. No third-party rich-text editor dependency is initially approved.
+- M14 implementation will migrate Dexie v3 string content to canonical plain content in v4 without changing indexes or adding tables. It will add strict Backup Format v3 while keeping v1 and v2 frozen and importable. These are approved architecture, not current implementation.
+- Variables, placeholders, merge fields, customer-data interpolation, conditional logic, loops, scripting, arbitrary HTML/CSS, tables, video, embeds, AI-generated content, page scraping, analytics, alternate trigger syntax, collaboration, sync, provider changes, and new Chrome permissions are excluded.
 
-Representative future rich-template example: a `;shopify-limit` Snippet may preserve the ordered sequence `text → explanatory image/reference → following text`. The exact rich schema and deterministic plain-text fallback remain M14 decisions.
+A `;shopify-limit` Rich Snippet may preserve `paragraph → paragraph with bold text → labelled image reference → paragraph`. A rich-capable destination may preserve supported emphasis and links, but generic expansion does not promise inline image upload. A plain destination receives the same sequence with `[Image: Shopify limitation diagram] https://example.com/shopify-limit.png` in the reference position.
+
+Representative unchanged plain Snippet:
+
+```text
+;hello
+
+Hi there! Thanks for reaching out.
+```
+
+Representative Rich Snippet structure:
+
+```text
+Paragraph: Thank you for reaching out.
+Paragraph: This is a limitation of the [bold: Shopify ecosystem].
+Reference: Shopify limitation diagram — https://example.com/shopify-limit.png
+Paragraph: Here is what I recommend doing instead...
+```
+
+A rich-capable destination may preserve the paragraph sequence, bold emphasis, and a safe linked reference, but no generic inline-image upload is promised. A plain destination must receive exactly:
+
+```text
+Thank you for reaching out.
+
+This is a limitation of the Shopify ecosystem.
+
+[Image: Shopify limitation diagram] https://example.com/shopify-limit.png
+
+Here is what I recommend doing instead...
+```
 
 ## M15 — Multimodal Screenshot Context
 
@@ -136,7 +171,7 @@ OpenAI Provider Expansion is assigned to M16. It will add OpenAI behind the exis
 
 ## Deferred Future Architecture
 
-M13 trigger architecture is defined above. Future reviews must still define rich-Snippet content and asset representation, rich destination serialization and plain-text fallback; multimodal screenshot representation, provider capability interfaces, unsupported-provider UX, limits, persistence, and serialization; and OpenAI credentials, provider selection, permissions, models, errors, and privacy.
+M13 trigger architecture and M14 Rich Snippet architecture are defined above. Future reviews must still define any local binary Snippet-asset architecture, destination-specific image capability, rich-to-plain conversion, or variable system; multimodal screenshot representation, provider capability interfaces, unsupported-provider UX, limits, persistence, and serialization; and OpenAI credentials, provider selection, permissions, models, errors, and privacy.
 
 ## Quality Requirements
 

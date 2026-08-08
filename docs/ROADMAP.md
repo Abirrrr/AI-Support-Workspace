@@ -112,11 +112,11 @@ Add optional unique semicolon triggers to existing plain-text Snippets and expan
 
 The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 defined the approved architecture. M13-B implemented trigger-enabled Snippets, persistence and Backup Format v2, the transient catalog, typed frame synchronization, and supported-editor expansion. M13-B.1 corrected overlapping catalog publication, and M13-B.2 corrected isolated-world/realm handling and intentionally expanded availability to normal HTTP/HTTPS websites. Principal Engineer review, automated validation, and product-owner real Chrome validation passed. M13 is complete at implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
 
-## Milestone 14 — Rich Snippet Templates (Current — Not Started)
+## Milestone 14 — Rich Snippet Templates (Current — Architecture Defined)
 
-Extend the M13 plain-text Snippet and trigger foundation with ordered rich template content, destination-aware rich insertion, deterministic plain-text fallback, and explicit reusable-asset handling. Detailed architecture remains deferred to future M14 tasks.
+Extend the M13 Snippet aggregate and trigger/editor foundation with one canonical plain-or-rich content union, ordered paragraphs and URL-based image references, deterministic plain-text projection for Retrieval, Prompt Builder, and incapable editors, safe destination-aware rendering, Dexie version 4 migration, Backup Format v3, and backward compatibility with existing plain Snippets and Backup Formats v1/v2.
 
-Status: Not started — architecture definition is the next engineering action. The next Principal Engineer action is to create M14-A — Rich Snippet Templates Architecture and Product Boundary; this roadmap status does not define or authorize its architecture or implementation.
+Status: Architecture defined by M14-A and Decision 36; implementation remains pending and M14 is not complete. M14-A is documentation-only and changes no source or tests. The next Principal Engineer action is to create M14-B — Structured Snippet Content and Backup Foundation. M14-B is not created by this task.
 
 ## Milestone 15 — Multimodal Screenshot Context
 

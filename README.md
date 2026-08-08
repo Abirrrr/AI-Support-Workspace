@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M13 adds optional unique triggers to plain-text Snippets, local trigger persistence and backup, a transient synchronized catalog, and safe expansion in supported focused editors. Normal HTTP and HTTPS websites are eligible; Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable. The latest committed and pushed checkpoint is `b76fcb4` (`feat: add snippet trigger expansion`). M14 — Rich Snippet Templates is current but not started; M15 remains Multimodal Screenshot Context and M16 remains OpenAI Provider Expansion.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M13 adds optional unique triggers to plain-text Snippets, local trigger persistence and backup, a transient synchronized catalog, and safe expansion in supported focused editors. Normal HTTP and HTTPS websites are eligible; Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable. The M13 implementation checkpoint is `b76fcb4`, and its closeout checkpoint is `9a3c7ef`. M14 — Rich Snippet Templates is current with architecture defined by M14-A and Decision 36; implementation has not started. M15 remains Multimodal Screenshot Context and M16 remains OpenAI Provider Expansion.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Create M14-A — Rich Snippet Templates Architecture and Product Boundary. M14 architecture and implementation have not started.
+Create M14-B — Structured Snippet Content and Backup Foundation. M14 architecture is defined; Dexie v4, Backup Format v3, rich editing, and rich expansion are approved but not implemented.
