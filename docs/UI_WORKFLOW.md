@@ -438,7 +438,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. Dexie v4, Backup v3, and UI implementation remain pending; M14-B is the next task.
+- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. M14-B implements structured persistence, Dexie v4, Backup v3, and a minimal rich-record preservation guard in the existing UI. Rich authoring and rich browser insertion remain pending; M14-C is the next task.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 

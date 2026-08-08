@@ -3,6 +3,7 @@ import type {
   SnippetEntryRepository,
 } from '../persistence/snippet-entry-repository';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import { validateSnippetContent } from '../../domain/snippet-content';
 import {
   DuplicateSnippetTriggerError,
   normalizeSnippetTrigger,
@@ -31,15 +32,27 @@ export class SnippetLibraryService implements SnippetLibrary {
 
   async create(input: SnippetEntryInput): Promise<SnippetEntry> {
     const trigger = await this.normalizeAndCheckTrigger(input.trigger);
+    const content = validateSnippetContent(input.content);
     return runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
-      this.repository.create({ ...input, trigger }),
+      this.repository.create({
+        title: input.title,
+        content,
+        tags: [...input.tags],
+        trigger,
+      }),
     );
   }
 
   async update(id: string, input: SnippetEntryInput): Promise<SnippetEntry> {
     const trigger = await this.normalizeAndCheckTrigger(input.trigger, id);
+    const content = validateSnippetContent(input.content);
     return runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
-      this.repository.update(id, { ...input, trigger }),
+      this.repository.update(id, {
+        title: input.title,
+        content,
+        tags: [...input.tags],
+        trigger,
+      }),
     );
   }
 

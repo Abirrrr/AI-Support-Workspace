@@ -10,12 +10,13 @@ import type { SnippetEntryRepository } from '../../src/application/persistence/s
 import { FrameTriggerCatalogCache } from '../../src/extension/snippet-trigger/frame-catalog-cache';
 import { FrameTriggerCatalogClient } from '../../src/extension/snippet-trigger/frame-catalog-client';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import { createPlainSnippetContent } from '../../src/domain/snippet-content';
 import { TRIGGER_CATALOG_PORT_NAME } from '../../src/shared/trigger-catalog-messages';
 
 const entry: SnippetEntry = {
   id: 'snippet-1',
   title: 'Private title',
-  content: 'Plain text content',
+  content: createPlainSnippetContent('Plain text content'),
   tags: ['private-tag'],
   createdAt: '2026-08-02T00:00:00.000Z',
   updatedAt: '2026-08-02T00:00:00.000Z',
@@ -59,6 +60,48 @@ describe('trigger catalog application and frame cache', () => {
     expect(JSON.stringify(catalog)).not.toContain('Private title');
     expect(JSON.stringify(catalog)).not.toContain('private-tag');
     expect(JSON.stringify(catalog)).not.toContain('createdAt');
+  });
+
+  it('publishes only the deterministic projection for rich content', async () => {
+    const rich: SnippetEntry = {
+      ...entry,
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              { type: 'text', text: 'Open ', bold: true, italic: false },
+              {
+                type: 'link',
+                text: 'the guide',
+                url: 'https://example.com/guide',
+                bold: false,
+                italic: true,
+              },
+            ],
+          },
+          {
+            type: 'reference',
+            referenceType: 'image',
+            label: 'Example',
+            url: 'https://example.com/image.png',
+          },
+        ],
+      },
+    };
+
+    await expect(
+      new TriggerCatalogService(repositoryFor([rich])).readCatalog(),
+    ).resolves.toEqual([
+      {
+        trigger: ';hello',
+        snippetId: 'snippet-1',
+        content:
+          'Open the guide (https://example.com/guide)\n\n' +
+          '[Image: Example] https://example.com/image.png',
+      },
+    ]);
   });
 
   it('enables only a complete snapshot and clears on invalidate or disconnect', () => {

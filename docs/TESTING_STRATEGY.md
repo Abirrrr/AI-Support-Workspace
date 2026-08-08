@@ -229,9 +229,9 @@ The manual evidence covers those tested workflows only. It does not claim every 
 
 Low-risk pattern permutations, forced IndexedDB rollback branches, revision-order combinations, and every unsupported input type may remain automated when deterministic coverage is reliable. Closeout must state the exact manual editors and origin tested, any destination-specific adapter used, what was omitted, and why each omission is non-blocking.
 
-## Rich Snippet Templates Future Validation Contract
+## Rich Snippet Templates Validation Contract
 
-M14-A is documentation-only and adds no runtime tests. Later M14 implementation must provide deterministic coverage at the following boundaries.
+M14-A is documentation-only and added no runtime tests. M14-B implements automated coverage for the domain/projection, Dexie v4, Backup v1/v2/v3, text consumers, existing plain catalog payload, and minimal UI preservation boundaries below. Later M14 tasks must add the rich authoring and rich browser-rendering coverage when those capabilities are implemented.
 
 ### Domain and Plain Projection
 
@@ -278,7 +278,7 @@ M14-A is documentation-only and adds no runtime tests. Later M14 implementation 
 
 ### Real Chrome Manual Validation
 
-Future M14 implementation requires risk-based real Chrome validation of an existing plain Snippet regression; explicit plain-to-rich conversion and rich editing; rich expansion in Intercom; deterministic fallback in a normal textarea; expansion on another normal website; exact surrounding content, caret, and input behavior; live catalog refresh after edit/delete; extension/service-worker reload recovery; Backup v3 export and restore; v2 import; v1 import; and appropriate Knowledge, Settings, options-page, Side Panel, M10 capture, generation, and M12 integrity regressions.
+Later M14 authoring and rendering implementation requires risk-based real Chrome validation of an existing plain Snippet regression; explicit plain-to-rich conversion and rich editing; rich expansion in Intercom; deterministic fallback in a normal textarea; expansion on another normal website; exact surrounding content, caret, and input behavior; live catalog refresh after edit/delete; extension/service-worker reload recovery; Backup v3 export and restore; v2 import; v1 import; and appropriate Knowledge, Settings, options-page, Side Panel, M10 capture, generation, and M12 integrity regressions. M14-B itself received no manual Chrome validation before Principal Engineer review.
 
 Manual validation need not exhaustively test every website. Closeout must identify the exact editors/origins tested, any destination-specific adapter used, omissions, and why each omission is non-blocking.
 

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SnippetLibraryService } from '../../../src/application/snippet/snippet-library';
+import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import {
   DATABASE_NAME,
   type AiSupportWorkspaceDatabase,
@@ -32,7 +33,7 @@ describe('Snippet Library production persistence integration', () => {
 
     const created = await library.create({
       title: 'Order confirmation',
-      content: 'Your order has been confirmed.',
+      content: createPlainSnippetContent('Your order has been confirmed.'),
       tags: ['orders'],
       trigger: ';order',
     });

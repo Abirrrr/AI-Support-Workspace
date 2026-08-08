@@ -7,6 +7,11 @@ import {
 } from '../../application/snippet/snippet-library';
 import type { SnippetEntry } from '../../domain/snippet-entry';
 import {
+  createPlainSnippetContent,
+  renderSnippetPlainText,
+  type SnippetContent,
+} from '../../domain/snippet-content';
+import {
   DuplicateSnippetTriggerError,
   InvalidSnippetTriggerError,
 } from '../../application/snippet/snippet-trigger';
@@ -41,16 +46,22 @@ function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
 function draftFromEntry(entry: SnippetEntry): SnippetDraft {
   return {
     title: entry.title,
-    content: entry.content,
+    content: renderSnippetPlainText(entry.content),
     tags: formatTags(entry.tags),
     trigger: entry.trigger ?? '',
   };
 }
 
-function inputFromDraft(draft: SnippetDraft): SnippetEntryInput {
+function inputFromDraft(
+  draft: SnippetDraft,
+  preservedContent?: SnippetContent,
+): SnippetEntryInput {
   return {
     title: draft.title,
-    content: draft.content,
+    content:
+      preservedContent?.kind === 'rich'
+        ? preservedContent
+        : createPlainSnippetContent(draft.content),
     tags: parseTags(draft.tags),
     trigger: draft.trigger === '' ? null : draft.trigger,
   };
@@ -140,7 +151,7 @@ export function SnippetLibraryView({
       if (editingId) {
         const updated = await snippetLibrary.update(
           editingId,
-          inputFromDraft(draft),
+          inputFromDraft(draft, editingEntry?.content),
         );
         setEntries((current) =>
           orderSnippetEntries(
@@ -223,6 +234,8 @@ export function SnippetLibraryView({
   }
 
   const isBusy = operation !== undefined;
+  const editingEntry = entries.find((entry) => entry.id === editingId);
+  const isEditingRich = editingEntry?.content.kind === 'rich';
 
   return (
     <section aria-labelledby="snippet-library-heading" className="mt-8">
@@ -312,15 +325,30 @@ export function SnippetLibraryView({
               />
             </label>
 
-            <label className="block text-sm font-medium text-slate-700">
-              Content
-              <textarea
-                className="mt-1 block min-h-32 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                disabled={isBusy}
-                onChange={(event) => updateDraft('content', event.target.value)}
-                value={draft.content}
-              />
-            </label>
+            {isEditingRich ? (
+              <div className="block text-sm font-medium text-slate-700">
+                Content preview
+                <p className="mt-1 whitespace-pre-wrap rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-normal text-slate-700">
+                  {draft.content}
+                </p>
+                <p className="mt-1 text-xs font-normal text-slate-600">
+                  Rich content editing is not available yet. Saving changes will
+                  preserve this content exactly.
+                </p>
+              </div>
+            ) : (
+              <label className="block text-sm font-medium text-slate-700">
+                Content
+                <textarea
+                  className="mt-1 block min-h-32 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  disabled={isBusy}
+                  onChange={(event) =>
+                    updateDraft('content', event.target.value)
+                  }
+                  value={draft.content}
+                />
+              </label>
+            )}
 
             <label className="block text-sm font-medium text-slate-700">
               Trigger (optional)
@@ -428,7 +456,7 @@ export function SnippetLibraryView({
                       </p>
                     ) : null}
                     <p className="mt-4 whitespace-pre-wrap text-sm text-slate-700">
-                      {entry.content}
+                      {renderSnippetPlainText(entry.content)}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {entry.tags.length === 0 ? (

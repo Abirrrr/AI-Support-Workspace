@@ -4,6 +4,7 @@ import type {
   SnippetEntryRepository,
 } from '../../application/persistence/snippet-entry-repository';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import { cloneSnippetContent } from '../../domain/snippet-content';
 import { DuplicateSnippetTriggerError } from '../../application/snippet/snippet-trigger';
 import type { AiSupportWorkspaceDatabase } from './database';
 import {
@@ -30,7 +31,7 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
       const entry: SnippetEntry = {
         id: crypto.randomUUID(),
         title: input.title,
-        content: input.content,
+        content: cloneSnippetContent(input.content),
         tags: [...input.tags],
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -94,7 +95,7 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
           const updated: SnippetEntry = {
             id: existing.id,
             title: input.title,
-            content: input.content,
+            content: cloneSnippetContent(input.content),
             tags: [...input.tags],
             createdAt: existing.createdAt,
             updatedAt: createUpdatedTimestamp(existing.updatedAt),

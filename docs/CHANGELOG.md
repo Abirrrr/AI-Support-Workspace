@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### M14-B — Structured Snippet Content and Backup Foundation
+
+- Implemented the Decision 36 `SnippetContent` union, exact structured validation, approved link/image URL protocols, deep explicit mapping, and deterministic plain-text projection.
+- Evolved the existing `SnippetEntry` and repository contracts without adding another aggregate, repository, Library, or trigger system. Existing UI-created Snippets default to plain content.
+- Implemented forward-only Dexie version 4 with unchanged indexes and no new table. The migration wraps every legacy v3 content string exactly as plain content, preserves metadata and timestamps, retains physical trigger omission, and fails unexpected legacy content.
+- Implemented Backup Format v3 with dedicated exact DTOs, explicit export/restore mappings, strict rich-content validation, and plain/rich round trips. Frozen Backup v1 and v2 imports remain supported and map their strings to current plain content.
+- Routed Retrieval Engine, Prompt Builder, and the unchanged M13 transient catalog through the canonical plain projection. The M13-B.1 publication barrier and plain browser-expansion contract remain intact.
+- Added the minimal existing Snippet Library guard: projected rich previews, safe deletion, and metadata edits that preserve structured content. Rich authoring and rich browser rendering remain out of scope.
+- Added focused domain, migration, repository, backup, retrieval, Prompt Builder, trigger-catalog, and UI regression coverage. Introduced no dependency, binary asset system, provider change, network behavior, or Chrome permission.
+- M14-B implements the foundation only. The next action is M14-C — Rich Snippet Library Authoring UI; no M14-B checkpoint hash is recorded before the eventual Principal-approved implementation commit exists.
+
 ### M14-A — Rich Snippet Templates Architecture and Product Boundary
 
 - Defined M14 as an extension of the existing `SnippetEntry`, Snippet Library, repository, M13 trigger, transient catalog, and editor-adapter system rather than a second Template entity, Library, or trigger mechanism.

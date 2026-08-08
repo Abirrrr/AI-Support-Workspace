@@ -10,6 +10,7 @@ import type {
   RetrievalResults,
   SnippetRetrievalResult,
 } from '../../src/application/retrieval/retrieval-engine';
+import { createPlainSnippetContent } from '../../src/domain/snippet-content';
 
 const timestamp = '2026-07-26T12:00:00.000Z';
 
@@ -42,7 +43,7 @@ function createSnippetResult(index: number): SnippetRetrievalResult {
     record: {
       id,
       title: `Snippet title ${index}`,
-      content: `Snippet content ${index}`,
+      content: createPlainSnippetContent(`Snippet content ${index}`),
       tags: [`snippet-tag-${index}`],
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -336,6 +337,37 @@ describe('PromptBuilder', () => {
     });
     expect(JSON.stringify(snippetsSection.items[0]?.content)).not.toContain(
       'snippet-tag-0',
+    );
+  });
+
+  it('sends only projected text for rich Snippet content', () => {
+    const result = createSnippetResult(0);
+    result.record.content = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'link',
+              text: 'Support',
+              url: 'mailto:help@example.com',
+              bold: true,
+              italic: false,
+            },
+          ],
+        },
+      ],
+    };
+    const assembly = new PromptBuilder().build({
+      guidance: 'Draft a reply',
+      retrievalResults: { knowledge: [], snippets: [result] },
+    });
+    const section = assembly.sections.find(({ kind }) => kind === 'snippets');
+
+    if (section?.kind !== 'snippets') throw new Error('Expected snippets.');
+    expect(section.items[0]?.content.content).toBe(
+      'Support (mailto:help@example.com)',
     );
   });
 

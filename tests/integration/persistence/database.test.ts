@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { PersistenceError } from '../../../src/application/persistence/errors';
 import type { KnowledgeEntry } from '../../../src/domain/knowledge-entry';
+import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import {
   DATABASE_NAME,
   DATABASE_VERSION,
@@ -11,7 +12,7 @@ import {
 } from '../../../src/infrastructure/persistence/database';
 import { DexieKnowledgeEntryRepository } from '../../../src/infrastructure/persistence/dexie-knowledge-entry-repository';
 import { DexieSnippetEntryRepository } from '../../../src/infrastructure/persistence/dexie-snippet-entry-repository';
-import type { SnippetEntryRecord } from '../../../src/infrastructure/persistence/snippet-entry-record';
+import type { SnippetEntryRecordV3 } from '../../../src/infrastructure/persistence/snippet-entry-record';
 import {
   createIsolatedDatabase,
   deleteIsolatedDatabase,
@@ -31,7 +32,7 @@ describe('local database foundation', () => {
     await deleteIsolatedDatabase(databaseName);
   });
 
-  it('opens version 3 with only the approved tables and indexes', async () => {
+  it('opens version 4 with only the approved tables and indexes', async () => {
     await database.open();
 
     expect(database.verno).toBe(DATABASE_VERSION);
@@ -75,7 +76,7 @@ describe('local database foundation', () => {
     expect(await database.settings.count()).toBe(0);
   });
 
-  it('upgrades version 1 without transforming Knowledge or Snippet data', async () => {
+  it('upgrades version 1 while preserving metadata and wrapping Snippet content', async () => {
     const knowledge: KnowledgeEntry = {
       id: 'knowledge-v1',
       title: 'Version 1 knowledge',
@@ -85,7 +86,7 @@ describe('local database foundation', () => {
       updatedAt: '2026-08-01T10:00:00.000Z',
       source: 'migration fixture',
     };
-    const snippet: SnippetEntryRecord = {
+    const snippet: SnippetEntryRecordV3 = {
       id: 'snippet-v1',
       title: 'Version 1 snippet',
       content: 'Preserve this content.',
@@ -100,14 +101,16 @@ describe('local database foundation', () => {
     });
     await versionOne.open();
     await versionOne.table<KnowledgeEntry>('knowledgeEntries').add(knowledge);
-    await versionOne.table<SnippetEntryRecord>('snippetEntries').add(snippet);
+    await versionOne.table<SnippetEntryRecordV3>('snippetEntries').add(snippet);
     versionOne.close();
 
     await database.open();
 
-    expect(database.verno).toBe(3);
+    expect(database.verno).toBe(4);
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
-    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.snippetEntries.toArray()).toEqual([
+      { ...snippet, content: createPlainSnippetContent(snippet.content) },
+    ]);
     expect(await database.settings.count()).toBe(0);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
       'knowledgeEntries',
@@ -116,7 +119,7 @@ describe('local database foundation', () => {
     ]);
   });
 
-  it('upgrades version 2 to version 3 without changing existing records', async () => {
+  it('upgrades version 2 while preserving metadata and wrapping Snippet content', async () => {
     const knowledge: KnowledgeEntry = {
       id: 'knowledge-v2',
       title: 'Version 2 knowledge',
@@ -126,7 +129,7 @@ describe('local database foundation', () => {
       updatedAt: '2026-08-01T11:00:00.000Z',
       source: 'migration fixture',
     };
-    const snippet: SnippetEntryRecord = {
+    const snippet: SnippetEntryRecordV3 = {
       id: 'snippet-v2',
       title: 'Version 2 snippet',
       content: 'Preserved content',
@@ -146,7 +149,7 @@ describe('local database foundation', () => {
     });
     await versionTwo.open();
     await versionTwo.table<KnowledgeEntry>('knowledgeEntries').add(knowledge);
-    await versionTwo.table<SnippetEntryRecord>('snippetEntries').add(snippet);
+    await versionTwo.table<SnippetEntryRecordV3>('snippetEntries').add(snippet);
     await versionTwo.table('settings').add({
       id: 'global',
       defaultModel: 'preserved-model',
@@ -156,13 +159,93 @@ describe('local database foundation', () => {
     await database.open();
 
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
-    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    const migratedSnippet = {
+      ...snippet,
+      content: createPlainSnippetContent(snippet.content),
+    };
+    expect(await database.snippetEntries.toArray()).toEqual([migratedSnippet]);
     expect(await database.settings.toArray()).toEqual([
       { id: 'global', defaultModel: 'preserved-model' },
     ]);
     database.close();
     database = createIsolatedDatabase(databaseName);
-    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.snippetEntries.toArray()).toEqual([migratedSnippet]);
+  });
+
+  it('upgrades version 3 to version 4 without changing metadata or physical trigger omission', async () => {
+    const triggered: SnippetEntryRecordV3 = {
+      id: 'snippet-v3-triggered',
+      title: 'Triggered',
+      content: 'Triggered content',
+      tags: ['first', 'second'],
+      createdAt: '2026-08-01T12:00:00.000Z',
+      updatedAt: '2026-08-01T12:00:01.000Z',
+      trigger: ';triggered',
+    };
+    const triggerless: SnippetEntryRecordV3 = {
+      id: 'snippet-v3-triggerless',
+      title: 'Triggerless',
+      content: 'Triggerless content',
+      tags: [],
+      createdAt: '2026-08-01T12:00:02.000Z',
+      updatedAt: '2026-08-01T12:00:03.000Z',
+    };
+    const versionThree = new Dexie(databaseName, { indexedDB, IDBKeyRange });
+    versionThree.version(3).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
+    });
+    await versionThree.open();
+    await versionThree
+      .table<SnippetEntryRecordV3>('snippetEntries')
+      .bulkAdd([triggered, triggerless]);
+    versionThree.close();
+
+    await database.open();
+
+    expect(await database.snippetEntries.toArray()).toEqual([
+      { ...triggered, content: createPlainSnippetContent(triggered.content) },
+      {
+        ...triggerless,
+        content: createPlainSnippetContent(triggerless.content),
+      },
+    ]);
+    expect(
+      await database.snippetEntries.get(triggerless.id),
+    ).not.toHaveProperty('trigger');
+    database.close();
+    database = createIsolatedDatabase(databaseName);
+    expect(await database.snippetEntries.toArray()).toEqual([
+      { ...triggered, content: createPlainSnippetContent(triggered.content) },
+      {
+        ...triggerless,
+        content: createPlainSnippetContent(triggerless.content),
+      },
+    ]);
+  });
+
+  it('fails the version 4 migration for unexpected legacy content', async () => {
+    const versionThree = new Dexie(databaseName, { indexedDB, IDBKeyRange });
+    versionThree.version(3).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
+    });
+    await versionThree.open();
+    await versionThree.table('snippetEntries').add({
+      id: 'snippet-invalid-v3',
+      title: 'Invalid legacy record',
+      content: { kind: 'plain', text: 'already structured' },
+      tags: [],
+      createdAt: '2026-08-01T13:00:00.000Z',
+      updatedAt: '2026-08-01T13:00:00.000Z',
+    });
+    versionThree.close();
+
+    await expect(database.open()).rejects.toThrow(
+      'Database v4 migration expected legacy string Snippet content.',
+    );
   });
 
   it('keeps Knowledge and Snippet records in separate tables', async () => {
@@ -177,7 +260,7 @@ describe('local database foundation', () => {
     });
     const snippet = await snippetRepository.create({
       title: 'Snippet title',
-      content: 'Snippet content',
+      content: createPlainSnippetContent('Snippet content'),
       tags: ['snippet'],
       trigger: null,
     });

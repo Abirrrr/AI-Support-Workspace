@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M13 adds optional unique triggers to plain-text Snippets, local trigger persistence and backup, a transient synchronized catalog, and safe expansion in supported focused editors. Normal HTTP and HTTPS websites are eligible; Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable. The M13 implementation checkpoint is `b76fcb4`, and its closeout checkpoint is `9a3c7ef`. M14 — Rich Snippet Templates is current with architecture defined by M14-A and Decision 36; implementation has not started. M15 remains Multimodal Screenshot Context and M16 remains OpenAI Provider Expansion.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M14 — Rich Snippet Templates is current under Decision 36. M14-B implements canonical plain-or-rich Snippet content, deterministic plain projection, Dexie version 4, Backup Format v3 with v1/v2 import compatibility, and safe compatibility with the existing plain-authoring UI and M13 trigger expansion. Rich authoring and rich browser rendering remain pending. M15 remains Multimodal Screenshot Context and M16 remains OpenAI Provider Expansion.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Create M14-B — Structured Snippet Content and Backup Foundation. M14 architecture is defined; Dexie v4, Backup Format v3, rich editing, and rich expansion are approved but not implemented.
+Create M14-C — Rich Snippet Library Authoring UI. The M14 data and backup foundation is implemented; rich authoring and rich browser rendering remain pending.

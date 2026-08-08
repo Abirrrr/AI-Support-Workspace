@@ -1,7 +1,9 @@
+import type { SnippetContent } from './snippet-content';
+
 export interface SnippetEntry {
   id: string;
   title: string;
-  content: string;
+  content: SnippetContent;
   tags: string[];
   createdAt: string;
   updatedAt: string;

@@ -18,6 +18,10 @@ import {
 } from '../../src/application/snippet/snippet-trigger';
 import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import {
+  createPlainSnippetContent,
+  renderSnippetPlainText,
+} from '../../src/domain/snippet-content';
 import type { ImportExportActions } from '../../src/ui/import-export/ImportExportView';
 import { OptionsShell } from '../../src/ui/options/OptionsShell';
 import { SnippetLibraryView } from '../../src/ui/snippet/SnippetLibraryView';
@@ -25,7 +29,7 @@ import { SnippetLibraryView } from '../../src/ui/snippet/SnippetLibraryView';
 const entry: SnippetEntry = {
   id: 'snippet-1',
   title: 'Order confirmation',
-  content: 'Your order has been confirmed.',
+  content: createPlainSnippetContent('Your order has been confirmed.'),
   tags: ['orders', 'confirmation'],
   createdAt: '2026-07-26T12:00:00.000Z',
   updatedAt: '2026-07-26T12:00:00.000Z',
@@ -90,10 +94,17 @@ describe('SnippetLibraryView', () => {
       load: vi.fn(async () => [entry]),
     });
 
-    render(<SnippetLibraryView snippetLibrary={library} />);
+    render(
+      <SnippetLibraryView
+        confirmDelete={() => true}
+        snippetLibrary={library}
+      />,
+    );
 
     expect(await screen.findByText(entry.title)).toBeTruthy();
-    expect(screen.getByText(entry.content)).toBeTruthy();
+    expect(
+      screen.getByText(renderSnippetPlainText(entry.content)),
+    ).toBeTruthy();
     expect(screen.getByText('orders')).toBeTruthy();
     expect(screen.getByText('confirmation')).toBeTruthy();
   });
@@ -124,7 +135,7 @@ describe('SnippetLibraryView', () => {
     await waitFor(() =>
       expect(library.create).toHaveBeenCalledWith({
         title: 'Refund confirmation',
-        content: 'Your refund has been processed.',
+        content: createPlainSnippetContent('Your refund has been processed.'),
         tags: ['billing', 'refunds'],
         trigger: null,
       }),
@@ -209,7 +220,9 @@ describe('SnippetLibraryView', () => {
     const updatedEntry = {
       ...entry,
       title: 'Updated order confirmation',
-      content: 'Your updated order has been confirmed.',
+      content: createPlainSnippetContent(
+        'Your updated order has been confirmed.',
+      ),
       tags: ['orders'],
       updatedAt: '2026-07-26T12:00:02.000Z',
     };
@@ -226,7 +239,7 @@ describe('SnippetLibraryView', () => {
       target: { value: updatedEntry.title },
     });
     fireEvent.change(screen.getByLabelText('Content'), {
-      target: { value: updatedEntry.content },
+      target: { value: renderSnippetPlainText(updatedEntry.content) },
     });
     fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
       target: { value: 'orders' },
@@ -243,6 +256,62 @@ describe('SnippetLibraryView', () => {
     );
     expect(await screen.findByText(updatedEntry.title)).toBeTruthy();
     expect(screen.getByText('Snippet updated.')).toBeTruthy();
+  });
+
+  it('previews rich content and preserves it during metadata-only editing', async () => {
+    const richEntry: SnippetEntry = {
+      ...entry,
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              { type: 'text', text: 'Rich reply', bold: true, italic: false },
+            ],
+          },
+          {
+            type: 'reference',
+            referenceType: 'image',
+            label: 'Receipt',
+            url: 'https://example.com/receipt.png',
+          },
+        ],
+      },
+    };
+    const library = createSnippetLibrary({
+      load: vi.fn(async () => [richEntry]),
+    });
+    render(
+      <SnippetLibraryView
+        confirmDelete={() => true}
+        snippetLibrary={library}
+      />,
+    );
+    await screen.findByText(richEntry.title);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(screen.queryByLabelText('Content')).toBeNull();
+    expect(
+      screen.getByText(/Rich content editing is not available yet/),
+    ).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Updated metadata' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(library.update).toHaveBeenCalledWith(richEntry.id, {
+        title: 'Updated metadata',
+        content: richEntry.content,
+        tags: richEntry.tags,
+        trigger: null,
+      }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await waitFor(() =>
+      expect(library.delete).toHaveBeenCalledWith(richEntry.id),
+    );
   });
 
   it('requires confirmation before deleting and removes a confirmed snippet', async () => {

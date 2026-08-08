@@ -5,6 +5,10 @@ import type { KnowledgeEntryRepository } from '../../src/application/persistence
 import type { SnippetEntryRepository } from '../../src/application/persistence/snippet-entry-repository';
 import type { KnowledgeEntry } from '../../src/domain/knowledge-entry';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import {
+  createPlainSnippetContent,
+  type SnippetContent,
+} from '../../src/domain/snippet-content';
 
 const timestamp = '2026-07-26T12:00:00.000Z';
 
@@ -24,17 +28,23 @@ function createKnowledgeEntry(
 }
 
 function createSnippetEntry(
-  overrides: Partial<SnippetEntry> = {},
+  overrides: Omit<Partial<SnippetEntry>, 'content'> & {
+    content?: string | SnippetContent;
+  } = {},
 ): SnippetEntry {
+  const { content = 'Default content', ...rest } = overrides;
   return {
     id: 'snippet-default',
     title: 'Default snippet',
-    content: 'Default content',
+    content:
+      typeof content === 'string'
+        ? createPlainSnippetContent(content)
+        : content,
     tags: [],
     createdAt: timestamp,
     updatedAt: timestamp,
     trigger: null,
-    ...overrides,
+    ...rest,
   };
 }
 
@@ -219,6 +229,34 @@ describe('RetrievalEngine', () => {
       { id: 'snippet-title', score: 5 },
       { id: 'snippet-tag', score: 3 },
       { id: 'snippet-content', score: 1 },
+    ]);
+  });
+
+  it('scores rich Snippets through their deterministic plain projection', async () => {
+    const rich = createSnippetEntry({
+      id: 'snippet-rich',
+      title: 'Unrelated',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                text: 'Refund details',
+                bold: true,
+                italic: true,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const { engine } = createRepositories([], [rich]);
+
+    expect((await engine.retrieve('refund')).snippets).toEqual([
+      { kind: 'snippet', id: rich.id, record: rich, score: 1 },
     ]);
   });
 

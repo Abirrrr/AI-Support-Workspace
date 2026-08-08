@@ -6,8 +6,9 @@ import { SettingsService } from '../../../src/application/settings/settings-serv
 import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
-  type BackupFileV2,
+  type BackupFileV3,
 } from '../../../src/domain/backup-file';
+import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import type { KnowledgeEntry } from '../../../src/domain/knowledge-entry';
 import type { SnippetEntry } from '../../../src/domain/snippet-entry';
 import { loadWorkspaceSettings } from '../../../src/extension/sidepanel/settings-bootstrap';
@@ -41,7 +42,7 @@ const originalKnowledge: KnowledgeEntry = {
 const originalSnippet: SnippetEntry = {
   id: '223e4567-e89b-42d3-a456-426614174000',
   title: 'Original snippet',
-  content: 'Original content',
+  content: createPlainSnippetContent('Original content'),
   tags: ['original'],
   createdAt: '2026-08-01T08:00:02.000Z',
   updatedAt: '2026-08-01T08:00:03.000Z',
@@ -64,7 +65,7 @@ const restoredData: BackupRestoreData = {
     {
       id: '423e4567-e89b-42d3-a456-426614174000',
       title: 'Restored snippet',
-      content: 'Restored content',
+      content: createPlainSnippetContent('Restored content'),
       tags: ['z', 'a'],
       createdAt: '2026-08-02T08:00:02.000Z',
       updatedAt: '2026-08-02T08:00:03.000Z',
@@ -258,7 +259,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
       formatVersion: BACKUP_FORMAT_VERSION,
       exportedAt: '2026-08-02T09:00:00.000Z',
       data: { knowledge: [knowledge], snippets: [snippet], settings },
-    } as BackupFileV2;
+    } as BackupFileV3;
 
     await new BackupRestoreService(
       new DexieTransactionalBackupRestorePort(database),

@@ -2,16 +2,28 @@ import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION_1,
   BACKUP_FORMAT_VERSION_2,
+  BACKUP_FORMAT_VERSION_3,
   type BackupFile,
   type BackupFileV1,
   type BackupFileV2,
+  type BackupFileV3,
   type BackupKnowledgeRecordV1,
   type BackupKnowledgeRecordV2,
+  type BackupKnowledgeRecordV3,
+  type BackupRichSnippetBlockV3,
+  type BackupRichSnippetInlineV3,
   type BackupSettingsV1,
   type BackupSettingsV2,
+  type BackupSettingsV3,
+  type BackupSnippetContentV3,
   type BackupSnippetRecordV1,
   type BackupSnippetRecordV2,
+  type BackupSnippetRecordV3,
 } from '../../domain/backup-file';
+import {
+  isSafeSnippetImageUrl,
+  isSafeSnippetLinkUrl,
+} from '../../domain/snippet-content';
 import { isCanonicalSnippetTrigger } from '../snippet/snippet-trigger';
 import { BackupImportError } from './backup-errors';
 
@@ -136,6 +148,23 @@ function validateKnowledgeV2(
   };
 }
 
+function validateKnowledgeV3(
+  value: unknown,
+): BackupKnowledgeRecordV3 | undefined {
+  const validated = validateKnowledgeV2(value);
+  return validated === undefined
+    ? undefined
+    : {
+        id: validated.id,
+        title: validated.title,
+        body: validated.body,
+        tags: [...validated.tags],
+        createdAt: validated.createdAt,
+        updatedAt: validated.updatedAt,
+        source: validated.source,
+      };
+}
+
 function validateSnippetV1(value: unknown): BackupSnippetRecordV1 | undefined {
   if (
     !isRecord(value) ||
@@ -199,6 +228,138 @@ function validateSnippetV2(value: unknown): BackupSnippetRecordV2 | undefined {
   };
 }
 
+function validateRichInlineV3(
+  value: unknown,
+): BackupRichSnippetInlineV3 | undefined {
+  if (!isRecord(value) || typeof value.type !== 'string') return undefined;
+  if (
+    value.type === 'text' &&
+    hasExactKeys(value, ['type', 'text', 'bold', 'italic']) &&
+    typeof value.text === 'string' &&
+    typeof value.bold === 'boolean' &&
+    typeof value.italic === 'boolean'
+  ) {
+    return {
+      type: 'text',
+      text: value.text,
+      bold: value.bold,
+      italic: value.italic,
+    };
+  }
+  if (
+    value.type === 'link' &&
+    hasExactKeys(value, ['type', 'text', 'url', 'bold', 'italic']) &&
+    typeof value.text === 'string' &&
+    typeof value.url === 'string' &&
+    typeof value.bold === 'boolean' &&
+    typeof value.italic === 'boolean' &&
+    isSafeSnippetLinkUrl(value.url)
+  ) {
+    return {
+      type: 'link',
+      text: value.text,
+      url: value.url,
+      bold: value.bold,
+      italic: value.italic,
+    };
+  }
+  return undefined;
+}
+
+function validateRichBlockV3(
+  value: unknown,
+): BackupRichSnippetBlockV3 | undefined {
+  if (!isRecord(value) || typeof value.type !== 'string') return undefined;
+  if (
+    value.type === 'paragraph' &&
+    hasExactKeys(value, ['type', 'children']) &&
+    Array.isArray(value.children)
+  ) {
+    const children = value.children.map(validateRichInlineV3);
+    if (children.some((child) => child === undefined)) return undefined;
+    return {
+      type: 'paragraph',
+      children: children as BackupRichSnippetInlineV3[],
+    };
+  }
+  if (
+    value.type === 'reference' &&
+    hasExactKeys(value, ['type', 'referenceType', 'label', 'url']) &&
+    value.referenceType === 'image' &&
+    typeof value.label === 'string' &&
+    typeof value.url === 'string' &&
+    isSafeSnippetImageUrl(value.url)
+  ) {
+    return {
+      type: 'reference',
+      referenceType: 'image',
+      label: value.label,
+      url: value.url,
+    };
+  }
+  return undefined;
+}
+
+function validateSnippetContentV3(
+  value: unknown,
+): BackupSnippetContentV3 | undefined {
+  if (!isRecord(value) || typeof value.kind !== 'string') return undefined;
+  if (
+    value.kind === 'plain' &&
+    hasExactKeys(value, ['kind', 'text']) &&
+    typeof value.text === 'string'
+  ) {
+    return { kind: 'plain', text: value.text };
+  }
+  if (
+    value.kind === 'rich' &&
+    hasExactKeys(value, ['kind', 'blocks']) &&
+    Array.isArray(value.blocks)
+  ) {
+    const blocks = value.blocks.map(validateRichBlockV3);
+    if (blocks.some((block) => block === undefined)) return undefined;
+    return {
+      kind: 'rich',
+      blocks: blocks as BackupRichSnippetBlockV3[],
+    };
+  }
+  return undefined;
+}
+
+function validateSnippetV3(value: unknown): BackupSnippetRecordV3 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'id',
+      'title',
+      'content',
+      'tags',
+      'createdAt',
+      'updatedAt',
+      'trigger',
+    ]) ||
+    !isCanonicalUuid(value.id) ||
+    typeof value.title !== 'string' ||
+    !isStringArray(value.tags) ||
+    !isUtcIsoTimestamp(value.createdAt) ||
+    !isUtcIsoTimestamp(value.updatedAt) ||
+    (value.trigger !== null && !isCanonicalSnippetTrigger(value.trigger))
+  ) {
+    return undefined;
+  }
+  const content = validateSnippetContentV3(value.content);
+  if (content === undefined) return undefined;
+  return {
+    id: value.id,
+    title: value.title,
+    content,
+    tags: [...value.tags],
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+    trigger: value.trigger,
+  };
+}
+
 function validateSettingsV1(value: unknown): BackupSettingsV1 | undefined {
   if (
     !isRecord(value) ||
@@ -221,17 +382,54 @@ function validateSettingsV2(value: unknown): BackupSettingsV2 | undefined {
   return { defaultModel: value.defaultModel };
 }
 
+function validateSettingsV3(value: unknown): BackupSettingsV3 | undefined {
+  const validated = validateSettingsV2(value);
+  return validated === undefined
+    ? undefined
+    : { defaultModel: validated.defaultModel };
+}
+
 function hasDuplicateIds(records: readonly { id: string }[]): boolean {
   return new Set(records.map(({ id }) => id)).size !== records.length;
 }
 
 function hasDuplicateTriggers(
-  records: readonly BackupSnippetRecordV2[],
+  records: readonly { readonly trigger: string | null }[],
 ): boolean {
   const triggers = records.flatMap(({ trigger }) =>
     trigger === null ? [] : [trigger],
   );
   return new Set(triggers).size !== triggers.length;
+}
+
+function parseVersion3(parsed: Record<string, unknown>): BackupFileV3 {
+  validateEnvelope(parsed);
+  const data = parsed.data as Record<string, unknown>;
+  const knowledge = (data.knowledge as unknown[]).map(validateKnowledgeV3);
+  const snippets = (data.snippets as unknown[]).map(validateSnippetV3);
+  const settings = validateSettingsV3(data.settings);
+  if (
+    knowledge.some((entry) => entry === undefined) ||
+    snippets.some((entry) => entry === undefined) ||
+    settings === undefined
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const trustedKnowledge = knowledge as BackupKnowledgeRecordV3[];
+  const trustedSnippets = snippets as BackupSnippetRecordV3[];
+  if (
+    hasDuplicateIds(trustedKnowledge) ||
+    hasDuplicateIds(trustedSnippets) ||
+    hasDuplicateTriggers(trustedSnippets)
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_3,
+    exportedAt: parsed.exportedAt as string,
+    data: { knowledge: trustedKnowledge, snippets: trustedSnippets, settings },
+  };
 }
 
 function parseJson(serialized: string): Record<string, unknown> {
@@ -324,7 +522,8 @@ export function parseBackupFile(serialized: string): BackupFile {
     typeof parsed.formatVersion === 'number' &&
     Number.isInteger(parsed.formatVersion) &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_1 &&
-    parsed.formatVersion !== BACKUP_FORMAT_VERSION_2
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_2 &&
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_3
   ) {
     throw new BackupImportError('unsupported-version');
   }
@@ -333,6 +532,9 @@ export function parseBackupFile(serialized: string): BackupFile {
   }
   if (parsed.formatVersion === BACKUP_FORMAT_VERSION_2) {
     return parseVersion2(parsed);
+  }
+  if (parsed.formatVersion === BACKUP_FORMAT_VERSION_3) {
+    return parseVersion3(parsed);
   }
   throw new BackupImportError('invalid');
 }

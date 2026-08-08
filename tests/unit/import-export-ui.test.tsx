@@ -21,6 +21,7 @@ import type { SettingsApplication } from '../../src/application/settings/setting
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
 import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
 import type { BackupFileV1 } from '../../src/domain/backup-file';
+import { createPlainSnippetContent } from '../../src/domain/snippet-content';
 import {
   ImportExportView,
   type ImportExportActions,
@@ -447,6 +448,7 @@ describe('options-page restore refresh', () => {
     }));
     const restoredSnippets = backup.data.snippets.map((entry) => ({
       ...entry,
+      content: createPlainSnippetContent(entry.content),
       tags: [...entry.tags],
       trigger: null,
     }));
@@ -478,6 +480,7 @@ describe('options-page restore refresh', () => {
               {
                 ...snippetFixture,
                 title: 'Before snippet',
+                content: createPlainSnippetContent(snippetFixture.content),
                 tags: [...snippetFixture.tags],
                 trigger: null,
               },

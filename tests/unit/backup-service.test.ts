@@ -24,10 +24,16 @@ import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
   BACKUP_FORMAT_VERSION_1,
+  BACKUP_FORMAT_VERSION_2,
   MAX_BACKUP_BYTES,
   type BackupFileV1,
   type BackupFileV2,
+  type BackupFileV3,
 } from '../../src/domain/backup-file';
+import {
+  createPlainSnippetContent,
+  renderSnippetPlainText,
+} from '../../src/domain/snippet-content';
 
 const KNOWLEDGE_ID = '123e4567-e89b-42d3-a456-426614174000';
 const SNIPPET_ID = '223e4567-e89b-42d3-a456-426614174000';
@@ -50,7 +56,7 @@ function createData(): BackupSnapshot {
       {
         id: SNIPPET_ID,
         title: 'Snippet',
-        content: 'Line one\nLine two',
+        content: createPlainSnippetContent('Line one\nLine two'),
         tags: ['z', 'a'],
         createdAt: '2026-08-02T07:02:00.000Z',
         updatedAt: '2026-08-02T07:03:00.000Z',
@@ -82,7 +88,7 @@ function createBackup(overrides: Partial<BackupFileV1> = {}): BackupFileV1 {
         {
           id: snippet.id,
           title: snippet.title,
-          content: snippet.content,
+          content: renderSnippetPlainText(snippet.content),
           tags: [...snippet.tags],
           createdAt: snippet.createdAt,
           updatedAt: snippet.updatedAt,
@@ -94,7 +100,7 @@ function createBackup(overrides: Partial<BackupFileV1> = {}): BackupFileV1 {
   };
 }
 
-function createCurrentBackup(data = createData()): BackupFileV2 {
+function createCurrentBackup(data = createData()): BackupFileV3 {
   return {
     format: BACKUP_FORMAT,
     formatVersion: BACKUP_FORMAT_VERSION,
@@ -112,13 +118,50 @@ function createCurrentBackup(data = createData()): BackupFileV2 {
       snippets: data.snippets.map((entry) => ({
         id: entry.id,
         title: entry.title,
-        content: entry.content,
+        content:
+          entry.content.kind === 'plain'
+            ? { kind: 'plain', text: entry.content.text }
+            : {
+                kind: 'rich',
+                blocks: entry.content.blocks.map((block) =>
+                  block.type === 'paragraph'
+                    ? {
+                        type: 'paragraph',
+                        children: block.children.map((inline) => ({
+                          ...inline,
+                        })),
+                      }
+                    : { ...block },
+                ),
+              },
         tags: [...entry.tags],
         createdAt: entry.createdAt,
         updatedAt: entry.updatedAt,
         trigger: entry.trigger,
       })),
       settings: { defaultModel: data.settings.defaultModel },
+    },
+  };
+}
+
+function createVersion2Backup(data = createData()): BackupFileV2 {
+  const current = createCurrentBackup(data);
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_2,
+    exportedAt: EXPORTED_AT,
+    data: {
+      knowledge: current.data.knowledge,
+      snippets: data.snippets.map((entry) => ({
+        id: entry.id,
+        title: entry.title,
+        content: renderSnippetPlainText(entry.content),
+        tags: [...entry.tags],
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+        trigger: entry.trigger,
+      })),
+      settings: current.data.settings,
     },
   };
 }
@@ -165,7 +208,7 @@ describe('BackupFileV1 parser and validator', () => {
             {
               id: KNOWLEDGE_ID,
               title: snippet.title,
-              content: snippet.content,
+              content: renderSnippetPlainText(snippet.content),
               tags: snippet.tags,
               createdAt: snippet.createdAt,
               updatedAt: snippet.updatedAt,
@@ -309,16 +352,97 @@ describe('BackupFileV1 parser and validator', () => {
   });
 });
 
-describe('Backup Format v2 parser and validator', () => {
-  it('accepts exact v2 DTOs and preserves canonical unique triggers', () => {
+describe('Backup Format v2 and v3 parser and validator', () => {
+  it('keeps exact v2 DTOs importable with canonical unique triggers', () => {
+    const backup = createVersion2Backup();
+    expect(parseBackupFile(JSON.stringify(backup))).toEqual(backup);
+  });
+
+  it('accepts exact v3 DTOs and preserves structured content', () => {
     const backup = createCurrentBackup();
     expect(parseBackupFile(JSON.stringify(backup))).toEqual(backup);
   });
 
   it.each([
     [
+      'unknown block',
+      { kind: 'rich', blocks: [{ type: 'heading', children: [] }] },
+    ],
+    [
+      'unknown inline',
+      {
+        kind: 'rich',
+        blocks: [
+          { type: 'paragraph', children: [{ type: 'code', text: 'x' }] },
+        ],
+      },
+    ],
+    [
+      'missing mark',
+      {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [{ type: 'text', text: 'x', bold: false }],
+          },
+        ],
+      },
+    ],
+    [
+      'unsafe link',
+      {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'link',
+                text: 'x',
+                url: 'javascript:alert(1)',
+                bold: false,
+                italic: false,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    [
+      'unsafe image',
+      {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'reference',
+            referenceType: 'image',
+            label: 'x',
+            url: 'data:image/png;base64,AA==',
+          },
+        ],
+      },
+    ],
+    ['extra content key', { kind: 'plain', text: 'x', html: '<b>x</b>' }],
+  ])('rejects v3 %s', (_label, content) => {
+    const backup = createCurrentBackup();
+    expect(() =>
+      parseBackupFile(
+        JSON.stringify({
+          ...backup,
+          data: {
+            ...backup.data,
+            snippets: [{ ...backup.data.snippets[0], content }],
+          },
+        }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: 'invalid' }));
+  });
+
+  it.each([
+    [
       'missing trigger',
-      (backup: BackupFileV2) => {
+      (backup: BackupFileV3) => {
         const snippet = requireValue(backup.data.snippets[0], 'Snippet entry');
         const withoutTrigger = {
           id: snippet.id,
@@ -336,7 +460,7 @@ describe('Backup Format v2 parser and validator', () => {
     ],
     [
       'uppercase trigger',
-      (backup: BackupFileV2) => ({
+      (backup: BackupFileV3) => ({
         ...backup,
         data: {
           ...backup.data,
@@ -346,7 +470,7 @@ describe('Backup Format v2 parser and validator', () => {
     ],
     [
       'unexpected Snippet field',
-      (backup: BackupFileV2) => ({
+      (backup: BackupFileV3) => ({
         ...backup,
         data: {
           ...backup.data,
@@ -397,13 +521,72 @@ describe('Backup Format v2 parser and validator', () => {
   it('rejects unsupported future versions explicitly', () => {
     expect(() =>
       parseBackupFile(
-        JSON.stringify({ ...createCurrentBackup(), formatVersion: 3 }),
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 4 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
 });
 
 describe('backup application services', () => {
+  it('exports, parses, and restores rich v3 content without live-object aliasing', async () => {
+    const data = createData();
+    const snippet = requireValue(data.snippets[0], 'Snippet entry');
+    const richContent = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', text: 'Bold', bold: true, italic: false },
+            {
+              type: 'link',
+              text: 'Guide',
+              url: 'https://example.com/guide',
+              bold: false,
+              italic: true,
+            },
+          ],
+        },
+        {
+          type: 'reference',
+          referenceType: 'image',
+          label: 'Receipt',
+          url: 'https://example.com/receipt.png',
+        },
+      ],
+    } as const;
+    const snapshot = {
+      ...data,
+      snippets: [{ ...snippet, content: richContent }],
+    };
+    const download = vi.fn<BackupDownloadPort['download']>(
+      async () => undefined,
+    );
+    await new BackupExportService(
+      { readSnapshot: async () => snapshot },
+      { download },
+      () => new Date(EXPORTED_AT),
+    ).exportBackup();
+    const serialized = requireValue(download.mock.calls[0], 'download call')[0];
+    const parsed = parseBackupFile(serialized);
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => undefined,
+    );
+
+    await new BackupRestoreService({ replaceAll }).restoreBackup(parsed);
+
+    expect(parsed.formatVersion).toBe(3);
+    expect(replaceAll).toHaveBeenCalledWith({
+      knowledge: data.knowledge,
+      snippets: [{ ...snippet, content: richContent }],
+      settings: data.settings,
+    });
+    expect(
+      requireValue(replaceAll.mock.calls[0], 'restore call')[0].snippets[0]
+        ?.content,
+    ).not.toBe(richContent);
+  });
+
   it('exports deterministic arrays, exact metadata, filename, and logical fields', async () => {
     const data = createData();
     const knowledgeFixture = requireValue(data.knowledge[0], 'Knowledge entry');
@@ -460,9 +643,9 @@ describe('backup application services', () => {
     expect(filename).toBe(
       'ai-support-workspace-backup-2026-08-02T08-15-30Z.json',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV2;
+    const parsed = JSON.parse(serialized) as BackupFileV3;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(2);
+    expect(parsed.formatVersion).toBe(3);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -496,7 +679,7 @@ describe('backup application services', () => {
     ).exportBackup();
 
     const downloadCall = requireValue(download.mock.calls[0], 'download call');
-    const parsed = JSON.parse(downloadCall[0]) as BackupFileV2;
+    const parsed = JSON.parse(downloadCall[0]) as BackupFileV3;
     expect(parsed.data).toEqual({
       knowledge: [],
       snippets: [],
@@ -530,7 +713,7 @@ describe('backup application services', () => {
     );
 
     expect(replaceAll).toHaveBeenCalledWith(original);
-    expect(prepared.backup.formatVersion).toBe(2);
+    expect(prepared.backup.formatVersion).toBe(3);
   });
 
   it('excludes simulated future live-domain fields from serialized format v2', async () => {
@@ -567,7 +750,7 @@ describe('backup application services', () => {
       download.mock.calls[0],
       'future-field download call',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV2;
+    const parsed = JSON.parse(serialized) as BackupFileV3;
     expect(Object.keys(parsed.data.knowledge[0] ?? {}).sort()).toEqual(
       [
         'id',
@@ -738,6 +921,7 @@ describe('backup application services', () => {
       knowledge: backup.data.knowledge,
       snippets: backup.data.snippets.map((entry) => ({
         ...entry,
+        content: createPlainSnippetContent(entry.content),
         trigger: null,
       })),
       settings: backup.data.settings,

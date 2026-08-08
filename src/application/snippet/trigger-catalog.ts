@@ -1,5 +1,6 @@
 import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
 import type { TriggerCatalogEntry } from '../../shared/trigger-catalog-messages';
+import { renderSnippetPlainText } from '../../domain/snippet-content';
 
 export interface TriggerCatalogReader {
   readCatalog(): Promise<readonly TriggerCatalogEntry[]>;
@@ -17,7 +18,7 @@ export class TriggerCatalogService implements TriggerCatalogReader {
             {
               trigger: snippet.trigger,
               snippetId: snippet.id,
-              content: snippet.content,
+              content: renderSnippetPlainText(snippet.content),
             },
           ],
     );

@@ -7,6 +7,7 @@ import {
   type AiSupportWorkspaceDatabase,
 } from '../../../src/infrastructure/persistence/database';
 import { DexieSnippetEntryRepository } from '../../../src/infrastructure/persistence/dexie-snippet-entry-repository';
+import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import {
   createIsolatedDatabase,
   deleteIsolatedDatabase,
@@ -33,7 +34,7 @@ describe('DexieSnippetEntryRepository', () => {
     now.mockReturnValue(Date.parse('2026-07-25T12:00:01.000Z'));
     const later = await repository.create({
       title: 'Later snippet',
-      content: 'Later content',
+      content: createPlainSnippetContent('Later content'),
       tags: [],
       trigger: null,
     });
@@ -41,7 +42,7 @@ describe('DexieSnippetEntryRepository', () => {
     now.mockReturnValue(Date.parse('2026-07-25T12:00:00.000Z'));
     const earlier = await repository.create({
       title: 'Earlier snippet',
-      content: 'Earlier content',
+      content: createPlainSnippetContent('Earlier content'),
       tags: ['snippet'],
       trigger: ';earlier',
     });
@@ -59,14 +60,14 @@ describe('DexieSnippetEntryRepository', () => {
     vi.spyOn(Date, 'now').mockReturnValue(baseTime);
     const created = await repository.create({
       title: 'Original snippet',
-      content: 'Original content',
+      content: createPlainSnippetContent('Original content'),
       tags: ['original'],
       trigger: ';original',
     });
 
     const updated = await repository.update(created.id, {
       title: 'Updated snippet',
-      content: 'Updated content',
+      content: createPlainSnippetContent('Updated content'),
       tags: [],
       trigger: ';updated',
     });
@@ -74,7 +75,7 @@ describe('DexieSnippetEntryRepository', () => {
     expect(updated).toEqual({
       id: created.id,
       title: 'Updated snippet',
-      content: 'Updated content',
+      content: createPlainSnippetContent('Updated content'),
       tags: [],
       createdAt: created.createdAt,
       updatedAt: '2026-07-25T12:00:00.001Z',
@@ -85,7 +86,7 @@ describe('DexieSnippetEntryRepository', () => {
   it('throws for an absent update and returns boolean delete results', async () => {
     const missingUpdate = repository.update('missing-id', {
       title: 'Missing',
-      content: 'Missing content',
+      content: createPlainSnippetContent('Missing content'),
       tags: [],
       trigger: null,
     });
@@ -99,7 +100,7 @@ describe('DexieSnippetEntryRepository', () => {
 
     const created = await repository.create({
       title: 'Temporary snippet',
-      content: 'Temporary content',
+      content: createPlainSnippetContent('Temporary content'),
       tags: [],
       trigger: null,
     });
@@ -112,7 +113,7 @@ describe('DexieSnippetEntryRepository', () => {
   it('preserves snippet records across a database reopen', async () => {
     const created = await repository.create({
       title: 'Persistent snippet',
-      content: 'Persistent content',
+      content: createPlainSnippetContent('Persistent content'),
       tags: ['reopen'],
       trigger: ';persistent',
     });
@@ -124,16 +125,50 @@ describe('DexieSnippetEntryRepository', () => {
     expect(await repository.get(created.id)).toEqual(created);
   });
 
+  it('round-trips rich content through explicit physical mapping without aliasing', async () => {
+    const content = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', text: 'Rich', bold: true, italic: false },
+            {
+              type: 'link',
+              text: 'Guide',
+              url: 'https://example.com/guide',
+              bold: false,
+              italic: true,
+            },
+          ],
+        },
+      ],
+    } as const;
+    const created = await repository.create({
+      title: 'Rich snippet',
+      content,
+      tags: ['rich'],
+      trigger: ';rich',
+    });
+    const physical = await database.snippetEntries.get(created.id);
+
+    expect(created.content).toEqual(content);
+    expect(physical?.content).toEqual(content);
+    expect(created.content).not.toBe(content);
+    expect(physical?.content).not.toBe(created.content);
+    expect(await repository.get(created.id)).toEqual(created);
+  });
+
   it('omits null physically, finds exact triggers, maps conflicts, and releases triggers', async () => {
     const first = await repository.create({
       title: 'First',
-      content: 'First content',
+      content: createPlainSnippetContent('First content'),
       tags: [],
       trigger: ';shared',
     });
     const triggerless = await repository.create({
       title: 'Triggerless',
-      content: 'No trigger',
+      content: createPlainSnippetContent('No trigger'),
       tags: [],
       trigger: null,
     });
@@ -148,7 +183,7 @@ describe('DexieSnippetEntryRepository', () => {
     await expect(
       repository.create({
         title: 'Duplicate',
-        content: 'Duplicate content',
+        content: createPlainSnippetContent('Duplicate content'),
         tags: [],
         trigger: ';shared',
       }),
@@ -162,7 +197,7 @@ describe('DexieSnippetEntryRepository', () => {
     });
     const reused = await repository.create({
       title: 'Reused',
-      content: 'Reused content',
+      content: createPlainSnippetContent('Reused content'),
       tags: [],
       trigger: ';shared',
     });
@@ -171,7 +206,7 @@ describe('DexieSnippetEntryRepository', () => {
     await expect(
       repository.create({
         title: 'Reused after delete',
-        content: 'Reused again',
+        content: createPlainSnippetContent('Reused again'),
         tags: [],
         trigger: ';shared',
       }),

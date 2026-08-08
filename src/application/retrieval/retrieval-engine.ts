@@ -1,5 +1,6 @@
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import { renderSnippetPlainText } from '../../domain/snippet-content';
 import type { KnowledgeEntryRepository } from '../persistence/knowledge-entry-repository';
 import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
 
@@ -106,7 +107,7 @@ function retrieveSnippets(
         queryTokens,
         record.title,
         record.tags,
-        record.content,
+        renderSnippetPlainText(record.content),
       ),
     }))
     .filter((result) => result.score > 0)

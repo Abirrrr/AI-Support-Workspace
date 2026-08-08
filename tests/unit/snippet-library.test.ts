@@ -9,11 +9,12 @@ import {
 import { DuplicateSnippetTriggerError } from '../../src/application/snippet/snippet-trigger';
 import type { CatalogMutationPort } from '../../src/application/snippet/catalog-mutation';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import { createPlainSnippetContent } from '../../src/domain/snippet-content';
 
 const entry: SnippetEntry = {
   id: 'snippet-1',
   title: 'Greeting',
-  content: 'Thanks for contacting support.',
+  content: createPlainSnippetContent('Thanks for contacting support.'),
   tags: ['greeting'],
   createdAt: '2026-07-26T12:00:00.000Z',
   updatedAt: '2026-07-26T12:00:00.000Z',
@@ -43,7 +44,7 @@ describe('SnippetLibraryService', () => {
     const library = new SnippetLibraryService(repository);
     const input = {
       title: 'Greeting',
-      content: 'Thanks for contacting support.',
+      content: createPlainSnippetContent('Thanks for contacting support.'),
       tags: ['greeting'],
       trigger: ';GREETING',
     };
@@ -86,7 +87,7 @@ describe('SnippetLibraryService', () => {
     const library = new SnippetLibraryService(repository);
     const input = {
       title: 'Duplicate',
-      content: 'Duplicate content',
+      content: createPlainSnippetContent('Duplicate content'),
       tags: [],
       trigger: ';GREETING',
     };

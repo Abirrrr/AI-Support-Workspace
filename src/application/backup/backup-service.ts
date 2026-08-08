@@ -2,16 +2,27 @@ import {
   BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION,
   BACKUP_FORMAT_VERSION_1,
+  BACKUP_FORMAT_VERSION_2,
   MAX_BACKUP_BYTES,
   type BackupFile,
-  type BackupFileV2,
+  type BackupFileV3,
   type BackupImportPreview,
-  type BackupKnowledgeRecordV2,
+  type BackupKnowledgeRecordV3,
+  type BackupRichSnippetBlockV3,
+  type BackupRichSnippetInlineV3,
+  type BackupSnippetContentV3,
   type BackupSnippetRecordV1,
   type BackupSnippetRecordV2,
+  type BackupSnippetRecordV3,
 } from '../../domain/backup-file';
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import {
+  createPlainSnippetContent,
+  type RichSnippetBlock,
+  type RichSnippetInline,
+  type SnippetContent,
+} from '../../domain/snippet-content';
 import {
   BackupExportError,
   BackupImportError,
@@ -62,9 +73,9 @@ function compareByCreatedAtAndId(
   return 0;
 }
 
-function toBackupKnowledgeRecordV2(
+function toBackupKnowledgeRecordV3(
   entry: KnowledgeEntry,
-): BackupKnowledgeRecordV2 {
+): BackupKnowledgeRecordV3 {
   return {
     id: entry.id,
     title: entry.title,
@@ -76,11 +87,54 @@ function toBackupKnowledgeRecordV2(
   };
 }
 
-function toBackupSnippetRecordV2(entry: SnippetEntry): BackupSnippetRecordV2 {
+function toBackupRichInlineV3(
+  inline: RichSnippetInline,
+): BackupRichSnippetInlineV3 {
+  return inline.type === 'text'
+    ? {
+        type: 'text',
+        text: inline.text,
+        bold: inline.bold,
+        italic: inline.italic,
+      }
+    : {
+        type: 'link',
+        text: inline.text,
+        url: inline.url,
+        bold: inline.bold,
+        italic: inline.italic,
+      };
+}
+
+function toBackupRichBlockV3(
+  block: RichSnippetBlock,
+): BackupRichSnippetBlockV3 {
+  return block.type === 'paragraph'
+    ? {
+        type: 'paragraph',
+        children: block.children.map(toBackupRichInlineV3),
+      }
+    : {
+        type: 'reference',
+        referenceType: 'image',
+        label: block.label,
+        url: block.url,
+      };
+}
+
+function toBackupSnippetContentV3(
+  content: SnippetContent,
+): BackupSnippetContentV3 {
+  return content.kind === 'plain'
+    ? { kind: 'plain', text: content.text }
+    : { kind: 'rich', blocks: content.blocks.map(toBackupRichBlockV3) };
+}
+
+function toBackupSnippetRecordV3(entry: SnippetEntry): BackupSnippetRecordV3 {
   return {
     id: entry.id,
     title: entry.title,
-    content: entry.content,
+    content: toBackupSnippetContentV3(entry.content),
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
@@ -89,7 +143,7 @@ function toBackupSnippetRecordV2(entry: SnippetEntry): BackupSnippetRecordV2 {
 }
 
 function toRestoreKnowledgeEntry(
-  entry: BackupKnowledgeRecordV2,
+  entry: BackupKnowledgeRecordV3,
 ): KnowledgeEntry {
   return {
     id: entry.id,
@@ -106,7 +160,7 @@ function toRestoreSnippetEntry(entry: BackupSnippetRecordV1): SnippetEntry {
   return {
     id: entry.id,
     title: entry.title,
-    content: entry.content,
+    content: createPlainSnippetContent(entry.content),
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
@@ -118,7 +172,62 @@ function toRestoreSnippetEntryV2(entry: BackupSnippetRecordV2): SnippetEntry {
   return {
     id: entry.id,
     title: entry.title,
-    content: entry.content,
+    content: createPlainSnippetContent(entry.content),
+    tags: [...entry.tags],
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
+    trigger: entry.trigger,
+  };
+}
+
+function toRestoreRichInlineV3(
+  inline: BackupRichSnippetInlineV3,
+): RichSnippetInline {
+  return inline.type === 'text'
+    ? {
+        type: 'text',
+        text: inline.text,
+        bold: inline.bold,
+        italic: inline.italic,
+      }
+    : {
+        type: 'link',
+        text: inline.text,
+        url: inline.url,
+        bold: inline.bold,
+        italic: inline.italic,
+      };
+}
+
+function toRestoreRichBlockV3(
+  block: BackupRichSnippetBlockV3,
+): RichSnippetBlock {
+  return block.type === 'paragraph'
+    ? {
+        type: 'paragraph',
+        children: block.children.map(toRestoreRichInlineV3),
+      }
+    : {
+        type: 'reference',
+        referenceType: 'image',
+        label: block.label,
+        url: block.url,
+      };
+}
+
+function toRestoreSnippetContentV3(
+  content: BackupSnippetContentV3,
+): SnippetContent {
+  return content.kind === 'plain'
+    ? createPlainSnippetContent(content.text)
+    : { kind: 'rich', blocks: content.blocks.map(toRestoreRichBlockV3) };
+}
+
+function toRestoreSnippetEntryV3(entry: BackupSnippetRecordV3): SnippetEntry {
+  return {
+    id: entry.id,
+    title: entry.title,
+    content: toRestoreSnippetContentV3(entry.content),
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
@@ -146,17 +255,17 @@ export class BackupExportService implements BackupExportApplication {
     try {
       const snapshot = await this.snapshotReader.readSnapshot();
       const exportedAt = this.now().toISOString();
-      const backup: BackupFileV2 = {
+      const backup: BackupFileV3 = {
         format: BACKUP_FORMAT,
         formatVersion: BACKUP_FORMAT_VERSION,
         exportedAt,
         data: {
           knowledge: [...snapshot.knowledge]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupKnowledgeRecordV2),
+            .map(toBackupKnowledgeRecordV3),
           snippets: [...snapshot.snippets]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupSnippetRecordV2),
+            .map(toBackupSnippetRecordV3),
           settings: { defaultModel: snapshot.settings.defaultModel },
         },
       };
@@ -221,7 +330,9 @@ export class BackupRestoreService implements BackupRestoreApplication {
         snippets:
           backup.formatVersion === BACKUP_FORMAT_VERSION_1
             ? backup.data.snippets.map(toRestoreSnippetEntry)
-            : backup.data.snippets.map(toRestoreSnippetEntryV2),
+            : backup.formatVersion === BACKUP_FORMAT_VERSION_2
+              ? backup.data.snippets.map(toRestoreSnippetEntryV2)
+              : backup.data.snippets.map(toRestoreSnippetEntryV3),
         settings: { defaultModel: backup.data.settings.defaultModel },
       };
 

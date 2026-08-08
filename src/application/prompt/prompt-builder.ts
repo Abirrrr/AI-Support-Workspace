@@ -3,6 +3,7 @@ import type {
   RetrievalResults,
   SnippetRetrievalResult,
 } from '../retrieval/retrieval-engine';
+import { renderSnippetPlainText } from '../../domain/snippet-content';
 
 const KNOWLEDGE_RESULT_LIMIT = 5;
 const SNIPPET_RESULT_LIMIT = 3;
@@ -118,7 +119,7 @@ function createSnippetItem(result: SnippetRetrievalResult): SnippetPromptItem {
   return {
     content: {
       title: result.record.title,
-      content: result.record.content,
+      content: renderSnippetPlainText(result.record.content),
     },
     metadata: {
       kind: result.kind,

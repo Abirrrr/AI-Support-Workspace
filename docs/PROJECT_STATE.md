@@ -8,17 +8,17 @@
 ## Current Milestone
 
 - Milestone 14 — Rich Snippet Templates
-- Status: Architecture defined; implementation not started.
+- Status: Foundation implemented; Rich authoring and rich browser rendering remain pending.
 
 ## Task State
 
-- Last completed task: M14-A — Rich Snippet Templates Architecture and Product Boundary.
-- M14 status: Architecture defined; implementation not started.
-- Last completed implementation task: M13-B.2 — All-Sites Scope and Isolated-World Expansion Correction. M13-A.1, M13-B, M13-B.1, and M13-B.2 are complete at approved implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
-- Active implementation task: None. No M14 implementation has started.
+- Last completed task: M14-B — Structured Snippet Content and Backup Foundation.
+- M14 status: Foundation implemented; Rich authoring and rich browser rendering remain pending.
+- Last completed implementation task: M14-B — Structured Snippet Content and Backup Foundation. The checkpoint is the eventual Principal-approved commit containing this implementation; no hash is recorded before that commit exists.
+- Active implementation task: None.
 - Last completed documentation task: M14-A — Rich Snippet Templates Architecture and Product Boundary. M14-A is documentation-only and changed no source or tests.
 - Active documentation task: None. A future thread must not treat M14-A as active, pending, or uncommitted architecture work.
-- Exact next Principal Engineer action: Create M14-B — Structured Snippet Content and Backup Foundation. M14-B is not created by M14-A.
+- Exact next Principal Engineer action: Create M14-C — Rich Snippet Library Authoring UI. M14-C is not created by M14-B.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
 - M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
@@ -48,7 +48,7 @@
 
 ## Project Status
 
-- Status: Milestone 13 — Snippet Trigger Expansion v1 is implemented, Principal Engineer approved, automatically validated, manually validated in real Chrome by the product owner, committed, pushed, and complete at implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`) and closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). No unresolved M13 blocker remains. Milestone 14 — Rich Snippet Templates is current; M14-A has defined its architecture, but implementation has not started.
+- Status: Milestone 13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. Milestone 14 — Rich Snippet Templates is current. M14-A architecture is complete at `c1105d4`, and M14-B has implemented the structured-content, Dexie v4, Backup v3, and plain-projection foundation. Rich authoring and rich browser rendering remain pending.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -57,11 +57,11 @@
 
 ## Approved Future Product Directions
 
-- **M14 — Rich Snippet Templates:** Extend the existing `SnippetEntry` aggregate and M13 trigger/editor foundation with one canonical plain-or-rich content union, ordered structured paragraphs and image references, safe destination-aware rendering, deterministic plain-text projection, Dexie version 4 migration, and Backup Format v3. M14 v1 stores URL references rather than binary image assets and introduces no variables, provider changes, or new permissions. Decision 36 is authoritative; implementation remains pending.
+- **M14 — Rich Snippet Templates:** The existing `SnippetEntry` aggregate now uses the canonical plain-or-rich content union, deterministic projection, Dexie version 4, and Backup Format v3. The existing UI remains plain-authoring-only and safely preserves imported rich content during metadata edits; rich authoring and destination-aware rich browser rendering remain pending. M14 v1 stores URL references rather than binary image assets and introduces no variables, provider changes, or new permissions. Decision 36 remains authoritative.
 - **M15 — Multimodal Screenshot Context:** Merchant Context should eventually combine text with one or more transient clipboard screenshots for generation through a provider-independent capability boundary. Unsupported screenshots must never disappear silently. Detailed M15 architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
-- The Side Panel focus direction remains unassigned. M14–M16 retain their roadmap ownership. M13 remains authoritative for trigger persistence, editor activation, runtime synchronization, and Backup Format v2; Decision 36 adds M14 rich-content architecture without reopening M9, redefining M10, or changing the existing Ollama/AI workflow.
+- The Side Panel focus direction remains unassigned. M14–M16 retain their roadmap ownership. M13 remains authoritative for trigger persistence, editor activation, and runtime synchronization; M14-B preserves those behaviors while projecting structured content to the existing plain catalog payload. Decision 36 does not reopen M9, redefine M10, or change the existing Ollama/AI workflow.
 
 ## Milestone 12 Architecture
 
@@ -85,19 +85,19 @@
 - Backup Format v1 remains frozen and importable, with v1 Snippets restored as `trigger: null`. New exports use strict Backup Format v2, whose exact Snippet DTO adds required `trigger: string | null`; all M12 size, explicit mapping, security, preview, acknowledgement, identity, atomic transaction, rollback, and failed-validation guarantees remain.
 - The Snippet form adds one optional Trigger field, format guidance, inline invalid/duplicate feedback, and list display. Rich content, images, variables, autocomplete, analytics, providers, Prompt Builder changes, Screenshot Context, OpenAI, cloud sync, team sharing, and generalized automation are excluded.
 
-## Approved Milestone 14 Architecture
+## Milestone 14 Architecture and Implemented Foundation
 
-- M14-A is the completed documentation-only architecture task for Rich Snippet Templates. Decision 36 is its approved architecture, and the task introduced no application source, test, configuration, dependency, manifest, permission, physical schema, or backup implementation change. The eventual Principal-approved documentation commit containing Decision 36 and these M14-A documents is the M14-A architecture checkpoint; its hash must be read from Git history after that commit exists rather than invented in advance.
+- M14-A is the completed documentation-only architecture task for Rich Snippet Templates at checkpoint `c1105d4` (`docs: define rich snippet template architecture`). Decision 36 is its approved architecture. M14-B implements the approved foundation without changing Decision 36.
 - A Rich Snippet remains the existing `SnippetEntry`, preserving ID, title, tags, trigger, timestamps, repository identity, CRUD semantics, and M13 trigger uniqueness. There is no `TemplateEntry`, parallel Template Library, duplicate record, or second trigger system.
-- M14 replaces the live plain `content: string` field with one canonical discriminated `SnippetContent` union: `{ kind: 'plain', text }` or `{ kind: 'rich', blocks }`. Rich blocks are an ordered, non-recursive project-owned structure containing paragraphs with text/link inline nodes and image-reference blocks with a label and user-supplied HTTP(S) URL. Persisted HTML is prohibited.
+- M14-B replaced the live plain `content: string` field with one canonical discriminated `SnippetContent` union: `{ kind: 'plain', text }` or `{ kind: 'rich', blocks }`. Rich blocks are an ordered, non-recursive project-owned structure containing paragraphs with text/link inline nodes and image-reference blocks with a label and user-supplied HTTP(S) URL. Persisted HTML is prohibited.
 - Ordinary links initially allow `https:`, `http:`, and `mailto:`. Image references allow only `https:` and `http:`. Persistence validation and untrusted Backup v3 import validation reject executable or unapproved schemes.
 - One deterministic `renderSnippetPlainText(content)` boundary preserves exact plain text and produces the canonical fallback for rich content. Rich blocks retain order, paragraphs are separated by exactly `\n\n`, emphasis emits readable text only, labelled links emit `label (url)` unless label equals URL, and image references emit `[Image: label] url`. No block may disappear.
 - Retrieval Engine and Prompt Builder remain text consumers and receive only that plain projection. Rich markup and DOM structures do not enter AI prompts, and M14 adds no provider work.
-- M14 extends the M13 adapter and transient-catalog boundaries. Catalog payloads may carry the canonical trigger, Snippet ID, deterministic plain projection, and optional validated rich structure; all M13-B.1 epoch, revision, port, invalidation, publication-barrier, and fail-closed guarantees remain authoritative. Content scripts remain Dexie-free.
+- M14-B keeps the M13 catalog payload plain-text-only and supplies the deterministic projection for both plain and rich records. All M13-B.1 epoch, revision, port, invalidation, publication-barrier, and fail-closed guarantees remain authoritative. Content scripts remain Dexie-free. Structured rich payloads and rich insertion are deferred.
 - Textareas always receive plain projection. Single-line inputs decline multiline projections before preventing Space. Safely supported generic contenteditables may receive extension-created text, paragraph, `strong`, `em`, and validated anchor nodes made with the target's `ownerDocument`; arbitrary HTML parsing and automatic image creation/fetching remain prohibited. Image references use their positional plain representation unless a separately approved target capability exists.
-- M14 implementation will introduce forward-only Dexie version 4, preserving v1-v3 declarations and the `id, createdAt, &trigger` indexes. Its migration wraps every v3 string exactly as `{ kind: 'plain', text: formerContent }`, preserves IDs, metadata, tag order, triggers, and timestamps, keeps null triggers physically omitted, and adds no table. Dexie version 3 remains implemented today; version 4 is approved but not implemented.
-- Backup Formats v1 and v2 remain permanently frozen and importable. M14 implementation will export strict Backup Format v3 with dedicated exact DTOs and explicit mappings. V1 maps string content to plain content and null trigger; v2 maps string content to plain content and preserves its trigger. V3 carries exact discriminated content and retains the existing 25 MiB, ordering, preview, acknowledgement, replace-only atomic transaction, rollback, and security guarantees. Backup v3 is approved but not implemented.
-- The existing Snippet Library remains the only UI. New Snippets default to plain content. Plain-to-rich conversion is explicit and readable-content preserving; rich-to-plain conversion is deferred. Rich authoring owns structured state and supports paragraphs, bold, italic, links, image references, and keyboard-accessible ordering without requiring drag-and-drop or a third-party editor dependency.
+- M14-B implemented forward-only Dexie version 4 while preserving v1-v3 declarations and the `id, createdAt, &trigger` indexes. Its migration wraps every v3 string exactly as `{ kind: 'plain', text: formerContent }`, preserves IDs, metadata, tag order, triggers, and timestamps, keeps null triggers physically omitted, and adds no table or index.
+- Backup Formats v1 and v2 remain permanently frozen and importable. M14-B implemented new exports as strict Backup Format v3 with dedicated exact DTOs and explicit mappings. V1 maps string content to plain content and null trigger; v2 maps string content to plain content and preserves its trigger. V3 carries exact discriminated content and retains the existing 25 MiB, ordering, preview, acknowledgement, replace-only atomic transaction, rollback, and security guarantees.
+- The existing Snippet Library remains the only UI. New Snippets default to plain content. M14-B renders projected previews for rich records and preserves their structured content during metadata edits; it adds no rich authoring. Plain-to-rich conversion, the structured editor, and keyboard-accessible block ordering belong to M14-C. Rich-to-plain conversion remains deferred.
 - M14 v1 persists no local Blob, base64 data, binary asset, `snippetAssets` table, upload, host service, clipboard image, or automatic remote-image fetch. M15 screenshot Context remains a separate transient generation-input domain and cannot serve as Snippet asset storage.
 - Variables, placeholders, customer-field interpolation, conditional logic, loops, scripting, arbitrary HTML/CSS, tables, video, embeds, AI-generated fields, page scraping, analytics, trigger syntax changes, provider changes, OpenAI, collaboration, sync, and new Chrome permissions are explicit non-goals.
 
@@ -266,8 +266,8 @@
 
 ## Next Engineering Action
 
-- Create M14-B — Structured Snippet Content and Backup Foundation.
-- M14-A is complete as documentation only. M14 implementation remains unstarted; this architecture task does not create M14-B or authorize work beyond its separately approved specification.
+- Create M14-C — Rich Snippet Library Authoring UI.
+- M14-B is complete as the approved foundation only. It does not create M14-C or implement rich authoring or rich browser rendering.
 
 ## Repository Status
 
@@ -276,7 +276,7 @@
 - The approved platform may not be substituted without an explicit architecture review.
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
-- The implemented Dexie-backed persistence foundation is at schema version 3. M13 changed only `snippetEntries` to add optional canonical trigger data and the unique `&trigger` index while preserving Knowledge, existing Snippets, and Settings.
+- The implemented Dexie-backed persistence foundation is at schema version 4. M14-B changes only Snippet content representation, preserves the v3 `id, createdAt, &trigger` indexes and historical declarations, and adds no table or index.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
 - The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the M11 implementation checkpoint is `d40e031` (`feat: add default Ollama model settings`).
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
@@ -287,13 +287,14 @@
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 14 — Rich Snippet Templates. Status: architecture defined; implementation not started; no active implementation or documentation task exists.
+- Current roadmap milestone: Milestone 14 — Rich Snippet Templates. Status: foundation implemented; Rich authoring and rich browser rendering remain pending; no active implementation or documentation task exists.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
-- M14-A architecture checkpoint: the eventual Principal-approved documentation commit containing Decision 36 and these M14-A documents. Its hash is intentionally not recorded before the commit exists.
-- Expected stable state after the M14-A architecture checkpoint is committed and pushed: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at that architecture checkpoint.
+- M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
+- M14-B implementation checkpoint: the eventual Principal-approved commit containing the approved M14-B implementation and documentation. Its hash is intentionally not recorded before that commit exists.
+- Expected stable state after the M14-B checkpoint is committed and pushed: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at that implementation checkpoint.
 - Future continuity: M14-A is complete and approved architecture. A future thread must not treat it as active, pending, uncommitted architecture work, or work that must be recreated.
-- Next action: Create M14-B — Structured Snippet Content and Backup Foundation. Do not create or implement M14-B as part of M14-A.
+- Next action: Create M14-C — Rich Snippet Library Authoring UI. Do not create or implement M14-C as part of M14-B.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -304,7 +305,7 @@
 - Broad normal-site access is intentional for M13 trigger expansion: generated output must match exactly `http://*/*` and `https://*/*` with frame-local `all_frames: true`. Chrome-protected and non-HTTP(S) pages remain unavailable. This increases permission exposure, so bounded candidate reading, password/specialized-input exclusion, no logging or transmission, no persistent catalog, and fail-closed unsupported-editor behavior remain mandatory.
 - Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration. These boundaries passed manual Chrome validation, but environment setup remains external and must not be changed automatically.
 - Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
-- M14 rich-template architecture is defined by Decision 36, but implementation is absent: current source still has string Snippet content, plain-only expansion, Dexie version 3, and Backup Format v2. M15 multimodal-screenshot and M16 OpenAI architecture remains unresolved.
+- M14-B implements structured Snippet content, validation, deterministic plain projection, Dexie version 4, Backup Format v3, and compatibility for existing plain UI and expansion. Rich authoring and rich browser rendering remain absent. M15 multimodal-screenshot and M16 OpenAI architecture remain unresolved.
 - Product-owner Chrome validation passed the real Intercom editor and another normal website, but did not test every website or editor framework. Unsupported or unsafe editor structures continue to fail closed, and Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable.
 - History remains intentionally undecided and must not be assumed to be in scope.
 - The already-mounted Side Panel does not live-refresh a restored default model; recreating the Side Panel loads the restored value. This edge case and a manual oversized-file exercise were not repeated during M12 closeout and are non-blocking because their required behavior is covered by source review and automated tests.
@@ -314,6 +315,7 @@
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It remains the authoritative M13 source-and-test checkpoint.
 - M13-C documentation checkpoint: `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`).
 - Historical M14-A starting checkpoint: `9a3c7ef`. At preflight, branch `master` was clean and local `master` was synchronized with `origin/master`; this does not describe the expected HEAD after the architecture checkpoint.
-- M14-A architecture checkpoint: the eventual Principal-approved documentation commit containing Decision 36 and the M14-A documentation set. No hash is recorded until that commit exists.
-- Expected stable post-architecture state: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at the M14-A architecture checkpoint.
-- Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented and approved M13-B/M13-B.1/M13-B.2, and the subsequent M13-C documentation checkpoint closes M13 and activates unstarted M14.
+- M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
+- M14-B implementation checkpoint: the eventual Principal-approved commit containing this approved implementation. No hash is recorded until that commit exists.
+- Expected stable post-M14-B state: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at the M14-B implementation checkpoint.
+- Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, and `c1105d4` defined the approved M14 architecture.

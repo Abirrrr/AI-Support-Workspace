@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { RetrievalEngine } from '../../../src/application/retrieval/retrieval-engine';
+import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import {
   DATABASE_NAME,
   type AiSupportWorkspaceDatabase,
@@ -49,13 +50,13 @@ describe('Retrieval Engine production persistence integration', () => {
     });
     const snippetTagMatch = await snippetRepository.create({
       title: 'Billing response',
-      content: 'Please allow processing time.',
+      content: createPlainSnippetContent('Please allow processing time.'),
       tags: ['refund'],
       trigger: null,
     });
     const snippetContentMatch = await snippetRepository.create({
       title: 'Follow-up response',
-      content: 'Your refund is being processed.',
+      content: createPlainSnippetContent('Your refund is being processed.'),
       tags: [],
       trigger: null,
     });

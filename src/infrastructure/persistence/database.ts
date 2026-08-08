@@ -2,15 +2,20 @@ import Dexie, { type DexieOptions, type Table } from 'dexie';
 
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SettingsRecord } from './settings-record';
+import { createPlainSnippetContent } from '../../domain/snippet-content';
 import type { SnippetEntryRecord } from './snippet-entry-record';
 
 export const DATABASE_NAME = 'ai-support-workspace';
-export const DATABASE_VERSION = 3;
+export const DATABASE_VERSION = 4;
 
 export interface DatabaseConstructionOptions {
   databaseName?: string;
   indexedDB?: IDBFactory;
   IDBKeyRange?: typeof globalThis.IDBKeyRange;
+}
+
+interface MigratingSnippetEntryRecordV3 {
+  content: unknown;
 }
 
 function getDexieOptions(
@@ -48,11 +53,30 @@ export class AiSupportWorkspaceDatabase extends Dexie {
       settings: 'id',
       snippetEntries: 'id, createdAt',
     });
-    this.version(DATABASE_VERSION).stores({
+    this.version(3).stores({
       knowledgeEntries: 'id, createdAt',
       settings: 'id',
       snippetEntries: 'id, createdAt, &trigger',
     });
+    this.version(DATABASE_VERSION)
+      .stores({
+        knowledgeEntries: 'id, createdAt',
+        settings: 'id',
+        snippetEntries: 'id, createdAt, &trigger',
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table<MigratingSnippetEntryRecordV3, string>('snippetEntries')
+          .toCollection()
+          .modify((record) => {
+            if (typeof record.content !== 'string') {
+              throw new TypeError(
+                'Database v4 migration expected legacy string Snippet content.',
+              );
+            }
+            record.content = createPlainSnippetContent(record.content);
+          });
+      });
 
     this.knowledgeEntries = this.table('knowledgeEntries');
     this.settings = this.table('settings');
