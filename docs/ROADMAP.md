@@ -112,11 +112,11 @@ Add optional unique semicolon triggers to existing plain-text Snippets and expan
 
 The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 defined the approved architecture. M13-B implemented trigger-enabled Snippets, persistence and Backup Format v2, the transient catalog, typed frame synchronization, and supported-editor expansion. M13-B.1 corrected overlapping catalog publication, and M13-B.2 corrected isolated-world/realm handling and intentionally expanded availability to normal HTTP/HTTPS websites. Principal Engineer review, automated validation, and product-owner real Chrome validation passed. M13 is complete at implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
 
-## Milestone 14 — Rich Snippet Templates (Current — Foundation Implemented)
+## Milestone 14 — Rich Snippet Templates (Current — Authoring Implemented)
 
 Extend the M13 Snippet aggregate and trigger/editor foundation with one canonical plain-or-rich content union, ordered paragraphs and URL-based image references, deterministic plain-text projection for Retrieval, Prompt Builder, and incapable editors, safe destination-aware rendering, Dexie version 4 migration, Backup Format v3, and backward compatibility with existing plain Snippets and Backup Formats v1/v2.
 
-Status: Decision 36 remains authoritative. M14-B implements canonical structured content, strict validation and URL rules, deterministic plain projection, Dexie version 4, Backup Format v3 with v1/v2 compatibility, text-consumer compatibility, and a minimal existing-UI preservation guard. Rich authoring and destination-aware rich browser rendering remain pending, so M14 is not complete. The next Principal Engineer action is to create M14-C — Rich Snippet Library Authoring UI. M14-C is not created by M14-B.
+Status: Decision 36 remains authoritative. M14-B implements canonical structured content, strict validation and URL rules, deterministic plain projection, Dexie version 4, Backup Format v3 with v1/v2 compatibility, and text-consumer compatibility. M14-C implements explicit draft-only Plain-to-Rich conversion and structured authoring in the existing Snippet Library. Destination-aware rich browser rendering remains pending, so M14 is not complete. After M14-C approval, the next Principal Engineer action is to create M14-D — Rich Snippet Browser Rendering.
 
 ## Milestone 15 — Multimodal Screenshot Context
 

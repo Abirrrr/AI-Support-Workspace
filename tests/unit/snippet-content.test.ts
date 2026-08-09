@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   InvalidSnippetContentError,
   cloneSnippetContent,
+  convertPlainSnippetToRich,
   createPlainSnippetContent,
   isSafeSnippetImageUrl,
   isSafeSnippetLinkUrl,
@@ -48,6 +49,29 @@ describe('SnippetContent', () => {
     const content = createPlainSnippetContent('  exact\ntext  ');
     expect(content).toEqual({ kind: 'plain', text: '  exact\ntext  ' });
     expect(renderSnippetPlainText(content)).toBe('  exact\ntext  ');
+  });
+
+  it('converts Plain to Rich without inferring formatting or losing readable text', () => {
+    const plain = createPlainSnippetContent('  First line\nSecond line  ');
+    const rich = convertPlainSnippetToRich(plain);
+
+    expect(rich).toEqual({
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              text: plain.text,
+              bold: false,
+              italic: false,
+            },
+          ],
+        },
+      ],
+    });
+    expect(renderSnippetPlainText(rich)).toBe(plain.text);
   });
 
   it('projects every rich block deterministically without markup', () => {

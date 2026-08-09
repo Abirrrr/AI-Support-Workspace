@@ -231,7 +231,7 @@ Low-risk pattern permutations, forced IndexedDB rollback branches, revision-orde
 
 ## Rich Snippet Templates Validation Contract
 
-M14-A is documentation-only and added no runtime tests. M14-B implements automated coverage for the domain/projection, Dexie v4, Backup v1/v2/v3, text consumers, existing plain catalog payload, and minimal UI preservation boundaries below. Later M14 tasks must add the rich authoring and rich browser-rendering coverage when those capabilities are implemented.
+M14-A is documentation-only and added no runtime tests. M14-B implements automated coverage for the domain/projection, Dexie v4, Backup v1/v2/v3, text consumers, existing plain catalog payload, and minimal UI preservation boundaries below. M14-C adds focused Rich authoring coverage. M14-D must add destination-aware rich browser-rendering coverage when that capability is implemented.
 
 ### Domain and Plain Projection
 
@@ -275,10 +275,11 @@ M14-A is documentation-only and added no runtime tests. M14-B implements automat
 
 - Cover existing plain create/edit/delete behavior and default-to-plain creation; explicit plain-to-rich conversion preserving readable content, identity, metadata, and trigger; structured rich editing of paragraphs, bold, italic, links, image references, and ordering; protocol errors; and continued rich mode during ordinary edits.
 - Cover keyboard-accessible block ordering without requiring drag-and-drop, accessible labels/status/errors, narrow layout, safe structured-state handling, and absence of rich-to-plain conversion, variables, HTML persistence, local binary images, or a separate Template Library.
+- M14-C automated coverage proves conversion is explicit and draft-only; cancel leaves the stored record Plain; Save updates the same identity with metadata and trigger intact; existing Rich data loads and saves without flattening; paragraph, inline, bold, italic, link, image-reference, removal, and ordering controls produce the canonical structured model; unsafe protocols prevent Save; pasted markup remains inert text; no image preview is generated; UI-shaped Rich content persists through the existing application/repository boundary; and existing plain, catalog-projection, and Backup v1/v2/v3 suites remain the regression boundary.
 
 ### Real Chrome Manual Validation
 
-Later M14 authoring and rendering implementation requires risk-based real Chrome validation of an existing plain Snippet regression; explicit plain-to-rich conversion and rich editing; rich expansion in Intercom; deterministic fallback in a normal textarea; expansion on another normal website; exact surrounding content, caret, and input behavior; live catalog refresh after edit/delete; extension/service-worker reload recovery; Backup v3 export and restore; v2 import; v1 import; and appropriate Knowledge, Settings, options-page, Side Panel, M10 capture, generation, and M12 integrity regressions. M14-B itself received no manual Chrome validation before Principal Engineer review.
+M14-C receives no claimed real Chrome validation before Principal Engineer source review and product-owner validation. Future risk-based Chrome validation should cover the existing Plain workflow; explicit conversion and Rich editing; Save/reopen and cancel; Backup v3 export/restore; and appropriate Library regressions. M14-D must separately validate rich expansion in Intercom, deterministic textarea fallback, another normal website, exact surrounding content/caret/input behavior, live catalog refresh, and extension/service-worker reload recovery when rich browser rendering is implemented.
 
 Manual validation need not exhaustively test every website. Closeout must identify the exact editors/origins tested, any destination-specific adapter used, omissions, and why each omission is non-blocking.
 

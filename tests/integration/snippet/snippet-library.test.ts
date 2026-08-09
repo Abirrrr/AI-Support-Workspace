@@ -49,4 +49,50 @@ describe('Snippet Library production persistence integration', () => {
     });
     expect(await library.load()).toEqual([created]);
   });
+
+  it('persists and reopens UI-shaped Rich content through the same aggregate', async () => {
+    const library = new SnippetLibraryService(
+      new DexieSnippetEntryRepository(database),
+    );
+    const content = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', text: 'Hello ', bold: true, italic: true },
+            {
+              type: 'link',
+              text: 'help',
+              url: 'https://example.com/help',
+              bold: false,
+              italic: false,
+            },
+          ],
+        },
+        {
+          type: 'reference',
+          referenceType: 'image',
+          label: 'Diagram',
+          url: 'http://example.com/diagram.png',
+        },
+      ],
+    } as const;
+
+    const created = await library.create({
+      title: 'Rich reply',
+      content,
+      tags: ['rich'],
+      trigger: ';rich',
+    });
+    database.close({ disableAutoOpen: true });
+    database = createIsolatedDatabase(databaseName);
+    const reopened = new SnippetLibraryService(
+      new DexieSnippetEntryRepository(database),
+    );
+
+    await expect(reopened.load()).resolves.toEqual([created]);
+    expect(created.content).toEqual(content);
+    expect(created.id).toBe((await reopened.load())[0]?.id);
+  });
 });

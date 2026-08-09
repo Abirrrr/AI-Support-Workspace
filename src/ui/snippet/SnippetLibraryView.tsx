@@ -7,7 +7,10 @@ import {
 } from '../../application/snippet/snippet-library';
 import type { SnippetEntry } from '../../domain/snippet-entry';
 import {
+  cloneSnippetContent,
+  convertPlainSnippetToRich,
   createPlainSnippetContent,
+  InvalidSnippetContentError,
   renderSnippetPlainText,
   type SnippetContent,
 } from '../../domain/snippet-content';
@@ -17,25 +20,36 @@ import {
 } from '../../application/snippet/snippet-trigger';
 import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
 import { formatTags, parseTags } from '../library/tags';
+import {
+  isRichSnippetDraftValid,
+  RichSnippetEditor,
+} from './RichSnippetEditor';
 
 interface SnippetDraft {
   title: string;
-  content: string;
+  content: SnippetContent;
   tags: string;
   trigger: string;
 }
 
 interface SnippetLibraryViewProps {
   snippetLibrary: SnippetLibrary;
+  confirmConvert?: () => boolean;
   confirmDelete?: (entry: SnippetEntry) => boolean;
 }
 
 const EMPTY_DRAFT: SnippetDraft = {
   title: '',
-  content: '',
+  content: createPlainSnippetContent(''),
   tags: '',
   trigger: '',
 };
+
+function defaultConvertConfirmation(): boolean {
+  return globalThis.confirm(
+    'Convert this draft to a rich template? Once you save the Rich version, it cannot be converted back to Plain in this version.',
+  );
+}
 
 function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
   return globalThis.confirm(
@@ -46,22 +60,16 @@ function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
 function draftFromEntry(entry: SnippetEntry): SnippetDraft {
   return {
     title: entry.title,
-    content: renderSnippetPlainText(entry.content),
+    content: cloneSnippetContent(entry.content),
     tags: formatTags(entry.tags),
     trigger: entry.trigger ?? '',
   };
 }
 
-function inputFromDraft(
-  draft: SnippetDraft,
-  preservedContent?: SnippetContent,
-): SnippetEntryInput {
+function inputFromDraft(draft: SnippetDraft): SnippetEntryInput {
   return {
     title: draft.title,
-    content:
-      preservedContent?.kind === 'rich'
-        ? preservedContent
-        : createPlainSnippetContent(draft.content),
+    content: draft.content,
     tags: parseTags(draft.tags),
     trigger: draft.trigger === '' ? null : draft.trigger,
   };
@@ -69,6 +77,7 @@ function inputFromDraft(
 
 export function SnippetLibraryView({
   snippetLibrary,
+  confirmConvert = defaultConvertConfirmation,
   confirmDelete = defaultDeleteConfirmation,
 }: SnippetLibraryViewProps) {
   const [entries, setEntries] = useState<readonly SnippetEntry[]>([]);
@@ -122,14 +131,27 @@ export function SnippetLibraryView({
   }, [snippetLibrary]);
 
   function resetForm() {
-    setDraft(EMPTY_DRAFT);
+    setDraft({ ...EMPTY_DRAFT, content: createPlainSnippetContent('') });
     setEditingId(undefined);
     setTriggerErrorMessage(undefined);
   }
 
-  function updateDraft(field: keyof SnippetDraft, value: string) {
+  function updateDraft(
+    field: Exclude<keyof SnippetDraft, 'content'>,
+    value: string,
+  ) {
     if (field === 'trigger') setTriggerErrorMessage(undefined);
     setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateContent(content: SnippetContent) {
+    setErrorMessage(undefined);
+    setDraft((current) => ({ ...current, content }));
+  }
+
+  function convertDraftToRich() {
+    if (draft.content.kind !== 'plain' || !confirmConvert()) return;
+    updateContent(convertPlainSnippetToRich(draft.content));
   }
 
   function beginEditing(entry: SnippetEntry) {
@@ -151,7 +173,7 @@ export function SnippetLibraryView({
       if (editingId) {
         const updated = await snippetLibrary.update(
           editingId,
-          inputFromDraft(draft, editingEntry?.content),
+          inputFromDraft(draft),
         );
         setEntries((current) =>
           orderSnippetEntries(
@@ -187,6 +209,8 @@ export function SnippetLibraryView({
         error instanceof DuplicateSnippetTriggerError
       ) {
         setTriggerErrorMessage(error.message);
+      } else if (error instanceof InvalidSnippetContentError) {
+        setErrorMessage('Check the Rich content URLs and try saving again.');
       } else {
         setErrorMessage(
           editingId
@@ -234,8 +258,9 @@ export function SnippetLibraryView({
   }
 
   const isBusy = operation !== undefined;
-  const editingEntry = entries.find((entry) => entry.id === editingId);
-  const isEditingRich = editingEntry?.content.kind === 'rich';
+  const canSave =
+    !isBusy &&
+    (draft.content.kind === 'plain' || isRichSnippetDraftValid(draft.content));
 
   return (
     <section aria-labelledby="snippet-library-heading" className="mt-8">
@@ -325,29 +350,51 @@ export function SnippetLibraryView({
               />
             </label>
 
-            {isEditingRich ? (
-              <div className="block text-sm font-medium text-slate-700">
-                Content preview
-                <p className="mt-1 whitespace-pre-wrap rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-normal text-slate-700">
-                  {draft.content}
-                </p>
-                <p className="mt-1 text-xs font-normal text-slate-600">
-                  Rich content editing is not available yet. Saving changes will
-                  preserve this content exactly.
+            {draft.content.kind === 'rich' ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-slate-700">Content</p>
+                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                    Rich template
+                  </span>
+                </div>
+                <RichSnippetEditor
+                  content={draft.content}
+                  disabled={isBusy}
+                  onChange={updateContent}
+                />
+                <p className="text-xs text-slate-600">
+                  Rich-to-Plain conversion is not available in this version.
                 </p>
               </div>
             ) : (
-              <label className="block text-sm font-medium text-slate-700">
-                Content
-                <textarea
-                  className="mt-1 block min-h-32 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Content
+                  <textarea
+                    className="mt-1 block min-h-32 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    disabled={isBusy}
+                    onChange={(event) =>
+                      updateContent(
+                        createPlainSnippetContent(event.target.value),
+                      )
+                    }
+                    value={draft.content.text}
+                  />
+                </label>
+                <button
+                  className="mt-2 rounded-md border border-blue-300 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-50 disabled:opacity-50"
                   disabled={isBusy}
-                  onChange={(event) =>
-                    updateDraft('content', event.target.value)
-                  }
-                  value={draft.content}
-                />
-              </label>
+                  onClick={convertDraftToRich}
+                  type="button"
+                >
+                  Convert to rich template
+                </button>
+                <p className="mt-1 text-xs text-slate-600">
+                  Conversion affects only this draft. It becomes one-way after
+                  you save the Rich version.
+                </p>
+              </div>
             )}
 
             <label className="block text-sm font-medium text-slate-700">
@@ -398,7 +445,7 @@ export function SnippetLibraryView({
 
             <button
               className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={isBusy}
+              disabled={!canSave}
               type="submit"
             >
               {operation === 'saving'
@@ -455,6 +502,9 @@ export function SnippetLibraryView({
                         {entry.trigger}
                       </p>
                     ) : null}
+                    <span className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                      {entry.content.kind === 'rich' ? 'Rich' : 'Plain'}
+                    </span>
                     <p className="mt-4 whitespace-pre-wrap text-sm text-slate-700">
                       {renderSnippetPlainText(entry.content)}
                     </p>

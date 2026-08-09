@@ -178,6 +178,27 @@ export function createPlainSnippetContent(text: string): PlainSnippetContent {
   return { kind: 'plain', text };
 }
 
+export function convertPlainSnippetToRich(
+  content: PlainSnippetContent,
+): RichSnippetContent {
+  return {
+    kind: 'rich',
+    blocks: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: content.text,
+            bold: false,
+            italic: false,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 export function cloneSnippetContent(content: SnippetContent): SnippetContent {
   return validateSnippetContent(content);
 }

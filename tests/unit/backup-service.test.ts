@@ -528,7 +528,7 @@ describe('Backup Format v2 and v3 parser and validator', () => {
 });
 
 describe('backup application services', () => {
-  it('exports, parses, and restores rich v3 content without live-object aliasing', async () => {
+  it('exports, parses, and restores authoring-compatible rich v3 content without live-object aliasing', async () => {
     const data = createData();
     const snippet = requireValue(data.snippets[0], 'Snippet entry');
     const richContent = {

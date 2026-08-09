@@ -293,8 +293,19 @@ describe('SnippetLibraryView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(screen.queryByLabelText('Content')).toBeNull();
     expect(
-      screen.getByText(/Rich content editing is not available yet/),
+      screen.getByRole('region', { name: 'Rich snippet content editor' }),
     ).toBeTruthy();
+    expect(screen.getByLabelText('Text')).toHaveProperty('value', 'Rich reply');
+    expect(screen.getByLabelText('Bold paragraph 1 segment 1')).toHaveProperty(
+      'ariaPressed',
+      'true',
+    );
+    expect(screen.getByLabelText('Label')).toHaveProperty('value', 'Receipt');
+    expect(screen.getAllByLabelText('URL')[0]).toHaveProperty(
+      'value',
+      'https://example.com/receipt.png',
+    );
+    expect(document.querySelector('img')).toBeNull();
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'Updated metadata' },
     });
@@ -312,6 +323,238 @@ describe('SnippetLibraryView', () => {
     await waitFor(() =>
       expect(library.delete).toHaveBeenCalledWith(richEntry.id),
     );
+  });
+
+  it('converts only the current Plain draft and cancel leaves storage untouched', async () => {
+    const confirmConvert = vi.fn(() => true);
+    const library = createSnippetLibrary({
+      load: vi.fn(async () => [entry]),
+    });
+    render(
+      <SnippetLibraryView
+        confirmConvert={confirmConvert}
+        snippetLibrary={library}
+      />,
+    );
+    await screen.findByText(entry.title);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'Draft only\nwith line breaks' },
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Convert to rich template' }),
+    );
+
+    expect(confirmConvert).toHaveBeenCalledOnce();
+    expect(library.update).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Text')).toHaveProperty(
+      'value',
+      'Draft only\nwith line breaks',
+    );
+    expect(screen.getByLabelText('Bold paragraph 1 segment 1')).toHaveProperty(
+      'ariaPressed',
+      'false',
+    );
+    expect(
+      screen.getByLabelText('Italic paragraph 1 segment 1'),
+    ).toHaveProperty('ariaPressed', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel edit' }));
+    expect(library.update).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(screen.getByLabelText('Content')).toHaveProperty(
+      'value',
+      renderSnippetPlainText(entry.content),
+    );
+  });
+
+  it('requires explicit confirmation and saves conversion on the same entity with metadata', async () => {
+    const rejectedConfirmation = vi.fn(() => false);
+    const convertedEntry: SnippetEntry = {
+      ...entry,
+      title: 'Converted title',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                text: 'Your order has been confirmed.',
+                bold: false,
+                italic: false,
+              },
+            ],
+          },
+        ],
+      },
+      tags: ['orders', 'rich'],
+      trigger: ';order',
+    };
+    const library = createSnippetLibrary({
+      load: vi.fn(async () => [entry]),
+      update: vi.fn(async () => convertedEntry),
+    });
+    const { rerender } = render(
+      <SnippetLibraryView
+        confirmConvert={rejectedConfirmation}
+        snippetLibrary={library}
+      />,
+    );
+    await screen.findByText(entry.title);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Convert to rich template' }),
+    );
+    expect(screen.getByLabelText('Content')).toBeTruthy();
+
+    rerender(
+      <SnippetLibraryView
+        confirmConvert={() => true}
+        snippetLibrary={library}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Convert to rich template' }),
+    );
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: convertedEntry.title },
+    });
+    fireEvent.change(screen.getByLabelText(/^Trigger \(optional\)/), {
+      target: { value: ';order' },
+    });
+    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
+      target: { value: 'orders, rich' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(library.update).toHaveBeenCalledWith(entry.id, {
+        title: convertedEntry.title,
+        content: convertedEntry.content,
+        tags: convertedEntry.tags,
+        trigger: convertedEntry.trigger,
+      }),
+    );
+    expect(library.create).not.toHaveBeenCalled();
+    expect(screen.getByText('Rich')).toBeTruthy();
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(
+      screen.getByRole('region', { name: 'Rich snippet content editor' }),
+    ).toBeTruthy();
+  });
+
+  it('creates a structured Rich draft through the existing application boundary', async () => {
+    const library = createSnippetLibrary();
+    render(
+      <SnippetLibraryView
+        confirmConvert={() => true}
+        snippetLibrary={library}
+      />,
+    );
+    await screen.findByText('No snippets saved yet.');
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Rich reply' },
+    });
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'Hello ' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Trigger \(optional\)/), {
+      target: { value: ';RICH' },
+    });
+    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
+      target: { value: 'support, rich' },
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Convert to rich template' }),
+    );
+    fireEvent.click(screen.getByLabelText('Bold paragraph 1 segment 1'));
+    fireEvent.click(screen.getByLabelText('Italic paragraph 1 segment 1'));
+    fireEvent.click(screen.getByLabelText('Add link to paragraph 1'));
+    fireEvent.change(screen.getByLabelText('Link text'), {
+      target: { value: 'help' },
+    });
+    fireEvent.change(screen.getByLabelText('URL'), {
+      target: { value: 'https://example.com/help' },
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Add image reference' }),
+    );
+    fireEvent.change(screen.getByLabelText('Label'), {
+      target: { value: 'Diagram' },
+    });
+    const imageUrl = screen.getAllByLabelText('URL')[1];
+    if (imageUrl === undefined) throw new Error('Missing image URL input.');
+    fireEvent.change(imageUrl, {
+      target: { value: 'http://example.com/diagram.png' },
+    });
+    fireEvent.click(screen.getByLabelText('Move block 2 up'));
+    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
+
+    await waitFor(() =>
+      expect(library.create).toHaveBeenCalledWith({
+        title: 'Rich reply',
+        content: {
+          kind: 'rich',
+          blocks: [
+            {
+              type: 'reference',
+              referenceType: 'image',
+              label: 'Diagram',
+              url: 'http://example.com/diagram.png',
+            },
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  text: 'Hello ',
+                  bold: true,
+                  italic: true,
+                },
+                {
+                  type: 'link',
+                  text: 'help',
+                  url: 'https://example.com/help',
+                  bold: false,
+                  italic: false,
+                },
+              ],
+            },
+          ],
+        },
+        tags: ['support', 'rich'],
+        trigger: ';RICH',
+      }),
+    );
+  });
+
+  it('prevents unsafe Rich URLs from reaching the save boundary', async () => {
+    const library = createSnippetLibrary();
+    render(
+      <SnippetLibraryView
+        confirmConvert={() => true}
+        snippetLibrary={library}
+      />,
+    );
+    await screen.findByText('No snippets saved yet.');
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Convert to rich template' }),
+    );
+    fireEvent.click(
+      screen.getByLabelText('Convert paragraph 1 segment 1 to link'),
+    );
+    fireEvent.change(screen.getByLabelText('URL'), {
+      target: { value: 'javascript:alert(1)' },
+    });
+
+    expect(
+      screen.getByRole('button', { name: 'Create snippet' }),
+    ).toHaveProperty('disabled', true);
+    expect(library.create).not.toHaveBeenCalled();
   });
 
   it('requires confirmation before deleting and removes a confirmed snippet', async () => {

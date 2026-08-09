@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### M14-C — Rich Snippet Library Authoring UI
+
+- Added explicit draft-only `Convert to rich template` behavior in the existing Snippet Library. Conversion preserves exact readable text in one unformatted paragraph, does not persist before Save, updates the same Snippet identity, and leaves stored Plain content unchanged on Cancel.
+- Added a project-owned structured Rich editor for ordered paragraph and image-reference blocks. Paragraphs support ordered text/link segments, explicit bold and italic marks, link creation/edit/removal, segment removal, and keyboard-operable block movement through semantic buttons.
+- Reused the M14-B URL validators for focused link and image-reference feedback. Unsafe protocols prevent Save, image URLs remain text-only references, pasted markup stays inert input text, and the UI creates no `contenteditable`, HTML parser, live `<img>` preview, fetch, upload, asset store, or clipboard permission.
+- Preserved ordinary Plain creation/editing, title/tags/trigger ownership, canonical trigger behavior, delete/cancel/save flows, projected list previews, and the single `SnippetEntry` application/repository path. Added Plain/Rich list indicators without creating another Library, entity, repository, or trigger system.
+- Added focused conversion, structured-editor, URL-safety, ordering, persistence/reopen, plain-regression, deterministic-projection, and Backup v3 compatibility coverage. M13-B.1 catalog publication remains unchanged, and browser expansion continues using deterministic plain projection.
+- Documentation Impact Review synchronized project state, architecture status, product requirements, roadmap, backlog, UI workflow, testing strategy, changelog, and README. `DECISIONS.md`, `DATABASE_SCHEMA.md`, `CODING_AGENT_RULES.md`, and `ENGINEERING_PRINCIPLES.md` required no changes.
+- M14 remains incomplete. Rich browser insertion is not implemented; after M14-C approval the next action is M14-D — Rich Snippet Browser Rendering. No M14-C commit or push was performed.
+
 ### M14-B — Structured Snippet Content and Backup Foundation
 
 - Implemented the Decision 36 `SnippetContent` union, exact structured validation, approved link/image URL protocols, deep explicit mapping, and deterministic plain-text projection.

@@ -32,7 +32,7 @@
 - Implement Dexie version 4 without new indexes/tables and strict Backup Format v3 with v1/v2 frozen import compatibility and explicit DTO mappings.
 - Keep the existing Library. Default new Snippets to plain, provide explicit plain-to-rich conversion, structured rich editing, and keyboard-accessible ordering; defer rich-to-plain conversion and third-party editor dependencies.
 - Keep variables, arbitrary HTML/CSS, local assets, clipboard ingestion, uploads, provider work, M15 screenshots, analytics, alternate triggers, sync, collaboration, and new permissions out of M14 v1.
-- M14-B implements the structured content and backup foundation. Next task: create M14-C — Rich Snippet Library Authoring UI. Rich browser rendering remains pending after authoring.
+- M14-B implements the structured content and backup foundation, and M14-C implements Rich Snippet Library authoring. After M14-C approval, create M14-D — Rich Snippet Browser Rendering.
 
 ### M15 — Multimodal Screenshot Context
 
@@ -58,4 +58,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. M14 — Rich Snippet Templates is current under Decision 36; M14-B implements its data and backup foundation, and M14-C — Rich Snippet Library Authoring UI is the next action. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and additional integrations remain later work.
+M13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. M14 — Rich Snippet Templates is current under Decision 36; M14-B implements its data and backup foundation, and M14-C implements the Rich Snippet Library Authoring UI. After M14-C approval, M14-D — Rich Snippet Browser Rendering is the next action. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and additional integrations remain later work.

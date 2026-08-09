@@ -160,6 +160,9 @@ Expand Snippet into Response
 - An existing plain Snippet may expose `Convert to rich template`. Conversion is explicit, preserves readable content, and does not change the Snippet's identity, metadata, trigger, or CRUD semantics. Ordinary editing never silently changes its content kind.
 - A Rich Snippet remains rich. M14 v1 does not provide a lossy rich-to-plain toggle.
 - Rich authoring uses extension-owned structured state for paragraphs, bold, italic, links, labelled image references, and block order. Editor HTML is not persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
+- Plain-to-Rich conversion changes only the current draft until Save. Cancel restores the stored Plain record unchanged; Save updates the same Snippet and preserves its title, tags, trigger, identity, and normal repository semantics. A lightweight confirmation explains that Rich-to-Plain conversion is unavailable after saving.
+- Paragraph authoring uses ordered text/link segments with explicit bold and italic controls. Link removal retains its readable text. Link and image-reference URLs show focused protocol feedback and remain subject to domain validation.
+- Image references are edited as Label and URL fields only. The authoring UI displays no live image preview and performs no fetch, upload, caching, or availability inspection.
 - Image references accept a readable label and HTTP(S) URL. They do not upload, fetch, preview from the network automatically, or store a local binary image. Variables and dynamic customer fields are not available.
 
 ## 6. Snippet Trigger Expansion Workflow
@@ -438,7 +441,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. M14-B implements structured persistence, Dexie v4, Backup v3, and a minimal rich-record preservation guard in the existing UI. Rich authoring and rich browser insertion remain pending; M14-C is the next task.
+- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. M14-B implements structured persistence, Dexie v4, and Backup v3. M14-C implements structured authoring in the existing Snippet Library. Rich browser insertion remains pending; M14-D is the next task after M14-C approval.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
