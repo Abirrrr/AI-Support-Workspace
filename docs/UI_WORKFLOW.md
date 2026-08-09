@@ -159,11 +159,13 @@ Expand Snippet into Response
 - Existing and new Snippets default to the current fast plain-text editor. The existing Snippet Library remains the only surface; there is no Rich Templates page.
 - An existing plain Snippet may expose `Convert to rich template`. Conversion is explicit, preserves readable content, and does not change the Snippet's identity, metadata, trigger, or CRUD semantics. Ordinary editing never silently changes its content kind.
 - A Rich Snippet remains rich. M14 v1 does not provide a lossy rich-to-plain toggle.
-- Rich authoring uses extension-owned structured state for paragraphs, bold, italic, links, labelled image references, and block order. Editor HTML is not persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
+- M14-C Rich authoring currently uses extension-owned structured form state for paragraphs, bold, italic, links, labelled image references, and block order. Editor HTML is not persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
 - Plain-to-Rich conversion changes only the current draft until Save. Cancel restores the stored Plain record unchanged; Save updates the same Snippet and preserves its title, tags, trigger, identity, and normal repository semantics. A lightweight confirmation explains that Rich-to-Plain conversion is unavailable after saving.
 - Paragraph authoring uses ordered text/link segments with explicit bold and italic controls. Link removal retains its readable text. Link and image-reference URLs show focused protocol feedback and remain subject to domain validation.
-- Image references are edited as Label and URL fields only. The authoring UI displays no live image preview and performs no fetch, upload, caching, or availability inspection.
-- Image references accept a readable label and HTTP(S) URL. They do not upload, fetch, preview from the network automatically, or store a local binary image. Variables and dynamic customer fields are not available.
+- The current Label/URL Image Reference controls are transitional. Existing saved references remain editable/removable and are never fetched or automatically converted.
+- The target M14-F experience is one normal Rich document editor. With the caret at the desired position, the user pastes a PNG/JPEG/WebP through the editor's normal user-initiated paste event or chooses Insert Image from local disk; the actual locally owned image appears inline between surrounding paragraphs. This paste handling requires no `clipboardRead`. The user never needs a public URL or asset ID.
+- New images remain draft-only with local previews until Save. Cancel discards new bytes; removing a persisted image does not delete it until Save; Save updates content and assets atomically. Preview object URLs are temporary and revoked explicitly. Drag/drop remains optional later.
+- New local image blocks reference Snippet-owned assets; bytes do not live in paragraph text. Limits and malformed/unsupported feedback are explicit. Variables and dynamic customer fields remain unavailable.
 
 ## 6. Snippet Trigger Expansion Workflow
 
@@ -189,18 +191,37 @@ Caret Rests after the Inserted Space
 
 ### Workflow Notes
 
-- Expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. M14 preserves the M13 activation boundary while allowing the adapter to select safe rich rendering or deterministic plain fallback.
+- The implemented expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. Browser delivery is currently deterministic plain insertion.
 - The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
 - A match replaces exactly the trigger range, inserts the saved content as plain text plus the intended single space, preserves surrounding content and line breaks, emits the normal bubbling composed host `input` notification without synthesizing `change`, and places the caret after the inserted space.
 - `textarea` always receives the deterministic plain projection. A supported single-line input expands only when that final projection contains no `\r` or `\n`; otherwise its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit.
-- A safely supported generic contenteditable may receive target-owned text, paragraph, bold, italic, and validated-link nodes. It never parses Snippet HTML and never automatically creates or fetches an image. Each image reference remains in position through `[Image: label] url` unless a separately approved destination capability exists.
+- Future direct Rich rendering may create only proven-safe target-owned text, paragraph, bold, italic, and validated-link nodes. It never parses stored HTML or automatically fetches a reference URL. Image delivery is capability/evidence-driven.
 - A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
 - Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port`. Its transient cache is enabled only while the port is connected and holds a complete validated current-epoch snapshot; ordered invalidation and complete-snapshot messages use that port. Disconnection immediately clears and disables the cache, so no former snapshot can expand. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and stale epochs are rejected.
 - Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame and each clears immediately. Success publishes one rebuilt complete snapshot; persistence failure republishes the unchanged snapshot; publication failure leaves affected frames disabled until reconnect or successful refresh. Content scripts never open Dexie, and no persistent browser-storage catalog, durable queue, polling loop, or per-keystroke worker lookup is created.
-- Intercom is a required real-world validation target, but editor detection and replacement remain behind generic adapters. Destination-specific adaptation may be added only behind that interface when real evidence shows the generic adapter is insufficient.
+- Intercom, Crisp, generic textarea, and generic contenteditable are required real-world validation targets for the revised delivery architecture. Destination-specific adaptation may be added only behind capability resolution when concrete browser evidence justifies it.
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
-- Trigger expansion reads only the bounded text immediately before the caret, logs no editor content, uses no clipboard, sends nothing to an AI provider, and never interprets Snippet content as HTML.
+- Trigger expansion reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Current expansion uses no clipboard; future clipboard fallback is explicit opt-in.
 - For rich content, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, and renders an image reference as `[Image: label] url`. No block disappears.
+
+### Planned Destination Delivery Workflow
+
+```text
+Type Trigger + Space
+→ Delivery Planner checks behavioral capabilities
+├─ reliable direct target → insert directly and complete
+├─ opted-in clipboard target → write clipboard successfully
+│  → safely remove only unchanged trigger/activation space
+│  → show “Snippet copied — press Ctrl+V”
+│  → user presses Ctrl+V for native destination paste
+└─ unavailable/unsupported → preserve input and explain limitation
+```
+
+- Clipboard assistance is real copy plus user native paste, never a synthetic paste event and never a claim that insertion has already occurred.
+- Clipboard capability is enabled globally through an explicit future Settings/options action. Permission denial, revocation, offscreen failure, or write failure preserves normal typing and the trigger. The application never requests clipboard permission silently from trigger input.
+- Because the write is asynchronous, ordinary Space proceeds. Trigger cleanup occurs only after confirmed clipboard success and exact editor/range/catalog/request revalidation; otherwise typed content remains and the copy result reports that cleanup did not occur.
+- `text/plain` always uses deterministic projection. Safe `text/html` contains only validated paragraphs, text, bold/italic, and links. Local images are not silently omitted: until ordered clipboard image delivery is proven, the result is unsupported or explicitly degraded.
+- Current Crisp evidence is limited but actionable: ordinary direct Plain insertion fails in the tested Crisp editor, the same Snippet succeeds in another Rich editor, the speculative generic patch was removed, and manual native paste works. No Crisp-specific runtime is implemented or promised by M14-D.
 
 ## 7. Keyboard Shortcut Workflow
 
@@ -441,7 +462,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Rich Snippet Templates:** Decision 36 defines ordered structured Snippet content on the existing Snippet aggregate, explicit plain-to-rich conversion, URL-reference-only images, safe capability-aware rich insertion, and deterministic positional fallback. M14-B implements structured persistence, Dexie v4, and Backup v3. M14-C implements structured authoring in the existing Snippet Library. Rich browser insertion remains pending; M14-D is the next task after M14-C approval.
+- **M14 — Rich Snippet Templates:** Decision 36 defines the implemented structured foundation; Decision 37 revises image ownership and delivery. M14-B implements Dexie v4/Backup v3, M14-C implements structured authoring, and M14-D defines the target continuous editor, local assets, Dexie v5/Backup v4, and capability-based direct/clipboard delivery. M14-E is next, followed by M14-F through M14-H.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 

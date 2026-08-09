@@ -231,7 +231,7 @@ Low-risk pattern permutations, forced IndexedDB rollback branches, revision-orde
 
 ## Rich Snippet Templates Validation Contract
 
-M14-A is documentation-only and added no runtime tests. M14-B implements automated coverage for the domain/projection, Dexie v4, Backup v1/v2/v3, text consumers, existing plain catalog payload, and minimal UI preservation boundaries below. M14-C adds focused Rich authoring coverage. M14-D must add destination-aware rich browser-rendering coverage when that capability is implemented.
+M14-A and M14-D are documentation-only and add no runtime tests. M14-B implements domain/projection, Dexie v4, Backup v1/v2/v3, text-consumer, and catalog compatibility coverage. M14-C adds focused structured-authoring coverage. Decision 37 divides remaining acceptance across M14-E asset/backup foundation, M14-F unified image authoring, M14-G delivery/clipboard fallback, and M14-H proven destination rendering.
 
 ### Domain and Plain Projection
 
@@ -277,9 +277,51 @@ M14-A is documentation-only and added no runtime tests. M14-B implements automat
 - Cover keyboard-accessible block ordering without requiring drag-and-drop, accessible labels/status/errors, narrow layout, safe structured-state handling, and absence of rich-to-plain conversion, variables, HTML persistence, local binary images, or a separate Template Library.
 - M14-C automated coverage proves conversion is explicit and draft-only; cancel leaves the stored record Plain; Save updates the same identity with metadata and trigger intact; existing Rich data loads and saves without flattening; paragraph, inline, bold, italic, link, image-reference, removal, and ordering controls produce the canonical structured model; unsafe protocols prevent Save; pasted markup remains inert text; no image preview is generated; UI-shaped Rich content persists through the existing application/repository boundary; and existing plain, catalog-projection, and Backup v1/v2/v3 suites remain the regression boundary.
 
+### M14-E Local Asset Foundation and Dexie v5
+
+- Prove PNG/JPEG/WebP Blob round trip, exact MIME/signature/byte validation, and rejection of SVG, HTML, unsupported MIME, malformed bytes, spoofed MIME, unsafe sizes, and non-integer size metadata.
+- Enforce 5 MiB per asset, 20 MiB per Snippet, and 40 MiB project/profile aggregate limits before persistence; test exact boundary values and rollback.
+- Prove each asset has one Snippet owner; reject missing/foreign references and orphan assets; create a distinct asset for repeated insertion; and cascade Snippet deletion atomically.
+- Prove new draft assets persist only with successful Save, Cancel creates no record, existing-asset removal remains draft-only until Save, failed Save preserves prior content/assets, and multi-store transactions leave no partial record.
+- Cover fresh Dexie v5 creation, v4-to-v5 migration without Snippet rewrite or URL fetch, v5 reopen, preserved v1-v4 declarations/indexes, exact new indexes, and all existing Plain/Rich/trigger/Settings/Knowledge regressions.
+
+### M14-E Backup Format v4
+
+- Prove one-file JSON export/import round-trips exact binary bytes, MIME, size, filename, timestamps, asset/Snippet identity, local block order, legacy references, and deterministic `createdAt`/ID asset ordering.
+- Preserve frozen v1/v2/v3 import behavior and exact DTO isolation. Do not allow local asset fields into old versions or remote URL fetching in any version.
+- Enforce the 96 MiB serialized guard, canonical base64, decoded-length equality, MIME signatures, per-asset/per-Snippet/project limits, and safe allocation order.
+- Reject malformed or unsupported assets, missing assets, foreign ownership, unreferenced assets, duplicate asset/Snippet/Knowledge IDs, duplicate triggers, unknown/extra/dangerous keys, and unsupported future versions before persistence.
+- Prove preview/acknowledgement, atomic four-store replace, forced rollback at each asset-aware restore stage, failed-validation preservation, export failure without partial download, and reopen after restore.
+
+### M14-F Unified Rich Editor
+
+- Paste representative PNG, JPEG, and WebP clipboard items in the Rich editor; select the same formats through a labelled file input/Insert Image action; reject unsupported data with accessible focused feedback.
+- Prove inline local preview at the caret, exact paragraph/image ordering, keyboard-accessible reorder/removal, local object-URL creation/revocation, and no network request or remote URL preview.
+- Prove draft Save/reopen, Cancel, existing-image removal/Cancel, replacement, failed Save, limits, and no orphaned asset bytes.
+- Preserve Plain editing/conversion, paragraphs, marks, links, metadata, triggers, legacy URL-reference display/edit/remove/replace, and no automatic legacy conversion.
+- Prove the continuous document surface persists only project-owned structured content and assets: no editor HTML, arbitrary HTML, script, CSS, SVG, asset ID, or Blob/base64 inside paragraph text.
+
+### M14-G Clipboard-Assisted Delivery
+
+- Cover global opt-in, optional `clipboardWrite`/`offscreen` granted, denied, revoked, and unavailable states; verify no `clipboardRead`, no permission request from trigger typing, and no unexplained mandatory clipboard behavior.
+- Prove offscreen creation/message/write/close sequencing, concurrent write serialization, service-worker restart, document creation failure, clipboard write failure, and truthful typed outcomes.
+- Prove trigger and normal Space are preserved on failure; trigger/activation-space cleanup happens only after write success and exact compare-and-swap revalidation; changed editor/range/selection/epoch/revision/request leaves input untouched.
+- Prove exact plain clipboard projection and safe minimal Rich HTML for paragraphs, text, `strong`, `em`, and validated anchors. Reject arbitrary/stored/imported HTML, CSS, script, iframe, untrusted schemes, and serializer/transport coupling.
+- Prove accessible `Snippet copied — press Ctrl+V` feedback occurs only after copy, never claims paste completion, and supports the explicit extension UI Copy fallback when trigger-originated clipboard activation is unavailable.
+- Treat local image clipboard payloads as unsupported until separately proven. Test that image-containing Snippets are not partially written or silently degraded and that asset IDs never escape.
+
+### M14-H Destination Delivery
+
+- Regress every currently supported textarea, text/search input, and generic contenteditable direct path, including exact trigger replacement, surrounding content, line breaks, one trailing U+0020, caret, input notification, catalog mutation barrier, reload, disconnect, and normal-typing failure behavior.
+- Validate direct Rich paragraph, bold, italic, and link rendering only in targets whose capabilities are proven. Test target-owned nodes, no HTML parser, and deterministic plain fallback where explicitly selected.
+- Run real Chrome validation in Crisp, Intercom, a generic textarea, a generic contenteditable, and another normal website. Record browser version, DOM/editor evidence, selected strategy, any destination-specific adapter, and unsupported capability outcomes.
+- For images, validate only representations proven for that browser/destination. Never report success after omission; exercise completed-direct, prepared-for-native-paste, intentionally-degraded, and unsupported-with-reason outcomes.
+
 ### Real Chrome Manual Validation
 
-M14-C receives no claimed real Chrome validation before Principal Engineer source review and product-owner validation. Future risk-based Chrome validation should cover the existing Plain workflow; explicit conversion and Rich editing; Save/reopen and cancel; Backup v3 export/restore; and appropriate Library regressions. M14-D must separately validate rich expansion in Intercom, deterministic textarea fallback, another normal website, exact surrounding content/caret/input behavior, live catalog refresh, and extension/service-worker reload recovery when rich browser rendering is implemented.
+M14-D claims no new real Chrome validation because it changes documentation only. The architecture records existing evidence: direct insertion of an ordinary Plain Snippet fails in tested Crisp, the same Snippet succeeds in another Rich editor, upstream persistence/projection/catalog delivery was separately verified, the speculative generic patch was removed, and manual native paste into Crisp works. This does not prove clipboard transport or authorize a Crisp-specific adapter.
+
+M14-E manual validation must cover representative asset persistence/reopen and Backup v4 export/restore in Chrome. M14-F must cover clipboard paste, file selection, local previews, Save/Cancel, and legacy records. M14-G must prove optional permission and offscreen transport, denial/failure safety, trigger cleanup races, user notification, and native user paste. M14-H must cover Crisp, Intercom, generic textarea/contenteditable, links/formatting, reload/catalog behavior, and explicit image capability outcomes.
 
 Manual validation need not exhaustively test every website. Closeout must identify the exact editors/origins tested, any destination-specific adapter used, omissions, and why each omission is non-blocking.
 

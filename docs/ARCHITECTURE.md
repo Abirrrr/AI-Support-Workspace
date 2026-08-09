@@ -346,6 +346,8 @@ Insertion is plain text only: no `innerHTML`, script, markup execution, external
 
 Milestone 14 extends the existing M13 Snippet aggregate, repository, trigger catalog, and editor-adapter foundation. A Rich Snippet is still a `SnippetEntry`: its ID, title, tags, optional canonical trigger, timestamps, repository identity, CRUD lifecycle, and trigger uniqueness retain their current meanings. The product has one Snippet Library and one trigger system; it does not add `TemplateEntry`, a parallel Template Library, or duplicated plain/rich records.
 
+The Decision 36 subsections below describe the implemented architecture through M14-C: structured paragraph/link content, legacy URL Image References, Dexie v4, Backup v3, structured form authoring, and deterministic plain browser expansion without local assets or clipboard delivery. Decision 37 later in this section explicitly supersedes only the pending image-ownership and delivery boundaries and defines approved future M14 architecture that is not yet implemented.
+
 #### Canonical Content and Validation
 
 The approved domain representation has one source of truth:
@@ -364,11 +366,11 @@ interface RichSnippetContent {
 }
 ```
 
-Rich content is a small, project-owned, ordered document model, never HTML. A paragraph block contains ordered inline nodes. A reference block initially has exactly `type: 'reference'`, `referenceType: 'image'`, a user-readable `label`, and a user-supplied `url`. Paragraph inline nodes are either text or link nodes; both carry explicit `bold` and `italic` booleans, while a link additionally carries its URL. The model is non-recursive and supports no arbitrary nesting, HTML, DOM node, CSS, font, color, table, script, event handler, iframe, video, or embed.
+The implemented M14-C Rich content is a small, project-owned, ordered document model, never HTML. A paragraph block contains ordered inline nodes. Its currently implemented image representation is the legacy reference block with exactly `type: 'reference'`, `referenceType: 'image'`, a user-readable `label`, and a user-supplied `url`. Paragraph inline nodes are either text or link nodes; both carry explicit `bold` and `italic` booleans, while a link additionally carries its URL. The model is non-recursive and supports no arbitrary nesting, HTML, DOM node, CSS, font, color, table, script, event handler, iframe, video, or embed.
 
 Ordinary link URLs initially allow only `https:`, `http:`, and `mailto:`. Image-reference URLs allow only `https:` and `http:`. Values using `javascript:`, `data:`, `blob:`, `file:`, `chrome:`, `chrome-extension:`, or another unapproved scheme are rejected before persistence and again at untrusted backup import. Imported HTML is never interpreted or converted.
 
-M14 v1 resolves reusable images as references, not binary assets. It persists no Blob, base64 data, local file, clipboard image, fetched response, or upload-provider identity; adds no `snippetAssets` table, extension-managed file store, hosting service, or cloud uploader; and never automatically fetches a supplied URL. Local reusable asset storage requires a separate decision covering ownership, limits, backup, editor upload semantics, portability, and lifecycle. M15 screenshot Context remains a distinct transient generation-input domain and cannot be reused for M14 storage.
+The implemented Decision 36/M14-C baseline resolves reusable images only as URL references. It currently persists no Blob, base64 data, local file, clipboard image, fetched response, or upload-provider identity; has no `snippetAssets` table, extension-managed file store, hosting service, or cloud uploader; and never automatically fetches a supplied URL. Decision 37 below supplies the approved local-asset architecture, but its local image blocks, asset persistence, Dexie v5, Backup v4, and unified inline-image authoring remain unimplemented. M15 screenshot Context remains a distinct transient generation-input domain and cannot be reused for M14 storage.
 
 #### Deterministic Plain Projection and AI Compatibility
 
@@ -387,7 +389,7 @@ M14 changes no provider contract, endpoint, provider serialization, model behavi
 
 #### Expansion and Rendering
 
-Destination-aware expansion extends the M13 adapter boundary:
+Decision 36 proposed destination-aware expansion through the M13 adapter boundary:
 
 ```text
 Persisted Snippet
@@ -401,7 +403,7 @@ Persisted Snippet
   └── Plain Renderer
 ```
 
-The adapter determines target capability; the domain contains no Intercom, Gmail, Shopify, Crisp, or other destination names. A safely supported generic `contenteditable` may render only extension-created text nodes, paragraph separation using `<p>` or an equivalent safe structure, `<strong>`, `<em>`, and validated `<a>` nodes, all created from the target's own `ownerDocument`. Snippet insertion must not use `innerHTML`, `insertAdjacentHTML`, `DOMParser`, or `document.write`. Generic rendering neither creates `<img>` nor fetches a reference URL. An image-reference block retains its position through the deterministic reference text unless a separately approved destination capability safely supports real inline-image insertion.
+The current M14-C runtime has not implemented that Rich renderer: its trigger catalog and browser expansion still use deterministic plain projection. Under the Decision 36 safety boundary, a future safely supported generic `contenteditable` could render only extension-created text nodes, paragraph separation using `<p>` or an equivalent safe structure, `<strong>`, `<em>`, and validated `<a>` nodes created from the target's own `ownerDocument`; it could not use `innerHTML`, `insertAdjacentHTML`, `DOMParser`, or `document.write`. Decision 37 below now makes the Delivery Planner and evidence-backed target capabilities authoritative for future delivery. Destination names do not enter the domain.
 
 `textarea` always receives the plain projection. M13's absent/text/search single-line input boundary remains: if the final projection contains `\r` or `\n`, the adapter declines before preventing Space, leaves the host value unchanged, and preserves normal typing. Content is never truncated, flattened, normalized, or partially inserted to fit.
 
@@ -454,9 +456,51 @@ Backup v3
 → current PlainSnippetContent or RichSnippetContent
 ```
 
-M14 remains local-first. It captures or logs no surrounding conversation/editor content, trigger usage, history, page data, or provider state; sends no Snippet payload to an AI provider, analytics, or telemetry; reads or writes no clipboard; performs no page scraping; and adds no persistent content-script storage. The Rich Snippet payload is extension-owned user data and content-script inspection remains limited to M13's bounded trigger candidate and exact replacement range.
+The implementation through M14-C remains local-first. It captures or logs no surrounding conversation/editor content, trigger usage, history, page data, or provider state; sends no Snippet payload to an AI provider, analytics, or telemetry; currently performs no clipboard read or write; performs no page scraping; and adds no persistent content-script storage. The Rich Snippet payload is extension-owned user data and content-script inspection remains limited to M13's bounded trigger candidate and exact replacement range. Decision 37 approves optional clipboard-assisted delivery for future M14-G without implying that transport exists today.
 
-M14 v1 introduces no variables, placeholders, merge fields, customer interpolation, conditions, loops, scripting, AI-generated fields, arbitrary HTML/CSS, local binary images, clipboard ingestion, file upload, cloud hosting, automatic remote loading, screenshot generation Context, page scraping, usage analytics, trigger autocomplete, alternate trigger syntax, folder redesign, collaboration, sync, provider change, or new Chrome permission. Normal website scope remains exactly `http://*/*` and `https://*/*`; protected pages and other schemes remain unsupported. Existing `sidePanel`, `activeTab`, `scripting`, and localhost Ollama access remain unchanged, and M14 adds no `<all_urls>`, `file://`, `tabs`, clipboard, downloads, `webRequest`, cookies, identity, or new host permission.
+The implemented M14-C baseline introduces no variables, placeholders, merge fields, customer interpolation, conditions, loops, scripting, AI-generated fields, arbitrary HTML/CSS, local binary images, clipboard ingestion, file upload, cloud hosting, automatic remote loading, screenshot generation Context, page scraping, usage analytics, trigger autocomplete, alternate trigger syntax, folder redesign, collaboration, sync, provider change, or new Chrome permission. Its manifest still contains no clipboard/offscreen permission. Decision 37 supersedes this baseline only for approved future locally owned images and globally opt-in clipboard assistance with optional `clipboardWrite`/`offscreen`; neither capability is implemented. Normal website scope remains exactly `http://*/*` and `https://*/*`; protected pages and other schemes remain unsupported. Existing `sidePanel`, `activeTab`, `scripting`, and localhost Ollama access remain unchanged, and no `<all_urls>`, `file://`, `tabs`, downloads, `webRequest`, cookies, identity, or new host permission is approved.
+
+#### Decision 37 Local Image Revision
+
+M14-D revises the final Rich authoring target without invalidating the implemented M14-C checkpoint. The product surface evolves from the transitional block form and URL Image Reference controls to one continuous Rich document editor where users paste a PNG/JPEG/WebP or choose it from local disk and see the actual local image inline. The persisted source remains project-owned structured data, never editor HTML. Existing URL image references stay readable and removable as legacy blocks and are never fetched or automatically converted.
+
+```text
+SnippetEntry
+→ RichSnippetContent
+→ local image block { type, assetId, altText }
+→ SnippetAsset { id, snippetId, mimeType, blob, byteSize,
+                 originalFilename, createdAt }
+```
+
+The content model owns placement and optional human alt text; the asset store owns bytes. Each asset has one Snippet owner, cannot be shared across Snippets, and initially represents one insertion. Draft bytes stay in editor/application memory until Save. Runtime object URLs are preview handles only and are revoked on removal, replacement, cancel, or unmount. Save coordinates content plus asset creation/deletion in one transaction; Cancel cannot orphan or delete persisted data. Local images accept only PNG, JPEG, and WebP after MIME, signature, and byte validation. Limits are 5 MiB per asset, 20 MiB per Snippet, and 40 MiB per local profile/project.
+
+Dexie v5 adds only `snippetAssets: 'id, snippetId, createdAt'`; v1-v4 declarations remain unchanged and v4-to-v5 does not rewrite Snippets or fetch legacy URLs. The application/repository boundary enforces ownership and referential integrity because IndexedDB provides no foreign keys. Snippet deletion and content/asset Save run atomically across `snippetEntries` and `snippetAssets`.
+
+Backup v1-v3 remain frozen and importable. Backup v4 remains one strict JSON file, adds exact `snippetAssets`, and serializes each Blob as canonical RFC 4648 base64 with declared byte size, MIME, ownership, optional filename, and creation metadata. V4 validates exact keys, a 96 MiB serialized guard, base64 canonicality, decoded size, format signature, duplicate identity, ownership, missing/foreign/unreferenced assets, and aggregate limits before one atomic restore. Its deterministic asset ordering is `createdAt` then `id`. The roughly one-third base64 expansion and transient in-memory duplication are accepted for a simple provider-independent local-first first version; archives and compression remain deferred.
+
+#### Delivery Planning Revision
+
+Delivery planning becomes a project-owned application boundary above target adapters:
+
+```text
+SnippetContent + local assets
+→ Delivery Planner
+→ behavioral target capabilities
+→ direct plain | direct rich | clipboard-assisted | unsupported
+→ explicit delivery outcome
+```
+
+Capabilities describe behavior—direct plain, direct rich, hyperlinks, inline images, clipboard assistance, rich clipboard HTML, and clipboard images—not provider names. Destination evidence maps the active host/editor to capabilities behind adapter resolution. Direct insertion remains preferred wherever it is proven reliable and retains every M13 trigger, range, trailing-space, caret, input, cache, and mutation-barrier guarantee. An image-containing Snippet is never reported as delivered when the selected strategy omitted the image; degradation requires an explicit user/product choice.
+
+Clipboard assistance means an extension-owned clipboard write followed by the user's native `Ctrl+V`, not synthetic paste. The serializer always provides deterministic `text/plain` and may provide minimal `text/html` made only from validated paragraphs, text, `strong`, `em`, and anchors. Serializer and transport are separate. Image clipboard serialization is not approved until browser and destination evidence proves ordered formatted text plus one or more local images; unsupported image delivery returns a typed limitation rather than dropping data or exposing asset IDs.
+
+Clipboard fallback is globally opt-in. A future options/Settings action explains and requests optional `clipboardWrite` and optional `offscreen`; trigger input never requests permission silently, and M14-D changes no manifest. Chrome's current extension documentation states that `clipboardWrite` carries a user warning, MV3 service workers lack DOM/window, and an offscreen document with reason `CLIPBOARD` provides the hidden document context. The service worker will coordinate a short-lived packaged offscreen document through runtime messaging after permission grant. No `clipboardRead` is used. Denial, revocation, serialization, offscreen, or write failure preserves input and produces no success claim.
+
+Because clipboard writing is asynchronous while canceling `beforeinput` is synchronous, trigger cleanup uses an exact compare-and-swap after confirmed write: ordinary Space proceeds, and cleanup occurs only if the same editor, trigger, activation space, selection contract, catalog epoch/revision, and request are unchanged. Otherwise the content remains untouched and the UI reports copied without cleanup. M14-G must prove user activation, optional permission, offscreen lifecycle, clipboard representation, and this race behavior in real Chrome; an explicit extension UI Copy action is the safe fallback if trigger-originated writing cannot be made reliable.
+
+The current Crisp evidence is a capability input, not domain logic: ordinary direct Plain insertion fails in the tested Crisp editor, the same Snippet succeeds elsewhere, upstream content/catalog boundaries were separately verified, the failed speculative contenteditable patch was removed, and manual native paste works. No Crisp-specific adapter is approved without concrete implementation evidence.
+
+M14-D is documentation-only. Runtime work is split into M14-E asset/Dexie v5/Backup v4 foundation, M14-F unified inline-image authoring, M14-G delivery planning and clipboard fallback, and M14-H proven rich rendering/image-delivery capabilities. Durable Snippet assets remain separate from M15 transient generation Context and never enter provider requests, telemetry, logs, cloud synchronization, or project-hosted uploads.
 
 ### Project Layer Responsibilities
 
@@ -494,4 +538,4 @@ The structure may be refined only through an approved documentation change. Dire
 
 ## Current Status
 
-The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 13 are implemented and validated. M13-A.1 defined the architecture; M13-B implemented it; M13-B.1 corrected the catalog publication barrier; and M13-B.2 established isolated-world-safe integration plus all-normal-HTTP/HTTPS availability. Principal Engineer review, automated validation, product-owner real Chrome validation, implementation checkpoint `b76fcb4`, and closeout checkpoint `9a3c7ef` are complete. M14 — Rich Snippet Templates is current under Decision 36 and architecture checkpoint `c1105d4`. M14-B implements structured content, Dexie version 4, Backup Format v3, and plain-projection compatibility at `ed23f30`; M14-C implements structured authoring through project-owned React form state and the existing application boundary. Browser insertion remains plain-only. After M14-C approval, the next action is M14-D — Rich Snippet Browser Rendering.
+The platform architecture remains approved and frozen: WXT, Manifest V3, TypeScript, React, Tailwind CSS, pnpm, Dexie, React Context and Hooks, Vitest, Playwright, ESLint, Prettier, Husky, and lint-staged. Milestones 1 through 13 are implemented and validated. M13 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. M14 is current under Decision 36 as partially superseded by Decision 37. M14-B implements structured content, Dexie v4, Backup v3, and plain-projection compatibility at `ed23f30`; M14-C implements structured authoring at `a787100`. M14-D is architecture/documentation only and defines local assets plus direct/clipboard delivery without changing the still-plain browser runtime. The next action is M14-E — Local Image Asset Foundation and Backup v4.

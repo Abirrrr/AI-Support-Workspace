@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### M14-D — Rich Snippet Delivery and Local Image Architecture
+
+- Added Decision 37 as a deliberate partial supersession of Decision 36 after M14-C product evidence. Preserved the single Snippet aggregate/Library, project-owned structured content, deterministic text projection, Retrieval/Prompt Builder compatibility, M13 catalog/trigger guarantees, local-first ownership, and provider independence.
+- Defined the target authoring UX as one continuous Rich document surface with normal clipboard paste and Insert Image from disk. The M14-C Label/URL Image Reference controls are transitional; existing URL references remain readable/importable/removable and are never fetched or automatically converted.
+- Defined Snippet-owned local image blocks and assets, draft-only ingestion/previews, object-URL revocation, atomic Save/delete/cancel semantics, PNG/JPEG/WebP validation, and explicit 5 MiB per-asset, 20 MiB per-Snippet, and 40 MiB project/profile limits. Durable assets remain separate from M15 screenshots and provider requests.
+- Defined Dexie v5 with dedicated `snippetAssets: 'id, snippetId, createdAt'`, no v4 record rewrite, and transactionally enforced ownership/orphan prevention. Defined strict single-JSON Backup v4 with canonical base64 assets, deterministic order, a 96 MiB serialized guard, complete graph validation, atomic restore, and frozen v1/v2/v3 import compatibility.
+- Added the application Delivery Planner and behavioral capability/outcome model for reliable direct insertion, clipboard-assisted native paste, intentional degradation, and unsupported cases. Local images cannot be silently omitted, exposed as asset IDs, or claimed delivered without evidence.
+- Defined globally opt-in clipboard fallback using future optional `clipboardWrite` and optional `offscreen`, separate safe plain/HTML serialization and transport, a short-lived MV3 offscreen document, no `clipboardRead`, failure-safe input preservation, and compare-and-swap cleanup only after successful write. M14-D adds no manifest permission or runtime behavior.
+- Recorded Crisp evidence accurately: ordinary direct Plain insertion fails in the tested editor, the same Snippet works elsewhere, the failed speculative contenteditable patch was removed, and manual native paste works. No Crisp-specific adapter or synthetic paste is approved.
+- Revised the sequence to M14-E asset/Dexie v5/Backup v4 foundation, M14-F unified inline-image authoring, M14-G delivery/clipboard fallback, and M14-H proven Rich/image destination delivery. Reviewed `ENGINEERING_PRINCIPLES.md` and `CODING_AGENT_RULES.md`; no changes were materially required.
+- M14-D is architecture/documentation only. It changes no source, tests, configuration, dependency, manifest, permission, schema implementation, or backup implementation, and performs no commit or push. M14-C remains the last completed implementation task at `a787100`; the next action is M14-E — Local Image Asset Foundation and Backup v4.
+
 ### M14-C — Rich Snippet Library Authoring UI
 
 - Added explicit draft-only `Convert to rich template` behavior in the existing Snippet Library. Conversion preserves exact readable text in one unformatted paragraph, does not persist before Save, updates the same Snippet identity, and leaves stored Plain content unchanged on Cancel.
@@ -10,7 +22,7 @@
 - Preserved ordinary Plain creation/editing, title/tags/trigger ownership, canonical trigger behavior, delete/cancel/save flows, projected list previews, and the single `SnippetEntry` application/repository path. Added Plain/Rich list indicators without creating another Library, entity, repository, or trigger system.
 - Added focused conversion, structured-editor, URL-safety, ordering, persistence/reopen, plain-regression, deterministic-projection, and Backup v3 compatibility coverage. M13-B.1 catalog publication remains unchanged, and browser expansion continues using deterministic plain projection.
 - Documentation Impact Review synchronized project state, architecture status, product requirements, roadmap, backlog, UI workflow, testing strategy, changelog, and README. `DECISIONS.md`, `DATABASE_SCHEMA.md`, `CODING_AGENT_RULES.md`, and `ENGINEERING_PRINCIPLES.md` required no changes.
-- M14 remains incomplete. Rich browser insertion is not implemented; after M14-C approval the next action is M14-D — Rich Snippet Browser Rendering. No M14-C commit or push was performed.
+- M14-C is complete at `a787100` (`feat: add rich snippet authoring`). M14-D later revised the pending local-image and delivery architecture without changing M14-C source.
 
 ### M14-B — Structured Snippet Content and Backup Foundation
 
