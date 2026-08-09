@@ -62,6 +62,7 @@ const prepared: PreparedBackupImport = {
   backup,
   preview: {
     filename: 'merchant-backup.json',
+    formatVersion: 1,
     exportedAt: backup.exportedAt,
     knowledgeCount: 1,
     snippetCount: 1,

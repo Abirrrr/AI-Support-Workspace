@@ -15,7 +15,9 @@ export class TriggerCatalogService implements TriggerCatalogReader {
   async readCatalog(): Promise<readonly TriggerCatalogEntry[]> {
     const snippets = await this.repository.list();
     return snippets.flatMap((snippet) =>
-      snippet.trigger === null || containsLocalImageBlock(snippet.content)
+      snippet.trigger === null ||
+      snippet.content.kind === 'image' ||
+      containsLocalImageBlock(snippet.content)
         ? []
         : [
             {

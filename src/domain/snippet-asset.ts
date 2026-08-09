@@ -136,3 +136,22 @@ export async function validateSnippetAsset(
     createdAt: value.createdAt,
   };
 }
+
+const DRAFT_VALIDATION_OWNER_ID = '00000000-0000-4000-8000-000000000000';
+
+export async function validateSnippetAssetDraft(
+  draft: SnippetAssetDraft,
+): Promise<SnippetAssetDraft> {
+  const validated = await validateSnippetAsset({
+    ...draft,
+    snippetId: DRAFT_VALIDATION_OWNER_ID,
+  });
+  return {
+    id: validated.id,
+    mimeType: validated.mimeType,
+    blob: validated.blob,
+    byteSize: validated.byteSize,
+    originalFilename: validated.originalFilename,
+    createdAt: validated.createdAt,
+  };
+}

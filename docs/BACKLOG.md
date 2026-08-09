@@ -29,10 +29,10 @@
 - Apply Decision 39: Rich Snippets target paragraphs, bold, italic, links, bullet lists, and numbered lists. M14-F inline local-image Rich authoring is cancelled before implementation.
 - Add Image Snippets as a distinct `SnippetContent` type with exactly one same-owner local PNG/JPEG/WebP asset and the normal trigger system. Do not create an Image Library, galleries, shared assets, image/text combinations, or "Use as Context."
 - Preserve legacy HTTP(S) Image References without fetching/conversion. Preserve existing Rich local-image blocks as compatibility-only Backup-v4 data under Decision 38; allow no new authoring or automatic mixed-record conversion.
-- **Next — M14-G:** implement structured unordered/ordered lists, the minimal image content discriminant needed for one complete Backup v5 contract, strict Backup v5, v1-v4 import regression coverage, and no Dexie v6. No Image Snippet UI/delivery.
-- **Then — M14-H:** implement exactly-one Image Snippet ownership and paste/select/preview/replace/remove-before-Save/Save/Cancel/reopen UI through M14-E transactions. Keep image triggers excluded until typed delivery.
-- **Then — M14-I:** implement typed catalog descriptors without binaries, on-demand asset lookup, optional `clipboardWrite`/`offscreen`, PNG preparation, safe post-copy trigger cleanup, `Image copied — press Ctrl+V`, and real user paste. Never use clipboard read or synthetic paste.
-- **Then — M14-J:** implement Rich text/list delivery through proven safe direct or clipboard-assisted text/HTML strategies and record Crisp/Intercom capability evidence. No normal Rich image delivery.
+- **Completed, uncommitted — M14-G/G.2:** implemented lists, the Image discriminant, Backup v5, semantic isolation, constrained Text WYSIWYG, simplified Library, and screenshot/file Image authoring with atomic asset lifecycle reuse.
+- **M14-H:** ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.
+- **Next — M14-I:** implement unified Text + Image clipboard delivery and trigger planning: safe Text HTML/plain serialization, portable local image preparation, no binary catalog payload, safe post-copy cleanup, truthful feedback, and real native paste. Never use clipboard read or synthetic paste.
+- **Then — M14-J:** validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors; add direct insertion only where evidence proves it worthwhile and retain graceful fallback.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
 ### M15 — Multimodal Screenshot Context
@@ -66,4 +66,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`. Decision 39 cancels the former M14-F before implementation and revises the remaining sequence to M14-G through M14-J. The next action after M14-F.1 approval is M14-G — Rich Snippet Structured Lists and Backup v5 Foundation. M15 remains Multimodal Screenshot Context, M16 remains OpenAI Provider Expansion, and workflow polish and integrations remain later work.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 is committed at `b7d16ec`, and M14-G/G.2 is implemented but uncommitted pending review. The next action after approval is M14-I — Unified Snippet Clipboard Delivery and Trigger Planner. M15 remains Multimodal Screenshot Context and separate from reusable Image Snippets.

@@ -7,656 +7,526 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
-import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
-import {
-  DuplicateSnippetTriggerError,
-  InvalidSnippetTriggerError,
-} from '../../src/application/snippet/snippet-trigger';
-import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
+import type {
+  SnippetAsset,
+  SnippetAssetMimeType,
+} from '../../src/domain/snippet-asset';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
-import {
-  createPlainSnippetContent,
-  renderSnippetPlainText,
-} from '../../src/domain/snippet-content';
-import type { ImportExportActions } from '../../src/ui/import-export/ImportExportView';
-import { OptionsShell } from '../../src/ui/options/OptionsShell';
 import { SnippetLibraryView } from '../../src/ui/snippet/SnippetLibraryView';
 
-const entry: SnippetEntry = {
-  id: 'snippet-1',
-  title: 'Order confirmation',
-  content: createPlainSnippetContent('Your order has been confirmed.'),
-  tags: ['orders', 'confirmation'],
-  createdAt: '2026-07-26T12:00:00.000Z',
-  updatedAt: '2026-07-26T12:00:00.000Z',
-  trigger: null,
-};
+const CREATED = '2026-08-09T00:00:00.000Z';
+const SNIPPET_ID = '123e4567-e89b-42d3-a456-426614174000';
+const ASSET_ID = '223e4567-e89b-42d3-a456-426614174000';
+const SECOND_ASSET_ID = '523e4567-e89b-42d3-a456-426614174000';
 
-const importExport: ImportExportActions = {
-  exportBackup: async () => undefined,
-  prepareImport: async () => {
-    throw new Error('Not used by this navigation test.');
+const plain: SnippetEntry = {
+  id: SNIPPET_ID,
+  title: 'Welcome response',
+  content: { kind: 'plain', text: 'Hello\nthere' },
+  tags: ['greeting'],
+  trigger: ';welcome',
+  createdAt: CREATED,
+  updatedAt: CREATED,
+};
+const rich: SnippetEntry = {
+  ...plain,
+  id: '323e4567-e89b-42d3-a456-426614174000',
+  title: 'Widget setup',
+  content: {
+    kind: 'rich',
+    blocks: [
+      {
+        type: 'paragraph',
+        children: [
+          { type: 'text', text: 'Open settings', bold: true, italic: false },
+        ],
+      },
+    ],
   },
-  restoreBackup: async () => undefined,
+};
+const imageEntry: SnippetEntry = {
+  ...plain,
+  id: '423e4567-e89b-42d3-a456-426614174000',
+  title: 'Limitation screenshot',
+  content: { kind: 'image', assetId: ASSET_ID },
+  trigger: ';limitation',
+};
+const secondImageEntry: SnippetEntry = {
+  ...imageEntry,
+  id: '623e4567-e89b-42d3-a456-426614174000',
+  title: 'Second screenshot',
+  content: { kind: 'image', assetId: SECOND_ASSET_ID },
+  trigger: ';second-image',
 };
 
-function createSnippetLibrary(overrides: Partial<SnippetLibrary> = {}) {
+function bytesFor(mimeType: SnippetAssetMimeType): number[] {
+  if (mimeType === 'image/png')
+    return [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (mimeType === 'image/jpeg') return [0xff, 0xd8, 0xff];
+  return [0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50];
+}
+
+function localFile(
+  mimeType: SnippetAssetMimeType,
+  filename = 'capture.bin',
+): File {
+  const file = new File([Uint8Array.from(bytesFor(mimeType))], filename, {
+    type: mimeType,
+  });
+  Object.defineProperty(file, 'arrayBuffer', {
+    value: async () => Uint8Array.from(bytesFor(mimeType)).buffer,
+  });
+  return file;
+}
+
+function asset(overrides: Partial<SnippetAsset> = {}): SnippetAsset {
+  const file = localFile('image/png', 'original.png');
   return {
-    load: vi.fn(async () => []),
+    id: ASSET_ID,
+    snippetId: imageEntry.id,
+    mimeType: 'image/png',
+    blob: file,
+    byteSize: file.size,
+    originalFilename: file.name,
+    createdAt: CREATED,
+    ...overrides,
+  };
+}
+
+function deferred<T>() {
+  let resolvePromise: (value: T) => void = () => {
+    throw new Error('Deferred promise was not initialized.');
+  };
+  let rejectPromise: (reason?: unknown) => void = () => {
+    throw new Error('Deferred promise was not initialized.');
+  };
+  const promise = new Promise<T>((resolve, reject) => {
+    resolvePromise = resolve;
+    rejectPromise = reject;
+  });
+  return { promise, resolve: resolvePromise, reject: rejectPromise };
+}
+
+function library(entries: readonly SnippetEntry[] = []): SnippetLibrary {
+  return {
+    load: vi.fn(async () => entries),
+    loadAsset: vi.fn(async () => asset()),
     create: vi.fn(async (input) => ({
-      id: 'snippet-created',
+      id: SNIPPET_ID,
       ...input,
-      createdAt: '2026-07-26T12:00:01.000Z',
-      updatedAt: '2026-07-26T12:00:01.000Z',
+      createdAt: CREATED,
+      updatedAt: CREATED,
     })),
     update: vi.fn(async (id, input) => ({
       id,
       ...input,
-      createdAt: entry.createdAt,
-      updatedAt: '2026-07-26T12:00:02.000Z',
+      createdAt: CREATED,
+      updatedAt: CREATED,
     })),
     delete: vi.fn(async () => true),
-    ...overrides,
-  } satisfies SnippetLibrary;
-}
-
-function createKnowledgeLibrary() {
-  return {
-    load: vi.fn(async () => []),
-    create: vi.fn(async () => {
-      throw new Error('Not used by this navigation test.');
-    }),
-    update: vi.fn(async () => {
-      throw new Error('Not used by this navigation test.');
-    }),
-    delete: vi.fn(async () => false),
-  } satisfies KnowledgeLibrary;
-}
-
-function createSettings(): SettingsApplication {
-  return {
-    load: vi.fn(async () => ({ defaultModel: null })),
-    save: vi.fn(async (defaultModelInput) => ({
-      defaultModel: defaultModelInput.trim() || null,
-    })),
   };
 }
 
-afterEach(cleanup);
+beforeEach(() => {
+  Object.defineProperty(URL, 'createObjectURL', {
+    configurable: true,
+    value: vi.fn((blob: Blob) => `blob:${(blob as File).name || 'preview'}`),
+  });
+  Object.defineProperty(URL, 'revokeObjectURL', {
+    configurable: true,
+    value: vi.fn(),
+  });
+});
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
-describe('SnippetLibraryView', () => {
-  it('renders existing snippets with their approved fields', async () => {
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [entry]),
-    });
-
+describe('unified Snippet Library', () => {
+  it('shows Plain and Rich as Text, Image as Image, and supports search and filters', async () => {
     render(
       <SnippetLibraryView
-        confirmDelete={() => true}
-        snippetLibrary={library}
+        snippetLibrary={library([plain, rich, imageEntry])}
       />,
     );
+    expect(await screen.findByText('Welcome response')).toBeTruthy();
+    expect(screen.getAllByText('Text')).toHaveLength(2);
+    expect(screen.getByText('Image')).toBeTruthy();
+    expect(document.body.textContent).not.toContain(ASSET_ID);
+    fireEvent.click(screen.getByRole('button', { name: 'images' }));
+    expect(screen.queryByText('Welcome response')).toBeNull();
+    expect(screen.getByText('Limitation screenshot')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'all' }));
+    fireEvent.change(screen.getByPlaceholderText('Search snippets...'), {
+      target: { value: 'widget' },
+    });
+    expect(screen.getByText('Widget setup')).toBeTruthy();
+    expect(screen.queryByText('Welcome response')).toBeNull();
+  });
 
-    expect(await screen.findByText(entry.title)).toBeTruthy();
+  it('offers only Text and Image creation and new Text records are Rich', async () => {
+    const service = library();
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('No matching snippets.');
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    expect(screen.getByRole('button', { name: /Text Snippet/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Image Snippet/ })).toBeTruthy();
+    expect(screen.queryByText(/Plain/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Text Snippet/ }));
     expect(
-      screen.getByText(renderSnippetPlainText(entry.content)),
+      await screen.findByRole('toolbar', { name: 'Text formatting' }),
     ).toBeTruthy();
-    expect(screen.getByText('orders')).toBeTruthy();
-    expect(screen.getByText('confirmation')).toBeTruthy();
-  });
-
-  it('renders loading and empty states', async () => {
-    render(<SnippetLibraryView snippetLibrary={createSnippetLibrary()} />);
-
-    expect(screen.getByText('Loading snippets…')).toBeTruthy();
-    expect(await screen.findByText('No snippets saved yet.')).toBeTruthy();
-  });
-
-  it('creates a snippet and reflects it without reloading the library', async () => {
-    const library = createSnippetLibrary();
-    render(<SnippetLibraryView snippetLibrary={library} />);
-    await screen.findByText('No snippets saved yet.');
-
-    fireEvent.change(screen.getByLabelText('Title'), {
-      target: { value: 'Refund confirmation' },
-    });
-    fireEvent.change(screen.getByLabelText('Content'), {
-      target: { value: 'Your refund has been processed.' },
-    });
-    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
-      target: { value: 'billing, refunds' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
-
-    await waitFor(() =>
-      expect(library.create).toHaveBeenCalledWith({
-        title: 'Refund confirmation',
-        content: createPlainSnippetContent('Your refund has been processed.'),
-        tags: ['billing', 'refunds'],
-        trigger: null,
-      }),
+    expect(screen.getByRole('button', { name: 'Bold' })).toBeTruthy();
+    expect(screen.queryByText(/Convert to rich/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.create).toHaveBeenCalled());
+    expect(vi.mocked(service.create).mock.calls[0]?.[0].content.kind).toBe(
+      'rich',
     );
-    expect(await screen.findByText('Refund confirmation')).toBeTruthy();
-    expect(screen.getByText('Snippet created.')).toBeTruthy();
-    expect(library.load).toHaveBeenCalledOnce();
   });
 
-  it('creates, displays, prepopulates, and clears an optional trigger', async () => {
-    const triggered = { ...entry, trigger: ';refund' };
-    const cleared = { ...triggered, trigger: null };
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [triggered]),
-      update: vi.fn(async () => cleared),
-    });
-    render(<SnippetLibraryView snippetLibrary={library} />);
-
-    expect(await screen.findByText(';refund')).toBeTruthy();
+  it('opens historical Plain as Text and converts only on successful Save', async () => {
+    const service = library([plain]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Welcome response');
+    expect(service.update).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    const triggerInput = screen.getByLabelText(/^Trigger \(optional\)/);
-    expect(triggerInput).toHaveProperty('value', ';refund');
-    expect(triggerInput.getAttribute('aria-describedby')).toContain(
-      'snippet-trigger-guidance',
-    );
-    expect(screen.getByText(/characters starting with ;/)).toBeTruthy();
-    fireEvent.change(triggerInput, { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-
-    await waitFor(() =>
-      expect(library.update).toHaveBeenCalledWith(
-        triggered.id,
-        expect.objectContaining({ trigger: null }),
-      ),
-    );
-    await waitFor(() => expect(screen.queryByText(';refund')).toBeNull());
-  });
-
-  it.each([
-    ['invalid format', new InvalidSnippetTriggerError()],
-    ['duplicate trigger', new DuplicateSnippetTriggerError(';used')],
-  ])('shows focused inline %s feedback', async (_label, error) => {
-    const library = createSnippetLibrary({
-      create: vi.fn(async () => {
-        throw error;
-      }),
-    });
-    render(<SnippetLibraryView snippetLibrary={library} />);
-    await screen.findByText('No snippets saved yet.');
-    const triggerInput = screen.getByLabelText(/^Trigger \(optional\)/);
-    fireEvent.change(triggerInput, { target: { value: ';candidate' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
-
-    expect(await screen.findByText(error.message)).toBeTruthy();
-    expect(triggerInput.getAttribute('aria-invalid')).toBe('true');
-    expect(triggerInput.getAttribute('aria-describedby')).toContain(
-      'snippet-trigger-error',
-    );
-  });
-
-  it('reports a saved Snippet accurately when catalog publication is unavailable', async () => {
-    const persisted = { ...entry, id: 'persisted', trigger: ';saved' };
-    const library = createSnippetLibrary({
-      create: vi.fn(async () => {
-        throw new CatalogUnavailableAfterMutationError(persisted);
-      }),
-    });
-    render(<SnippetLibraryView snippetLibrary={library} />);
-    await screen.findByText('No snippets saved yet.');
-    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
-
-    expect(await screen.findByText(persisted.title)).toBeTruthy();
     expect(
-      screen.getByText(
-        'Snippet saved. Trigger expansion is temporarily unavailable.',
-      ),
+      await screen.findByRole('toolbar', { name: 'Text formatting' }),
     ).toBeTruthy();
-    expect(screen.queryByText(/could not create/i)).toBeNull();
+    expect(service.update).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.update).toHaveBeenCalled());
+    expect(vi.mocked(service.update).mock.calls[0]?.[1].content).toMatchObject({
+      kind: 'rich',
+    });
   });
 
-  it('edits a snippet and immediately renders the repository result', async () => {
-    const updatedEntry = {
-      ...entry,
-      title: 'Updated order confirmation',
-      content: createPlainSnippetContent(
-        'Your updated order has been confirmed.',
-      ),
-      tags: ['orders'],
-      updatedAt: '2026-07-26T12:00:02.000Z',
-    };
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [entry]),
-      update: vi.fn(async () => updatedEntry),
-    });
-    render(<SnippetLibraryView snippetLibrary={library} />);
-    await screen.findByText(entry.title);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.getByLabelText('Title')).toHaveProperty('value', entry.title);
-    fireEvent.change(screen.getByLabelText('Title'), {
-      target: { value: updatedEntry.title },
-    });
-    fireEvent.change(screen.getByLabelText('Content'), {
-      target: { value: renderSnippetPlainText(updatedEntry.content) },
-    });
-    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
-      target: { value: 'orders' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-
-    await waitFor(() =>
-      expect(library.update).toHaveBeenCalledWith(entry.id, {
-        title: updatedEntry.title,
-        content: updatedEntry.content,
-        tags: ['orders'],
-        trigger: null,
-      }),
-    );
-    expect(await screen.findByText(updatedEntry.title)).toBeTruthy();
-    expect(screen.getByText('Snippet updated.')).toBeTruthy();
-  });
-
-  it('previews rich content and preserves it during metadata-only editing', async () => {
-    const richEntry: SnippetEntry = {
-      ...entry,
+  it('protects legacy image-containing Rich content with a read-only compatibility state', async () => {
+    const legacy: SnippetEntry = {
+      ...rich,
       content: {
         kind: 'rich',
-        blocks: [
-          {
-            type: 'paragraph',
-            children: [
-              { type: 'text', text: 'Rich reply', bold: true, italic: false },
-            ],
-          },
-          {
-            type: 'reference',
-            referenceType: 'image',
-            label: 'Receipt',
-            url: 'https://example.com/receipt.png',
-          },
-        ],
+        blocks: [{ type: 'image', assetId: ASSET_ID, altText: 'legacy' }],
       },
     };
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [richEntry]),
-    });
-    render(
-      <SnippetLibraryView
-        confirmDelete={() => true}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText(richEntry.title);
-
+    const service = library([legacy]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Widget setup');
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.queryByLabelText('Content')).toBeNull();
-    expect(
-      screen.getByRole('region', { name: 'Rich snippet content editor' }),
-    ).toBeTruthy();
-    expect(screen.getByLabelText('Text')).toHaveProperty('value', 'Rich reply');
-    expect(screen.getByLabelText('Bold paragraph 1 segment 1')).toHaveProperty(
-      'ariaPressed',
-      'true',
-    );
-    expect(screen.getByLabelText('Label')).toHaveProperty('value', 'Receipt');
-    expect(screen.getAllByLabelText('URL')[0]).toHaveProperty(
-      'value',
-      'https://example.com/receipt.png',
-    );
-    expect(document.querySelector('img')).toBeNull();
-    fireEvent.change(screen.getByLabelText('Title'), {
-      target: { value: 'Updated metadata' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-
-    await waitFor(() =>
-      expect(library.update).toHaveBeenCalledWith(richEntry.id, {
-        title: 'Updated metadata',
-        content: richEntry.content,
-        tags: richEntry.tags,
-        trigger: null,
-      }),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    await waitFor(() =>
-      expect(library.delete).toHaveBeenCalledWith(richEntry.id),
-    );
+    expect(screen.getByText('This Text Snippet is read-only')).toBeTruthy();
+    expect(service.update).not.toHaveBeenCalled();
+    expect(document.body.textContent).not.toContain(ASSET_ID);
   });
 
-  it('converts only the current Plain draft and cancel leaves storage untouched', async () => {
-    const confirmConvert = vi.fn(() => true);
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [entry]),
-    });
-    render(
-      <SnippetLibraryView
-        confirmConvert={confirmConvert}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText(entry.title);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    fireEvent.change(screen.getByLabelText('Content'), {
-      target: { value: 'Draft only\nwith line breaks' },
-    });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Convert to rich template' }),
-    );
-
-    expect(confirmConvert).toHaveBeenCalledOnce();
-    expect(library.update).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('Text')).toHaveProperty(
-      'value',
-      'Draft only\nwith line breaks',
-    );
-    expect(screen.getByLabelText('Bold paragraph 1 segment 1')).toHaveProperty(
-      'ariaPressed',
-      'false',
-    );
-    expect(
-      screen.getByLabelText('Italic paragraph 1 segment 1'),
-    ).toHaveProperty('ariaPressed', 'false');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel edit' }));
-    expect(library.update).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(screen.getByLabelText('Content')).toHaveProperty(
-      'value',
-      renderSnippetPlainText(entry.content),
-    );
-  });
-
-  it('requires explicit confirmation and saves conversion on the same entity with metadata', async () => {
-    const rejectedConfirmation = vi.fn(() => false);
-    const convertedEntry: SnippetEntry = {
-      ...entry,
-      title: 'Converted title',
-      content: {
-        kind: 'rich',
-        blocks: [
-          {
-            type: 'paragraph',
-            children: [
-              {
-                type: 'text',
-                text: 'Your order has been confirmed.',
-                bold: false,
-                italic: false,
-              },
-            ],
-          },
-        ],
-      },
-      tags: ['orders', 'rich'],
-      trigger: ';order',
-    };
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [entry]),
-      update: vi.fn(async () => convertedEntry),
-    });
-    const { rerender } = render(
-      <SnippetLibraryView
-        confirmConvert={rejectedConfirmation}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText(entry.title);
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Convert to rich template' }),
-    );
-    expect(screen.getByLabelText('Content')).toBeTruthy();
-
-    rerender(
-      <SnippetLibraryView
-        confirmConvert={() => true}
-        snippetLibrary={library}
-      />,
-    );
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Convert to rich template' }),
-    );
-    fireEvent.change(screen.getByLabelText('Title'), {
-      target: { value: convertedEntry.title },
-    });
-    fireEvent.change(screen.getByLabelText(/^Trigger \(optional\)/), {
-      target: { value: ';order' },
-    });
-    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
-      target: { value: 'orders, rich' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-
-    await waitFor(() =>
-      expect(library.update).toHaveBeenCalledWith(entry.id, {
-        title: convertedEntry.title,
-        content: convertedEntry.content,
-        tags: convertedEntry.tags,
-        trigger: convertedEntry.trigger,
-      }),
-    );
-    expect(library.create).not.toHaveBeenCalled();
-    expect(screen.getByText('Rich')).toBeTruthy();
-    expect(screen.getAllByRole('listitem')).toHaveLength(1);
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    expect(
-      screen.getByRole('region', { name: 'Rich snippet content editor' }),
-    ).toBeTruthy();
-  });
-
-  it('creates a structured Rich draft through the existing application boundary', async () => {
-    const library = createSnippetLibrary();
-    render(
-      <SnippetLibraryView
-        confirmConvert={() => true}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText('No snippets saved yet.');
-    fireEvent.change(screen.getByLabelText('Title'), {
-      target: { value: 'Rich reply' },
-    });
-    fireEvent.change(screen.getByLabelText('Content'), {
-      target: { value: 'Hello ' },
-    });
-    fireEvent.change(screen.getByLabelText(/^Trigger \(optional\)/), {
-      target: { value: ';RICH' },
-    });
-    fireEvent.change(screen.getByLabelText('Tags (comma-separated)'), {
-      target: { value: 'support, rich' },
-    });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Convert to rich template' }),
-    );
-    fireEvent.click(screen.getByLabelText('Bold paragraph 1 segment 1'));
-    fireEvent.click(screen.getByLabelText('Italic paragraph 1 segment 1'));
-    fireEvent.click(screen.getByLabelText('Add link to paragraph 1'));
-    fireEvent.change(screen.getByLabelText('Link text'), {
-      target: { value: 'help' },
-    });
-    fireEvent.change(screen.getByLabelText('URL'), {
-      target: { value: 'https://example.com/help' },
-    });
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Add image reference' }),
-    );
-    fireEvent.change(screen.getByLabelText('Label'), {
-      target: { value: 'Diagram' },
-    });
-    const imageUrl = screen.getAllByLabelText('URL')[1];
-    if (imageUrl === undefined) throw new Error('Missing image URL input.');
-    fireEvent.change(imageUrl, {
-      target: { value: 'http://example.com/diagram.png' },
-    });
-    fireEvent.click(screen.getByLabelText('Move block 2 up'));
-    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
-
-    await waitFor(() =>
-      expect(library.create).toHaveBeenCalledWith({
-        title: 'Rich reply',
-        content: {
-          kind: 'rich',
-          blocks: [
-            {
-              type: 'reference',
-              referenceType: 'image',
-              label: 'Diagram',
-              url: 'http://example.com/diagram.png',
-            },
-            {
-              type: 'paragraph',
-              children: [
-                {
-                  type: 'text',
-                  text: 'Hello ',
-                  bold: true,
-                  italic: true,
-                },
-                {
-                  type: 'link',
-                  text: 'help',
-                  url: 'https://example.com/help',
-                  bold: false,
-                  italic: false,
-                },
-              ],
-            },
-          ],
+  it.each(['image/png', 'image/jpeg', 'image/webp'] as const)(
+    'accepts a pasted %s image as a draft and sends it only on Save',
+    async (mimeType) => {
+      const service = library();
+      render(<SnippetLibraryView snippetLibrary={service} />);
+      await screen.findByText('No matching snippets.');
+      fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+      fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+      const file = localFile(mimeType);
+      fireEvent.paste(screen.getByLabelText('Paste image'), {
+        clipboardData: {
+          items: [{ kind: 'file', type: mimeType, getAsFile: () => file }],
         },
-        tags: ['support', 'rich'],
-        trigger: ';RICH',
-      }),
-    );
-  });
+      });
+      expect(service.create).not.toHaveBeenCalled();
+      expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await waitFor(() => expect(service.create).toHaveBeenCalled());
+      const input = vi.mocked(service.create).mock.calls[0]?.[0];
+      expect(input?.content.kind).toBe('image');
+      expect(input?.newAssets).toHaveLength(1);
+      expect(input?.newAssets?.[0]?.mimeType).toBe(mimeType);
+    },
+  );
 
-  it('prevents unsafe Rich URLs from reaching the save boundary', async () => {
-    const library = createSnippetLibrary();
-    render(
-      <SnippetLibraryView
-        confirmConvert={() => true}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText('No snippets saved yet.');
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Convert to rich template' }),
-    );
-    fireEvent.click(
-      screen.getByLabelText('Convert paragraph 1 segment 1 to link'),
-    );
-    fireEvent.change(screen.getByLabelText('URL'), {
-      target: { value: 'javascript:alert(1)' },
+  it.each(['image/png', 'image/jpeg', 'image/webp'] as const)(
+    'supports %s file selection, removal, and Cancel without persistence',
+    async (mimeType) => {
+      const service = library();
+      render(<SnippetLibraryView snippetLibrary={service} />);
+      await screen.findByText('No matching snippets.');
+      fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+      fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+      fireEvent.change(screen.getByLabelText('Choose Image'), {
+        target: { files: [localFile(mimeType)] },
+      });
+      expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
+      fireEvent.click(screen.getByRole('button', { name: 'Remove image' }));
+      expect(
+        screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled'),
+      ).toBe(true);
+      const cancel = screen.getAllByRole('button', { name: 'Cancel' }).at(-1);
+      if (cancel === undefined) throw new Error('Expected a Cancel button.');
+      fireEvent.click(cancel);
+      expect(service.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects malformed images and ignores non-image clipboard content', async () => {
+    const service = library();
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('No matching snippets.');
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+    const malformed = new File([Uint8Array.from([1, 2, 3])], 'bad.png', {
+      type: 'image/png',
     });
-
+    Object.defineProperty(malformed, 'arrayBuffer', {
+      value: async () => Uint8Array.from([1, 2, 3]).buffer,
+    });
+    fireEvent.paste(screen.getByLabelText('Paste image'), {
+      clipboardData: {
+        items: [
+          { kind: 'file', type: 'image/png', getAsFile: () => malformed },
+        ],
+      },
+    });
     expect(
-      screen.getByRole('button', { name: 'Create snippet' }),
-    ).toHaveProperty('disabled', true);
-    expect(library.create).not.toHaveBeenCalled();
+      await screen.findByText('The image data does not match its file type.'),
+    ).toBeTruthy();
+    fireEvent.paste(screen.getByLabelText('Paste image'), {
+      clipboardData: { items: [{ kind: 'string', type: 'text/plain' }] },
+    });
+    expect(screen.queryByAltText('Image snippet preview')).toBeNull();
+    expect(service.create).not.toHaveBeenCalled();
   });
 
-  it('requires confirmation before deleting and removes a confirmed snippet', async () => {
-    const confirmDelete = vi
-      .fn<(candidate: SnippetEntry) => boolean>()
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true);
-    const library = createSnippetLibrary({
-      load: vi.fn(async () => [entry]),
-    });
-    render(
-      <SnippetLibraryView
-        confirmDelete={confirmDelete}
-        snippetLibrary={library}
-      />,
-    );
-    await screen.findByText(entry.title);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    expect(confirmDelete).toHaveBeenCalledWith(entry);
-    expect(library.delete).not.toHaveBeenCalled();
-    expect(screen.getByText(entry.title)).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    await waitFor(() => expect(library.delete).toHaveBeenCalledWith(entry.id));
-    await waitFor(() => expect(screen.queryByText(entry.title)).toBeNull());
-    expect(screen.getByText('Snippet deleted.')).toBeTruthy();
+  it('reopens an Image Snippet through the application asset-read boundary', async () => {
+    const service = library([imageEntry]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
+    expect(service.loadAsset).toHaveBeenCalledWith(ASSET_ID);
+    expect(document.body.textContent).not.toContain(ASSET_ID);
   });
 
-  it('shows safe user-visible load and persistence errors', async () => {
-    const failedLoad = createSnippetLibrary({
-      load: vi.fn(async () => {
-        throw new Error('raw IndexedDB load failure');
-      }),
+  it('keeps the original persisted image when a replacement draft is cancelled', async () => {
+    const service = library([imageEntry]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(
+      (await screen.findByAltText('Image snippet preview')).getAttribute('src'),
+    ).toBe('blob:original.png');
+
+    fireEvent.change(screen.getByLabelText('Replace Image'), {
+      target: { files: [localFile('image/png', 'replacement.png')] },
     });
-    const { rerender } = render(
-      <SnippetLibraryView snippetLibrary={failedLoad} />,
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:replacement.png'),
     );
+    const cancel = screen.getAllByRole('button', { name: 'Cancel' }).at(-1);
+    if (cancel === undefined) throw new Error('Expected a Cancel button.');
+    fireEvent.click(cancel);
+    expect(service.update).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:original.png'),
+    );
+  });
+
+  it('submits exactly one replacement draft when an existing image is saved', async () => {
+    const service = library([imageEntry]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await screen.findByAltText('Image snippet preview');
+    fireEvent.change(screen.getByLabelText('Replace Image'), {
+      target: { files: [localFile('image/webp', 'replacement.webp')] },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:replacement.webp'),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(service.update).toHaveBeenCalledTimes(1));
+    const input = vi.mocked(service.update).mock.calls[0]?.[1];
+    expect(input?.newAssets).toHaveLength(1);
+    const replacement = input?.newAssets?.[0];
+    expect(replacement?.mimeType).toBe('image/webp');
+    expect(input?.content).toEqual({
+      kind: 'image',
+      assetId: replacement?.id,
+    });
+  });
+
+  it('retains replacement metadata and preview after a failed Save', async () => {
+    const service = library([imageEntry]);
+    service.update = vi.fn(async () => {
+      throw new Error('forced update failure');
+    });
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await screen.findByAltText('Image snippet preview');
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Updated screenshot title' },
+    });
+    fireEvent.change(screen.getByLabelText('Replace Image'), {
+      target: { files: [localFile('image/jpeg', 'replacement.jpg')] },
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:replacement.jpg'),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(
       await screen.findByText(
-        'We could not load your Snippet Library. Please try again.',
+        'We could not update this snippet. Your draft is still here.',
       ),
     ).toBeTruthy();
-    expect(screen.queryByText('raw IndexedDB load failure')).toBeNull();
-
-    const failedCreate = createSnippetLibrary({
-      create: vi.fn(async () => {
-        throw new Error('raw Dexie create failure');
-      }),
-    });
-    rerender(<SnippetLibraryView snippetLibrary={failedCreate} />);
-    await screen.findByText('No snippets saved yet.');
-    fireEvent.click(screen.getByRole('button', { name: 'Create snippet' }));
-
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+      'Updated screenshot title',
+    );
     expect(
-      await screen.findByText(
-        'We could not create this snippet. Please try again.',
-      ),
-    ).toBeTruthy();
-    expect(screen.queryByText('raw Dexie create failure')).toBeNull();
+      screen.getByAltText('Image snippet preview').getAttribute('src'),
+    ).toBe('blob:replacement.jpg');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy();
   });
 
-  it('navigates between distinct libraries without reloading either view', async () => {
-    const knowledgeLibrary = createKnowledgeLibrary();
-    const settings = createSettings();
-    const snippetLibrary = createSnippetLibrary();
-    render(
-      <OptionsShell
-        importExport={importExport}
-        knowledgeLibrary={knowledgeLibrary}
-        settings={settings}
-        snippetLibrary={snippetLibrary}
-      />,
+  it('ignores a late Image A success after Image B becomes active', async () => {
+    const loadA = deferred<SnippetAsset | undefined>();
+    const loadB = deferred<SnippetAsset | undefined>();
+    const callCounts = new Map<string, number>();
+    const originalA = asset();
+    const secondFile = localFile('image/png', 'second.png');
+    const originalB = asset({
+      id: SECOND_ASSET_ID,
+      snippetId: secondImageEntry.id,
+      blob: secondFile,
+      byteSize: secondFile.size,
+      originalFilename: secondFile.name,
+    });
+    const loadAsset = vi.fn((id: string) => {
+      const count = (callCounts.get(id) ?? 0) + 1;
+      callCounts.set(id, count);
+      if (count === 1)
+        return Promise.resolve(id === ASSET_ID ? originalA : originalB);
+      return id === ASSET_ID ? loadA.promise : loadB.promise;
+    });
+    const service = { ...library([imageEntry, secondImageEntry]), loadAsset };
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Second screenshot');
+    await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
+
+    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editA = editButtons[0];
+    const editB = editButtons[1];
+    if (editA === undefined || editB === undefined)
+      throw new Error('Expected two Edit buttons.');
+    fireEvent.click(editA);
+    await waitFor(() => expect(callCounts.get(ASSET_ID)).toBe(2));
+    fireEvent.click(editB);
+    await waitFor(() => expect(callCounts.get(SECOND_ASSET_ID)).toBe(2));
+    loadB.resolve(originalB);
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:second.png'),
     );
+    const previewCallsBeforeLateA = vi.mocked(URL.createObjectURL).mock.calls
+      .length;
+    loadA.resolve(originalA);
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:second.png'),
+    );
+    expect(vi.mocked(URL.createObjectURL)).toHaveBeenCalledTimes(
+      previewCallsBeforeLateA,
+    );
+  });
 
-    expect(await screen.findByText('No knowledge entries yet.')).toBeTruthy();
-    expect(snippetLibrary.load).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
-    expect(await screen.findByText('No snippets saved yet.')).toBeTruthy();
-    expect(snippetLibrary.load).toHaveBeenCalledOnce();
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Knowledge Library' }));
+  it('ignores a stale Image A failure after Image B loads successfully', async () => {
+    const loadA = deferred<SnippetAsset | undefined>();
+    const loadB = deferred<SnippetAsset | undefined>();
+    const callCounts = new Map<string, number>();
+    const secondFile = localFile('image/png', 'second.png');
+    const originalB = asset({
+      id: SECOND_ASSET_ID,
+      snippetId: secondImageEntry.id,
+      blob: secondFile,
+      byteSize: secondFile.size,
+      originalFilename: secondFile.name,
+    });
+    const loadAsset = vi.fn((id: string) => {
+      const count = (callCounts.get(id) ?? 0) + 1;
+      callCounts.set(id, count);
+      if (count === 1)
+        return Promise.resolve(id === ASSET_ID ? asset() : originalB);
+      return id === ASSET_ID ? loadA.promise : loadB.promise;
+    });
+    const service = { ...library([imageEntry, secondImageEntry]), loadAsset };
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Second screenshot');
+    await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
+    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editA = editButtons[0];
+    const editB = editButtons[1];
+    if (editA === undefined || editB === undefined)
+      throw new Error('Expected two Edit buttons.');
+    fireEvent.click(editA);
+    await waitFor(() => expect(callCounts.get(ASSET_ID)).toBe(2));
+    fireEvent.click(editB);
+    await waitFor(() => expect(callCounts.get(SECOND_ASSET_ID)).toBe(2));
+    loadB.resolve(originalB);
+    await screen.findByAltText('Image snippet preview');
+    loadA.reject(new Error('late A failure'));
+    await waitFor(() =>
+      expect(
+        screen.getByAltText('Image snippet preview').getAttribute('src'),
+      ).toBe('blob:second.png'),
+    );
     expect(
-      screen.getByRole('heading', { name: 'Knowledge Library' }),
-    ).toBeTruthy();
-    expect(knowledgeLibrary.load).toHaveBeenCalledOnce();
+      screen.queryByText(
+        'We could not load this image. The saved Snippet was not changed.',
+      ),
+    ).toBeNull();
+  });
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
+  it('ignores an old image load after Cancel and New Image Snippet', async () => {
+    const editLoad = deferred<SnippetAsset | undefined>();
+    let loadCount = 0;
+    const loadAsset = vi.fn(() => {
+      loadCount += 1;
+      return loadCount === 1 ? Promise.resolve(asset()) : editLoad.promise;
+    });
+    const service = { ...library([imageEntry]), loadAsset };
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
+    const cancel = screen.getAllByRole('button', { name: 'Cancel' }).at(-1);
+    if (cancel === undefined) throw new Error('Expected a Cancel button.');
+    fireEvent.click(cancel);
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+    editLoad.resolve(asset());
+
+    await waitFor(() =>
+      expect(screen.queryByAltText('Image snippet preview')).toBeNull(),
+    );
     expect(
-      screen.getByRole('heading', { name: 'Snippet Library' }),
-    ).toBeTruthy();
-    expect(snippetLibrary.load).toHaveBeenCalledOnce();
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
-    expect(
-      await screen.findByRole('heading', { name: 'Settings' }),
-    ).toBeTruthy();
-    expect(settings.load).toHaveBeenCalledOnce();
-
-    fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
-    expect(snippetLibrary.load).toHaveBeenCalledOnce();
+      screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled'),
+    ).toBe(true);
   });
 });

@@ -3,10 +3,12 @@ export const BACKUP_FORMAT_VERSION_1 = 1 as const;
 export const BACKUP_FORMAT_VERSION_2 = 2 as const;
 export const BACKUP_FORMAT_VERSION_3 = 3 as const;
 export const BACKUP_FORMAT_VERSION_4 = 4 as const;
-export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_4;
+export const BACKUP_FORMAT_VERSION_5 = 5 as const;
+export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_5;
 export const MAX_LEGACY_BACKUP_BYTES = 26_214_400;
 export const MAX_BACKUP_V4_BYTES = 100_663_296;
-export const MAX_BACKUP_BYTES = MAX_BACKUP_V4_BYTES;
+export const MAX_BACKUP_V5_BYTES = 100_663_296;
+export const MAX_BACKUP_BYTES = MAX_BACKUP_V5_BYTES;
 
 export interface BackupKnowledgeRecordV1 {
   readonly id: string;
@@ -267,11 +269,133 @@ export interface BackupFileV4 {
   readonly data: BackupDataV4;
 }
 
+export interface BackupKnowledgeRecordV5 {
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+  readonly tags: readonly string[];
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly source: string;
+}
+
+export interface BackupPlainSnippetContentV5 {
+  readonly kind: 'plain';
+  readonly text: string;
+}
+
+export interface BackupRichSnippetTextV5 {
+  readonly type: 'text';
+  readonly text: string;
+  readonly bold: boolean;
+  readonly italic: boolean;
+}
+
+export interface BackupRichSnippetLinkV5 {
+  readonly type: 'link';
+  readonly text: string;
+  readonly url: string;
+  readonly bold: boolean;
+  readonly italic: boolean;
+}
+
+export type BackupRichSnippetInlineV5 =
+  BackupRichSnippetTextV5 | BackupRichSnippetLinkV5;
+
+export interface BackupRichSnippetParagraphV5 {
+  readonly type: 'paragraph';
+  readonly children: readonly BackupRichSnippetInlineV5[];
+}
+
+export interface BackupRichSnippetImageReferenceV5 {
+  readonly type: 'reference';
+  readonly referenceType: 'image';
+  readonly label: string;
+  readonly url: string;
+}
+
+export interface BackupRichSnippetLocalImageV5 {
+  readonly type: 'image';
+  readonly assetId: string;
+  readonly altText: string;
+}
+
+export interface BackupRichSnippetListItemV5 {
+  readonly children: readonly BackupRichSnippetInlineV5[];
+}
+
+export interface BackupRichSnippetListV5 {
+  readonly type: 'list';
+  readonly listType: 'unordered' | 'ordered';
+  readonly items: readonly BackupRichSnippetListItemV5[];
+}
+
+export type BackupRichSnippetBlockV5 =
+  | BackupRichSnippetParagraphV5
+  | BackupRichSnippetImageReferenceV5
+  | BackupRichSnippetLocalImageV5
+  | BackupRichSnippetListV5;
+
+export interface BackupRichSnippetContentV5 {
+  readonly kind: 'rich';
+  readonly blocks: readonly BackupRichSnippetBlockV5[];
+}
+
+export interface BackupImageSnippetContentV5 {
+  readonly kind: 'image';
+  readonly assetId: string;
+}
+
+export type BackupSnippetContentV5 =
+  | BackupPlainSnippetContentV5
+  | BackupRichSnippetContentV5
+  | BackupImageSnippetContentV5;
+
+export interface BackupSnippetRecordV5 {
+  readonly id: string;
+  readonly title: string;
+  readonly content: BackupSnippetContentV5;
+  readonly tags: readonly string[];
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly trigger: string | null;
+}
+
+export interface BackupSnippetAssetRecordV5 {
+  readonly id: string;
+  readonly snippetId: string;
+  readonly mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+  readonly byteSize: number;
+  readonly originalFilename: string | null;
+  readonly createdAt: string;
+  readonly encoding: 'base64';
+  readonly data: string;
+}
+
+export interface BackupSettingsV5 {
+  readonly defaultModel: string | null;
+}
+
+export interface BackupDataV5 {
+  readonly knowledge: readonly BackupKnowledgeRecordV5[];
+  readonly snippets: readonly BackupSnippetRecordV5[];
+  readonly snippetAssets: readonly BackupSnippetAssetRecordV5[];
+  readonly settings: BackupSettingsV5;
+}
+
+export interface BackupFileV5 {
+  readonly format: typeof BACKUP_FORMAT;
+  readonly formatVersion: typeof BACKUP_FORMAT_VERSION_5;
+  readonly exportedAt: string;
+  readonly data: BackupDataV5;
+}
+
 export type BackupFile =
-  BackupFileV1 | BackupFileV2 | BackupFileV3 | BackupFileV4;
+  BackupFileV1 | BackupFileV2 | BackupFileV3 | BackupFileV4 | BackupFileV5;
 
 export interface BackupImportPreview {
   readonly filename: string;
+  readonly formatVersion: 1 | 2 | 3 | 4 | 5;
   readonly exportedAt: string;
   readonly knowledgeCount: number;
   readonly snippetCount: number;

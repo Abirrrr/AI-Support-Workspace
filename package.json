@@ -21,6 +21,9 @@
     "validate": "pnpm lint && pnpm format --check && pnpm typecheck && pnpm test && pnpm exec playwright test --list && pnpm build"
   },
   "dependencies": {
+    "@tiptap/pm": "3.29.2",
+    "@tiptap/react": "3.29.2",
+    "@tiptap/starter-kit": "3.29.2",
     "dexie": "^4.4.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

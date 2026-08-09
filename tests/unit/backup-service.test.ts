@@ -30,7 +30,7 @@ import {
   type BackupFileV1,
   type BackupFileV2,
   type BackupFileV3,
-  type BackupFileV4,
+  type BackupFileV5,
 } from '../../src/domain/backup-file';
 import {
   createPlainSnippetContent,
@@ -124,24 +124,28 @@ function createCurrentBackup(data = createData()): BackupFileV3 {
         content:
           entry.content.kind === 'plain'
             ? { kind: 'plain', text: entry.content.text }
-            : {
-                kind: 'rich',
-                blocks: entry.content.blocks.map((block) => {
-                  if (block.type === 'image') {
-                    throw new Error(
-                      'V3 test fixture cannot contain local images.',
-                    );
-                  }
-                  return block.type === 'paragraph'
-                    ? {
-                        type: 'paragraph' as const,
-                        children: block.children.map((inline) => ({
-                          ...inline,
-                        })),
-                      }
-                    : { ...block };
-                }),
-              },
+            : entry.content.kind === 'image'
+              ? (() => {
+                  throw new Error('V3 test fixture cannot contain images.');
+                })()
+              : {
+                  kind: 'rich',
+                  blocks: entry.content.blocks.map((block) => {
+                    if (block.type === 'image' || block.type === 'list') {
+                      throw new Error(
+                        'V3 test fixture cannot contain local images or lists.',
+                      );
+                    }
+                    return block.type === 'paragraph'
+                      ? {
+                          type: 'paragraph' as const,
+                          children: block.children.map((inline) => ({
+                            ...inline,
+                          })),
+                        }
+                      : { ...block };
+                  }),
+                },
         tags: [...entry.tags],
         createdAt: entry.createdAt,
         updatedAt: entry.updatedAt,
@@ -529,7 +533,7 @@ describe('Backup Format v2 and v3 parser and validator', () => {
   it('rejects unsupported future versions explicitly', () => {
     expect(() =>
       parseBackupFile(
-        JSON.stringify({ ...createCurrentBackup(), formatVersion: 5 }),
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 6 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
@@ -583,7 +587,7 @@ describe('backup application services', () => {
 
     await new BackupRestoreService({ replaceAll }).restoreBackup(parsed);
 
-    expect(parsed.formatVersion).toBe(4);
+    expect(parsed.formatVersion).toBe(5);
     expect(replaceAll).toHaveBeenCalledWith({
       knowledge: data.knowledge,
       snippets: [{ ...snippet, content: richContent }],
@@ -652,9 +656,9 @@ describe('backup application services', () => {
     expect(filename).toBe(
       'ai-support-workspace-backup-2026-08-02T08-15-30Z.json',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV4;
+    const parsed = JSON.parse(serialized) as BackupFileV5;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(4);
+    expect(parsed.formatVersion).toBe(5);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -727,7 +731,7 @@ describe('backup application services', () => {
       ...original,
       snippetAssets: [],
     });
-    expect(prepared.backup.formatVersion).toBe(4);
+    expect(prepared.backup.formatVersion).toBe(5);
   });
 
   it('excludes simulated future live-domain fields from serialized format v2', async () => {
@@ -857,6 +861,7 @@ describe('backup application services', () => {
 
     expect(prepared.preview).toEqual({
       filename: 'backup.json',
+      formatVersion: 1,
       exportedAt: EXPORTED_AT,
       knowledgeCount: 1,
       snippetCount: 1,

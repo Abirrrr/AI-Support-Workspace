@@ -25,6 +25,16 @@ export interface RichSnippetParagraph {
   readonly children: readonly RichSnippetInline[];
 }
 
+export interface RichSnippetListItem {
+  readonly children: readonly RichSnippetInline[];
+}
+
+export interface RichSnippetList {
+  readonly type: 'list';
+  readonly listType: 'unordered' | 'ordered';
+  readonly items: readonly RichSnippetListItem[];
+}
+
 export interface RichSnippetImageReference {
   readonly type: 'reference';
   readonly referenceType: 'image';
@@ -39,14 +49,23 @@ export interface RichSnippetLocalImage {
 }
 
 export type RichSnippetBlock =
-  RichSnippetParagraph | RichSnippetImageReference | RichSnippetLocalImage;
+  | RichSnippetParagraph
+  | RichSnippetList
+  | RichSnippetImageReference
+  | RichSnippetLocalImage;
 
 export interface RichSnippetContent {
   readonly kind: 'rich';
   readonly blocks: readonly RichSnippetBlock[];
 }
 
-export type SnippetContent = PlainSnippetContent | RichSnippetContent;
+export interface ImageSnippetContent {
+  readonly kind: 'image';
+  readonly assetId: string;
+}
+
+export type SnippetContent =
+  PlainSnippetContent | RichSnippetContent | ImageSnippetContent;
 
 export class InvalidSnippetContentError extends Error {
   constructor() {
@@ -144,6 +163,27 @@ function validateBlock(value: unknown): RichSnippetBlock {
     return { type: 'image', assetId: value.assetId, altText: value.altText };
   }
   if (
+    value.type === 'list' &&
+    hasExactKeys(value, ['type', 'listType', 'items']) &&
+    (value.listType === 'unordered' || value.listType === 'ordered') &&
+    Array.isArray(value.items)
+  ) {
+    return {
+      type: 'list',
+      listType: value.listType,
+      items: value.items.map((item) => {
+        if (
+          !isRecord(item) ||
+          !hasExactKeys(item, ['children']) ||
+          !Array.isArray(item.children)
+        ) {
+          throw new InvalidSnippetContentError();
+        }
+        return { children: item.children.map(validateInline) };
+      }),
+    };
+  }
+  if (
     value.type === 'paragraph' &&
     hasExactKeys(value, ['type', 'children']) &&
     Array.isArray(value.children)
@@ -181,6 +221,16 @@ export function validateSnippetContent(value: unknown): SnippetContent {
     typeof value.text === 'string'
   ) {
     return { kind: 'plain', text: value.text };
+  }
+  if (
+    value.kind === 'image' &&
+    hasExactKeys(value, ['kind', 'assetId']) &&
+    typeof value.assetId === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      value.assetId,
+    )
+  ) {
+    return { kind: 'image', assetId: value.assetId };
   }
   if (
     value.kind === 'rich' &&
@@ -231,6 +281,14 @@ function renderInline(inline: RichSnippetInline): string {
 function renderBlock(block: RichSnippetBlock): string {
   if (block.type === 'paragraph')
     return block.children.map(renderInline).join('');
+  if (block.type === 'list') {
+    return block.items
+      .map((item, index) => {
+        const prefix = block.listType === 'unordered' ? '- ' : `${index + 1}. `;
+        return `${prefix}${item.children.map(renderInline).join('')}`;
+      })
+      .join('\n');
+  }
   if (block.type === 'image') {
     return block.altText.length > 0 ? `[Image: ${block.altText}]` : '[Image]';
   }
@@ -240,18 +298,22 @@ function renderBlock(block: RichSnippetBlock): string {
 export function getLocalImageAssetIds(
   content: SnippetContent,
 ): readonly string[] {
-  return content.kind === 'rich'
-    ? content.blocks.flatMap((block) =>
-        block.type === 'image' ? [block.assetId] : [],
-      )
-    : [];
+  if (content.kind === 'image') return [content.assetId];
+  if (content.kind === 'plain') return [];
+  return content.blocks.flatMap((block) =>
+    block.type === 'image' ? [block.assetId] : [],
+  );
 }
 
 export function containsLocalImageBlock(content: SnippetContent): boolean {
-  return getLocalImageAssetIds(content).length > 0;
+  return (
+    content.kind === 'rich' &&
+    content.blocks.some((block) => block.type === 'image')
+  );
 }
 
 export function renderSnippetPlainText(content: SnippetContent): string {
   if (content.kind === 'plain') return content.text;
+  if (content.kind === 'image') return '';
   return content.blocks.map(renderBlock).join('\n\n');
 }

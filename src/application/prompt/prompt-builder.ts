@@ -165,6 +165,7 @@ export class PromptBuilder {
     }
 
     const snippetItems = input.retrievalResults?.snippets
+      .filter((result) => result.record.content.kind !== 'image')
       .slice(0, SNIPPET_RESULT_LIMIT)
       .map(createSnippetItem);
 

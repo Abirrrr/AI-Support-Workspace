@@ -131,6 +131,108 @@ describe('SnippetContent', () => {
     expect(projection).not.toContain('[object Object]');
   });
 
+  it('validates non-recursive unordered and ordered lists and projects them deterministically', () => {
+    const content = validateSnippetContent({
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', text: 'Steps:', bold: true, italic: false },
+          ],
+        },
+        {
+          type: 'list',
+          listType: 'unordered',
+          items: [
+            {
+              children: [
+                { type: 'text', text: 'Open ', bold: true, italic: true },
+                {
+                  type: 'link',
+                  text: 'Settings',
+                  url: 'https://example.com/settings',
+                  bold: false,
+                  italic: false,
+                },
+              ],
+            },
+            {
+              children: [
+                { type: 'text', text: 'Save', bold: false, italic: false },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'list',
+          listType: 'ordered',
+          items: [
+            {
+              children: [
+                { type: 'text', text: 'First', bold: false, italic: false },
+              ],
+            },
+            {
+              children: [
+                { type: 'text', text: 'Second', bold: false, italic: false },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(renderSnippetPlainText(content)).toBe(
+      'Steps:\n\n- Open Settings (https://example.com/settings)\n- Save\n\n1. First\n2. Second',
+    );
+    expect(JSON.stringify(content)).not.toContain('<ul');
+  });
+
+  it.each([
+    {
+      kind: 'rich',
+      blocks: [{ type: 'list', listType: 'task', items: [] }],
+    },
+    {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'list',
+          listType: 'unordered',
+          items: [{ children: [], extra: true }],
+        },
+      ],
+    },
+    {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'list',
+          listType: 'ordered',
+          items: [{ children: [{ type: 'list', items: [] }] }],
+        },
+      ],
+    },
+  ])('rejects malformed or nested list content %#', (value) => {
+    expect(() => validateSnippetContent(value)).toThrow(
+      InvalidSnippetContentError,
+    );
+  });
+
+  it('validates the exact ImageSnippetContent contract and has no text projection', () => {
+    const assetId = '123e4567-e89b-42d3-a456-426614174000';
+    const content = validateSnippetContent({ kind: 'image', assetId });
+    expect(content).toEqual({ kind: 'image', assetId });
+    expect(renderSnippetPlainText(content)).toBe('');
+    expect(() =>
+      validateSnippetContent({ kind: 'image', assetId, text: '[Image]' }),
+    ).toThrow(InvalidSnippetContentError);
+    expect(() =>
+      validateSnippetContent({ kind: 'image', assetId: 'not-a-uuid' }),
+    ).toThrow(InvalidSnippetContentError);
+  });
+
   it('accepts only the approved link and image protocols', () => {
     expect(isSafeSnippetLinkUrl('https://example.com')).toBe(true);
     expect(isSafeSnippetLinkUrl('http://example.com')).toBe(true);

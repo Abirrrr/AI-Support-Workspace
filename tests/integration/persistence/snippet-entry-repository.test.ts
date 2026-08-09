@@ -161,6 +161,64 @@ describe('DexieSnippetEntryRepository', () => {
     expect(await repository.get(created.id)).toEqual(created);
   });
 
+  it('round-trips Rich lists and a top-level Image Snippet without a schema migration', async () => {
+    const listContent = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'list',
+          listType: 'ordered',
+          items: [
+            {
+              children: [
+                {
+                  type: 'link',
+                  text: 'Settings',
+                  url: 'https://example.com/settings',
+                  bold: true,
+                  italic: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as const;
+    const list = await repository.create({
+      title: 'Steps',
+      content: listContent,
+      tags: [],
+      trigger: ';steps',
+    });
+    const assetId = crypto.randomUUID();
+    const bytes = Uint8Array.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    const image = await repository.create({
+      title: 'Screenshot',
+      content: { kind: 'image', assetId },
+      tags: ['image'],
+      trigger: ';screenshot',
+      newAssets: [
+        {
+          id: assetId,
+          mimeType: 'image/png',
+          blob: new Blob([bytes], { type: 'image/png' }),
+          byteSize: bytes.byteLength,
+          originalFilename: 'screenshot.png',
+          createdAt: '2026-08-09T00:00:00.000Z',
+        },
+      ],
+    });
+
+    expect(database.verno).toBe(5);
+    expect(await repository.get(list.id)).toEqual(list);
+    expect(await repository.get(image.id)).toEqual(image);
+    expect((await database.snippetAssets.get(assetId))?.snippetId).toBe(
+      image.id,
+    );
+  });
+
   it('omits null physically, finds exact triggers, maps conflicts, and releases triggers', async () => {
     const first = await repository.create({
       title: 'First',

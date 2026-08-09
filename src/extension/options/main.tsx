@@ -20,6 +20,7 @@ import {
 import { DexieKnowledgeEntryRepository } from '../../infrastructure/persistence/dexie-knowledge-entry-repository';
 import { DexieSettingsRepository } from '../../infrastructure/persistence/dexie-settings-repository';
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
+import { DexieSnippetAssetRepository } from '../../infrastructure/persistence/dexie-snippet-asset-repository';
 import { RuntimeCatalogMutationPort } from '../../infrastructure/snippet-trigger/runtime-catalog-mutation-port';
 import { OptionsShell } from '../../ui/options/OptionsShell';
 import '../../ui/styles.css';
@@ -49,6 +50,7 @@ const settings = new SettingsService(new DexieSettingsRepository(database));
 const snippetLibrary = new SnippetLibraryService(
   new DexieSnippetEntryRepository(database),
   catalogMutationPort,
+  new DexieSnippetAssetRepository(database),
 );
 const backupExport = new BackupExportService(
   new DexieBackupSnapshotReader(database),

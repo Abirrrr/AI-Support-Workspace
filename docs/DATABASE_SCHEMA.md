@@ -439,19 +439,19 @@ Assets export in `createdAt` ascending then `id` ascending order. V4 uses a 96 M
 
 Before any restore write, v4 validates exact keys, version, identity, timestamps, duplicate IDs/triggers/assets, asset limits, and the complete ownership graph. Every local image block must resolve to a same-owner asset; foreign, missing, unsupported, or unreferenced assets reject the whole backup. Import never downloads a legacy URL. Restore atomically replaces Knowledge, Snippets, Settings, and assets in one transaction with rollback on any failure. Export and restore remain one user-facing operation each, with deterministic ordering, metadata preview, and destructive acknowledgement.
 
-## Approved Milestone 14 Backup Format v5 Evolution
+## Implemented Milestone 14 Backup Format v5
 
 Backup Format v4 is frozen and remains importable. It cannot faithfully encode the new Rich list block or top-level `ImageSnippetContent` discriminant, so Decision 39 requires Backup Format v5 rather than changing v4.
 
-V5 will retain the strict single-JSON envelope, exact version-owned DTOs, deterministic ordering, canonical base64 asset records, metadata preview, destructive acknowledgement, and atomic four-store restore. The 96 MiB serialized guard remains the planned limit unless implementation evidence requires a separately approved tightening. V5 Snippet DTOs will represent:
+V5 retains the strict single-JSON envelope, exact version-owned DTOs, deterministic ordering, canonical base64 asset records, metadata preview including format version, destructive acknowledgement, and atomic four-store restore. The implemented serialized guard remains exactly 96 MiB (`100,663,296` bytes). V5 Snippet DTOs represent:
 
 - exact Plain content;
 - Rich paragraphs, marks, links, unordered/ordered lists, legacy URL references, and preserved legacy local-image blocks;
 - exact Image content containing only `kind: 'image'` and `assetId`.
 
-V5 graph validation requires each Image Snippet to reference exactly one asset owned by that same Snippet and prohibits any additional owned asset. Legacy Rich records continue using the frozen compatibility graph without automatic conversion. V1 and v2 strings continue mapping to Plain content; v3 continues mapping its exact Plain/Rich structures; and v4 continues mapping its exact Plain/Rich/local-image structures. New exports use v5 only after its implementation. Restore remains all-or-nothing across Knowledge, Snippets, Settings, and assets.
+V5 graph validation reuses the authoritative domain graph validator. Each Image Snippet references exactly one asset owned by that same Snippet and any additional owned asset is rejected as an orphan. Binary/base64/signature validation remains separate. Legacy Rich records continue using the frozen compatibility graph without automatic conversion. V1 and v2 strings continue mapping to Plain content; v3 continues mapping its exact Plain/Rich structures; and v4 continues mapping its exact Plain/Rich/local-image structures. New exports use v5. Restore remains all-or-nothing across Knowledge, Snippets, Settings, and assets.
 
-M14-G will introduce the list model, minimal Image Snippet discriminant, and Backup v5 contract together. This avoids a list-only v5 immediately followed by an image-only v6 while keeping Image Snippet UI and clipboard delivery in later tasks.
+M14-G implements the list model, minimal Image Snippet discriminant, and Backup v5 contract together. No Dexie v6, store, index, or record-rewrite migration is added. Image Snippet UI and clipboard delivery remain later tasks.
 
 ## Future Capability Guidance
 
@@ -461,7 +461,7 @@ Knowledge should evolve beyond a single body-text field into structured troubles
 
 ### Richer Snippets
 
-M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local asset infrastructure, and Decision 39's split between text-only Rich Snippets and one-image Image Snippets. M14-E implements locally owned PNG/JPEG/WebP assets, Dexie v5, and Backup v4. M14-G will add lists and Backup v5; M14-H will add Image Snippet authoring. Variables, categories, usage statistics, shared assets, arbitrary attachments, and rich-to-plain conversion remain future decisions.
+M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local assets, Decision 39's Text/Image split, and Decision 41's unified authoring. M14-G/G.2 implements lists, the image discriminant, Backup v5, constrained Text WYSIWYG, and Image authoring without changing Dexie v5 stores or indexes. M14-H is absorbed. Variables, categories, usage statistics, shared assets, and arbitrary attachments remain future decisions.
 
 ### Prompt Templates
 
@@ -473,4 +473,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 13 are complete. M14-E is complete at `1828f09` with Dexie v5 and Backup v4; valid v1, v2, and v3 imports remain supported and restore an empty asset store. Decision 39 requires no Dexie v6, freezes v4, and plans one Backup v5 for lists plus Image Snippets. Decision 38 continues to exclude legacy Rich local-image records. M14-F inline Rich-image authoring is cancelled before implementation; the next engineering action after M14-F.1 review is M14-G — Rich Snippet Structured Lists and Backup v5 Foundation.
+Milestones 3 through 13 are complete. M14-E is complete at `1828f09` with Dexie v5 and frozen Backup v4. M14-G/G.2 implements lists, `ImageSnippetContent`, Backup v5, and unified authoring while valid v1-v4 imports remain supported. Decision 38 continues to exclude legacy Rich local-image records, and Image Snippets remain excluded from text retrieval/prompt/catalog delivery. M14-F remains cancelled; the next action after approval is M14-I unified delivery.

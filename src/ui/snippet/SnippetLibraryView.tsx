@@ -1,54 +1,54 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { SnippetEntryInput } from '../../application/persistence/snippet-entry-repository';
 import {
   orderSnippetEntries,
   type SnippetLibrary,
 } from '../../application/snippet/snippet-library';
-import type { SnippetEntry } from '../../domain/snippet-entry';
-import {
-  cloneSnippetContent,
-  convertPlainSnippetToRich,
-  createPlainSnippetContent,
-  InvalidSnippetContentError,
-  renderSnippetPlainText,
-  type SnippetContent,
-} from '../../domain/snippet-content';
+import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
 import {
   DuplicateSnippetTriggerError,
   InvalidSnippetTriggerError,
 } from '../../application/snippet/snippet-trigger';
-import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
-import { formatTags, parseTags } from '../library/tags';
+import type {
+  SnippetAsset,
+  SnippetAssetDraft,
+} from '../../domain/snippet-asset';
+import type { SnippetEntry } from '../../domain/snippet-entry';
 import {
-  isRichSnippetDraftValid,
-  RichSnippetEditor,
-} from './RichSnippetEditor';
+  convertPlainSnippetToRich,
+  InvalidSnippetContentError,
+  renderSnippetPlainText,
+  type RichSnippetContent,
+} from '../../domain/snippet-content';
+import { formatTags, parseTags } from '../library/tags';
+import { ImageSnippetEditor } from './ImageSnippetEditor';
+import { ImagePreviewUrl } from './image-preview-url';
+import { isSupportedTextSnippetContent } from './text-editor-document';
+import { TextSnippetEditor } from './TextSnippetEditor';
+
+type EditorMode = 'closed' | 'chooser' | 'text' | 'image' | 'compatibility';
+type LibraryFilter = 'all' | 'text' | 'images';
 
 interface SnippetDraft {
   title: string;
-  content: SnippetContent;
+  content: RichSnippetContent;
   tags: string;
   trigger: string;
 }
 
 interface SnippetLibraryViewProps {
   snippetLibrary: SnippetLibrary;
-  confirmConvert?: () => boolean;
   confirmDelete?: (entry: SnippetEntry) => boolean;
 }
 
-const EMPTY_DRAFT: SnippetDraft = {
-  title: '',
-  content: createPlainSnippetContent(''),
-  tags: '',
-  trigger: '',
+const EMPTY_RICH_CONTENT: RichSnippetContent = {
+  kind: 'rich',
+  blocks: [{ type: 'paragraph', children: [] }],
 };
 
-function defaultConvertConfirmation(): boolean {
-  return globalThis.confirm(
-    'Convert this draft to a rich template? Once you save the Rich version, it cannot be converted back to Plain in this version.',
-  );
+function emptyDraft(): SnippetDraft {
+  return { title: '', content: EMPTY_RICH_CONTENT, tags: '', trigger: '' };
 }
 
 function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
@@ -58,46 +58,79 @@ function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
 }
 
 function draftFromEntry(entry: SnippetEntry): SnippetDraft {
+  if (entry.content.kind === 'image') throw new InvalidSnippetContentError();
   return {
     title: entry.title,
-    content: cloneSnippetContent(entry.content),
+    content:
+      entry.content.kind === 'plain'
+        ? convertPlainSnippetToRich(entry.content)
+        : entry.content,
     tags: formatTags(entry.tags),
     trigger: entry.trigger ?? '',
   };
 }
 
-function inputFromDraft(draft: SnippetDraft): SnippetEntryInput {
-  return {
-    title: draft.title,
-    content: draft.content,
-    tags: parseTags(draft.tags),
-    trigger: draft.trigger === '' ? null : draft.trigger,
-  };
+function ImageThumbnail({
+  assetId,
+  snippetLibrary,
+}: {
+  readonly assetId: string;
+  readonly snippetLibrary: SnippetLibrary;
+}) {
+  const [url, setUrl] = useState<string>();
+  useEffect(() => {
+    let active = true;
+    const preview = new ImagePreviewUrl(URL);
+    void (
+      snippetLibrary.loadAsset?.(assetId) ?? Promise.resolve(undefined)
+    ).then(
+      (asset) => {
+        if (active && asset !== undefined) setUrl(preview.replace(asset.blob));
+      },
+      () => undefined,
+    );
+    return () => {
+      active = false;
+      preview.clear();
+    };
+  }, [assetId, snippetLibrary]);
+  return url ? (
+    <img
+      alt=""
+      className="mt-3 h-20 w-28 rounded-md border border-slate-200 object-cover"
+      loading="lazy"
+      src={url}
+    />
+  ) : null;
 }
 
 export function SnippetLibraryView({
   snippetLibrary,
-  confirmConvert = defaultConvertConfirmation,
   confirmDelete = defaultDeleteConfirmation,
 }: SnippetLibraryViewProps) {
   const [entries, setEntries] = useState<readonly SnippetEntry[]>([]);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'failed'>(
     'loading',
   );
-  const [draft, setDraft] = useState<SnippetDraft>(EMPTY_DRAFT);
+  const [mode, setMode] = useState<EditorMode>('closed');
+  const [filter, setFilter] = useState<LibraryFilter>('all');
+  const [search, setSearch] = useState('');
+  const [draft, setDraft] = useState<SnippetDraft>(emptyDraft);
+  const [imageAsset, setImageAsset] = useState<
+    SnippetAsset | SnippetAssetDraft
+  >();
   const [editingId, setEditingId] = useState<string>();
   const [operation, setOperation] = useState<'saving' | 'deleting'>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [triggerErrorMessage, setTriggerErrorMessage] = useState<string>();
   const [statusMessage, setStatusMessage] = useState<string>();
+  const assetLoadGeneration = useRef(0);
 
   async function loadEntries() {
     setLoadState('loading');
     setErrorMessage(undefined);
-
     try {
-      const loadedEntries = await snippetLibrary.load();
-      setEntries(loadedEntries);
+      setEntries(await snippetLibrary.load());
       setLoadState('ready');
     } catch {
       setLoadState('failed');
@@ -109,11 +142,10 @@ export function SnippetLibraryView({
 
   useEffect(() => {
     let active = true;
-
     void snippetLibrary.load().then(
-      (loadedEntries) => {
+      (loaded) => {
         if (!active) return;
-        setEntries(loadedEntries);
+        setEntries(loaded);
         setLoadState('ready');
       },
       () => {
@@ -124,42 +156,79 @@ export function SnippetLibraryView({
         );
       },
     );
-
     return () => {
       active = false;
     };
   }, [snippetLibrary]);
 
-  function resetForm() {
-    setDraft({ ...EMPTY_DRAFT, content: createPlainSnippetContent('') });
+  function closeEditor() {
+    assetLoadGeneration.current += 1;
+    setMode('closed');
+    setDraft(emptyDraft());
+    setImageAsset(undefined);
     setEditingId(undefined);
     setTriggerErrorMessage(undefined);
   }
 
-  function updateDraft(
-    field: Exclude<keyof SnippetDraft, 'content'>,
-    value: string,
-  ) {
+  function openNewText() {
+    assetLoadGeneration.current += 1;
+    setDraft(emptyDraft());
+    setEditingId(undefined);
+    setMode('text');
+    setErrorMessage(undefined);
+  }
+
+  function openNewImage() {
+    assetLoadGeneration.current += 1;
+    setDraft(emptyDraft());
+    setImageAsset(undefined);
+    setEditingId(undefined);
+    setMode('image');
+    setErrorMessage(undefined);
+  }
+
+  async function beginEditing(entry: SnippetEntry) {
+    const loadGeneration = assetLoadGeneration.current + 1;
+    assetLoadGeneration.current = loadGeneration;
+    setStatusMessage(undefined);
+    setErrorMessage(undefined);
+    setEditingId(entry.id);
+    if (entry.content.kind === 'image') {
+      setImageAsset(undefined);
+      setDraft({
+        title: entry.title,
+        content: EMPTY_RICH_CONTENT,
+        tags: formatTags(entry.tags),
+        trigger: entry.trigger ?? '',
+      });
+      setMode('image');
+      try {
+        const asset = await snippetLibrary.loadAsset?.(entry.content.assetId);
+        if (assetLoadGeneration.current !== loadGeneration) return;
+        if (asset === undefined) throw new Error('missing asset');
+        setImageAsset(asset);
+      } catch {
+        if (assetLoadGeneration.current !== loadGeneration) return;
+        setErrorMessage(
+          'We could not load this image. The saved Snippet was not changed.',
+        );
+      }
+      return;
+    }
+    if (
+      entry.content.kind === 'rich' &&
+      !isSupportedTextSnippetContent(entry.content)
+    ) {
+      setMode('compatibility');
+      return;
+    }
+    setDraft(draftFromEntry(entry));
+    setMode('text');
+  }
+
+  function updateDraft(field: 'title' | 'tags' | 'trigger', value: string) {
     if (field === 'trigger') setTriggerErrorMessage(undefined);
     setDraft((current) => ({ ...current, [field]: value }));
-  }
-
-  function updateContent(content: SnippetContent) {
-    setErrorMessage(undefined);
-    setDraft((current) => ({ ...current, content }));
-  }
-
-  function convertDraftToRich() {
-    if (draft.content.kind !== 'plain' || !confirmConvert()) return;
-    updateContent(convertPlainSnippetToRich(draft.content));
-  }
-
-  function beginEditing(entry: SnippetEntry) {
-    setDraft(draftFromEntry(entry));
-    setEditingId(entry.id);
-    setErrorMessage(undefined);
-    setTriggerErrorMessage(undefined);
-    setStatusMessage(undefined);
   }
 
   async function saveEntry(event: FormEvent<HTMLFormElement>) {
@@ -168,26 +237,33 @@ export function SnippetLibraryView({
     setErrorMessage(undefined);
     setTriggerErrorMessage(undefined);
     setStatusMessage(undefined);
-
+    const newAsset =
+      imageAsset !== undefined && !('snippetId' in imageAsset)
+        ? imageAsset
+        : undefined;
+    const input: SnippetEntryInput = {
+      title: draft.title,
+      content:
+        mode === 'image' && imageAsset !== undefined
+          ? { kind: 'image', assetId: imageAsset.id }
+          : draft.content,
+      tags: parseTags(draft.tags),
+      trigger: draft.trigger === '' ? null : draft.trigger,
+      ...(newAsset === undefined ? {} : { newAssets: [newAsset] }),
+    };
     try {
-      if (editingId) {
-        const updated = await snippetLibrary.update(
-          editingId,
-          inputFromDraft(draft),
-        );
-        setEntries((current) =>
-          orderSnippetEntries(
-            current.map((entry) => (entry.id === updated.id ? updated : entry)),
-          ),
-        );
-        setStatusMessage('Snippet updated.');
-      } else {
-        const created = await snippetLibrary.create(inputFromDraft(draft));
-        setEntries((current) => orderSnippetEntries([...current, created]));
-        setStatusMessage('Snippet created.');
-      }
-
-      resetForm();
+      const saved = editingId
+        ? await snippetLibrary.update(editingId, input)
+        : await snippetLibrary.create(input);
+      setEntries((current) =>
+        orderSnippetEntries(
+          editingId
+            ? current.map((entry) => (entry.id === saved.id ? saved : entry))
+            : [...current, saved],
+        ),
+      );
+      closeEditor();
+      setStatusMessage(editingId ? 'Snippet updated.' : 'Snippet created.');
     } catch (error) {
       if (error instanceof CatalogUnavailableAfterMutationError) {
         const persisted = error.persistedResult as SnippetEntry;
@@ -200,7 +276,7 @@ export function SnippetLibraryView({
               : [...current, persisted],
           ),
         );
-        resetForm();
+        closeEditor();
         setStatusMessage(
           'Snippet saved. Trigger expansion is temporarily unavailable.',
         );
@@ -209,13 +285,11 @@ export function SnippetLibraryView({
         error instanceof DuplicateSnippetTriggerError
       ) {
         setTriggerErrorMessage(error.message);
-      } else if (error instanceof InvalidSnippetContentError) {
-        setErrorMessage('Check the Rich content URLs and try saving again.');
       } else {
         setErrorMessage(
           editingId
-            ? 'We could not update this snippet. Please try again.'
-            : 'We could not create this snippet. Please try again.',
+            ? 'We could not update this snippet. Your draft is still here.'
+            : 'We could not create this snippet. Your draft is still here.',
         );
       }
     } finally {
@@ -225,27 +299,21 @@ export function SnippetLibraryView({
 
   async function deleteEntry(entry: SnippetEntry) {
     if (!confirmDelete(entry)) return;
-
     setOperation('deleting');
     setErrorMessage(undefined);
-    setStatusMessage(undefined);
-
     try {
-      const existed = await snippetLibrary.delete(entry.id);
+      await snippetLibrary.delete(entry.id);
       setEntries((current) =>
         current.filter((candidate) => candidate.id !== entry.id),
       );
-
-      if (editingId === entry.id) resetForm();
-      setStatusMessage(
-        existed ? 'Snippet deleted.' : 'This snippet was already removed.',
-      );
+      if (editingId === entry.id) closeEditor();
+      setStatusMessage('Snippet deleted.');
     } catch (error) {
       if (error instanceof CatalogUnavailableAfterMutationError) {
         setEntries((current) =>
           current.filter((candidate) => candidate.id !== entry.id),
         );
-        if (editingId === entry.id) resetForm();
+        if (editingId === entry.id) closeEditor();
         setStatusMessage(
           'Snippet deleted. Trigger expansion is temporarily unavailable.',
         );
@@ -257,30 +325,51 @@ export function SnippetLibraryView({
     }
   }
 
+  const visibleEntries = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return entries.filter((entry) => {
+      const typeMatches =
+        filter === 'all' ||
+        (filter === 'images'
+          ? entry.content.kind === 'image'
+          : entry.content.kind !== 'image');
+      const searchMatches =
+        query === '' ||
+        [entry.title, entry.trigger ?? '', ...entry.tags].some((value) =>
+          value.toLocaleLowerCase().includes(query),
+        );
+      return typeMatches && searchMatches;
+    });
+  }, [entries, filter, search]);
+
   const isBusy = operation !== undefined;
   const canSave =
     !isBusy &&
-    (draft.content.kind === 'plain' || isRichSnippetDraftValid(draft.content));
+    mode !== 'compatibility' &&
+    (mode !== 'image' || imageAsset !== undefined);
 
   return (
     <section aria-labelledby="snippet-library-heading" className="mt-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2
-            id="snippet-library-heading"
             className="text-xl font-semibold text-slate-950"
+            id="snippet-library-heading"
           >
-            Snippet Library
+            Snippets
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Save and maintain reusable response text on this device.
+            Reusable text and images stored on this device.
           </p>
         </div>
-        {loadState === 'ready' ? (
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-            {entries.length} {entries.length === 1 ? 'snippet' : 'snippets'}
-          </span>
-        ) : null}
+        <button
+          className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+          disabled={isBusy}
+          onClick={() => setMode('chooser')}
+          type="button"
+        >
+          + New Snippet
+        </button>
       </div>
 
       {errorMessage ? (
@@ -291,7 +380,7 @@ export function SnippetLibraryView({
           <p>{errorMessage}</p>
           {loadState === 'failed' ? (
             <button
-              className="mt-3 rounded-md bg-red-700 px-3 py-2 font-medium text-white hover:bg-red-800"
+              className="mt-3 rounded-md bg-red-700 px-3 py-2 font-medium text-white"
               onClick={() => void loadEntries()}
               type="button"
             >
@@ -300,7 +389,6 @@ export function SnippetLibraryView({
           ) : null}
         </div>
       ) : null}
-
       {statusMessage ? (
         <p
           className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
@@ -310,224 +398,254 @@ export function SnippetLibraryView({
         </p>
       ) : null}
 
+      {mode === 'chooser' ? (
+        <section
+          aria-label="Create Snippet"
+          className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="flex justify-between">
+            <h3 className="font-semibold text-slate-900">Create Snippet</h3>
+            <button
+              className="text-sm text-slate-600"
+              onClick={closeEditor}
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              className="rounded-lg border border-slate-300 p-4 text-left hover:border-blue-500 hover:bg-blue-50"
+              onClick={openNewText}
+              type="button"
+            >
+              <span className="block font-semibold">Text Snippet</span>
+              <span className="mt-1 block text-sm text-slate-600">
+                Reusable formatted text
+              </span>
+            </button>
+            <button
+              className="rounded-lg border border-slate-300 p-4 text-left hover:border-blue-500 hover:bg-blue-50"
+              onClick={openNewImage}
+              type="button"
+            >
+              <span className="block font-semibold">Image Snippet</span>
+              <span className="mt-1 block text-sm text-slate-600">
+                Reusable screenshot or image
+              </span>
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {mode === 'compatibility' ? (
+        <section
+          aria-label="Legacy snippet compatibility"
+          className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5"
+        >
+          <h3 className="font-semibold text-amber-950">
+            This Text Snippet is read-only
+          </h3>
+          <p className="mt-2 text-sm text-amber-900">
+            It contains a legacy image format that the current text editor
+            cannot safely change. Its saved content remains preserved.
+          </p>
+          <button
+            className="mt-4 rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium"
+            onClick={closeEditor}
+            type="button"
+          >
+            Close
+          </button>
+        </section>
+      ) : null}
+
+      {mode === 'text' || mode === 'image' ? (
+        <form
+          aria-label={
+            editingId ? `Edit ${mode} snippet` : `Create ${mode} snippet`
+          }
+          className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          onSubmit={(event) => void saveEntry(event)}
+        >
+          <div className="flex justify-between">
+            <h3 className="font-semibold text-slate-900">
+              {editingId ? 'Edit' : 'New'}{' '}
+              {mode === 'text' ? 'Text Snippet' : 'Image Snippet'}
+            </h3>
+            <button
+              className="text-sm font-medium text-slate-600"
+              disabled={isBusy}
+              onClick={closeEditor}
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+          <label className="block text-sm font-medium text-slate-700">
+            Title
+            <input
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+              disabled={isBusy}
+              onChange={(event) => updateDraft('title', event.target.value)}
+              type="text"
+              value={draft.title}
+            />
+          </label>
+          <label className="block text-sm font-medium text-slate-700">
+            Trigger (optional)
+            <input
+              aria-invalid={triggerErrorMessage ? true : undefined}
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 font-mono"
+              disabled={isBusy}
+              onChange={(event) => updateDraft('trigger', event.target.value)}
+              placeholder=";welcome"
+              type="text"
+              value={draft.trigger}
+            />
+            {triggerErrorMessage ? (
+              <span className="mt-1 block text-xs text-red-700" role="alert">
+                {triggerErrorMessage}
+              </span>
+            ) : null}
+          </label>
+          <label className="block text-sm font-medium text-slate-700">
+            Tags (comma-separated)
+            <input
+              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
+              disabled={isBusy}
+              onChange={(event) => updateDraft('tags', event.target.value)}
+              placeholder="greeting, support"
+              type="text"
+              value={draft.tags}
+            />
+          </label>
+          {mode === 'text' ? (
+            <div>
+              <p className="mb-1 text-sm font-medium text-slate-700">Content</p>
+              <TextSnippetEditor
+                content={draft.content}
+                disabled={isBusy}
+                key={editingId ?? 'new-text'}
+                onChange={(content) =>
+                  setDraft((current) => ({ ...current, content }))
+                }
+              />
+            </div>
+          ) : (
+            <ImageSnippetEditor
+              asset={imageAsset}
+              disabled={isBusy}
+              onChange={setImageAsset}
+            />
+          )}
+          <div className="flex gap-2">
+            <button
+              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold"
+              disabled={isBusy}
+              onClick={closeEditor}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              disabled={!canSave}
+              type="submit"
+            >
+              {operation === 'saving' ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        </form>
+      ) : null}
+
       {loadState === 'loading' ? (
         <p className="mt-6 text-sm text-slate-600" role="status">
           Loading snippets…
         </p>
       ) : null}
-
       {loadState === 'ready' ? (
-        <>
-          <form
-            aria-label={editingId ? 'Edit snippet' : 'Create snippet'}
-            className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            onSubmit={(event) => void saveEntry(event)}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="font-semibold text-slate-900">
-                {editingId ? 'Edit snippet' : 'Create snippet'}
-              </h3>
-              {editingId ? (
-                <button
-                  className="text-sm font-medium text-slate-600 hover:text-slate-950"
-                  disabled={isBusy}
-                  onClick={resetForm}
-                  type="button"
-                >
-                  Cancel edit
-                </button>
-              ) : null}
-            </div>
-
-            <label className="block text-sm font-medium text-slate-700">
-              Title
-              <input
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                disabled={isBusy}
-                onChange={(event) => updateDraft('title', event.target.value)}
-                type="text"
-                value={draft.title}
-              />
-            </label>
-
-            {draft.content.kind === 'rich' ? (
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-slate-700">Content</p>
-                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
-                    Rich template
-                  </span>
-                </div>
-                <RichSnippetEditor
-                  content={draft.content}
-                  disabled={isBusy}
-                  onChange={updateContent}
-                />
-                <p className="text-xs text-slate-600">
-                  Rich-to-Plain conversion is not available in this version.
-                </p>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-slate-700">
-                  Content
-                  <textarea
-                    className="mt-1 block min-h-32 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    disabled={isBusy}
-                    onChange={(event) =>
-                      updateContent(
-                        createPlainSnippetContent(event.target.value),
-                      )
-                    }
-                    value={draft.content.text}
-                  />
-                </label>
-                <button
-                  className="mt-2 rounded-md border border-blue-300 px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-50 disabled:opacity-50"
-                  disabled={isBusy}
-                  onClick={convertDraftToRich}
-                  type="button"
-                >
-                  Convert to rich template
-                </button>
-                <p className="mt-1 text-xs text-slate-600">
-                  Conversion affects only this draft. It becomes one-way after
-                  you save the Rich version.
-                </p>
-              </div>
-            )}
-
-            <label className="block text-sm font-medium text-slate-700">
-              Trigger (optional)
-              <input
-                aria-describedby={
-                  triggerErrorMessage
-                    ? 'snippet-trigger-guidance snippet-trigger-error'
-                    : 'snippet-trigger-guidance'
-                }
-                aria-invalid={triggerErrorMessage ? true : undefined}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                disabled={isBusy}
-                onChange={(event) => updateDraft('trigger', event.target.value)}
-                placeholder=";refund"
-                type="text"
-                value={draft.trigger}
-              />
-              <span
-                className="mt-1 block text-xs font-normal text-slate-600"
-                id="snippet-trigger-guidance"
+        <div className="mt-6">
+          <label className="sr-only" htmlFor="snippet-search">
+            Search snippets
+          </label>
+          <input
+            className="block w-full rounded-md border border-slate-300 px-3 py-2"
+            id="snippet-search"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search snippets..."
+            type="search"
+            value={search}
+          />
+          <div aria-label="Snippet type filter" className="mt-3 flex gap-2">
+            {(['all', 'text', 'images'] as const).map((value) => (
+              <button
+                aria-pressed={filter === value}
+                className="rounded-full border border-slate-300 px-3 py-1.5 text-sm capitalize aria-pressed:border-blue-600 aria-pressed:bg-blue-100"
+                key={value}
+                onClick={() => setFilter(value)}
+                type="button"
               >
-                Optional. Use 2–32 characters starting with ;. Letters, numbers,
-                and single hyphens only.
-              </span>
-              {triggerErrorMessage ? (
-                <span
-                  className="mt-1 block text-xs font-normal text-red-700"
-                  id="snippet-trigger-error"
-                  role="alert"
-                >
-                  {triggerErrorMessage}
-                </span>
-              ) : null}
-            </label>
-
-            <label className="block text-sm font-medium text-slate-700">
-              Tags (comma-separated)
-              <input
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                disabled={isBusy}
-                onChange={(event) => updateDraft('tags', event.target.value)}
-                placeholder="billing, greeting"
-                type="text"
-                value={draft.tags}
-              />
-            </label>
-
-            <button
-              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={!canSave}
-              type="submit"
-            >
-              {operation === 'saving'
-                ? 'Saving…'
-                : editingId
-                  ? 'Save changes'
-                  : 'Create snippet'}
-            </button>
-          </form>
-
-          <div className="mt-8">
-            <h3 className="font-semibold text-slate-900">Saved snippets</h3>
-            {entries.length === 0 ? (
-              <div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="font-medium text-slate-800">
-                  No snippets saved yet.
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Create your first snippet using the form above.
-                </p>
-              </div>
-            ) : (
-              <ul className="mt-3 space-y-4">
-                {entries.map((entry) => (
-                  <li
-                    className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-                    key={entry.id}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <h4 className="font-semibold text-slate-950">
+                {value}
+              </button>
+            ))}
+          </div>
+          {visibleEntries.length === 0 ? (
+            <p className="mt-6 rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
+              No matching snippets.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+              {visibleEntries.map((entry) => (
+                <li className="p-4" key={entry.id}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-slate-950">
                         {entry.title}
-                      </h4>
-                      <div className="flex gap-2">
-                        <button
-                          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-                          disabled={isBusy}
-                          onClick={() => beginEditing(entry)}
-                          type="button"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
-                          disabled={isBusy}
-                          onClick={() => void deleteEntry(entry)}
-                          type="button"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      </h3>
+                      {entry.trigger ? (
+                        <p className="mt-1 font-mono text-sm text-blue-700">
+                          {entry.trigger}
+                        </p>
+                      ) : null}
+                      <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {entry.content.kind === 'image' ? 'Image' : 'Text'}
+                      </span>
                     </div>
-                    {entry.trigger ? (
-                      <p className="mt-2 font-mono text-sm font-semibold text-blue-700">
-                        {entry.trigger}
-                      </p>
-                    ) : null}
-                    <span className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                      {entry.content.kind === 'rich' ? 'Rich' : 'Plain'}
-                    </span>
-                    <p className="mt-4 whitespace-pre-wrap text-sm text-slate-700">
+                    <div className="flex gap-2">
+                      <button
+                        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                        disabled={isBusy}
+                        onClick={() => void beginEditing(entry)}
+                        type="button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700"
+                        disabled={isBusy}
+                        onClick={() => void deleteEntry(entry)}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  {entry.content.kind === 'image' ? (
+                    <ImageThumbnail
+                      assetId={entry.content.assetId}
+                      snippetLibrary={snippetLibrary}
+                    />
+                  ) : (
+                    <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
                       {renderSnippetPlainText(entry.content)}
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {entry.tags.length === 0 ? (
-                        <span className="text-xs text-slate-500">No tags</span>
-                      ) : (
-                        entry.tags.map((tag, index) => (
-                          <span
-                            className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700"
-                            key={`${entry.id}-${index}`}
-                          >
-                            {tag}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       ) : null}
     </section>
   );

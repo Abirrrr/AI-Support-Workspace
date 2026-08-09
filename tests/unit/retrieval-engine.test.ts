@@ -265,6 +265,49 @@ describe('RetrievalEngine', () => {
     ]);
   });
 
+  it('retrieves list projection but explicitly excludes Image Snippets from all ranking fields', async () => {
+    const list = createSnippetEntry({
+      id: 'snippet-list',
+      title: 'Unrelated',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'list',
+            listType: 'ordered',
+            items: [
+              {
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Enable widget',
+                    bold: true,
+                    italic: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const image = createSnippetEntry({
+      id: 'snippet-image',
+      title: 'refund secret.png',
+      tags: ['refund', 'base64'],
+      content: {
+        kind: 'image',
+        assetId: '123e4567-e89b-42d3-a456-426614174000',
+      },
+    });
+    const { engine } = createRepositories([], [image, list]);
+
+    expect(
+      (await engine.retrieve('widget')).snippets.map(({ id }) => id),
+    ).toEqual([list.id]);
+    expect((await engine.retrieve('refund base64')).snippets).toEqual([]);
+  });
+
   it('orders each domain by score, createdAt, and id deterministically', async () => {
     const records = [
       createKnowledgeEntry({

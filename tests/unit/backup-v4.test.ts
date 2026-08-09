@@ -1,20 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type {
-  BackupDownloadPort,
   BackupSnapshot,
   TransactionalBackupRestorePort,
 } from '../../src/application/backup/backup-ports';
-import {
-  BackupExportService,
-  BackupRestoreService,
-} from '../../src/application/backup/backup-service';
+import { BackupRestoreService } from '../../src/application/backup/backup-service';
 import { parseBackupFile } from '../../src/application/backup/backup-validator';
 import {
   decodeCanonicalBase64,
   encodeBase64,
 } from '../../src/application/backup/base64';
 import {
+  BACKUP_FORMAT,
   BACKUP_FORMAT_VERSION_4,
   type BackupFileV4,
 } from '../../src/domain/backup-file';
@@ -68,16 +65,64 @@ function createSnapshot(): BackupSnapshot {
   };
 }
 
-async function exportV4(): Promise<string> {
-  const download = vi.fn<BackupDownloadPort['download']>(async () => undefined);
-  await new BackupExportService(
-    { readSnapshot: async () => createSnapshot() },
-    { download },
-    () => new Date(CREATED_AT),
-  ).exportBackup();
-  const call = download.mock.calls[0];
-  if (call === undefined) throw new Error('Missing backup download.');
-  return call[0];
+async function exportV4(snapshot = createSnapshot()): Promise<string> {
+  const snippets = snapshot.snippets.map((entry) => {
+    if (entry.content.kind !== 'rich') {
+      throw new Error('Expected historical Rich fixture.');
+    }
+    return {
+      id: entry.id,
+      title: entry.title,
+      content: {
+        kind: 'rich' as const,
+        blocks: entry.content.blocks.map((block) => {
+          if (block.type === 'list') {
+            throw new Error('Backup v4 cannot contain lists.');
+          }
+          return block.type === 'paragraph'
+            ? {
+                type: 'paragraph' as const,
+                children: block.children.map((inline) => ({ ...inline })),
+              }
+            : { ...block };
+        }),
+      },
+      tags: [...entry.tags],
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
+      trigger: entry.trigger,
+    };
+  });
+  const snippetAssets = await Promise.all(
+    [...snapshot.snippetAssets]
+      .sort((left, right) =>
+        left.createdAt === right.createdAt
+          ? left.id.localeCompare(right.id)
+          : left.createdAt.localeCompare(right.createdAt),
+      )
+      .map(async (asset) => ({
+        id: asset.id,
+        snippetId: asset.snippetId,
+        mimeType: asset.mimeType,
+        byteSize: asset.byteSize,
+        originalFilename: asset.originalFilename,
+        createdAt: asset.createdAt,
+        encoding: 'base64' as const,
+        data: encodeBase64(new Uint8Array(await asset.blob.arrayBuffer())),
+      })),
+  );
+  const backup: BackupFileV4 = {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_4,
+    exportedAt: CREATED_AT,
+    data: {
+      knowledge: [],
+      snippets,
+      snippetAssets,
+      settings: { defaultModel: snapshot.settings.defaultModel },
+    },
+  };
+  return JSON.stringify(backup);
 }
 
 describe('Backup v4 local image assets', () => {
@@ -106,6 +151,10 @@ describe('Backup v4 local image assets', () => {
       parseBackupFile(serialized),
     );
     const restored = replaceAll.mock.calls[0]?.[0];
+    expect(restored?.snippets[0]?.content).toEqual(
+      createSnapshot().snippets[0]?.content,
+    );
+    expect(restored?.snippets[0]?.content.kind).toBe('rich');
     const restoredAsset = restored?.snippetAssets?.[0];
     expect(restoredAsset).toMatchObject({
       id: ASSET_ID,
@@ -169,16 +218,7 @@ describe('Backup v4 local image assets', () => {
       ],
       settings: { defaultModel: null },
     };
-    const download = vi.fn<BackupDownloadPort['download']>(
-      async () => undefined,
-    );
-    await new BackupExportService(
-      { readSnapshot: async () => snapshot },
-      { download },
-      () => new Date(CREATED_AT),
-    ).exportBackup();
-    const serialized = download.mock.calls[0]?.[0];
-    if (serialized === undefined) throw new Error('Missing backup download.');
+    const serialized = await exportV4(snapshot);
     const parsed = parseBackupFile(serialized);
     if (parsed.formatVersion !== 4) throw new Error('Expected Backup v4.');
     expect(parsed.data.snippetAssets.map(({ id }) => id)).toEqual([

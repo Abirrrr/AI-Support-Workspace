@@ -189,4 +189,47 @@ describe('SnippetAsset', () => {
       ),
     ).toThrowError(expect.objectContaining({ code: 'project-limit-exceeded' }));
   });
+
+  it('enforces exactly one same-owner asset for top-level Image Snippets', () => {
+    const imageSnippet: SnippetEntry = {
+      ...snippet(),
+      content: { kind: 'image', assetId: ASSET_ID },
+    };
+    expect(() =>
+      validateSnippetAssetGraph([imageSnippet], [asset()]),
+    ).not.toThrow();
+    expect(() => validateSnippetAssetGraph([imageSnippet], [])).toThrowError(
+      expect.objectContaining({ code: 'missing-asset' }),
+    );
+    expect(() =>
+      validateSnippetAssetGraph(
+        [
+          imageSnippet,
+          {
+            ...snippet(),
+            id: '323e4567-e89b-42d3-a456-426614174000',
+            content: { kind: 'plain', text: 'Foreign owner' },
+          },
+        ],
+        [
+          asset('image/png', {
+            snippetId: '323e4567-e89b-42d3-a456-426614174000',
+          }),
+        ],
+      ),
+    ).toThrowError(
+      expect.objectContaining({ code: 'foreign-asset-reference' }),
+    );
+    expect(() =>
+      validateSnippetAssetGraph(
+        [imageSnippet],
+        [
+          asset(),
+          asset('image/jpeg', {
+            id: '423e4567-e89b-42d3-a456-426614174000',
+          }),
+        ],
+      ),
+    ).toThrowError(expect.objectContaining({ code: 'orphan-asset' }));
+  });
 });

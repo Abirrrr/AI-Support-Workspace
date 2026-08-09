@@ -3,6 +3,8 @@ import type {
   SnippetEntryRepository,
 } from '../persistence/snippet-entry-repository';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import type { SnippetAsset } from '../../domain/snippet-asset';
+import type { SnippetAssetRepository } from '../persistence/snippet-asset-repository';
 import { validateSnippetContent } from '../../domain/snippet-content';
 import {
   DuplicateSnippetTriggerError,
@@ -15,6 +17,7 @@ import {
 
 export interface SnippetLibrary {
   load(): Promise<readonly SnippetEntry[]>;
+  loadAsset?(id: string): Promise<SnippetAsset | undefined>;
   create(input: SnippetEntryInput): Promise<SnippetEntry>;
   update(id: string, input: SnippetEntryInput): Promise<SnippetEntry>;
   delete(id: string): Promise<boolean>;
@@ -24,10 +27,15 @@ export class SnippetLibraryService implements SnippetLibrary {
   constructor(
     private readonly repository: SnippetEntryRepository,
     private readonly catalogMutationPort?: CatalogMutationPort,
+    private readonly assetRepository?: SnippetAssetRepository,
   ) {}
 
   load(): Promise<readonly SnippetEntry[]> {
     return this.repository.list();
+  }
+
+  loadAsset(id: string): Promise<SnippetAsset | undefined> {
+    return this.assetRepository?.get(id) ?? Promise.resolve(undefined);
   }
 
   async create(input: SnippetEntryInput): Promise<SnippetEntry> {

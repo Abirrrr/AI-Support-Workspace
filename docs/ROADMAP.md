@@ -112,21 +112,21 @@ Add optional unique semicolon triggers to existing plain-text Snippets and expan
 
 The previously documented M13-A — Provider Expansion / OpenAI Architecture Readiness Review was superseded before execution by the product-priority realignment. M13-A.1 defined the approved architecture. M13-B implemented trigger-enabled Snippets, persistence and Backup Format v2, the transient catalog, typed frame synchronization, and supported-editor expansion. M13-B.1 corrected overlapping catalog publication, and M13-B.2 corrected isolated-world/realm handling and intentionally expanded availability to normal HTTP/HTTPS websites. Principal Engineer review, automated validation, and product-owner real Chrome validation passed. M13 is complete at implementation checkpoint `b76fcb4` (`feat: add snippet trigger expansion`).
 
-## Milestone 14 — Rich Snippet Templates / Snippet Delivery (Current — Architecture Revised)
+## Milestone 14 — Snippet Authoring and Delivery (Current — Architecture Revised)
 
 Extend the M13 Snippet aggregate and trigger/editor foundation with canonical structured text, first-class bullet/numbered lists, a separate one-image Image Snippet content type, deterministic compatibility, and truthful destination delivery. Preserve existing Plain Snippets, legacy URL references, M14-E local assets, and frozen Backup Formats v1-v4.
 
-Status: M14-B implements structured content/Dexie v4/Backup v3 at `ed23f30`; M14-C implements structured authoring at `a787100`; M14-D and Decision 37 are at `64504df`; Decision 38 is at `f9b5097`; and M14-E implements local assets/Dexie v5/Backup v4 at `1828f09`. M14-F Unified Rich Editor Inline Image Authoring is cancelled before implementation. M14-F.1 records the architecture correction in Decision 39; no replacement implementation exists yet.
+Status: M14-B implements structured content/Dexie v4/Backup v3 at `ed23f30`; M14-C implements the historical structured authoring baseline at `a787100`; M14-D/Decision 37 is at `64504df`; Decision 38 is at `f9b5097`; M14-E implements local assets/Dexie v5/Backup v4 at `1828f09`; and M14-F.1/F.1.1 records Decision 39 at `b7d16ec`. M14-F is cancelled. The uncommitted M14-G/G.2 package implements lists, Backup v5, unified Text WYSIWYG, and Image authoring under Decision 41 pending Principal review.
 
 Revised sequence:
 
 - **M14-F.1 — Snippet Image Product Boundary Architecture Correction:** documentation-only cancellation of inline Rich-image authoring; defines portable text-only Rich Snippets, one-image Image Snippets, legacy compatibility, Backup v5, typed trigger delivery, and M15 separation.
-- **M14-G — Rich Snippet Structured Lists and Backup v5 Foundation:** implement unordered/ordered list blocks and authoring, deterministic projection, the minimal Image Snippet content discriminant needed to freeze one complete public contract, Backup v5, and v1-v4 compatibility. No Image Snippet UI or delivery.
-- **M14-H — Image Snippet Domain Completion and Authoring:** enforce exactly one owned asset; implement paste/file selection, preview, replace, remove-before-Save, Save/Cancel/reopen, and eligible explicit legacy conversion. Keep Image Snippet triggers fail-closed until M14-I.
-- **M14-I — Typed Trigger Delivery Planner and Clipboard Image Delivery:** implement typed catalog descriptors, on-demand asset retrieval, optional `clipboardWrite`/`offscreen` enablement, PNG clipboard preparation, safe trigger cleanup, truthful copy feedback, and real native-paste evidence. No synthetic paste.
+- **M14-G/G.2 (implemented, uncommitted):** unordered/ordered list domain, strict Backup v5, constrained Tiptap Text authoring, simplified All/Text/Images Library, direct screenshot/file Image authoring, and atomic M14-E lifecycle reuse. No external clipboard delivery.
+- **M14-H — ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.**
+- **M14-I — Unified Snippet Clipboard Delivery and Trigger Planner:** implement safe project-owned `text/html` plus deterministic `text/plain` for Text, portable local image clipboard preparation for Image, activation and permission/offscreen proof where required, safe trigger cleanup, truthful feedback, and real native-paste evidence. No synthetic paste.
 - **M14-J — Rich Text Delivery and Destination Capability Validation:** implement and validate direct or clipboard-assisted text/HTML delivery for paragraphs, bold, italic, links, bullets, and numbered lists, including Crisp/Intercom evidence. No normal Rich image delivery.
 
-The shared Backup v5 transition in M14-G is intentional: list blocks and `ImageSnippetContent` both change the public content contract, and freezing them together avoids unnecessary consecutive Backup v5/v6 formats. Dexie remains physical version 5 because no store or index changes. The exact next engineering action after M14-F.1 Principal approval is M14-G. M14 remains incomplete.
+The shared Backup v5 transition in M14-G is intentional: list blocks and `ImageSnippetContent` both change the public content contract, and freezing them together avoids unnecessary consecutive Backup v5/v6 formats. Dexie remains physical version 5. M14-G.2 absorbs M14-H and implements its screenshot-first workflow. The exact next engineering action after approval is M14-I — Unified Snippet Clipboard Delivery and Trigger Planner. M14 remains incomplete.
 
 ## Milestone 15 — Multimodal Screenshot Context
 

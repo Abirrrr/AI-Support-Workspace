@@ -5,25 +5,31 @@ import {
   BACKUP_FORMAT_VERSION_2,
   BACKUP_FORMAT_VERSION_3,
   BACKUP_FORMAT_VERSION_4,
+  BACKUP_FORMAT_VERSION_5,
   MAX_BACKUP_V4_BYTES,
+  MAX_BACKUP_V5_BYTES,
   MAX_LEGACY_BACKUP_BYTES,
   MAX_BACKUP_BYTES,
   type BackupFile,
-  type BackupFileV4,
+  type BackupFileV5,
   type BackupImportPreview,
   type BackupKnowledgeRecordV3,
-  type BackupKnowledgeRecordV4,
+  type BackupKnowledgeRecordV5,
   type BackupRichSnippetBlockV3,
   type BackupRichSnippetInlineV3,
   type BackupRichSnippetBlockV4,
   type BackupRichSnippetInlineV4,
+  type BackupRichSnippetBlockV5,
+  type BackupRichSnippetInlineV5,
   type BackupSnippetContentV3,
-  type BackupSnippetContentV4,
+  type BackupSnippetContentV5,
   type BackupSnippetAssetRecordV4,
+  type BackupSnippetAssetRecordV5,
   type BackupSnippetRecordV1,
   type BackupSnippetRecordV2,
   type BackupSnippetRecordV3,
   type BackupSnippetRecordV4,
+  type BackupSnippetRecordV5,
 } from '../../domain/backup-file';
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
@@ -89,9 +95,9 @@ function compareByCreatedAtAndId(
   return 0;
 }
 
-function toBackupKnowledgeRecordV4(
+function toBackupKnowledgeRecordV5(
   entry: KnowledgeEntry,
-): BackupKnowledgeRecordV4 {
+): BackupKnowledgeRecordV5 {
   return {
     id: entry.id,
     title: entry.title,
@@ -103,9 +109,9 @@ function toBackupKnowledgeRecordV4(
   };
 }
 
-function toBackupRichInlineV4(
+function toBackupRichInlineV5(
   inline: RichSnippetInline,
-): BackupRichSnippetInlineV4 {
+): BackupRichSnippetInlineV5 {
   return inline.type === 'text'
     ? {
         type: 'text',
@@ -122,17 +128,26 @@ function toBackupRichInlineV4(
       };
 }
 
-function toBackupRichBlockV4(
+function toBackupRichBlockV5(
   block: RichSnippetBlock,
-): BackupRichSnippetBlockV4 {
+): BackupRichSnippetBlockV5 {
   if (block.type === 'paragraph') {
     return {
       type: 'paragraph',
-      children: block.children.map(toBackupRichInlineV4),
+      children: block.children.map(toBackupRichInlineV5),
     };
   }
   if (block.type === 'image') {
     return { type: 'image', assetId: block.assetId, altText: block.altText };
+  }
+  if (block.type === 'list') {
+    return {
+      type: 'list',
+      listType: block.listType,
+      items: block.items.map((item) => ({
+        children: item.children.map(toBackupRichInlineV5),
+      })),
+    };
   }
   return {
     type: 'reference',
@@ -142,19 +157,21 @@ function toBackupRichBlockV4(
   };
 }
 
-function toBackupSnippetContentV4(
+function toBackupSnippetContentV5(
   content: SnippetContent,
-): BackupSnippetContentV4 {
-  return content.kind === 'plain'
-    ? { kind: 'plain', text: content.text }
-    : { kind: 'rich', blocks: content.blocks.map(toBackupRichBlockV4) };
+): BackupSnippetContentV5 {
+  if (content.kind === 'plain') return { kind: 'plain', text: content.text };
+  if (content.kind === 'image') {
+    return { kind: 'image', assetId: content.assetId };
+  }
+  return { kind: 'rich', blocks: content.blocks.map(toBackupRichBlockV5) };
 }
 
-function toBackupSnippetRecordV4(entry: SnippetEntry): BackupSnippetRecordV4 {
+function toBackupSnippetRecordV5(entry: SnippetEntry): BackupSnippetRecordV5 {
   return {
     id: entry.id,
     title: entry.title,
-    content: toBackupSnippetContentV4(entry.content),
+    content: toBackupSnippetContentV5(entry.content),
     tags: [...entry.tags],
     createdAt: entry.createdAt,
     updatedAt: entry.updatedAt,
@@ -162,9 +179,9 @@ function toBackupSnippetRecordV4(entry: SnippetEntry): BackupSnippetRecordV4 {
   };
 }
 
-async function toBackupSnippetAssetRecordV4(
+async function toBackupSnippetAssetRecordV5(
   asset: SnippetAsset,
-): Promise<BackupSnippetAssetRecordV4> {
+): Promise<BackupSnippetAssetRecordV5> {
   return {
     id: asset.id,
     snippetId: asset.snippetId,
@@ -342,6 +359,92 @@ function toRestoreSnippetAssetV4(
   };
 }
 
+function toRestoreRichInlineV5(
+  inline: BackupRichSnippetInlineV5,
+): RichSnippetInline {
+  return inline.type === 'text'
+    ? {
+        type: 'text',
+        text: inline.text,
+        bold: inline.bold,
+        italic: inline.italic,
+      }
+    : {
+        type: 'link',
+        text: inline.text,
+        url: inline.url,
+        bold: inline.bold,
+        italic: inline.italic,
+      };
+}
+
+function toRestoreRichBlockV5(
+  block: BackupRichSnippetBlockV5,
+): RichSnippetBlock {
+  if (block.type === 'paragraph') {
+    return {
+      type: 'paragraph',
+      children: block.children.map(toRestoreRichInlineV5),
+    };
+  }
+  if (block.type === 'image') {
+    return { type: 'image', assetId: block.assetId, altText: block.altText };
+  }
+  if (block.type === 'list') {
+    return {
+      type: 'list',
+      listType: block.listType,
+      items: block.items.map((item) => ({
+        children: item.children.map(toRestoreRichInlineV5),
+      })),
+    };
+  }
+  return {
+    type: 'reference',
+    referenceType: 'image',
+    label: block.label,
+    url: block.url,
+  };
+}
+
+function toRestoreSnippetEntryV5(entry: BackupSnippetRecordV5): SnippetEntry {
+  let content: SnippetContent;
+  if (entry.content.kind === 'plain') {
+    content = createPlainSnippetContent(entry.content.text);
+  } else if (entry.content.kind === 'image') {
+    content = { kind: 'image', assetId: entry.content.assetId };
+  } else {
+    content = {
+      kind: 'rich',
+      blocks: entry.content.blocks.map(toRestoreRichBlockV5),
+    };
+  }
+  return {
+    id: entry.id,
+    title: entry.title,
+    content,
+    tags: [...entry.tags],
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
+    trigger: entry.trigger,
+  };
+}
+
+function toRestoreSnippetAssetV5(
+  entry: BackupSnippetAssetRecordV5,
+): SnippetAsset {
+  const bytes = decodeCanonicalBase64(entry.data);
+  return {
+    id: entry.id,
+    snippetId: entry.snippetId,
+    mimeType: entry.mimeType,
+    blob: new Blob([Uint8Array.from(bytes).buffer], { type: entry.mimeType }),
+    byteSize: entry.byteSize,
+    originalFilename: entry.originalFilename,
+    createdAt: entry.createdAt,
+  };
+}
+
 export function createBackupFilename(exportedAt: string): string {
   const withoutMilliseconds = exportedAt.replace(/\.\d{3}Z$/, 'Z');
   return `ai-support-workspace-backup-${withoutMilliseconds.replaceAll(':', '-')}.json`;
@@ -353,7 +456,7 @@ export function measureUtf8Bytes(value: string): number {
 
 export function assertBackupFitsByteLimit(
   serialized: string,
-  maxBytes: number = MAX_BACKUP_V4_BYTES,
+  maxBytes: number = MAX_BACKUP_V5_BYTES,
 ): void {
   if (measureUtf8Bytes(serialized) > maxBytes) {
     throw new BackupExportError('too-large');
@@ -375,19 +478,19 @@ export class BackupExportService implements BackupExportApplication {
       await Promise.all(snapshotAssets.map(validateSnippetAsset));
       validateSnippetAssetGraph(snapshot.snippets, snapshotAssets);
       const sortedAssets = [...snapshotAssets].sort(compareByCreatedAtAndId);
-      const backup: BackupFileV4 = {
+      const backup: BackupFileV5 = {
         format: BACKUP_FORMAT,
         formatVersion: BACKUP_FORMAT_VERSION,
         exportedAt,
         data: {
           knowledge: [...snapshot.knowledge]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupKnowledgeRecordV4),
+            .map(toBackupKnowledgeRecordV5),
           snippets: [...snapshot.snippets]
             .sort(compareByCreatedAtAndId)
-            .map(toBackupSnippetRecordV4),
+            .map(toBackupSnippetRecordV5),
           snippetAssets: await Promise.all(
-            sortedAssets.map(toBackupSnippetAssetRecordV4),
+            sortedAssets.map(toBackupSnippetAssetRecordV5),
           ),
           settings: { defaultModel: snapshot.settings.defaultModel },
         },
@@ -422,8 +525,11 @@ export class BackupImportService implements BackupImportApplication {
 
     const backup = parseBackupFile(serialized);
     const versionLimit =
-      backup.formatVersion === BACKUP_FORMAT_VERSION_4
-        ? MAX_BACKUP_V4_BYTES
+      backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
+      backup.formatVersion === BACKUP_FORMAT_VERSION_5
+        ? backup.formatVersion === BACKUP_FORMAT_VERSION_5
+          ? MAX_BACKUP_V5_BYTES
+          : MAX_BACKUP_V4_BYTES
         : MAX_LEGACY_BACKUP_BYTES;
     if (measureUtf8Bytes(serialized) > versionLimit) {
       throw new BackupImportError('too-large');
@@ -432,11 +538,13 @@ export class BackupImportService implements BackupImportApplication {
       backup,
       preview: {
         filename: source.name,
+        formatVersion: backup.formatVersion,
         exportedAt: backup.exportedAt,
         knowledgeCount: backup.data.knowledge.length,
         snippetCount: backup.data.snippets.length,
         assetCount:
-          backup.formatVersion === BACKUP_FORMAT_VERSION_4
+          backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
+          backup.formatVersion === BACKUP_FORMAT_VERSION_5
             ? backup.data.snippetAssets.length
             : 0,
         defaultModel: backup.data.settings.defaultModel,
@@ -466,11 +574,15 @@ export class BackupRestoreService implements BackupRestoreApplication {
               ? backup.data.snippets.map(toRestoreSnippetEntryV2)
               : backup.formatVersion === BACKUP_FORMAT_VERSION_3
                 ? backup.data.snippets.map(toRestoreSnippetEntryV3)
-                : backup.data.snippets.map(toRestoreSnippetEntryV4),
+                : backup.formatVersion === BACKUP_FORMAT_VERSION_4
+                  ? backup.data.snippets.map(toRestoreSnippetEntryV4)
+                  : backup.data.snippets.map(toRestoreSnippetEntryV5),
         snippetAssets:
           backup.formatVersion === BACKUP_FORMAT_VERSION_4
             ? backup.data.snippetAssets.map(toRestoreSnippetAssetV4)
-            : [],
+            : backup.formatVersion === BACKUP_FORMAT_VERSION_5
+              ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
+              : [],
         settings: { defaultModel: backup.data.settings.defaultModel },
       };
 

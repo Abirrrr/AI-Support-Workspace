@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### M14-G.2 — Unified Snippet Library UX and Image Snippet Authoring
+
+- Replaced the technical Plain/Rich block-and-segment workflow with a unified Text Snippet experience backed by Tiptap 3.29.2. New Text records are Rich, supported content is constrained to paragraphs/line breaks, bold, italic, safe links, bullets, and numbering, and a project-owned adapter keeps Tiptap/HTML out of persistence.
+- Added historical Plain draft conversion on successful Save only, natural supported Rich reopen, nested-list/unsupported-node rejection, image-paste rejection in Text, and read-only preservation for legacy Rich image/reference records.
+- Simplified the Library with search, All/Text/Images filters, Text/Image labels, and a New Snippet chooser. Added Image Snippet clipboard screenshot paste, secondary file selection, M14-E validation, local revocation-safe preview, create/edit/replace/cancel/reopen/delete, and exactly-one atomic persistence without exposing asset IDs.
+- Preserved Backup v5 and v1-v4 import compatibility, Dexie v5, Retrieval/Prompt/catalog Image isolation, Decision 38, and the M13-B.1 publication barrier. Added no Backup v6, schema migration, external clipboard transport, clipboard permission, offscreen document, rich destination delivery, Workspace Shell change, or M15 Context behavior.
+- Added Decision 41. M14-H is absorbed into M14-G.2; M14-I becomes unified Text + Image clipboard delivery and trigger planning; M14-J remains destination validation. This work is uncommitted pending Principal review.
+
+### M14-G — Rich Snippet Structured Lists and Backup v5 Foundation
+
+- Added non-recursive unordered and ordered Rich list blocks with exact item/inline validation, deterministic bullet/one-based plain projection, and project-owned keyboard-accessible list authoring for items, marks, validated links, item/block ordering, and removal. Persisted content remains structured data, never HTML.
+- Added the minimal exact top-level `ImageSnippetContent` contract containing only `kind: 'image'` and a canonical `assetId`. Reused the M14-E graph validator to enforce exactly one same-owner asset and reject missing, foreign, additional, or orphan assets without changing asset size/MIME/signature rules.
+- Explicitly excluded Image Snippets from Retrieval, Prompt Builder reference content, and the current plain trigger catalog. The Library identifies pre-M14-H Image records without exposing asset IDs or binary data and disables Plain/Rich editing while preserving normal deletion/cascade behavior.
+- Implemented strict frozen Backup Format v5 with explicit version-owned DTOs and mappings for lists, top-level Image content, legacy Rich references/local images, and existing binary assets. New exports use v5 with deterministic ordering, exact bytes, the retained 96 MiB guard, strict untrusted validation, authoritative graph reuse, and atomic four-store restore. Frozen v1-v4 imports remain supported and v4 legacy Rich images are not converted.
+- Kept Dexie at physical version 5 with no new store, index, migration, or row rewrite. Preserved Decision 38 legacy Rich local-image fail-closed behavior, the M13-B.1 publication barrier, existing Plain/Rich authoring, and all historical backup behavior.
+- Added domain, editor, Library, persistence, retrieval, Prompt Builder, trigger-catalog, asset-graph, and Backup v5 coverage including PNG/JPEG/WebP byte round trips and strict rejection cases. Added no Image Snippet authoring, screenshot paste UI, image clipboard transport, permission, offscreen document, Workspace Shell change, Rich destination rendering, or M15 Context Image behavior.
+- At the M14-G foundation stage, Image authoring remained assigned to M14-H; Decision 41/M14-G.2 now supersedes that forward-looking assignment by absorbing and implementing it.
+
 ### M14-F.1 — Snippet Image Product Boundary Architecture Correction
 
 - Cancelled M14-F Unified Rich Editor Inline Image Authoring before implementation. Decision 39 supersedes Decision 37's unimplemented target of locally owned images embedded among Rich text while preserving Decision 37/M14-E's local asset, validation, persistence, backup-history, native-paste, and M15-separation foundations.

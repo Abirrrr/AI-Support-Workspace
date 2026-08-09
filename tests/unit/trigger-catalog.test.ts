@@ -154,6 +154,69 @@ describe('trigger catalog application and frame cache', () => {
     expect(JSON.stringify(catalog)).not.toContain('[Image]');
   });
 
+  it('publishes list text but excludes top-level Image Snippets without metadata leakage', async () => {
+    const list: SnippetEntry = {
+      ...entry,
+      id: 'snippet-list',
+      trigger: ';steps',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'list',
+            listType: 'ordered',
+            items: [
+              {
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Open settings',
+                    bold: true,
+                    italic: false,
+                  },
+                ],
+              },
+              {
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Save',
+                    bold: false,
+                    italic: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const image: SnippetEntry = {
+      ...entry,
+      id: 'snippet-image',
+      title: 'private-file.png',
+      trigger: ';image',
+      content: {
+        kind: 'image',
+        assetId: '123e4567-e89b-42d3-a456-426614174000',
+      },
+    };
+    const catalog = await new TriggerCatalogService(
+      repositoryFor([image, list]),
+    ).readCatalog();
+
+    expect(catalog).toEqual([
+      {
+        trigger: ';steps',
+        snippetId: 'snippet-list',
+        content: '1. Open settings\n2. Save',
+      },
+    ]);
+    expect(JSON.stringify(catalog)).not.toContain('123e4567');
+    expect(JSON.stringify(catalog)).not.toContain('private-file.png');
+    expect(new FrameTriggerCatalogCache().find(';image')).toBeUndefined();
+  });
+
   it('enables only a complete snapshot and clears on invalidate or disconnect', () => {
     const cache = new FrameTriggerCatalogCache();
     const snapshot = {

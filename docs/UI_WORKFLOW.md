@@ -134,7 +134,7 @@ Create Snippet
 
 ↓
 
-Choose Plain Snippet, Rich Snippet, or Image Snippet, then Add Type-Appropriate Content, Organization Details, and Optional Trigger
+Choose Text Snippet or Image Snippet, then Add Content, Organization Details, and Optional Trigger
 
 ↓
 
@@ -157,14 +157,11 @@ Expand Snippet into Response
 - M13 defines one optional canonical trigger per Snippet. Existing Snippets without triggers remain valid and editable.
 - Trigger guidance shows that values begin with `;`, are 2–32 characters including that semicolon, and use letters, numbers, and single hyphens. Uppercase is stored lowercase; whitespace and unsupported punctuation are rejected.
 - Create and edit show inline invalid-format and duplicate-trigger feedback. The list displays a configured trigger and omits trigger decoration for `null`.
-- Existing and new Snippets default to the current fast plain-text editor. The existing Snippet Library remains the only surface; there is no Rich Templates page.
-- An existing plain Snippet may expose `Convert to rich template`. Conversion is explicit, preserves readable content, and does not change the Snippet's identity, metadata, trigger, or CRUD semantics. Ordinary editing never silently changes its content kind.
-- A Rich Snippet remains rich. M14 v1 does not provide a lossy rich-to-plain toggle.
-- M14-C Rich authoring currently uses extension-owned structured form state for paragraphs, bold, italic, links, labelled image references, and block order. M14-G adds first-class unordered and ordered lists whose items reuse supported inline marks/links. Editor HTML is never persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
-- Plain-to-Rich conversion changes only the current draft until Save. Cancel restores the stored Plain record unchanged; Save updates the same Snippet and preserves its title, tags, trigger, identity, and normal repository semantics. A lightweight confirmation explains that Rich-to-Plain conversion is unavailable after saving.
-- Paragraph authoring uses ordered text/link segments with explicit bold and italic controls. Link removal retains its readable text. Link and image-reference URLs show focused protocol feedback and remain subject to domain validation.
-- Existing Label/URL Image References remain legacy Rich controls and are never fetched or automatically converted. Existing M14-E Rich local-image blocks remain visible preservation-only compatibility data with no normal move/remove/preview/edit controls. New embedded local-image Rich authoring is cancelled.
-- An Image Snippet opens a dedicated image-only editor, never the Rich editor. It shows Title, Trigger, existing tags/metadata, one labelled paste/select target, local preview, Replace, Remove before Save, Save, Cancel, reopen, and the existing Delete Snippet action.
+- The Library exposes All/Text/Images filters, search, and one New Snippet chooser with Text Snippet and Image Snippet. Plain/Rich is not a normal user-facing choice.
+- Every new Text Snippet is Rich and opens in the constrained Tiptap composer with Bold, Italic, Link, Bullet List, Numbered List, Undo, and Redo. Users type and manage normal paragraphs/list items directly; internal blocks and inline segments are not exposed. Tiptap HTML and runtime state are never persisted.
+- Historical Plain appears as Text. Opening creates an equivalent Rich draft with line breaks preserved; Cancel leaves storage unchanged, and the first successful Save updates the same identity/metadata through normal repository semantics. No startup or bulk migration occurs.
+- Supported Rich paragraphs, marks, links, and lists reopen normally. Existing legacy URL/local-image Rich records that cannot safely round-trip show a small read-only compatibility state; content and assets remain preserved and IDs remain hidden.
+- The Image editor's primary workflow is: take a screenshot, keep it on the clipboard, choose New Image Snippet, focus the paste target, press `Ctrl+V`, review the local preview, set metadata, and Save. No prior file save is required; labelled PNG/JPEG/WebP selection is secondary.
 - Pasting one PNG/JPEG/WebP into the extension-owned editor uses user-initiated paste event data and requires no `clipboardRead`; selecting from disk uses a labelled file input. Validation errors are accessible and focused.
 - A new Image Snippet cannot Save without exactly one valid image. Removing a new draft clears its preview and disables Save; replacing a persisted image occurs only through successful atomic Save. Cancel preserves stored data. Object URLs are revoked on replacement, removal, cancel, and unmount.
 - Users never see asset IDs, Blob/base64, binary storage terms, or a URL requirement. There is no global Image Library, image collection, shared asset picker, or "Use as Context" action.
@@ -409,7 +406,7 @@ Import / Export
 ↓
 Export backup
 ↓
-Browser downloads current version 2 JSON file
+Browser downloads current version 5 JSON file
 ```
 
 ```text
@@ -423,20 +420,20 @@ Read replacement warning and check acknowledgement
 ↓
 Restore backup
 ↓
-Atomically replace Knowledge, Snippets, and Settings
+Atomically replace Knowledge, Snippets, SnippetAssets, and Settings
 ```
 
 ### Workflow Notes
 
 - Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
-- New exports use Backup Format v2 and include each Snippet's required `trigger: string | null`. Version 1 files remain importable and restore their Snippets without triggers. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
+- New exports use strict Backup Format v5 and include Knowledge, Plain/Rich/Image Snippets, SnippetAssets, and Settings through explicit version-owned DTOs. Versions 1–4 remain importable; v1 restores Snippets without triggers, and v4 legacy Rich local-image records remain Rich without automatic conversion. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
 - The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
-- Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Export over the 25 MiB serialized UTF-8 limit uses `This backup file is too large. Choose a file smaller than 25 MB.`
+- Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Backup v4/v5 use the documented 96 MiB serialized UTF-8 guard; v1-v3 retain their historical 25 MiB guard.
 - Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.
-- Selecting a file clears any earlier preview and acknowledgement. A file above 25 MiB is rejected before reading. Read failure reports `Couldn't read this backup file. Choose another file.`
+- Selecting a file clears any earlier preview and acknowledgement. A file above the current 96 MiB maximum is rejected before reading, and the parsed version-specific guard is then enforced. Read failure reports `Couldn't read this backup file. Choose another file.`
 - Strict validation occurs before preview or persistence. Invalid content reports `This isn't a valid AI Support Workspace backup file.` An unknown format version reports `This backup version isn't supported by this version of AI Support Workspace.`
-- A valid preview shows filename, exported timestamp, Knowledge count, Snippet count, and saved default model; `null` appears as `No saved default model`. Knowledge bodies, Snippet content, and record diffs are never previewed.
-- The destructive warning reads `Restoring this backup will replace your current Knowledge, Snippets, and saved Settings.` The initially unchecked acknowledgement reads `I understand that my current local data will be replaced.` Restore uses native disabled behavior until acknowledgement and while busy.
+- A valid preview shows filename, backup format version, exported timestamp, Knowledge count, Snippet count, local image asset count, and saved default model; `null` appears as `No saved default model`. Knowledge bodies, Snippet content, asset identifiers/bytes, and record diffs are never previewed.
+- The destructive warning states that restore replaces current Knowledge, Snippets, local image assets, and saved Settings. The initially unchecked acknowledgement reads `I understand that my current local data will be replaced.` Restore uses native disabled behavior until acknowledgement and while busy.
 - `Cancel` clears selection-specific preview, confirmation, and status. Selecting a replacement file performs the same reset. A valid empty backup remains restorable and clears both Libraries under normal acknowledgement.
 - Successful replacement reports `Backup restored.` plus the restored Knowledge count, Snippet count, and `Settings restored`. It then clears the selected file, preview, and acknowledgement. A failed atomic replacement reports `Couldn't restore the backup. Your existing data was not changed.` and retains the current data. Validation failure clears the acknowledgement and invalid selection state.
 - After success, the options page locally refreshes or remounts its Knowledge, Snippets, and Settings sections so navigation shows restored data without a browser restart. This introduces no event bus, runtime broadcast, or subscription system.
@@ -477,7 +474,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Templates and Delivery:** M14-E implements reusable local asset infrastructure at `1828f09`; Decision 39 cancels inline Rich-image authoring and separates portable text-only Rich Snippets from one-image Image Snippets. The revised sequence is M14-G lists/Backup v5, M14-H Image Snippet authoring, M14-I typed clipboard image delivery, and M14-J Rich text/list destination delivery.
+- **M14 — Snippet Authoring and Delivery:** M14-G/G.2 implements lists, Backup v5, unified Text WYSIWYG, and one-image screenshot/file authoring. M14-H is absorbed. Remaining work is M14-I unified Text+Image clipboard delivery/trigger planning and M14-J destination compatibility validation.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 

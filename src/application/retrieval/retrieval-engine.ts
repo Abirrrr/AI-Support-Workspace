@@ -99,6 +99,7 @@ function retrieveSnippets(
   queryTokens: ReadonlySet<string>,
 ): SnippetRetrievalResult[] {
   return records
+    .filter((record) => record.content.kind !== 'image')
     .map((record): SnippetRetrievalResult => ({
       kind: 'snippet',
       id: record.id,

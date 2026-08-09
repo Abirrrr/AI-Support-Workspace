@@ -233,7 +233,7 @@ Low-risk pattern permutations, forced IndexedDB rollback branches, revision-orde
 
 ## Rich Snippet Templates Validation Contract
 
-M14-A, M14-D, and M14-F.1 are documentation-only and add no runtime tests. M14-B implements domain/projection, Dexie v4, Backup v1/v2/v3, text-consumer, and catalog compatibility coverage. M14-C adds structured authoring, and M14-E adds the local-asset/Dexie v5/Backup v4 foundation. Decision 39 cancels the former M14-F test target and divides remaining acceptance across M14-G lists/Backup v5, M14-H Image Snippet authoring, M14-I typed clipboard image delivery, and M14-J Rich text/list destination delivery.
+M14-A, M14-D, and M14-F.1 are documentation-only. M14-B implements domain/projection and Backup v3; M14-E adds local assets/Dexie v5/Backup v4; M14-G adds lists, the Image contract, isolation, and strict Backup v5; and M14-G.2 adds constrained Tiptap/domain fidelity, unified Library UX, screenshot/file Image authoring, preview lifecycle, and atomic lifecycle coverage. M14-H is absorbed. Remaining acceptance belongs to M14-I unified clipboard delivery/trigger planning and M14-J destination validation.
 
 ### Domain and Plain Projection
 
@@ -278,9 +278,9 @@ M14-A, M14-D, and M14-F.1 are documentation-only and add no runtime tests. M14-B
 
 ### Snippet Library UI
 
-- Cover existing Plain create/edit/delete behavior and default-to-Plain creation; explicit Plain-to-Rich conversion preserving readable content, identity, metadata, and trigger; structured Rich editing of paragraphs, bold, italic, links, unordered/ordered lists, legacy references, and ordering; protocol errors; and continued Rich mode during ordinary edits.
-- Cover keyboard-accessible block ordering without requiring drag-and-drop, accessible labels/status/errors, narrow layout, safe structured-state handling, and absence of rich-to-plain conversion, variables, HTML persistence, local binary images, or a separate Template Library.
-- M14-C automated coverage proves conversion is explicit and draft-only; cancel leaves the stored record Plain; Save updates the same identity with metadata and trigger intact; existing Rich data loads and saves without flattening; paragraph, inline, bold, italic, link, image-reference, removal, and ordering controls produce the canonical structured model; unsafe protocols prevent Save; pasted markup remains inert text; no image preview is generated; UI-shaped Rich content persists through the existing application/repository boundary; and existing plain, catalog-projection, and Backup v1/v2/v3 suites remain the regression boundary.
+- Cover Text/Image creation choices, Rich-by-default Text creation, historical Plain draft conversion only on Save, supported Rich reopen, legacy-image read-only preservation, search, All/Text/Images filters, labels, accessible status/errors, and narrow layout.
+- Prove the Tiptap adapter round-trips paragraphs, line breaks, bold, italic, safe links, bullet/numbered lists, and marks within list items. Reject unsafe links, unsupported nodes/marks, nested lists, arbitrary HTML persistence, and image ingestion into Text.
+- Preserve M14-C as historical regression coverage while M14-G.2 supersedes its block/segment and explicit conversion UI. Cancel leaves stored content unchanged and failed Save retains the current draft.
 
 ### M14-E Local Asset Foundation and Dexie v5
 
@@ -306,7 +306,7 @@ M14-A, M14-D, and M14-F.1 are documentation-only and add no runtime tests. M14-B
 - Prove strict Backup v5 round trips Plain, Rich lists, preserved legacy Rich local images, Image content, and exact assets while v1-v4 remain frozen/importable. Preserve the guard, ordering, preview, acknowledgement, four-store atomic restore, and rollback guarantees.
 - Prove Dexie remains version 5 with unchanged declarations, stores, and indexes.
 
-### M14-H Image Snippet Authoring
+### M14-G.2 Unified Text and Image Authoring (M14-H Absorbed)
 
 - Prove an Image Snippet contains exactly one same-owner asset; reject zero, multiple, missing, foreign, orphan, unsupported, malformed, oversized, and aggregate-limit states.
 - Paste representative PNG/JPEG/WebP through the extension editor's user paste event and select them through a labelled file input; reject unsupported data with accessible focused feedback and no `clipboardRead`.
@@ -315,9 +315,9 @@ M14-A, M14-D, and M14-F.1 are documentation-only and add no runtime tests. M14-B
 - Preserve legacy Rich local-image records without mutation. Allow explicit conversion only for exactly one valid local-image block plus one owned asset; reject mixed/empty/additional-asset conversion and never migrate automatically.
 - Prove Image Snippet triggers remain omitted under Decision 39 until M14-I while Decision 38 separately remains valid.
 
-### M14-I Typed Clipboard Image Delivery
+### M14-I Unified Snippet Clipboard Delivery and Trigger Planner
 
-- Cover explanatory opt-in and optional `clipboardWrite`/`offscreen` granted, denied, revoked, unavailable, and reload/runtime states; verify no `clipboardRead`, no permission request from trigger typing, and no mandatory clipboard behavior.
+- Cover safe project-owned Text `text/html` plus deterministic `text/plain`, portable Image clipboard preparation, explanatory opt-in and optional `clipboardWrite`/`offscreen` granted, denied, revoked, unavailable, and reload/runtime states; verify no `clipboardRead`, no permission request from trigger typing, and no mandatory clipboard behavior.
 - Prove WXT manifest generation, `chrome.permissions` request/contains behavior, offscreen creation/message/write/close sequencing, one-document concurrency, service-worker restart, and truthful typed outcomes in the minimum supported Chrome.
 - Prove activation retrieves only the requested Image Snippet/asset from Dexie, revalidates same-owner exactly-one graph state, and sends no Blob/base64/asset ID/filename through frame catalog snapshots.
 - Prove PNG input and JPEG/WebP-to-PNG conversion, `ClipboardItem` support checks, transparency/orientation expectations, decoded-pixel/memory guard, malformed decode failure, and successful `image/png` clipboard write.
@@ -336,7 +336,7 @@ M14-A, M14-D, and M14-F.1 are documentation-only and add no runtime tests. M14-B
 
 M14-D and M14-F.1 claim no new real Chrome validation because they change documentation only. Existing evidence remains: direct insertion of an ordinary Plain Snippet fails in tested Crisp, the same Snippet succeeds in another Rich editor, upstream persistence/projection/catalog delivery was separately verified, the speculative generic patch was removed, and manual native paste into Crisp works. This does not prove clipboard transport or authorize a Crisp-specific adapter.
 
-M14-G manual validation covers Rich list authoring/projection and Backup v5 workflows. M14-H covers Image Snippet paste, file selection, preview, Save/Cancel/replace/reopen, and legacy preservation. M14-I proves optional permission/offscreen transport, image conversion, denial/failure safety, trigger cleanup races, notification, and real native image paste. M14-J covers Crisp, Intercom, generic textarea/contenteditable, Rich text/lists, reload/catalog behavior, and explicit capability outcomes.
+M14-G.2 combines the cancelled list-only manual check with Text typing/formatting/list Save/reopen and screenshot Ctrl+V preview/Save/reopen after source review. M14-I proves required permission/offscreen transport, safe Text HTML/plain and portable Image preparation, denial/failure safety, trigger cleanup races, feedback, and real native paste. M14-J covers Crisp, Intercom, representative editors, and explicit capability outcomes.
 
 Manual validation need not exhaustively test every website. Closeout must identify the exact editors/origins tested, any destination-specific adapter used, omissions, and why each omission is non-blocking.
 

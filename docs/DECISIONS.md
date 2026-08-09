@@ -907,6 +907,18 @@ Acceptance requires real Chrome proof that a toolbar-action click opens or shows
 
 This is an unassigned future Workspace Shell/extension-action UX item. It is not M14-G, M14-H, M14-I, or M14-J, does not interrupt the Snippet roadmap, and does not alter Decision 39's product boundary or milestone sequence.
 
+## Decision 41: Unified Snippet Authoring and Native-Paste Delivery Direction
+
+The Snippet Library exposes exactly two authoring choices: **Text Snippet** and **Image Snippet**. Text Snippets use a conventional project-owned Tiptap v3 WYSIWYG surface for paragraphs, line breaks, bold, italic, validated HTTP/HTTPS/mailto links, bullet lists, and numbered lists. New Text Snippets persist as project-owned Rich `SnippetContent`; Plain/Rich is no longer a normal user-facing choice. Historical Plain records remain compatible, are presented as Text, and convert to equivalent Rich content only after a successful user Save. Untouched Plain records are never bulk migrated. Legacy Rich image/reference records that cannot round-trip through the supported editor remain preserved, read-only compatibility data.
+
+Tiptap is UI infrastructure, not the business or backup model. A focused adapter maps between constrained Tiptap JSON and validated project-owned `SnippetContent`. Arbitrary HTML, ProseMirror objects, editor instances, and DOM state are never persisted. Unsupported StarterKit features and nested lists are excluded; new embedded-image authoring inside Text Snippets remains prohibited. This supersedes earlier user-facing targets that exposed explicit Plain/Rich conversion or block/segment forms, without invalidating the structured Rich domain, Decision 39, Backup v5, or Decision 40.
+
+Image Snippet authoring is implemented as part of M14-G.2 and M14-H is absorbed rather than remaining active. The primary input is a user-initiated `paste` event containing a clipboard screenshot; secondary input is a PNG/JPEG/WebP file chooser. No `clipboardRead`, `clipboardWrite`, `offscreen`, or new permission is required for authoring. The image remains an in-memory validated draft with a local, revocation-safe Blob preview until Save. Create, replace, and delete reuse M14-E's exactly-one ownership and atomic Snippet/asset transaction boundary. Asset IDs, Blob bytes, and base64 remain hidden from the UI and trigger catalog.
+
+The future delivery target is native paste fidelity. M14-I — Unified Snippet Clipboard Delivery and Trigger Planner will own both Text and Image delivery. Text delivery prepares safe project-owned `text/html` plus deterministic `text/plain`; Image delivery retrieves the owned local asset and prepares a portable image clipboard representation. Both use native destination paste and safe trigger-cleanup planning rather than brittle reconstruction of complex destination DOM. M14-G.2 implements no external clipboard delivery, permission transport, or final trigger planner. Until M14-I, Image Snippets remain excluded from the trigger catalog and Decision 38 continues to fail closed for legacy Rich local images. M14-J remains later destination validation for Crisp, Intercom, representative editors, native-paste fidelity, graceful fallback, and only evidence-backed direct-insertion optimizations.
+
+Decision 40's future Workspace Shell and M15 Context Images remain separate, unimplemented scopes. Backup v5 and Dexie v5 remain current; Backup v1-v4 meanings and imports remain frozen.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.

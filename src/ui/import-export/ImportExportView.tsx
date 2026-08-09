@@ -256,6 +256,12 @@ export function ImportExportView({
               Backup preview
             </h3>
             <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="font-medium text-slate-600">Format version</dt>
+                <dd className="text-slate-950">
+                  {prepared.preview.formatVersion}
+                </dd>
+              </div>
               <div className="min-w-0">
                 <dt className="font-medium text-slate-600">Filename</dt>
                 <dd className="break-all text-slate-950">

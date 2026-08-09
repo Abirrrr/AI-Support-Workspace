@@ -377,6 +377,51 @@ describe('PromptBuilder', () => {
     expect(JSON.stringify(section)).not.toContain('123e4567');
   });
 
+  it('uses deterministic list text and drops supplied Image Snippet results entirely', () => {
+    const list = createSnippetResult(0);
+    list.record.content = {
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'list',
+          listType: 'unordered',
+          items: [
+            {
+              children: [
+                {
+                  type: 'link',
+                  text: 'Open settings',
+                  url: 'https://example.com/settings',
+                  bold: true,
+                  italic: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const image = createSnippetResult(1);
+    image.record.title = 'Private image.png';
+    image.record.content = {
+      kind: 'image',
+      assetId: '123e4567-e89b-42d3-a456-426614174000',
+    };
+    const assembly = new PromptBuilder().build({
+      guidance: 'Draft a reply',
+      retrievalResults: { knowledge: [], snippets: [image, list] },
+    });
+    const section = assembly.sections.find(({ kind }) => kind === 'snippets');
+
+    if (section?.kind !== 'snippets') throw new Error('Expected snippets.');
+    expect(section.items).toHaveLength(1);
+    expect(section.items[0]?.content.content).toBe(
+      '- Open settings (https://example.com/settings)',
+    );
+    expect(JSON.stringify(assembly)).not.toContain('123e4567');
+    expect(JSON.stringify(assembly)).not.toContain('Private image.png');
+  });
+
   it.each([0, 2])(
     'includes all %i available Snippet results without placeholders',
     (snippetCount) => {
