@@ -12,12 +12,12 @@
 
 ## Task State
 
-- Last completed task: M14-D — Rich Snippet Delivery and Local Image Architecture.
+- Last completed task: M14-D.2 — Pre-Delivery Local Image Trigger Safety Clarification.
 - M14 status: Structured Snippet content and Rich authoring are implemented. Architecture is revised for locally owned inline image assets and destination-aware direct/clipboard delivery. Local image persistence, unified inline-image authoring, clipboard delivery, and Rich browser rendering are not yet implemented.
 - Last completed implementation task: M14-C — Rich Snippet Library Authoring UI at `a787100`.
 - Active implementation task: None.
-- Last completed architecture task: M14-D — Rich Snippet Delivery and Local Image Architecture. M14-D is documentation-only and changes no source or tests.
-- Active documentation task: None. A future thread must not treat M14-D as active after its eventual Principal-approved commit.
+- Last completed architecture task: M14-D.2 — Pre-Delivery Local Image Trigger Safety Clarification. M14-D.2 is documentation-only and changes no source or tests.
+- Active documentation task: None. A future thread must not treat M14-D.2 as active after its eventual Principal-approved commit.
 - Exact next engineering action: Create M14-E — Local Image Asset Foundation and Backup v4.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
@@ -48,7 +48,7 @@
 
 ## Project Status
 
-- Status: Milestone 13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. Milestone 14 — Rich Snippet Templates is current. M14-A is complete at `c1105d4`, M14-B at `ed23f30`, and M14-C at `a787100`. M14-D revises the pending delivery and local-image architecture under Decision 37; no M14-D commit hash exists before Principal approval.
+- Status: Milestone 13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. Milestone 14 — Rich Snippet Templates is current. M14-A is complete at `c1105d4`, M14-B at `ed23f30`, M14-C at `a787100`, and M14-D at `64504df`. M14-D.2 adds Decision 38's pre-M14-G trigger safety clarification; no M14-D.2 commit hash exists before Principal approval. M14-E implementation has not started.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -101,6 +101,7 @@
 - The implemented M14-C state still persists no local Blob or asset. Decision 37 defines future Snippet-owned local images, Dexie v5, Backup v4, and direct/clipboard delivery without implementing them. Legacy URL references remain compatible and are never fetched or automatically converted. M15 screenshot Context remains a separate transient generation-input domain.
 - The target authoring UX is one continuous Rich editor with inline local images pasted from the clipboard or selected from disk. The current Image Reference form is transitional.
 - Clipboard fallback is an explicit global opt-in using future optional `clipboardWrite` and `offscreen` permissions, real clipboard copy, and user native paste. M14-D adds no permission, manifest change, clipboard transport, or destination-specific adapter.
+- Decision 38 requires M14-E to omit every local-image-containing Snippet from the transient trigger catalog until M14-G. Plain, text/link-only Rich, and legacy-reference Snippets remain unchanged; excluded triggers follow unknown-trigger behavior, and Retrieval/Prompt Builder still use plain projection.
 - Variables, placeholders, customer-field interpolation, conditional logic, loops, scripting, arbitrary HTML/CSS, tables, video, embeds, AI-generated fields, page scraping, analytics, trigger syntax changes, provider changes, OpenAI, collaboration, sync, and new Chrome permissions are explicit non-goals.
 
 ## Architecture Status
@@ -269,7 +270,7 @@
 ## Next Engineering Action
 
 - Create M14-E — Local Image Asset Foundation and Backup v4.
-- M14-E must implement only the Decision 37 asset domain, Dexie v5, atomic ownership/lifecycle, Backup v4, and frozen v1-v3 import compatibility. Unified authoring and destination delivery remain M14-F through M14-H.
+- M14-E must implement only the Decision 37 asset domain, Dexie v5, atomic ownership/lifecycle, Backup v4, frozen v1-v3 import compatibility, and Decision 38's temporary local-image catalog exclusion. Unified authoring and destination delivery remain M14-F through M14-H.
 
 ## Repository Status
 
@@ -296,7 +297,7 @@
 - M14-B implementation checkpoint: `ed23f30` (`feat: add structured snippet content foundation`).
 - Future continuity: M14-A is complete and approved architecture. A future thread must not treat it as active, pending, uncommitted architecture work, or work that must be recreated.
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
-- M14-D is the completed documentation-only architecture revision. Do not invent its eventual Principal-approved commit hash; the expected post-checkpoint state is `master`, clean, and synchronized with `origin/master`.
+- M14-D is complete at `64504df`. M14-D.2 is the completed documentation-only safety clarification; do not invent its eventual Principal-approved commit hash. The expected post-checkpoint state is `master`, clean, and synchronized with `origin/master`.
 - Next action: Create M14-E — Local Image Asset Foundation and Backup v4.
 - Additional business functionality starts only in its assigned later milestones.
 
@@ -321,5 +322,6 @@
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
 - M14-B implementation checkpoint: `ed23f30` (`feat: add structured snippet content foundation`).
 - M14-C implementation checkpoint: `a787100` (`feat: add rich snippet authoring`).
-- M14-D architecture checkpoint: not yet created; do not invent a hash before Principal review and authorization.
+- M14-D architecture checkpoint: `64504df` (`docs: define rich snippet delivery and local image architecture`).
+- M14-D.2 architecture clarification checkpoint: not yet created; do not invent a hash before Principal review and authorization.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

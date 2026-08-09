@@ -732,6 +732,16 @@ Local image bytes remain local unless the user initiates delivery, are not uploa
 
 The revised sequence is M14-D architecture/documentation; M14-E Local Image Asset Foundation and Backup v4; M14-F Unified Rich Editor Inline Image Authoring; M14-G Delivery Planner and Clipboard-Assisted Fallback; and M14-H Rich Browser Rendering and Image Delivery Capability Validation. M14-D implements none of those runtime capabilities. M14-C remains the last completed implementation task.
 
+## Decision 38: Pre-Delivery Local Image Trigger Fail-Closed Behavior
+
+Decision 37 defines deterministic plain projection for local-image blocks but requires external use of that projection to be an explicit delivery outcome. M14-E introduces persisted local-image Snippets before M14-G introduces the Delivery Planner. Until M14-G is implemented, a Snippet containing one or more `{ type: 'image', assetId, altText }` blocks must not be published into the transient trigger catalog.
+
+This is deliberately fail-closed. An omitted catalog entry makes its typed trigger behave exactly like an unknown trigger, so existing M13 behavior preserves normal typing and performs no replacement. The current expansion path must not insert `[Image]` or `[Image: alt text]` as though image delivery succeeded, partially insert other blocks, leak an asset ID, publish Blob/base64 data, or report a plain degradation as complete delivery.
+
+The temporary exclusion applies only to Snippets containing a Decision 37 local-image block. Plain Snippets, Rich Snippets containing paragraphs/text/marks/links only, and Rich Snippets containing legacy URL Image References retain their current deterministic catalog projection and M13/M14 behavior. Local-image Snippets remain valid Library and persistence data, remain exportable/restorable through Backup v4, and remain available to Retrieval Engine and Prompt Builder through `renderSnippetPlainText()`. Plain projection is a text-consumer boundary, not proof of external image delivery.
+
+M14-E must implement this catalog filter without changing M13-B.1 port, epoch/revision, invalidation, publication-barrier, or unknown-trigger guarantees. M14-G will supersede the temporary exclusion with typed direct, clipboard-assisted, intentionally degraded, and unsupported delivery planning. Decision 38 adds no planner, clipboard transport, permission, destination adapter, or host renderer.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.

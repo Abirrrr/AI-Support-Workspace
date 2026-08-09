@@ -116,12 +116,12 @@ The previously documented M13-A — Provider Expansion / OpenAI Architecture Rea
 
 Extend the M13 Snippet aggregate and trigger/editor foundation with canonical structured content, one normal Rich authoring surface with locally owned inline images, deterministic text compatibility, and destination-aware direct or clipboard-assisted delivery. Preserve existing Plain Snippets, legacy URL image references, and frozen Backup Formats v1-v3.
 
-Status: M14-B implements structured content, Dexie v4, Backup v3, and text-consumer compatibility at `ed23f30`; M14-C implements structured authoring at `a787100`. M14-D adds Decision 37 and partially supersedes Decision 36 for local images and delivery only. No M14-D runtime work is implemented.
+Status: M14-B implements structured content, Dexie v4, Backup v3, and text-consumer compatibility at `ed23f30`; M14-C implements structured authoring at `a787100`; and M14-D is complete at `64504df`. M14-D.2 adds Decision 38's transitional fail-closed trigger rule after M14-E preflight found the pre-M14-G behavior undefined. No M14-E implementation has started.
 
 Revised sequence:
 
 - **M14-D — Rich Snippet Delivery and Local Image Architecture:** documentation-only definition of unified authoring, local assets, Dexie v5, Backup v4, capability planning, optional clipboard transport, evidence boundaries, and security.
-- **M14-E — Local Image Asset Foundation and Backup v4:** asset domain/repository, validated Blob ownership, atomic lifecycle, Dexie v5, Backup v4, and v1-v3 regression compatibility.
+- **M14-E — Local Image Asset Foundation and Backup v4:** asset domain/repository, validated Blob ownership, atomic lifecycle, Dexie v5, Backup v4, v1-v3 regression compatibility, and Decision 38 catalog exclusion for local-image Snippets until M14-G.
 - **M14-F — Unified Rich Editor Inline Image Authoring:** image paste, Insert Image file selection, inline local preview, removal/reordering, cancel/save/reopen, and legacy-reference compatibility; no destination delivery.
 - **M14-G — Delivery Planner and Clipboard-Assisted Fallback:** behavioral capabilities, serializer, optional permission workflow, offscreen transport, safe plain/HTML payloads, explicit outcomes, and Crisp-oriented browser evidence.
 - **M14-H — Rich Browser Rendering and Image Delivery Capability Validation:** safe direct rich rendering where proven, destination capability adapters supported by evidence, and image delivery only where validated.

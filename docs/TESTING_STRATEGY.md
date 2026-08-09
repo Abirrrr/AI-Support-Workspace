@@ -262,6 +262,8 @@ M14-A and M14-D are documentation-only and add no runtime tests. M14-B implement
 - Validate catalog payloads containing canonical trigger, Snippet ID, plain projection, and optional exact rich structure; reject invalid structure and URLs atomically.
 - Preserve M13-B.1 port connection, complete snapshot, epoch/revision, invalidation-before-create/edit/delete/import/restore, overlapping-mutation publication barrier, successful rebuild, failed-mutation unchanged rebuild, publication failure, disconnect clearing, stale rejection, and normal-typing fail-closed behavior.
 - Prove content scripts remain Dexie-free and no browser-storage catalog, durable queue, polling, surrounding editor data, host data, logs, or provider state enters the payload.
+- M14-E must implement Decision 38's temporary fail-closed guard: Plain publication remains unchanged; paragraph/text/mark/link-only Rich publication remains unchanged; legacy URL Image Reference publication remains unchanged; and any Snippet containing a local-image block is omitted from the catalog. Its trigger must follow existing unknown-trigger behavior with normal typing untouched, no placeholder or partial insertion, and no Blob, base64, or asset ID in catalog messages.
+- Regress the complete M13-B.1 port, epoch/revision, invalidation, overlapping-mutation publication barrier, rebuild, disconnect, stale-snapshot, and fail-closed behavior with the Decision 38 filter. M14-G will replace this temporary exclusion with typed delivery planning.
 
 ### Editor Expansion
 

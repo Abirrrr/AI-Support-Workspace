@@ -415,6 +415,10 @@ Dexie remains the sole persistent source. The service worker derives the catalog
 
 M13-B.1 remains authoritative: one long-lived typed port per frame; atomic complete snapshots; worker epochs; monotonic revisions; invalidation before Snippet CRUD/import/restore persistence; one global publication barrier; complete rebuild after success or unchanged rebuild after failure; and fail-closed stale, disconnected, invalid, or publication-failed state. No browser-storage catalog, durable queue, polling, or per-keystroke worker lookup is approved.
 
+Decision 38 adds one transitional publication guard for the period after M14-E and before M14-G. A Snippet containing any Decision 37 local-image block is omitted from the transient trigger catalog. Its typed trigger is therefore unknown to the frame cache and existing M13 handling leaves normal typing untouched. The guard does not insert local-image projection text, partially insert other Rich blocks, expose an asset ID, or publish Blob/base64 data.
+
+Plain Snippets, Rich Snippets containing only paragraphs/text/marks/links, and Rich Snippets containing legacy URL Image References retain their existing catalog publication and deterministic plain-projection behavior. The excluded local-image Snippet remains available to the Library, persistence, Backup v4, Retrieval Engine, and Prompt Builder. M14-E implements and tests this narrow catalog filter without changing the M13-B.1 publication barrier. M14-G later replaces it with typed Delivery Planner outcomes.
+
 #### Persistence and Backup Evolution
 
 M14-B implements Dexie version 4 while preserving version 1, 2, and 3 declarations unchanged. Version 4 retains `knowledgeEntries: 'id, createdAt'`, `settings: 'id'`, and `snippetEntries: 'id, createdAt, &trigger'`; it adds no table or index. Its migration maps each v3 `content: string` exactly to `{ kind: 'plain', text: formerContent }` while preserving ID, title, tags and order, trigger, `createdAt`, and `updatedAt`. Triggerless physical records continue omitting the unique indexed property, and unexpected migration input fails.
