@@ -82,6 +82,55 @@ describe('SnippetContent', () => {
     expect(renderSnippetPlainText(richContent)).toBe(expected);
   });
 
+  it('validates local-image blocks and projects alt text without exposing asset IDs', () => {
+    const assetId = '123e4567-e89b-42d3-a456-426614174000';
+    const content = validateSnippetContent({
+      kind: 'rich',
+      blocks: [
+        { type: 'image', assetId, altText: 'Receipt' },
+        { type: 'image', assetId, altText: '' },
+      ],
+    });
+    expect(renderSnippetPlainText(content)).toBe('[Image: Receipt]\n\n[Image]');
+    expect(renderSnippetPlainText(content)).not.toContain(assetId);
+    expect(() =>
+      validateSnippetContent({
+        kind: 'rich',
+        blocks: [{ type: 'image', assetId: 'not-a-uuid', altText: '' }],
+      }),
+    ).toThrow(InvalidSnippetContentError);
+    expect(() =>
+      validateSnippetContent({
+        kind: 'rich',
+        blocks: [{ type: 'image', assetId, altText: '', extra: true }],
+      }),
+    ).toThrow(InvalidSnippetContentError);
+  });
+
+  it('preserves local images and legacy URL references in one ordered Rich document', () => {
+    const content = validateSnippetContent({
+      kind: 'rich',
+      blocks: [
+        {
+          type: 'reference',
+          referenceType: 'image',
+          label: 'Remote',
+          url: 'https://example.com/image.png',
+        },
+        {
+          type: 'image',
+          assetId: '123e4567-e89b-42d3-a456-426614174000',
+          altText: 'Local',
+        },
+      ],
+    });
+    const projection = renderSnippetPlainText(content);
+    expect(projection).toBe(
+      '[Image: Remote] https://example.com/image.png\n\n[Image: Local]',
+    );
+    expect(projection).not.toContain('[object Object]');
+  });
+
   it('accepts only the approved link and image protocols', () => {
     expect(isSafeSnippetLinkUrl('https://example.com')).toBe(true);
     expect(isSafeSnippetLinkUrl('http://example.com')).toBe(true);

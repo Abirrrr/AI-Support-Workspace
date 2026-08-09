@@ -178,12 +178,12 @@ export function ImportExportView({
           Export backup
         </h3>
         <p className="mt-2 text-sm text-slate-600">
-          Export your current Knowledge, Snippets, and saved Settings as one
-          JSON file.
+          Export your current Knowledge, Snippets, local image assets, and saved
+          Settings as one JSON file.
         </p>
         <p className="mt-3 text-sm font-medium text-amber-800">
-          Backup files may contain merchant knowledge, internal notes, and
-          reusable support replies. Store them securely.
+          Backup files may contain merchant knowledge, internal notes, reusable
+          support replies, and local images. Store them securely.
         </p>
         <button
           className="mt-4 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -280,6 +280,14 @@ export function ImportExportView({
                   {prepared.preview.snippetCount}
                 </dd>
               </div>
+              <div>
+                <dt className="font-medium text-slate-600">
+                  Local image assets
+                </dt>
+                <dd className="text-slate-950">
+                  {prepared.preview.assetCount}
+                </dd>
+              </div>
               <div className="sm:col-span-2">
                 <dt className="font-medium text-slate-600">
                   Saved default model
@@ -293,7 +301,7 @@ export function ImportExportView({
 
             <p className="mt-5 text-sm font-semibold text-red-800">
               Restoring this backup will replace your current Knowledge,
-              Snippets, and saved Settings.
+              Snippets, local image assets, and saved Settings.
             </p>
             {prepared.preview.triggerWarning ? (
               <p className="mt-3 text-sm font-semibold text-amber-800">

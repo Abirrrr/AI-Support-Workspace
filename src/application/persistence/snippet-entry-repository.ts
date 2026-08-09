@@ -1,9 +1,12 @@
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import type { SnippetAssetDraft } from '../../domain/snippet-asset';
 
 export type SnippetEntryInput = Pick<
   SnippetEntry,
   'title' | 'content' | 'tags' | 'trigger'
->;
+> & {
+  readonly newAssets?: readonly SnippetAssetDraft[];
+};
 
 export interface SnippetEntryRepository {
   create(input: SnippetEntryInput): Promise<SnippetEntry>;

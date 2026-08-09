@@ -370,7 +370,7 @@ The implemented M14-C Rich content is a small, project-owned, ordered document m
 
 Ordinary link URLs initially allow only `https:`, `http:`, and `mailto:`. Image-reference URLs allow only `https:` and `http:`. Values using `javascript:`, `data:`, `blob:`, `file:`, `chrome:`, `chrome-extension:`, or another unapproved scheme are rejected before persistence and again at untrusted backup import. Imported HTML is never interpreted or converted.
 
-The implemented Decision 36/M14-C baseline resolves reusable images only as URL references. It currently persists no Blob, base64 data, local file, clipboard image, fetched response, or upload-provider identity; has no `snippetAssets` table, extension-managed file store, hosting service, or cloud uploader; and never automatically fetches a supplied URL. Decision 37 below supplies the approved local-asset architecture, but its local image blocks, asset persistence, Dexie v5, Backup v4, and unified inline-image authoring remain unimplemented. M15 screenshot Context remains a distinct transient generation-input domain and cannot be reused for M14 storage.
+The implemented M14-E foundation supports Decision 37 local-image blocks backed by validated Snippet-owned Blobs in `snippetAssets`, Dexie v5, and Backup v4. It still has no image paste/file ingestion, local preview/object-URL workflow, clipboard delivery, hosting service, or cloud uploader, and it never automatically fetches a supplied legacy URL. Unified inline-image authoring remains M14-F. M15 screenshot Context remains a distinct transient generation-input domain and cannot be reused for M14 storage.
 
 #### Deterministic Plain Projection and AI Compatibility
 

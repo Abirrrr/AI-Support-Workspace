@@ -65,6 +65,7 @@ const prepared: PreparedBackupImport = {
     exportedAt: backup.exportedAt,
     knowledgeCount: 1,
     snippetCount: 1,
+    assetCount: 0,
     defaultModel: null,
     triggerWarning:
       'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.',
@@ -117,7 +118,7 @@ describe('ImportExportView', () => {
     expect(fileInput.getAttribute('accept')).toBe('.json,application/json');
     expect(
       screen.getByText(
-        'Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.',
+        'Backup files may contain merchant knowledge, internal notes, reusable support replies, and local images. Store them securely.',
       ),
     ).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Restore backup' })).toBeNull();
@@ -181,7 +182,7 @@ describe('ImportExportView', () => {
     expect(screen.queryByText('hidden-tag')).toBeNull();
     expect(
       screen.getByText(
-        'Restoring this backup will replace your current Knowledge, Snippets, and saved Settings.',
+        'Restoring this backup will replace your current Knowledge, Snippets, local image assets, and saved Settings.',
       ),
     ).toBeTruthy();
     const restore = screen.getByRole('button', { name: 'Restore backup' });

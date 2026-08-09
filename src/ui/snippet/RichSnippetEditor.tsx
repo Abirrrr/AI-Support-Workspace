@@ -42,7 +42,9 @@ export function isRichSnippetDraftValid(content: RichSnippetContent): boolean {
           (inline) =>
             inline.type === 'text' || isSafeSnippetLinkUrl(inline.url),
         )
-      : isSafeSnippetImageUrl(block.url),
+      : block.type === 'reference'
+        ? isSafeSnippetImageUrl(block.url)
+        : true,
   );
 }
 
@@ -143,38 +145,44 @@ export function RichSnippetEditor({
             <legend className="px-1 text-sm font-semibold text-slate-800">
               {block.type === 'paragraph'
                 ? `Paragraph ${blockNumber}`
-                : `Image reference ${blockNumber}`}
+                : block.type === 'reference'
+                  ? `Image reference ${blockNumber}`
+                  : `Local image ${blockNumber}`}
             </legend>
 
-            <div className="mb-4 flex flex-wrap gap-2">
-              <button
-                aria-label={`Move block ${blockNumber} up`}
-                className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={disabled || blockIndex === 0}
-                onClick={() => moveBlock(blockIndex, -1)}
-                type="button"
-              >
-                Move up
-              </button>
-              <button
-                aria-label={`Move block ${blockNumber} down`}
-                className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={disabled || blockIndex === content.blocks.length - 1}
-                onClick={() => moveBlock(blockIndex, 1)}
-                type="button"
-              >
-                Move down
-              </button>
-              <button
-                aria-label={`Remove block ${blockNumber}`}
-                className="rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
-                disabled={disabled}
-                onClick={() => removeBlock(blockIndex)}
-                type="button"
-              >
-                Remove block
-              </button>
-            </div>
+            {block.type !== 'image' ? (
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button
+                  aria-label={`Move block ${blockNumber} up`}
+                  className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={disabled || blockIndex === 0}
+                  onClick={() => moveBlock(blockIndex, -1)}
+                  type="button"
+                >
+                  Move up
+                </button>
+                <button
+                  aria-label={`Move block ${blockNumber} down`}
+                  className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={
+                    disabled || blockIndex === content.blocks.length - 1
+                  }
+                  onClick={() => moveBlock(blockIndex, 1)}
+                  type="button"
+                >
+                  Move down
+                </button>
+                <button
+                  aria-label={`Remove block ${blockNumber}`}
+                  className="rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                  disabled={disabled}
+                  onClick={() => removeBlock(blockIndex)}
+                  type="button"
+                >
+                  Remove block
+                </button>
+              </div>
+            ) : null}
 
             {block.type === 'paragraph' ? (
               <div className="space-y-3">
@@ -356,7 +364,7 @@ export function RichSnippetEditor({
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : block.type === 'reference' ? (
               <div className="space-y-3">
                 <label
                   className="block text-xs font-medium text-slate-700"
@@ -414,6 +422,21 @@ export function RichSnippetEditor({
                 <p className="text-xs text-slate-600">
                   Stored as a reference only. The image is not loaded or
                   previewed here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 rounded-md bg-slate-50 p-3">
+                <p className="text-sm font-medium text-slate-800">
+                  Local image asset
+                </p>
+                <p className="text-xs text-slate-600">
+                  {block.altText.length > 0
+                    ? `Alternative text: ${block.altText}`
+                    : 'No alternative text.'}
+                </p>
+                <p className="text-xs text-slate-600">
+                  Image preview and editing arrive in M14-F. Saving other
+                  Snippet fields preserves this block.
                 </p>
               </div>
             )}

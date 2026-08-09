@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M14-E — Local Image Asset Foundation and Backup v4
+
+- Added the exact Snippet-owned `SnippetAsset` model and local-image Rich block with PNG/JPEG/WebP MIME and signature validation, byte-count checks, canonical UUID/timestamp checks, and 5 MiB per-asset, 20 MiB per-Snippet, and 40 MiB project limits.
+- Added complete ownership-graph validation and atomic Snippet/asset create, update, removal, and cascading delete behavior. Existing Snippet callers require no assets, and metadata edits preserve referenced assets.
+- Implemented forward-only Dexie v5 with only `snippetAssets: 'id, snippetId, createdAt'` added. V1-v4 declarations remain unchanged, and v4-to-v5 creates an empty table without rewriting structured Snippets.
+- Implemented strict Backup Format v4 with dedicated DTOs, canonical padded base64, exact byte/signature and graph validation, deterministic asset ordering, a 96 MiB v4 guard, and atomic four-store restore. Frozen v1-v3 imports remain supported and restore no synthetic assets.
+- Preserved deterministic Retrieval/Prompt projections and added a non-fetching Rich-editor compatibility guard. Decision 38 omits local-image-containing Snippets from the transient catalog until M14-G without changing Plain, rich text-only, or legacy URL-reference publication.
+- Added focused unit and fake-indexeddb coverage for asset validation, graph integrity, transaction rollback, migration, backup byte round trips and rejection cases, editor preservation, and catalog exclusion. No authoring ingestion, preview/object URL, clipboard permission/transport, destination adapter, or rich host rendering was added.
+
 ### M14-D — Rich Snippet Delivery and Local Image Architecture
 
 - Added Decision 37 as a deliberate partial supersession of Decision 36 after M14-C product evidence. Preserved the single Snippet aggregate/Library, project-owned structured content, deterministic text projection, Retrieval/Prompt Builder compatibility, M13 catalog/trigger guarantees, local-first ownership, and provider independence.

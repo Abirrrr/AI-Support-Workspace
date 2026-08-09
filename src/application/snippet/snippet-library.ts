@@ -39,6 +39,9 @@ export class SnippetLibraryService implements SnippetLibrary {
         content,
         tags: [...input.tags],
         trigger,
+        ...(input.newAssets === undefined
+          ? {}
+          : { newAssets: input.newAssets }),
       }),
     );
   }
@@ -52,6 +55,9 @@ export class SnippetLibraryService implements SnippetLibrary {
         content,
         tags: [...input.tags],
         trigger,
+        ...(input.newAssets === undefined
+          ? {}
+          : { newAssets: input.newAssets }),
       }),
     );
   }

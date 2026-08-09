@@ -1,7 +1,7 @@
 export const BACKUP_MESSAGES = {
   exportSuccess: 'Backup exported.',
   exportFailure: "Couldn't export your data. Try again.",
-  tooLarge: 'This backup file is too large. Choose a file smaller than 25 MB.',
+  tooLarge: 'This backup file exceeds the supported size limit.',
   readFailure: "Couldn't read this backup file. Choose another file.",
   invalid: "This isn't a valid AI Support Workspace backup file.",
   unsupportedVersion:

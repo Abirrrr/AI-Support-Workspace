@@ -3,29 +3,47 @@ import {
   BACKUP_FORMAT_VERSION_1,
   BACKUP_FORMAT_VERSION_2,
   BACKUP_FORMAT_VERSION_3,
+  BACKUP_FORMAT_VERSION_4,
   type BackupFile,
   type BackupFileV1,
   type BackupFileV2,
   type BackupFileV3,
+  type BackupFileV4,
   type BackupKnowledgeRecordV1,
   type BackupKnowledgeRecordV2,
   type BackupKnowledgeRecordV3,
+  type BackupKnowledgeRecordV4,
   type BackupRichSnippetBlockV3,
   type BackupRichSnippetInlineV3,
+  type BackupRichSnippetBlockV4,
   type BackupSettingsV1,
   type BackupSettingsV2,
   type BackupSettingsV3,
+  type BackupSettingsV4,
   type BackupSnippetContentV3,
+  type BackupSnippetContentV4,
+  type BackupSnippetAssetRecordV4,
   type BackupSnippetRecordV1,
   type BackupSnippetRecordV2,
   type BackupSnippetRecordV3,
+  type BackupSnippetRecordV4,
 } from '../../domain/backup-file';
 import {
   isSafeSnippetImageUrl,
   isSafeSnippetLinkUrl,
 } from '../../domain/snippet-content';
+import {
+  hasSnippetAssetSignature,
+  isSnippetAssetMimeType,
+  MAX_SNIPPET_ASSET_BYTES,
+} from '../../domain/snippet-asset';
+import {
+  SnippetAssetGraphError,
+  validateSnippetAssetGraph,
+} from '../../domain/snippet-asset-graph';
 import { isCanonicalSnippetTrigger } from '../snippet/snippet-trigger';
 import { BackupImportError } from './backup-errors';
+import { decodeCanonicalBase64 } from './base64';
 
 const DANGEROUS_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 const UUID_V4_PATTERN =
@@ -152,6 +170,23 @@ function validateKnowledgeV3(
   value: unknown,
 ): BackupKnowledgeRecordV3 | undefined {
   const validated = validateKnowledgeV2(value);
+  return validated === undefined
+    ? undefined
+    : {
+        id: validated.id,
+        title: validated.title,
+        body: validated.body,
+        tags: [...validated.tags],
+        createdAt: validated.createdAt,
+        updatedAt: validated.updatedAt,
+        source: validated.source,
+      };
+}
+
+function validateKnowledgeV4(
+  value: unknown,
+): BackupKnowledgeRecordV4 | undefined {
+  const validated = validateKnowledgeV3(value);
   return validated === undefined
     ? undefined
     : {
@@ -360,6 +395,160 @@ function validateSnippetV3(value: unknown): BackupSnippetRecordV3 | undefined {
   };
 }
 
+function validateRichBlockV4(
+  value: unknown,
+): BackupRichSnippetBlockV4 | undefined {
+  if (!isRecord(value) || typeof value.type !== 'string') return undefined;
+  if (
+    value.type === 'image' &&
+    hasExactKeys(value, ['type', 'assetId', 'altText']) &&
+    isCanonicalUuid(value.assetId) &&
+    typeof value.altText === 'string'
+  ) {
+    return { type: 'image', assetId: value.assetId, altText: value.altText };
+  }
+  const validated = validateRichBlockV3(value);
+  if (validated === undefined) return undefined;
+  return validated.type === 'paragraph'
+    ? {
+        type: 'paragraph',
+        children: validated.children.map((inline) =>
+          inline.type === 'text'
+            ? {
+                type: 'text',
+                text: inline.text,
+                bold: inline.bold,
+                italic: inline.italic,
+              }
+            : {
+                type: 'link',
+                text: inline.text,
+                url: inline.url,
+                bold: inline.bold,
+                italic: inline.italic,
+              },
+        ),
+      }
+    : {
+        type: 'reference',
+        referenceType: 'image',
+        label: validated.label,
+        url: validated.url,
+      };
+}
+
+function validateSnippetContentV4(
+  value: unknown,
+): BackupSnippetContentV4 | undefined {
+  if (!isRecord(value) || typeof value.kind !== 'string') return undefined;
+  if (
+    value.kind === 'plain' &&
+    hasExactKeys(value, ['kind', 'text']) &&
+    typeof value.text === 'string'
+  ) {
+    return { kind: 'plain', text: value.text };
+  }
+  if (
+    value.kind === 'rich' &&
+    hasExactKeys(value, ['kind', 'blocks']) &&
+    Array.isArray(value.blocks)
+  ) {
+    const blocks = value.blocks.map(validateRichBlockV4);
+    if (blocks.some((block) => block === undefined)) return undefined;
+    return {
+      kind: 'rich',
+      blocks: blocks as BackupRichSnippetBlockV4[],
+    };
+  }
+  return undefined;
+}
+
+function validateSnippetV4(value: unknown): BackupSnippetRecordV4 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'id',
+      'title',
+      'content',
+      'tags',
+      'createdAt',
+      'updatedAt',
+      'trigger',
+    ]) ||
+    !isCanonicalUuid(value.id) ||
+    typeof value.title !== 'string' ||
+    !isStringArray(value.tags) ||
+    !isUtcIsoTimestamp(value.createdAt) ||
+    !isUtcIsoTimestamp(value.updatedAt) ||
+    (value.trigger !== null && !isCanonicalSnippetTrigger(value.trigger))
+  ) {
+    return undefined;
+  }
+  const content = validateSnippetContentV4(value.content);
+  if (content === undefined) return undefined;
+  return {
+    id: value.id,
+    title: value.title,
+    content,
+    tags: [...value.tags],
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+    trigger: value.trigger,
+  };
+}
+
+function validateSnippetAssetV4(
+  value: unknown,
+): BackupSnippetAssetRecordV4 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'id',
+      'snippetId',
+      'mimeType',
+      'byteSize',
+      'originalFilename',
+      'createdAt',
+      'encoding',
+      'data',
+    ]) ||
+    !isCanonicalUuid(value.id) ||
+    !isCanonicalUuid(value.snippetId) ||
+    !isSnippetAssetMimeType(value.mimeType) ||
+    !Number.isSafeInteger(value.byteSize) ||
+    (value.byteSize as number) < 0 ||
+    (value.byteSize as number) > MAX_SNIPPET_ASSET_BYTES ||
+    (value.originalFilename !== null &&
+      typeof value.originalFilename !== 'string') ||
+    !isUtcIsoTimestamp(value.createdAt) ||
+    value.encoding !== 'base64' ||
+    typeof value.data !== 'string'
+  ) {
+    return undefined;
+  }
+  try {
+    const bytes = decodeCanonicalBase64(value.data);
+    if (
+      bytes.byteLength !== value.byteSize ||
+      !hasSnippetAssetSignature(value.mimeType, bytes)
+    ) {
+      return undefined;
+    }
+  } catch {
+    return undefined;
+  }
+  return {
+    id: value.id,
+    snippetId: value.snippetId,
+    mimeType: value.mimeType,
+    byteSize: value.byteSize,
+    originalFilename: value.originalFilename,
+    createdAt: value.createdAt,
+    encoding: 'base64',
+    data: value.data,
+  };
+}
+
 function validateSettingsV1(value: unknown): BackupSettingsV1 | undefined {
   if (
     !isRecord(value) ||
@@ -384,6 +573,13 @@ function validateSettingsV2(value: unknown): BackupSettingsV2 | undefined {
 
 function validateSettingsV3(value: unknown): BackupSettingsV3 | undefined {
   const validated = validateSettingsV2(value);
+  return validated === undefined
+    ? undefined
+    : { defaultModel: validated.defaultModel };
+}
+
+function validateSettingsV4(value: unknown): BackupSettingsV4 | undefined {
+  const validated = validateSettingsV3(value);
   return validated === undefined
     ? undefined
     : { defaultModel: validated.defaultModel };
@@ -432,6 +628,60 @@ function parseVersion3(parsed: Record<string, unknown>): BackupFileV3 {
   };
 }
 
+function parseVersion4(parsed: Record<string, unknown>): BackupFileV4 {
+  validateEnvelope(parsed, [
+    'knowledge',
+    'snippets',
+    'snippetAssets',
+    'settings',
+  ]);
+  const data = parsed.data as Record<string, unknown>;
+  if (!Array.isArray(data.snippetAssets)) {
+    throw new BackupImportError('invalid');
+  }
+  const knowledge = (data.knowledge as unknown[]).map(validateKnowledgeV4);
+  const snippets = (data.snippets as unknown[]).map(validateSnippetV4);
+  const snippetAssets = data.snippetAssets.map(validateSnippetAssetV4);
+  const settings = validateSettingsV4(data.settings);
+  if (
+    knowledge.some((entry) => entry === undefined) ||
+    snippets.some((entry) => entry === undefined) ||
+    snippetAssets.some((entry) => entry === undefined) ||
+    settings === undefined
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const trustedKnowledge = knowledge as BackupKnowledgeRecordV4[];
+  const trustedSnippets = snippets as BackupSnippetRecordV4[];
+  const trustedAssets = snippetAssets as BackupSnippetAssetRecordV4[];
+  if (
+    hasDuplicateIds(trustedKnowledge) ||
+    hasDuplicateIds(trustedSnippets) ||
+    hasDuplicateTriggers(trustedSnippets)
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  try {
+    validateSnippetAssetGraph(trustedSnippets, trustedAssets);
+  } catch (error) {
+    if (error instanceof SnippetAssetGraphError) {
+      throw new BackupImportError('invalid', error);
+    }
+    throw error;
+  }
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_4,
+    exportedAt: parsed.exportedAt as string,
+    data: {
+      knowledge: trustedKnowledge,
+      snippets: trustedSnippets,
+      snippetAssets: trustedAssets,
+      settings,
+    },
+  };
+}
+
 function parseJson(serialized: string): Record<string, unknown> {
   let parsed: unknown;
   try {
@@ -445,13 +695,16 @@ function parseJson(serialized: string): Record<string, unknown> {
   return parsed;
 }
 
-function validateEnvelope(parsed: Record<string, unknown>) {
+function validateEnvelope(
+  parsed: Record<string, unknown>,
+  dataKeys: readonly string[] = ['knowledge', 'snippets', 'settings'],
+) {
   if (
     !hasExactKeys(parsed, ['format', 'formatVersion', 'exportedAt', 'data']) ||
     parsed.format !== BACKUP_FORMAT ||
     !isUtcIsoTimestamp(parsed.exportedAt) ||
     !isRecord(parsed.data) ||
-    !hasExactKeys(parsed.data, ['knowledge', 'snippets', 'settings']) ||
+    !hasExactKeys(parsed.data, [...dataKeys]) ||
     !Array.isArray(parsed.data.knowledge) ||
     !Array.isArray(parsed.data.snippets)
   ) {
@@ -523,7 +776,8 @@ export function parseBackupFile(serialized: string): BackupFile {
     Number.isInteger(parsed.formatVersion) &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_1 &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_2 &&
-    parsed.formatVersion !== BACKUP_FORMAT_VERSION_3
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_3 &&
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_4
   ) {
     throw new BackupImportError('unsupported-version');
   }
@@ -535,6 +789,9 @@ export function parseBackupFile(serialized: string): BackupFile {
   }
   if (parsed.formatVersion === BACKUP_FORMAT_VERSION_3) {
     return parseVersion3(parsed);
+  }
+  if (parsed.formatVersion === BACKUP_FORMAT_VERSION_4) {
+    return parseVersion4(parsed);
   }
   throw new BackupImportError('invalid');
 }

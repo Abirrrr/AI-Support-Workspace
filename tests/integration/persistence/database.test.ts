@@ -32,13 +32,14 @@ describe('local database foundation', () => {
     await deleteIsolatedDatabase(databaseName);
   });
 
-  it('opens version 4 with only the approved tables and indexes', async () => {
+  it('opens version 5 with only the approved tables and indexes', async () => {
     await database.open();
 
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
       'knowledgeEntries',
       'settings',
+      'snippetAssets',
       'snippetEntries',
     ]);
 
@@ -74,6 +75,12 @@ describe('local database foundation', () => {
     });
     expect(database.settings.schema.indexes).toHaveLength(0);
     expect(await database.settings.count()).toBe(0);
+    expect(database.snippetAssets.schema.indexes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'snippetId', unique: false }),
+        expect.objectContaining({ name: 'createdAt', unique: false }),
+      ]),
+    );
   });
 
   it('upgrades version 1 while preserving metadata and wrapping Snippet content', async () => {
@@ -106,7 +113,7 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(4);
+    expect(database.verno).toBe(5);
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
     expect(await database.snippetEntries.toArray()).toEqual([
       { ...snippet, content: createPlainSnippetContent(snippet.content) },
@@ -115,8 +122,55 @@ describe('local database foundation', () => {
     expect(database.tables.map((table) => table.name).sort()).toEqual([
       'knowledgeEntries',
       'settings',
+      'snippetAssets',
       'snippetEntries',
     ]);
+  });
+
+  it('upgrades v4 by adding an empty asset table without rewriting structured Snippets', async () => {
+    const structured = {
+      id: '123e4567-e89b-42d3-a456-426614174000',
+      title: 'Structured',
+      content: {
+        kind: 'rich' as const,
+        blocks: [
+          {
+            type: 'paragraph' as const,
+            children: [
+              {
+                type: 'text' as const,
+                text: 'Preserved',
+                bold: true,
+                italic: false,
+              },
+            ],
+          },
+        ],
+      },
+      tags: ['v4'],
+      createdAt: '2026-08-09T00:00:00.000Z',
+      updatedAt: '2026-08-09T00:00:00.000Z',
+    };
+    const versionFour = new Dexie(databaseName, { indexedDB, IDBKeyRange });
+    versionFour.version(4).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
+    });
+    await versionFour.open();
+    await versionFour.table('snippetEntries').add(structured);
+    versionFour.close();
+
+    await database.open();
+
+    expect(database.verno).toBe(5);
+    expect(await database.snippetEntries.toArray()).toEqual([structured]);
+    expect(await database.snippetAssets.count()).toBe(0);
+
+    database.close();
+    database = createIsolatedDatabase(databaseName);
+    expect(await database.snippetEntries.toArray()).toEqual([structured]);
+    expect(await database.snippetAssets.count()).toBe(0);
   });
 
   it('upgrades version 2 while preserving metadata and wrapping Snippet content', async () => {

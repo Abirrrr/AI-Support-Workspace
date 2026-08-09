@@ -116,7 +116,7 @@ The previously documented M13-A — Provider Expansion / OpenAI Architecture Rea
 
 Extend the M13 Snippet aggregate and trigger/editor foundation with canonical structured content, one normal Rich authoring surface with locally owned inline images, deterministic text compatibility, and destination-aware direct or clipboard-assisted delivery. Preserve existing Plain Snippets, legacy URL image references, and frozen Backup Formats v1-v3.
 
-Status: M14-B implements structured content, Dexie v4, Backup v3, and text-consumer compatibility at `ed23f30`; M14-C implements structured authoring at `a787100`; and M14-D is complete at `64504df`. M14-D.2 adds Decision 38's transitional fail-closed trigger rule after M14-E preflight found the pre-M14-G behavior undefined. No M14-E implementation has started.
+Status: M14-B implements structured content, Dexie v4, Backup v3, and text-consumer compatibility at `ed23f30`; M14-C implements structured authoring at `a787100`; M14-D is complete at `64504df`; and Decision 38 is committed at `f9b5097`. M14-E now implements the local asset/Dexie v5/Backup v4 foundation and awaits Principal source review; no implementation commit exists yet.
 
 Revised sequence:
 
@@ -126,7 +126,7 @@ Revised sequence:
 - **M14-G — Delivery Planner and Clipboard-Assisted Fallback:** behavioral capabilities, serializer, optional permission workflow, offscreen transport, safe plain/HTML payloads, explicit outcomes, and Crisp-oriented browser evidence.
 - **M14-H — Rich Browser Rendering and Image Delivery Capability Validation:** safe direct rich rendering where proven, destination capability adapters supported by evidence, and image delivery only where validated.
 
-The exact next action is M14-E — Local Image Asset Foundation and Backup v4. M14 remains incomplete.
+The exact next action after M14-E review is M14-F — Unified Rich Editor Inline Image Authoring. M14 remains incomplete.
 
 ## Milestone 15 — Multimodal Screenshot Context
 

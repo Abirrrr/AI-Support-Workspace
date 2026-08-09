@@ -357,6 +357,11 @@ describe('PromptBuilder', () => {
             },
           ],
         },
+        {
+          type: 'image',
+          assetId: '123e4567-e89b-42d3-a456-426614174000',
+          altText: 'Receipt',
+        },
       ],
     };
     const assembly = new PromptBuilder().build({
@@ -367,8 +372,9 @@ describe('PromptBuilder', () => {
 
     if (section?.kind !== 'snippets') throw new Error('Expected snippets.');
     expect(section.items[0]?.content.content).toBe(
-      'Support (mailto:help@example.com)',
+      'Support (mailto:help@example.com)\n\n[Image: Receipt]',
     );
+    expect(JSON.stringify(section)).not.toContain('123e4567');
   });
 
   it.each([0, 2])(

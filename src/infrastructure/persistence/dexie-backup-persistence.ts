@@ -8,13 +8,16 @@ import type { AiSupportWorkspaceDatabase } from './database';
 import { runPersistenceOperation } from './repository-helpers';
 import { GLOBAL_SETTINGS_ID } from './settings-record';
 import { toSnippetEntry, toSnippetEntryRecord } from './snippet-entry-record';
+import { toSnippetAsset, toSnippetAssetRecord } from './snippet-asset-record';
 
 export type BackupRestoreStage =
   | 'knowledge-cleared'
   | 'snippets-cleared'
+  | 'snippet-assets-cleared'
   | 'settings-cleared'
   | 'knowledge-written'
   | 'snippets-written'
+  | 'snippet-assets-written'
   | 'settings-written';
 
 export interface BackupRestoreTestHooks {
@@ -37,13 +40,16 @@ export class DexieBackupSnapshotReader implements BackupSnapshotReader {
         'r',
         this.database.knowledgeEntries,
         this.database.snippetEntries,
+        this.database.snippetAssets,
         this.database.settings,
         async () => {
-          const [knowledge, snippets, settingsRecord] = await Promise.all([
-            this.database.knowledgeEntries.toArray(),
-            this.database.snippetEntries.toArray(),
-            this.database.settings.get(GLOBAL_SETTINGS_ID),
-          ]);
+          const [knowledge, snippets, snippetAssets, settingsRecord] =
+            await Promise.all([
+              this.database.knowledgeEntries.toArray(),
+              this.database.snippetEntries.toArray(),
+              this.database.snippetAssets.toArray(),
+              this.database.settings.get(GLOBAL_SETTINGS_ID),
+            ]);
 
           return {
             knowledge: knowledge.map((entry) => ({
@@ -56,6 +62,7 @@ export class DexieBackupSnapshotReader implements BackupSnapshotReader {
               source: entry.source,
             })),
             snippets: snippets.map(toSnippetEntry),
+            snippetAssets: snippetAssets.map(toSnippetAsset),
             settings: {
               defaultModel: settingsRecord?.defaultModel ?? null,
             },
@@ -78,12 +85,15 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
         'rw',
         this.database.knowledgeEntries,
         this.database.snippetEntries,
+        this.database.snippetAssets,
         this.database.settings,
         async () => {
           await this.database.knowledgeEntries.clear();
           await runHook(this.testHooks, 'knowledge-cleared');
           await this.database.snippetEntries.clear();
           await runHook(this.testHooks, 'snippets-cleared');
+          await this.database.snippetAssets.clear();
+          await runHook(this.testHooks, 'snippet-assets-cleared');
           await this.database.settings.clear();
           await runHook(this.testHooks, 'settings-cleared');
 
@@ -108,6 +118,13 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
             );
           }
           await runHook(this.testHooks, 'snippets-written');
+
+          if (data.snippetAssets.length > 0) {
+            await this.database.snippetAssets.bulkAdd(
+              data.snippetAssets.map(toSnippetAssetRecord),
+            );
+          }
+          await runHook(this.testHooks, 'snippet-assets-written');
 
           await this.database.settings.put({
             id: GLOBAL_SETTINGS_ID,

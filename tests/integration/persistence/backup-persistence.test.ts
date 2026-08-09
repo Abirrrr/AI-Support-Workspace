@@ -5,7 +5,10 @@ import { BackupRestoreService } from '../../../src/application/backup/backup-ser
 import { SettingsService } from '../../../src/application/settings/settings-service';
 import {
   BACKUP_FORMAT,
-  BACKUP_FORMAT_VERSION,
+  BACKUP_FORMAT_VERSION_1,
+  BACKUP_FORMAT_VERSION_2,
+  BACKUP_FORMAT_VERSION_3,
+  type BackupFile,
   type BackupFileV3,
 } from '../../../src/domain/backup-file';
 import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
@@ -72,6 +75,7 @@ const restoredData: BackupRestoreData = {
       trigger: ';restored',
     },
   ],
+  snippetAssets: [],
   settings: { defaultModel: 'qwen2.5:7b' },
 };
 
@@ -134,6 +138,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(await reader.readSnapshot()).toEqual({
       knowledge: [originalKnowledge],
       snippets: [originalSnippet],
+      snippetAssets: [],
       settings: { defaultModel: 'original-model' },
     });
 
@@ -195,7 +200,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(JSON.stringify(snapshot)).not.toContain('futureSettingsField');
   });
 
-  it('replaces all three stores, preserves exact metadata, and survives reopen', async () => {
+  it('replaces all four stores, preserves exact metadata, and survives reopen', async () => {
     await new DexieTransactionalBackupRestorePort(database).replaceAll(
       restoredData,
     );
@@ -210,6 +215,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(database.tables.map(({ name }) => name).sort()).toEqual([
       'knowledgeEntries',
       'settings',
+      'snippetAssets',
       'snippetEntries',
     ]);
 
@@ -220,10 +226,113 @@ describe('Dexie backup snapshot and atomic restore', () => {
     ).toEqual(restoredData);
   });
 
+  it('round-trips exact asset Blob bytes through restore, reopen, and snapshot', async () => {
+    const snippetId = '523e4567-e89b-42d3-a456-426614174000';
+    const assetId = '623e4567-e89b-42d3-a456-426614174000';
+    const bytes = Uint8Array.from([
+      0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50, 0xff,
+    ]);
+    const data: BackupRestoreData = {
+      knowledge: [],
+      snippets: [
+        {
+          id: snippetId,
+          title: 'WebP',
+          content: {
+            kind: 'rich',
+            blocks: [{ type: 'image', assetId, altText: 'Preview' }],
+          },
+          tags: [],
+          createdAt: '2026-08-09T00:00:00.000Z',
+          updatedAt: '2026-08-09T00:00:00.000Z',
+          trigger: null,
+        },
+      ],
+      snippetAssets: [
+        {
+          id: assetId,
+          snippetId,
+          mimeType: 'image/webp',
+          blob: new Blob([bytes], { type: 'image/webp' }),
+          byteSize: bytes.byteLength,
+          originalFilename: null,
+          createdAt: '2026-08-09T00:00:01.000Z',
+        },
+      ],
+      settings: { defaultModel: null },
+    };
+
+    await new DexieTransactionalBackupRestorePort(database).replaceAll(data);
+    database.close();
+    database = createIsolatedDatabase(databaseName);
+    const snapshot = await new DexieBackupSnapshotReader(
+      database,
+    ).readSnapshot();
+
+    expect(snapshot.snippets).toEqual(data.snippets);
+    expect(snapshot.snippetAssets[0]).toMatchObject({
+      id: assetId,
+      snippetId,
+      mimeType: 'image/webp',
+      byteSize: bytes.byteLength,
+      originalFilename: null,
+    });
+    const restoredAsset = snapshot.snippetAssets[0];
+    if (restoredAsset === undefined) throw new Error('Missing restored asset.');
+    expect(new Uint8Array(await restoredAsset.blob.arrayBuffer())).toEqual(
+      bytes,
+    );
+  });
+
+  it.each([
+    BACKUP_FORMAT_VERSION_1,
+    BACKUP_FORMAT_VERSION_2,
+    BACKUP_FORMAT_VERSION_3,
+  ] as const)(
+    'restores Backup v%i into Dexie v5 without synthetic assets',
+    async (formatVersion) => {
+      const common = {
+        id: '923e4567-e89b-42d3-a456-426614174000',
+        title: 'Historical',
+        tags: [],
+        createdAt: '2026-08-09T00:00:00.000Z',
+        updatedAt: '2026-08-09T00:00:00.000Z',
+      };
+      const backup = {
+        format: BACKUP_FORMAT,
+        formatVersion,
+        exportedAt: '2026-08-09T00:00:00.000Z',
+        data: {
+          knowledge: [],
+          snippets: [
+            formatVersion === BACKUP_FORMAT_VERSION_1
+              ? { ...common, content: 'Historical plain' }
+              : formatVersion === BACKUP_FORMAT_VERSION_2
+                ? { ...common, content: 'Historical plain', trigger: ';old' }
+                : {
+                    ...common,
+                    content: createPlainSnippetContent('Historical plain'),
+                    trigger: ';old',
+                  },
+          ],
+          settings: { defaultModel: null },
+        },
+      } as BackupFile;
+
+      await new BackupRestoreService(
+        new DexieTransactionalBackupRestorePort(database),
+      ).restoreBackup(backup);
+
+      expect(await database.snippetAssets.count()).toBe(0);
+      expect(await database.snippetEntries.count()).toBe(1);
+    },
+  );
+
   it('restores a valid empty backup and persists the null Settings singleton', async () => {
     await new DexieTransactionalBackupRestorePort(database).replaceAll({
       knowledge: [],
       snippets: [],
+      snippetAssets: [],
       settings: { defaultModel: null },
     });
 
@@ -256,7 +365,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     });
     const backup = {
       format: BACKUP_FORMAT,
-      formatVersion: BACKUP_FORMAT_VERSION,
+      formatVersion: BACKUP_FORMAT_VERSION_3,
       exportedAt: '2026-08-02T09:00:00.000Z',
       data: { knowledge: [knowledge], snippets: [snippet], settings },
     } as BackupFileV3;
@@ -324,8 +433,12 @@ describe('Dexie backup snapshot and atomic restore', () => {
 
   it.each<BackupRestoreStage>([
     'knowledge-cleared',
+    'snippets-cleared',
+    'snippet-assets-cleared',
+    'settings-cleared',
     'knowledge-written',
     'snippets-written',
+    'snippet-assets-written',
     'settings-written',
   ])('rolls back all stores when %s fails', async (failedStage) => {
     const restore = new DexieTransactionalBackupRestorePort(database, {
@@ -340,12 +453,59 @@ describe('Dexie backup snapshot and atomic restore', () => {
     await expectOriginalState();
   });
 
+  it('rolls back all four stores when a non-empty asset restore fails', async () => {
+    const snippetId = '723e4567-e89b-42d3-a456-426614174000';
+    const assetId = '823e4567-e89b-42d3-a456-426614174000';
+    const bytes = Uint8Array.from([0xff, 0xd8, 0xff]);
+    const restore = new DexieTransactionalBackupRestorePort(database, {
+      afterStage: (stage) => {
+        if (stage === 'snippet-assets-written') {
+          throw new Error('forced asset restore failure');
+        }
+      },
+    });
+    await expect(
+      restore.replaceAll({
+        knowledge: [],
+        snippets: [
+          {
+            id: snippetId,
+            title: 'New',
+            content: {
+              kind: 'rich',
+              blocks: [{ type: 'image', assetId, altText: '' }],
+            },
+            tags: [],
+            createdAt: '2026-08-09T00:00:00.000Z',
+            updatedAt: '2026-08-09T00:00:00.000Z',
+            trigger: null,
+          },
+        ],
+        snippetAssets: [
+          {
+            id: assetId,
+            snippetId,
+            mimeType: 'image/jpeg',
+            blob: new Blob([bytes], { type: 'image/jpeg' }),
+            byteSize: bytes.byteLength,
+            originalFilename: 'new.jpg',
+            createdAt: '2026-08-09T00:00:00.000Z',
+          },
+        ],
+        settings: { defaultModel: null },
+      }),
+    ).rejects.toThrow('Failed to restore backup.');
+    await expectOriginalState();
+    expect(await database.snippetAssets.count()).toBe(0);
+  });
+
   it('round-trips an exported logical snapshot independent of table iteration', async () => {
     const reader = new DexieBackupSnapshotReader(database);
     const exported = await reader.readSnapshot();
     await new DexieTransactionalBackupRestorePort(database).replaceAll({
       knowledge: [],
       snippets: [],
+      snippetAssets: [],
       settings: { defaultModel: null },
     });
     await new DexieTransactionalBackupRestorePort(database).replaceAll(

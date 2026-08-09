@@ -229,6 +229,36 @@ describe('RichSnippetEditor', () => {
     expect(currentContent().blocks).toEqual([]);
   });
 
+  it('renders a non-fetching local-image guard without exposing or flattening its asset ID', () => {
+    const assetId = '123e4567-e89b-42d3-a456-426614174000';
+    render(
+      <EditorHarness
+        initial={{
+          kind: 'rich',
+          blocks: [{ type: 'image', assetId, altText: 'Receipt' }],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Local image asset')).toBeTruthy();
+    expect(screen.getByText('Alternative text: Receipt')).toBeTruthy();
+    expect(
+      screen.getByLabelText('Rich snippet content editor').textContent,
+    ).not.toContain(assetId);
+    expect(document.querySelector('img')).toBeNull();
+    expect(isRichSnippetDraftValid(currentContent())).toBe(true);
+    expect(screen.queryByLabelText('Move block 1 up')).toBeNull();
+    expect(screen.queryByLabelText('Move block 1 down')).toBeNull();
+    expect(screen.queryByLabelText('Remove block 1')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add paragraph' }));
+    expect(currentContent().blocks[0]).toEqual({
+      type: 'image',
+      assetId,
+      altText: 'Receipt',
+    });
+  });
+
   it('moves blocks with keyboard-operable buttons and disables boundaries', () => {
     render(<EditorHarness initial={{ kind: 'rich', blocks: [] }} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add paragraph' }));

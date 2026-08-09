@@ -104,6 +104,56 @@ describe('trigger catalog application and frame cache', () => {
     ]);
   });
 
+  it('omits only local-image Snippets until the Delivery Planner exists', async () => {
+    const localImage: SnippetEntry = {
+      ...entry,
+      id: 'snippet-local-image',
+      trigger: ';local',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'image',
+            assetId: '123e4567-e89b-42d3-a456-426614174000',
+            altText: 'Secret receipt',
+          },
+        ],
+      },
+    };
+    const richTextOnly: SnippetEntry = {
+      ...entry,
+      id: 'snippet-rich-text',
+      trigger: ';richtext',
+      content: {
+        kind: 'rich',
+        blocks: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                text: 'Still published',
+                bold: true,
+                italic: false,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const catalog = await new TriggerCatalogService(
+      repositoryFor([entry, localImage, richTextOnly]),
+    ).readCatalog();
+
+    expect(catalog.map(({ trigger }) => trigger)).toEqual([
+      ';hello',
+      ';richtext',
+    ]);
+    expect(JSON.stringify(catalog)).not.toContain('123e4567');
+    expect(JSON.stringify(catalog)).not.toContain('Secret receipt');
+    expect(JSON.stringify(catalog)).not.toContain('[Image]');
+  });
+
   it('enables only a complete snapshot and clears on invalidate or disconnect', () => {
     const cache = new FrameTriggerCatalogCache();
     const snapshot = {

@@ -1,16 +1,19 @@
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { Settings } from '../../domain/settings';
 import type { SnippetEntry } from '../../domain/snippet-entry';
+import type { SnippetAsset } from '../../domain/snippet-asset';
 
 export interface BackupSnapshot {
   readonly knowledge: readonly KnowledgeEntry[];
   readonly snippets: readonly SnippetEntry[];
+  readonly snippetAssets: readonly SnippetAsset[];
   readonly settings: Settings;
 }
 
 export interface BackupRestoreData {
   readonly knowledge: readonly KnowledgeEntry[];
   readonly snippets: readonly SnippetEntry[];
+  readonly snippetAssets: readonly SnippetAsset[];
   readonly settings: Settings;
 }
 

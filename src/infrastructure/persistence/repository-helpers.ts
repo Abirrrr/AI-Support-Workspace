@@ -3,6 +3,8 @@ import {
   RecordNotFoundError,
 } from '../../application/persistence/errors';
 import { DuplicateSnippetTriggerError } from '../../application/snippet/snippet-trigger';
+import { SnippetAssetValidationError } from '../../domain/snippet-asset';
+import { SnippetAssetGraphError } from '../../domain/snippet-asset-graph';
 
 interface PersistedRecordOrder {
   id: string;
@@ -41,6 +43,8 @@ export async function runPersistenceOperation<Result>(
     if (
       error instanceof RecordNotFoundError ||
       error instanceof DuplicateSnippetTriggerError ||
+      error instanceof SnippetAssetValidationError ||
+      error instanceof SnippetAssetGraphError ||
       error instanceof PersistenceError
     ) {
       throw error;

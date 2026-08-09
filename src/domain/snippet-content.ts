@@ -32,7 +32,14 @@ export interface RichSnippetImageReference {
   readonly url: string;
 }
 
-export type RichSnippetBlock = RichSnippetParagraph | RichSnippetImageReference;
+export interface RichSnippetLocalImage {
+  readonly type: 'image';
+  readonly assetId: string;
+  readonly altText: string;
+}
+
+export type RichSnippetBlock =
+  RichSnippetParagraph | RichSnippetImageReference | RichSnippetLocalImage;
 
 export interface RichSnippetContent {
   readonly kind: 'rich';
@@ -126,6 +133,17 @@ function validateBlock(value: unknown): RichSnippetBlock {
     throw new InvalidSnippetContentError();
   }
   if (
+    value.type === 'image' &&
+    hasExactKeys(value, ['type', 'assetId', 'altText']) &&
+    typeof value.assetId === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      value.assetId,
+    ) &&
+    typeof value.altText === 'string'
+  ) {
+    return { type: 'image', assetId: value.assetId, altText: value.altText };
+  }
+  if (
     value.type === 'paragraph' &&
     hasExactKeys(value, ['type', 'children']) &&
     Array.isArray(value.children)
@@ -213,7 +231,24 @@ function renderInline(inline: RichSnippetInline): string {
 function renderBlock(block: RichSnippetBlock): string {
   if (block.type === 'paragraph')
     return block.children.map(renderInline).join('');
+  if (block.type === 'image') {
+    return block.altText.length > 0 ? `[Image: ${block.altText}]` : '[Image]';
+  }
   return `[Image: ${block.label}] ${block.url}`;
+}
+
+export function getLocalImageAssetIds(
+  content: SnippetContent,
+): readonly string[] {
+  return content.kind === 'rich'
+    ? content.blocks.flatMap((block) =>
+        block.type === 'image' ? [block.assetId] : [],
+      )
+    : [];
+}
+
+export function containsLocalImageBlock(content: SnippetContent): boolean {
+  return getLocalImageAssetIds(content).length > 0;
 }
 
 export function renderSnippetPlainText(content: SnippetContent): string {

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the version 2 singleton Settings store, M13 implemented version 3 with an optional unique Snippet-trigger index, and M14-B implemented version 4 structured Snippet content without rewriting historical declarations.
+This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the version 2 singleton Settings store, M13 implemented version 3 with an optional unique Snippet-trigger index, M14-B implemented version 4 structured Snippet content, and M14-E implements version 5 local image assets without rewriting historical declarations.
 
 ## Planned Domain Schema
 
@@ -38,7 +38,7 @@ Fields:
 
 `trigger` is the optional M13 plain-text expansion identity. A non-null value is stored in canonical lowercase, includes its leading semicolon, is unique, is 2–32 ASCII characters in total, and matches `^;[a-z0-9]+(?:-[a-z0-9]+)*$`. `null` means the Snippet has no expansion trigger.
 
-The current implemented domain through M14-C uses one canonical content discriminated union:
+The current implemented domain through M14-E uses one canonical content discriminated union:
 
 ```ts
 type SnippetContent =
@@ -48,7 +48,7 @@ type SnippetContent =
 
 Its implemented Rich blocks are ordered paragraph blocks with ordered text/link inline nodes or legacy URL Image Reference blocks with a label and HTTP(S) URL. Decision 36 remains authoritative for the discriminated union, non-recursive project-owned structure, and prohibition on persisted HTML. Ordinary link URLs allow HTTP(S) and `mailto:`; legacy image references allow HTTP(S) only and remain valid and backward-compatible.
 
-Decision 37 approves an additional future Rich block:
+Decision 37's local Rich block is implemented by M14-E:
 
 ```ts
 interface RichSnippetLocalImageBlock {
@@ -58,7 +58,7 @@ interface RichSnippetLocalImageBlock {
 }
 ```
 
-The block records document placement while a separately owned `SnippetAsset` stores the image bytes. This local-image block and asset entity are approved architecture but are not implemented through M14-C. The runtime database remains Dexie v4, `snippetAssets` does not exist, and current backup export remains Format v3. M14-E will introduce Dexie v5, `snippetAssets`, and Backup v4. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
+The block records document placement while a separately owned `SnippetAsset` stores the image bytes. The runtime database is Dexie v5 with `snippetAssets`, and current backup export is Format v4. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
 
 ### Settings
 
@@ -173,7 +173,7 @@ The forward-only version 2 to version 3 migration preserves every existing Knowl
 
 ## Implemented Milestone 14 Physical Schema Migration
 
-Implemented today: Dexie version 4.
+Implemented today: Dexie version 5.
 
 Version 4 preserves historical v1, v2, and v3 declarations unchanged and retains exactly the current indexes:
 
@@ -202,9 +202,9 @@ It preserves exactly the record's ID, title, tags and tag order, trigger, `creat
 
 M14-B implements Dexie version 4 and this migration. Rich authoring and rich browser rendering are not part of the schema migration.
 
-## Approved Milestone 14 Dexie Version 5 Evolution
+## Implemented Milestone 14 Dexie Version 5 Evolution
 
-M14-D defines, but does not implement, Dexie version 5. Historical v1-v4 declarations and records remain unchanged. Version 5 retains the v4 tables and indexes and adds exactly:
+M14-E implements Dexie version 5. Historical v1-v4 declarations and records remain unchanged. Version 5 retains the v4 tables and indexes and adds exactly:
 
 ```text
 snippetAssets: 'id, snippetId, createdAt'
@@ -404,9 +404,9 @@ New exports use Backup Format v3. V3 keeps the existing envelope identifier, Kno
 
 Untrusted v3 import strictly validates exact keys and version; record identity and timestamps; duplicate IDs and triggers; content discriminants; exact block, inline, mark, and reference types; strings and boolean mark fields; and allowed URL protocols. An unknown or malformed block, inline, mark, reference, URL, or future field rejects the entire file. The importer performs no repair, HTML interpretation, or partial persistence. Backup Formats v1 and v2 remain frozen and importable through explicit plain-content mappings.
 
-## Approved Milestone 14 Backup Format v4
+## Implemented Milestone 14 Backup Format v4
 
-Backup Formats v1, v2, and v3 remain frozen and importable. M14-D defines, but does not implement, Backup Format v4 for local assets. V4 retains one strict JSON file and the existing top-level format identifier/timestamp envelope. Its exact `data` keys are `knowledge`, `snippets`, `snippetAssets`, and `settings`. Knowledge and Settings use explicit version-owned DTOs; v4 Snippets use explicit DTOs supporting plain content, paragraph/link content, legacy URL references, and exact local image blocks.
+Backup Formats v1, v2, and v3 remain frozen and importable. M14-E implements Backup Format v4 for local assets. V4 retains one strict JSON file and the existing top-level format identifier/timestamp envelope. Its exact `data` keys are `knowledge`, `snippets`, `snippetAssets`, and `settings`. Knowledge and Settings use explicit version-owned DTOs; v4 Snippets use explicit DTOs supporting plain content, paragraph/link content, legacy URL references, and exact local image blocks.
 
 Each v4 asset DTO contains exactly:
 
@@ -433,7 +433,7 @@ Knowledge should evolve beyond a single body-text field into structured troubles
 
 ### Richer Snippets
 
-M14 extends the M13 Snippet and trigger foundation with the Decision 36 structured model and Decision 37 local-image revision. Locally owned PNG/JPEG/WebP assets, Dexie v5, and Backup v4 are approved for M14-E but not yet implemented. Variables, categories, usage statistics, shared assets, arbitrary attachments, and rich-to-plain conversion remain future decisions.
+M14 extends the M13 Snippet and trigger foundation with the Decision 36 structured model and Decision 37 local-image revision. M14-E implements locally owned PNG/JPEG/WebP assets, Dexie v5, and Backup v4. Variables, categories, usage statistics, shared assets, arbitrary attachments, and rich-to-plain conversion remain future decisions.
 
 ### Prompt Templates
 
@@ -445,4 +445,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 13 are complete. M14-B implements the data foundation at `ed23f30`, and M14-C implements authoring at `a787100` without a schema change. The runtime database remains version 4 and exports Backup v3; valid v1 and v2 imports remain supported. M14-D defines future Dexie v5 and Backup v4 but changes no schema or code. Retrieval, Prompt Builder, and the M13 catalog still consume deterministic plain projection. The next action is M14-E — Local Image Asset Foundation and Backup v4.
+Milestones 3 through 13 are complete. M14-E implements Dexie v5 and Backup v4; valid v1, v2, and v3 imports remain supported and restore an empty asset store. Retrieval and Prompt Builder still consume deterministic plain projection. Under Decision 38, only local-image-containing Snippets are omitted from the transient catalog until M14-G. The next action after review is M14-F — Unified Rich Editor Inline Image Authoring.

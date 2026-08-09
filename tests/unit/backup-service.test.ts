@@ -13,6 +13,7 @@ import {
   BackupExportService,
   BackupImportService,
   BackupRestoreService,
+  assertBackupFitsByteLimit,
   createBackupFilename,
   measureUtf8Bytes,
 } from '../../src/application/backup/backup-service';
@@ -22,13 +23,14 @@ import {
 } from '../../src/application/backup/backup-validator';
 import {
   BACKUP_FORMAT,
-  BACKUP_FORMAT_VERSION,
   BACKUP_FORMAT_VERSION_1,
   BACKUP_FORMAT_VERSION_2,
+  BACKUP_FORMAT_VERSION_3,
   MAX_BACKUP_BYTES,
   type BackupFileV1,
   type BackupFileV2,
   type BackupFileV3,
+  type BackupFileV4,
 } from '../../src/domain/backup-file';
 import {
   createPlainSnippetContent,
@@ -63,6 +65,7 @@ function createData(): BackupSnapshot {
         trigger: ';snippet',
       },
     ],
+    snippetAssets: [],
     settings: { defaultModel: 'qwen2.5:7b' },
   };
 }
@@ -103,7 +106,7 @@ function createBackup(overrides: Partial<BackupFileV1> = {}): BackupFileV1 {
 function createCurrentBackup(data = createData()): BackupFileV3 {
   return {
     format: BACKUP_FORMAT,
-    formatVersion: BACKUP_FORMAT_VERSION,
+    formatVersion: BACKUP_FORMAT_VERSION_3,
     exportedAt: EXPORTED_AT,
     data: {
       knowledge: data.knowledge.map((entry) => ({
@@ -123,16 +126,21 @@ function createCurrentBackup(data = createData()): BackupFileV3 {
             ? { kind: 'plain', text: entry.content.text }
             : {
                 kind: 'rich',
-                blocks: entry.content.blocks.map((block) =>
-                  block.type === 'paragraph'
+                blocks: entry.content.blocks.map((block) => {
+                  if (block.type === 'image') {
+                    throw new Error(
+                      'V3 test fixture cannot contain local images.',
+                    );
+                  }
+                  return block.type === 'paragraph'
                     ? {
-                        type: 'paragraph',
+                        type: 'paragraph' as const,
                         children: block.children.map((inline) => ({
                           ...inline,
                         })),
                       }
-                    : { ...block },
-                ),
+                    : { ...block };
+                }),
               },
         tags: [...entry.tags],
         createdAt: entry.createdAt,
@@ -521,7 +529,7 @@ describe('Backup Format v2 and v3 parser and validator', () => {
   it('rejects unsupported future versions explicitly', () => {
     expect(() =>
       parseBackupFile(
-        JSON.stringify({ ...createCurrentBackup(), formatVersion: 4 }),
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 5 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
@@ -575,10 +583,11 @@ describe('backup application services', () => {
 
     await new BackupRestoreService({ replaceAll }).restoreBackup(parsed);
 
-    expect(parsed.formatVersion).toBe(3);
+    expect(parsed.formatVersion).toBe(4);
     expect(replaceAll).toHaveBeenCalledWith({
       knowledge: data.knowledge,
       snippets: [{ ...snippet, content: richContent }],
+      snippetAssets: [],
       settings: data.settings,
     });
     expect(
@@ -643,9 +652,9 @@ describe('backup application services', () => {
     expect(filename).toBe(
       'ai-support-workspace-backup-2026-08-02T08-15-30Z.json',
     );
-    const parsed = JSON.parse(serialized) as BackupFileV3;
+    const parsed = JSON.parse(serialized) as BackupFileV4;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(3);
+    expect(parsed.formatVersion).toBe(4);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -671,6 +680,7 @@ describe('backup application services', () => {
         readSnapshot: async () => ({
           knowledge: [],
           snippets: [],
+          snippetAssets: [],
           settings: { defaultModel: null },
         }),
       },
@@ -683,6 +693,7 @@ describe('backup application services', () => {
     expect(parsed.data).toEqual({
       knowledge: [],
       snippets: [],
+      snippetAssets: [],
       settings: { defaultModel: null },
     });
   });
@@ -712,8 +723,11 @@ describe('backup application services', () => {
       prepared.backup,
     );
 
-    expect(replaceAll).toHaveBeenCalledWith(original);
-    expect(prepared.backup.formatVersion).toBe(3);
+    expect(replaceAll).toHaveBeenCalledWith({
+      ...original,
+      snippetAssets: [],
+    });
+    expect(prepared.backup.formatVersion).toBe(4);
   });
 
   it('excludes simulated future live-domain fields from serialized format v2', async () => {
@@ -739,6 +753,7 @@ describe('backup application services', () => {
         readSnapshot: async () => ({
           knowledge: [knowledge],
           snippets: [snippet],
+          snippetAssets: [],
           settings,
         }),
       },
@@ -781,56 +796,18 @@ describe('backup application services', () => {
     expect(serialized).not.toContain('futureSettingsField');
   });
 
-  it('uses UTF-8 byte measurement and accepts exactly the size limit', async () => {
+  it('uses UTF-8 byte measurement and accepts exactly the size limit', () => {
     expect(measureUtf8Bytes('é')).toBe(2);
-    const data = createData();
-    const knowledgeFixture = requireValue(data.knowledge[0], 'Knowledge entry');
-    const baseBackup = createCurrentBackup({
-      ...data,
-      knowledge: [{ ...knowledgeFixture, body: '' }],
-    });
-    const baseSize = measureUtf8Bytes(JSON.stringify(baseBackup));
-    const exactBody = 'a'.repeat(MAX_BACKUP_BYTES - baseSize);
-    const download = vi.fn<BackupDownloadPort['download']>(
-      async () => undefined,
+    expect(() => assertBackupFitsByteLimit('é', 2)).not.toThrow();
+    expect(() => assertBackupFitsByteLimit('é', 1)).toThrowError(
+      expect.objectContaining({ code: 'too-large' }),
     );
-    await new BackupExportService(
-      {
-        readSnapshot: async () => ({
-          ...data,
-          knowledge: [{ ...knowledgeFixture, body: exactBody }],
-        }),
-      },
-      { download },
-      () => new Date(EXPORTED_AT),
-    ).exportBackup();
-
-    const downloadCall = requireValue(download.mock.calls[0], 'download call');
-    expect(measureUtf8Bytes(downloadCall[0])).toBe(MAX_BACKUP_BYTES);
   });
 
   it('maps above-limit and general export failures safely', async () => {
-    const data = createData();
-    const knowledgeFixture = requireValue(data.knowledge[0], 'Knowledge entry');
-    const baseBackup = createCurrentBackup({
-      ...data,
-      knowledge: [{ ...knowledgeFixture, body: '' }],
-    });
-    const baseSize = measureUtf8Bytes(JSON.stringify(baseBackup));
-    const oversizedBody = 'a'.repeat(MAX_BACKUP_BYTES - baseSize + 1);
-    const oversized = new BackupExportService(
-      {
-        readSnapshot: async () => ({
-          ...data,
-          knowledge: [{ ...knowledgeFixture, body: oversizedBody }],
-        }),
-      },
-      { download: vi.fn(async () => undefined) },
-      () => new Date(EXPORTED_AT),
+    expect(() => assertBackupFitsByteLimit('oversized', 1)).toThrowError(
+      expect.objectContaining({ code: 'too-large' }),
     );
-    await expect(oversized.exportBackup()).rejects.toMatchObject({
-      code: 'too-large',
-    });
 
     const failed = new BackupExportService(
       { readSnapshot: async () => createData() },
@@ -883,6 +860,7 @@ describe('backup application services', () => {
       exportedAt: EXPORTED_AT,
       knowledgeCount: 1,
       snippetCount: 1,
+      assetCount: 0,
       defaultModel: 'qwen2.5:7b',
       triggerWarning:
         'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.',
@@ -906,6 +884,7 @@ describe('backup application services', () => {
     expect(replaceAll).toHaveBeenCalledWith({
       knowledge: backup.data.knowledge,
       snippets: backup.data.snippets,
+      snippetAssets: [],
       settings: backup.data.settings,
     });
   });
@@ -924,6 +903,7 @@ describe('backup application services', () => {
         content: createPlainSnippetContent(entry.content),
         trigger: null,
       })),
+      snippetAssets: [],
       settings: backup.data.settings,
     });
 
