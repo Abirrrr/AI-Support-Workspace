@@ -98,53 +98,46 @@ The libraries may both contribute to a support response, but they have different
 
 ## M14 — Rich Snippet Templates
 
-Rich Snippet Templates build on the existing M13 Snippet aggregate, trigger catalog, and editor adapters. M14 does not create a second Template entity, Library, repository, or trigger mechanism. Decision 37 revises only the local-image and destination-delivery portions of Decision 36.
+M14 builds on the existing M13 Snippet aggregate, Library, trigger catalog, and editor adapters. Decision 39 cancels M14-F Unified Rich Editor Inline Image Authoring before implementation and establishes three separate product concepts: Plain/Rich Snippets for reusable text, Image Snippets for one reusable local image, and future M15 Context Images for generation input.
 
-- Every Snippet retains its existing ID, title, tags, optional trigger, timestamps, CRUD behavior, and trigger uniqueness. Existing plain Snippets remain supported, new Snippets default to plain, and explicit Plain-to-Rich conversion preserves readable content. Rich-to-plain conversion remains deferred.
-- Canonical content remains one exact plain-or-rich project-owned model, never persisted HTML. Paragraphs contain ordered text/link nodes and explicit bold/italic marks. Existing labelled HTTP(S) Image Reference blocks remain valid legacy content and are never automatically fetched or converted.
-- The target authoring UX is one normal Rich document surface. Users paste PNG/JPEG/WebP images or choose them through Insert Image and see local previews inline with paragraphs. The current M14-C Image Reference form is transitional; users do not need public URLs, asset IDs, or technical labels for new local images.
-- A local image block records ordered placement through an asset ID and optional human alt text. A separate Snippet-owned asset record owns MIME, Blob bytes, byte size, optional original filename, and creation metadata. Bytes never live in paragraph text or `SnippetContent`; M15 screenshot Context remains a separate transient generation domain.
-- Draft images persist only with successful Save. Cancel discards new bytes, removal of existing images remains draft-only until Save, object URLs are local preview handles with explicit revocation, and content/asset create/delete operations are atomic. Snippet deletion cascades to its assets. Cross-Snippet asset sharing is excluded.
-- Image ingestion validates PNG/JPEG/WebP MIME and signature, malformed payloads, size, and aggregate ownership before persistence. Limits are 5 MiB per asset, 20 MiB per Snippet, and 40 MiB per local project/profile. SVG, executable interpretation, arbitrary attachments, video, documents, automatic remote loads, and proprietary hosting are excluded.
-- Deterministic plain projection remains authoritative for Retrieval and Prompt Builder. Legacy references retain `[Image: label] url`; local images project to `[Image: alt text]` or `[Image]`. External delivery of projection in place of an actual local image must be reported as intentional degradation, never silent success.
-- M14-E implements Dexie v5 with the dedicated `snippetAssets` store without rewriting v4 Snippets. Backup v4 remains one JSON file and round-trips validated assets as canonical base64 under a 96 MiB serialized limit. Backup v1/v2/v3 remain frozen and importable, restore remains atomic, and no import fetches a URL.
-- Destination delivery uses an application Delivery Planner and behavioral capabilities for direct plain, direct rich, links, inline images, clipboard assistance, rich clipboard HTML, and clipboard images. Outcomes distinguish direct completion, prepared native paste, explicit degradation, and unsupported-with-reason. Destination names do not enter domain logic.
-- Direct insertion remains preferred where reliable and preserves M13 activation, exact replacement, surrounding content, trailing space, caret, input notification, catalog freshness, and fail-closed behavior. The ordinary Plain Snippet failure in tested Crisp remains unresolved and does not authorize a Crisp-specific adapter.
-- Clipboard assistance is real extension copy plus user `Ctrl+V`, not synthetic paste. It is globally opt-in through future optional `clipboardWrite` and `offscreen` permissions; no `clipboardRead` is allowed. A write failure or permission denial preserves user input, trigger cleanup occurs only after successful write and exact state revalidation, and no success is claimed before native paste.
-- Clipboard `text/plain` always uses deterministic projection. Safe `text/html` may contain only validated paragraphs, text, strong/emphasis, and anchors. Ordered text-plus-image clipboard payloads remain evidence-driven; images may not be silently omitted, represented by internal asset IDs, or claimed delivered when destination support is unproven.
-- Until M14-G implements the Delivery Planner, a Snippet containing a local-image block is temporarily trigger-ineligible and is omitted from the transient catalog. Its typed trigger follows existing unknown-trigger behavior and leaves normal typing untouched. Plain Snippets, text/link-only Rich Snippets, and legacy URL Image References remain unchanged. Retrieval and Prompt Builder may still consume local-image plain projection; no placeholder, Blob, base64, or asset ID enters browser trigger delivery.
-- Variables, placeholders, merge fields, customer-data interpolation, conditions, loops, scripting, arbitrary HTML/CSS, tables, video, embeds, AI-generated content, page scraping, analytics, alternate triggers, collaboration, sync, provider changes, cloud asset hosting, and M15 work remain excluded.
+- Every Snippet retains its existing ID, title, tags, optional trigger, timestamps, CRUD behavior, and trigger uniqueness. There is one `SnippetEntry` aggregate, Library, repository, and trigger system.
+- A Plain Snippet stores exact plain text. A Rich Snippet stores only portable formatted text: paragraphs, bold, italic, validated links, unordered lists, and ordered lists. New Rich authoring cannot add embedded local images.
+- Rich lists are first-class project-owned blocks with `listType: 'unordered' | 'ordered'` and ordered items containing the existing text/link/bold/italic inline model. Nested lists, tasks, tables, HTML, CSS, and embeds are excluded.
+- Deterministic list projection uses `- Item` for unordered items and one-based `1. Item` for ordered items, one newline between items, and the existing two-newline boundary between Rich blocks.
+- An Image Snippet is a distinct `SnippetContent` variant with exactly one referenced, same-owner local `SnippetAsset`. It contains no text blocks, multiple images, gallery, caption/body combination, shared asset, or separate trigger syntax.
+- Image Snippet authoring provides normal Snippet metadata, one paste/select target, local preview, replace, remove-before-Save, Save, Cancel, reopen, and Delete. Save requires exactly one validated image. Asset IDs, Blob, base64, and storage details are not user-facing.
+- Image ingestion accepts validated PNG, JPEG, or WebP up to 5 MiB and preserves the existing 20 MiB per-Snippet and 40 MiB project/profile aggregate limits. It reuses M14-E ownership, atomic persistence, rollback, and cascade-delete behavior.
+- No general Image Library, image collection, cross-Snippet sharing, "Use as Context," cloud hosting, automatic upload, or remote URL fetching is introduced.
+- Existing URL Image References remain valid legacy Rich content and are never fetched or automatically converted. Existing M14-E Rich local-image blocks remain preserved legacy compatibility data, importable through Backup v4 and fail-closed under Decision 38. No new block can be authored.
+- There is no automatic legacy conversion. A later explicit conversion may be offered only when Rich content is exactly one valid local-image block with its one same-owner asset and no other block or asset. Mixed text/image records remain legacy Rich data without semantic loss.
+- M14-E remains implemented at `1828f09`: `SnippetAsset`, PNG/JPEG/WebP validation, Dexie v5 `snippetAssets`, one-Snippet ownership, atomic transactions, Backup v4, canonical base64, and graph validation are retained and repurposed.
+- Backup v4 remains frozen and importable. First-class list blocks and `ImageSnippetContent` require one new strict Backup Format v5. M14-G introduces the list model, minimal image content discriminant, and Backup v5 together to avoid consecutive list-only and image-only public formats. V1-v4 remain importable; restore remains atomic.
+- Dexie remains physical version 5 because `SnippetContent` JSON is not indexed by discriminant or block type and no store/index shape changes. No version 6 migration is required.
+- Image Snippets reuse existing trigger syntax and uniqueness. The future typed catalog carries text delivery data for text entries and only trigger/Snippet identity plus an image discriminator for image entries. Blob, base64, asset ID, and filename never enter frame snapshots.
+- Until typed image delivery exists in M14-I, Image Snippets are omitted from the current plain catalog under Decision 39. Decision 38 separately continues to exclude legacy Rich local-image records. Unknown-trigger behavior preserves normal typing.
+- Image delivery v1 retrieves and revalidates the one owned asset from Dexie only after activation, prepares a PNG image on the clipboard, removes the unchanged trigger only after copy success, reports `Image copied — press Ctrl+V`, and relies on the user's real native paste. Destination inline/attachment/message behavior is not promised.
+- Image copy is opt-in through future optional `clipboardWrite` and `offscreen` permissions requested from an explanatory extension UI. `clipboardRead`, synthetic paste, fake keyboard events, upload-control reverse engineering, and silent permission prompts are prohibited.
+- Permission denial, stale state, asset failure, PNG conversion failure, offscreen failure, or clipboard write failure preserves the trigger and surrounding content. Successful compare-and-swap cleanup removes the trigger plus activation space, leaves no placeholder or trailing U+0020, and collapses the caret at the removed range start.
+- Rich browser delivery now targets paragraphs, bold, italic, links, and lists only. Safe direct insertion or minimal text/HTML clipboard assistance remains capability/evidence-driven. The unresolved Crisp direct Plain insertion behavior does not authorize a site-specific adapter by itself.
+- Variables, merge fields, conditions, loops, scripting, arbitrary HTML/CSS, AI-generated content, page scraping, analytics, alternate triggers, collaboration, sync, provider changes, Context Images, and M15 implementation remain excluded.
 
-A `;shopify-limit` Rich Snippet may preserve `paragraph → paragraph with bold text → local image → paragraph`. A destination with proven image capability may preserve the complete sequence; otherwise the planner returns an explicit clipboard, degradation, or unsupported outcome rather than silently dropping the image.
-
-Representative unchanged plain Snippet:
-
-```text
-;hello
-
-Hi there! Thanks for reaching out.
-```
-
-Representative Rich Snippet structure:
+Representative Image Snippet:
 
 ```text
-Paragraph: Thank you for reaching out.
-Paragraph: This is a limitation of the [bold: Shopify ecosystem].
-Local image: locally owned screenshot with optional alt text
-Paragraph: Here is what I recommend doing instead...
+Title: Limitation screenshot
+Trigger: ;image-limitation
+Image: one locally stored PNG/JPEG/WebP
 ```
 
-A legacy URL reference continues to project exactly as before. A local image without alt text projects as `[Image]` for text consumers, but external use of that projection instead of real image delivery must be an explicit degraded outcome:
+Text plus an image intentionally uses two independent shortcuts, such as `;limitation-text` and `;image-limitation`.
 
-```text
-Thank you for reaching out.
+## Future Workspace Shell Action UX
 
-This is a limitation of the Shopify ecosystem.
+The current extension toolbar action opens the implemented popup. From there, Open Workspace opens the global AI Support Workspace Side Panel, while Open Libraries opens the existing full options page in a normal browser tab.
 
-[Image]
+The approved future target is one step shorter: clicking the toolbar action opens or shows the existing global Workspace Side Panel directly, with no intermediate popup. The panel must expose a Library action that opens the existing options/Library page in a normal browser tab. Knowledge, Snippets, Settings, Import / Export, and future management workflows remain in the options page and must not be duplicated or moved wholesale into the panel.
 
-Here is what I recommend doing instead...
-```
+Implementation must use Chrome's supported toolbar-action Side Panel behavior, preserve the existing `sidePanel` permission and global panel/keyboard-shortcut semantics, inspect WXT's generated manifest/action wiring, and retire the default popup cleanly so the action has no competing behaviors. No new permission is expected solely for this requirement. The work is an unassigned future Workspace Shell/extension-action UX item, not M14-G through M14-J, and it must not interrupt the approved Snippet roadmap.
 
 ## M15 — Multimodal Screenshot Context
 
@@ -152,10 +145,12 @@ Multimodal Screenshot Context is assigned to M15. This roadmap assignment does n
 
 - Merchant Context should eventually accept ordinary text plus one or more pasted screenshots or other visual context assets. Text and images may appear together in the current Context workflow, including text before and after an image, with separate Guidance supplied for the task.
 - A user should be able to paste screenshot or image clipboard content directly into Context without first saving every image to disk or uploading it to a cloud service. Exact browser clipboard mechanics remain future architecture work.
+- A user should also be able to select a local screenshot/image for Context. The Context UI requires visible preview and removal before generation; one or multiple images may be approved by the detailed M15 architecture.
 - The product direction is not limited to one image. Count, file-size, and format limits are deliberately unresolved.
 - Attached images require a visible attachment indication, an appropriate preview, and removal before generation. Each image remains associated with the current Context workflow. Reordering is not yet approved or defined.
 - Context images are transient and local-first by default. They belong to the current Workspace or generation session unless later persistence is explicitly approved.
 - Multimodal Context remains provider-independent. Images should become generation context when the selected provider and model support image understanding, and unsupported images must never be silently discarded. The provider-capability contract and unsupported-image UX remain unresolved.
+- Future `GenerationRequest` must carry project-owned image references/attachments rather than Image Snippet IDs or persistent asset ownership. Provider adapters must declare vision capability and return explicit unsupported behavior before a request can omit an image.
 
 The intended workflow can interleave current-task text and visual context before separate Guidance:
 
@@ -175,7 +170,7 @@ OpenAI Provider Expansion is assigned to M16. It will add OpenAI behind the exis
 
 ## Deferred Future Architecture
 
-M13 trigger architecture and M14 Rich Snippet architecture are defined above. Decision 37 now defines the local binary Snippet-asset and general destination-capability boundaries; concrete destination image support remains evidence-driven in M14-H. Future reviews must still define rich-to-plain conversion or variables; M15 multimodal screenshot/provider capability details; and M16 OpenAI credentials, provider selection, permissions, models, errors, and privacy.
+M13 trigger architecture and M14 structured-text architecture are defined above. Decision 39 preserves Decision 37's implemented binary foundation while moving reusable-image authoring and delivery to one-image Image Snippets. Future reviews must still define rich-to-plain conversion or variables; M15 multimodal screenshot/provider capability details; and M16 OpenAI credentials, provider selection, permissions, models, errors, and privacy.
 
 ## Quality Requirements
 

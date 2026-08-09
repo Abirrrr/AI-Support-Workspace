@@ -2,13 +2,26 @@
 
 ## [Unreleased]
 
+### M14-F.1 — Snippet Image Product Boundary Architecture Correction
+
+- Cancelled M14-F Unified Rich Editor Inline Image Authoring before implementation. Decision 39 supersedes Decision 37's unimplemented target of locally owned images embedded among Rich text while preserving Decision 37/M14-E's local asset, validation, persistence, backup-history, native-paste, and M15-separation foundations.
+- Defined the authoritative product split: Plain/Rich Snippets are portable reusable text targeting paragraphs, bold, italic, links, bullets, and numbered lists; Image Snippets are a distinct image-only `SnippetContent` type with exactly one locally owned image and the normal trigger system; Context Images remain future M15 generation inputs.
+- Defined the minimal non-recursive Rich list block and deterministic `- ` / one-based numeric plain projection. Excluded nested lists, tasks, tables, HTML/CSS, embeds, and new local-image Rich authoring.
+- Reused M14-E rather than reverting it: keep `SnippetAsset`, PNG/JPEG/WebP validation, Blob persistence, Dexie v5 `snippetAssets`, one-Snippet ownership, aggregate limits, atomic transactions, base64 utilities, Backup v4 import, and graph validation. Repurpose them for one-image Image Snippets.
+- Froze Backup v4 and approved one Backup v5 transition for both list blocks and `ImageSnippetContent`, with v1-v4 import compatibility and atomic restore. Dexie remains physical version 5 because content discriminants/blocks require no store or index change.
+- Preserved existing Rich local-image records as parseable, non-destructive, Backup-v4-compatible legacy data under Decision 38. Defined no automatic conversion and an optional future conversion only for exactly one valid local-image block with one owned asset and no other content/asset.
+- Defined a typed future catalog whose Image entry contains only trigger/Snippet identity and delivery kind. Blob, base64, asset ID, and filename never enter frame snapshots; the service worker retrieves and validates the requested asset from Dexie only at activation.
+- Defined Image delivery as opt-in PNG clipboard preparation followed by real user `Ctrl+V`, with no synthetic paste or destination-placement promise. Failure preserves the trigger; success removes only the unchanged trigger plus activation space, leaves no placeholder/trailing space, and reports `Image copied — press Ctrl+V`.
+- Reverified current primary platform constraints: warning-bearing `clipboardWrite`; runtime optional-permission rules; MV3 `offscreen` with `CLIPBOARD`; PNG as the portable clipboard image representation; and the need to prove WXT optional declarations, grant/runtime lifecycle, JPEG/WebP-to-PNG conversion, decoded-pixel safety, and native destination paste in M14-I. Added no permission.
+- Revised the remaining sequence to M14-G lists/Backup v5, M14-H Image Snippet authoring, M14-I typed clipboard image delivery, and M14-J Rich text/list destination validation. M14-F.1 changes documentation only: no source, tests, configuration, dependency, database, backup implementation, manifest, or permission changes; no commit or push.
+
 ### M14-E — Local Image Asset Foundation and Backup v4
 
 - Added the exact Snippet-owned `SnippetAsset` model and local-image Rich block with PNG/JPEG/WebP MIME and signature validation, byte-count checks, canonical UUID/timestamp checks, and 5 MiB per-asset, 20 MiB per-Snippet, and 40 MiB project limits.
 - Added complete ownership-graph validation and atomic Snippet/asset create, update, removal, and cascading delete behavior. Existing Snippet callers require no assets, and metadata edits preserve referenced assets.
 - Implemented forward-only Dexie v5 with only `snippetAssets: 'id, snippetId, createdAt'` added. V1-v4 declarations remain unchanged, and v4-to-v5 creates an empty table without rewriting structured Snippets.
 - Implemented strict Backup Format v4 with dedicated DTOs, canonical padded base64, exact byte/signature and graph validation, deterministic asset ordering, a 96 MiB v4 guard, and atomic four-store restore. Frozen v1-v3 imports remain supported and restore no synthetic assets.
-- Preserved deterministic Retrieval/Prompt projections and added a non-fetching Rich-editor compatibility guard. Decision 38 omits local-image-containing Snippets from the transient catalog until M14-G without changing Plain, rich text-only, or legacy URL-reference publication.
+- Preserved deterministic Retrieval/Prompt projections and added a non-fetching Rich-editor compatibility guard. Decision 38 omits legacy Rich local-image-containing Snippets from the transient catalog without changing Plain, portable Rich text, or legacy URL-reference publication.
 - Added focused unit and fake-indexeddb coverage for asset validation, graph integrity, transaction rollback, migration, backup byte round trips and rejection cases, editor preservation, and catalog exclusion. No authoring ingestion, preview/object URL, clipboard permission/transport, destination adapter, or rich host rendering was added.
 
 ### M14-D — Rich Snippet Delivery and Local Image Architecture

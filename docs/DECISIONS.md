@@ -720,7 +720,7 @@ M13 direct insertion remains preferred where evidence shows it is reliable. Plai
 
 Clipboard assistance is real copy followed by a real user `Ctrl+V`, never synthetic paste. The extension prepares a clipboard payload, reports `Snippet copied — press Ctrl+V` only after the write succeeds, and lets the destination's native paste/upload pipeline consume it. Clipboard overwrite is a globally user-enabled capability, not mandatory behavior and not silently enabled per site. The Settings/options surface must explain the clipboard warning and request permission from an explicit user action; trigger handling must not request permission opportunistically. Denial or revocation leaves direct delivery available and returns a safe unavailable outcome.
 
-The future manifest declares `clipboardWrite` and `offscreen` as optional permissions for this capability; M14-D adds neither. `clipboardRead` is prohibited. Chrome's [permission list](https://developer.chrome.com/docs/extensions/reference/permissions-list) documents that `clipboardWrite` displays “Modify data you copy and paste”; the [Permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions) supports runtime grants for optional capabilities; and the [MV3 offscreen API](https://developer.chrome.com/docs/extensions/reference/api/offscreen) documents that service workers have no DOM/window and that an offscreen document with reason `CLIPBOARD` supplies the hidden document context. The service worker therefore coordinates one packaged offscreen document and runtime messages only after both optional permissions are granted; it creates the document only for a pending write and closes it after completion. Permission denial, document creation failure, service-worker restart, serialization failure, or clipboard write failure produces no trigger removal and no success claim. M14-G must verify WXT manifest generation, optional `offscreen` runtime granting, user-activation behavior, `ClipboardItem` support, and offscreen lifecycle in the minimum supported Chrome before implementation is accepted. If that proof invalidates optional `offscreen`, a focused architecture correction is required; `clipboardWrite` remains optional.
+The future manifest declares `clipboardWrite` and `offscreen` as optional permissions for this capability; M14-D adds neither. `clipboardRead` is prohibited. Chrome's [permission list](https://developer.chrome.com/docs/extensions/reference/permissions-list) documents that `clipboardWrite` displays “Modify data you copy and paste”; the [Permissions API](https://developer.chrome.com/docs/extensions/reference/api/permissions) supports runtime grants for optional capabilities; and the [MV3 offscreen API](https://developer.chrome.com/docs/extensions/reference/api/offscreen) documents that service workers have no DOM/window and that an offscreen document with reason `CLIPBOARD` supplies the hidden document context. The service worker therefore coordinates one packaged offscreen document and runtime messages only after both optional permissions are granted; it creates the document only for a pending write and closes it after completion. Permission denial, document creation failure, service-worker restart, serialization failure, or clipboard write failure produces no trigger removal and no success claim. Decision 37 assigned WXT manifest generation, optional `offscreen` runtime granting, user-activation behavior, `ClipboardItem` support, and offscreen lifecycle proof to the then-planned M14-G. Decision 39 supersedes that milestone ownership: current implementation acceptance requires M14-I to verify the proof in the minimum supported Chrome. If that proof invalidates optional `offscreen`, a focused architecture correction is required; `clipboardWrite` remains optional.
 
 Clipboard payload generation is project-owned and separate from transport. `text/plain` always contains deterministic plain projection. `text/html` is generated only from validated structured paragraphs, text, `strong`, `em`, and validated anchors; it contains no stored HTML, arbitrary CSS, script, iframe, event handler, parser output, or untrusted markup. The serializer returns explicit representations and capability requirements to transport. Local image clipboard representations are excluded until Chrome/destination evidence proves a safe multi-part payload for ordered text, formatting, and multiple images. If a Snippet contains a local image and `clipboardImages` is unproven, the planner must return unsupported or an explicitly chosen degradation; it must not omit the image, expose `assetId`, or silently substitute projection text.
 
@@ -730,17 +730,182 @@ Current evidence is recorded without overclaiming: direct DOM insertion of an or
 
 Local image bytes remain local unless the user initiates delivery, are not uploaded by AI Support Workspace, are not sent to Ollama, OpenAI, another provider, analytics, telemetry, or logs, and are not page-scraped. Durable Rich Snippet assets remain separate from M15 transient screenshot Context even if later low-level byte validation utilities are shared. No cloud sync, collaboration, proprietary hosting, provider request, or new host permission is introduced.
 
-The revised sequence is M14-D architecture/documentation; M14-E Local Image Asset Foundation and Backup v4; M14-F Unified Rich Editor Inline Image Authoring; M14-G Delivery Planner and Clipboard-Assisted Fallback; and M14-H Rich Browser Rendering and Image Delivery Capability Validation. M14-D implements none of those runtime capabilities. M14-C remains the last completed implementation task.
+At the time of Decision 37, the planned sequence was M14-D architecture/documentation, M14-E asset foundation, M14-F unified inline-image authoring, M14-G clipboard fallback, and M14-H destination rendering. M14-E was later implemented at `1828f09`; Decision 39 cancels M14-F and supersedes the remaining sequence.
 
 ## Decision 38: Pre-Delivery Local Image Trigger Fail-Closed Behavior
 
-Decision 37 defines deterministic plain projection for local-image blocks but requires external use of that projection to be an explicit delivery outcome. M14-E introduces persisted local-image Snippets before M14-G introduces the Delivery Planner. Until M14-G is implemented, a Snippet containing one or more `{ type: 'image', assetId, altText }` blocks must not be published into the transient trigger catalog.
+Decision 37 defines deterministic plain projection for local-image blocks but requires external use of that projection to be an explicit delivery outcome. M14-E introduces persisted local-image Rich records without a safe delivery path. A Snippet containing one or more `{ type: 'image', assetId, altText }` blocks must not be published into the transient trigger catalog while that legacy content shape remains supported without an explicitly approved migration or delivery strategy.
 
 This is deliberately fail-closed. An omitted catalog entry makes its typed trigger behave exactly like an unknown trigger, so existing M13 behavior preserves normal typing and performs no replacement. The current expansion path must not insert `[Image]` or `[Image: alt text]` as though image delivery succeeded, partially insert other blocks, leak an asset ID, publish Blob/base64 data, or report a plain degradation as complete delivery.
 
 The temporary exclusion applies only to Snippets containing a Decision 37 local-image block. Plain Snippets, Rich Snippets containing paragraphs/text/marks/links only, and Rich Snippets containing legacy URL Image References retain their current deterministic catalog projection and M13/M14 behavior. Local-image Snippets remain valid Library and persistence data, remain exportable/restorable through Backup v4, and remain available to Retrieval Engine and Prompt Builder through `renderSnippetPlainText()`. Plain projection is a text-consumer boundary, not proof of external image delivery.
 
-M14-E must implement this catalog filter without changing M13-B.1 port, epoch/revision, invalidation, publication-barrier, or unknown-trigger guarantees. M14-G will supersede the temporary exclusion with typed direct, clipboard-assisted, intentionally degraded, and unsupported delivery planning. Decision 38 adds no planner, clipboard transport, permission, destination adapter, or host renderer.
+M14-E implements this catalog filter without changing M13-B.1 port, epoch/revision, invalidation, publication-barrier, or unknown-trigger guarantees. Decision 39 preserves it as a compatibility safety rule for legacy Rich local-image records; typed Image Snippet delivery does not supersede or reinterpret it. Retirement requires an explicitly approved lossless migration or legacy delivery decision. Decision 38 adds no planner, clipboard transport, permission, destination adapter, or host renderer.
+
+## Decision 39: Text/Rich Snippet and Image Snippet Product Boundary
+
+Product evidence after M14-E establishes that images embedded among reusable Rich text are not valuable enough to justify destination-dependent placement semantics. Some destination editors paste an image inline while others turn it into an attachment or separate message. M14-F Unified Rich Editor Inline Image Authoring is therefore cancelled before implementation. This decision supersedes Decision 37 only where Decision 37 made locally owned images a normal future Rich-authoring block, promised inline image placement among Rich blocks, or made Rich image rendering/delivery a normal M14 target.
+
+Decision 37 remains authoritative history for the implemented local-first `SnippetAsset` foundation, PNG/JPEG/WebP validation, one-Snippet ownership, atomic Snippet/asset persistence, Dexie v5, Backup v4, no synthetic paste, no cloud hosting, and separation from M15 Context images. Decision 38 remains authoritative for legacy Rich records containing local-image blocks. Decision 39 does not revert M14-E.
+
+### Product and Content Boundary
+
+The product has three distinct concepts:
+
+- A Plain Snippet stores exact reusable plain text.
+- A Rich Snippet stores reusable formatted text made only from paragraphs, bold, italic, validated links, unordered lists, and ordered lists. New Rich authoring cannot create, paste, preview, reorder, replace, or remove locally owned image blocks as normal Rich content.
+- An Image Snippet is an image-only reusable shortcut containing normal Snippet identity, metadata, trigger, and exactly one locally owned image. It is not a general Image Library, does not share assets, and has no "Use as Context" action.
+
+Context images remain future M15 generation inputs with separate transient lifecycle, provider-capability, and privacy rules. They are not Image Snippets, cannot reuse Image Snippet ownership merely because both contain bytes, and are not implemented by M14.
+
+`SnippetEntry` remains the only Snippet aggregate, Library record, repository identity, and trigger owner. The approved target union is:
+
+```ts
+type SnippetContent =
+  | PlainSnippetContent
+  | RichSnippetContent
+  | ImageSnippetContent;
+
+interface ImageSnippetContent {
+  kind: 'image';
+  assetId: string;
+}
+```
+
+The exact implementation naming must follow existing conventions. The image Blob remains only in `SnippetAsset`; Blob, base64, filenames, and storage metadata never enter `SnippetContent`. No second top-level Image Snippet table, Library, repository, trigger parser, or keyboard command is approved.
+
+Rich lists use the smallest non-recursive block:
+
+```ts
+interface RichSnippetList {
+  type: 'list';
+  listType: 'unordered' | 'ordered';
+  items: readonly RichSnippetListItem[];
+}
+
+interface RichSnippetListItem {
+  children: readonly RichSnippetInline[];
+}
+```
+
+List items reuse the existing ordered text/link inline nodes and their explicit bold/italic marks. Nested lists, tables, task lists, arbitrary HTML, custom CSS, and embeds are prohibited. Plain projection preserves item and inline order. Unordered items use `- `; ordered items use one-based `${index}. `; items are joined by `\n`; and the list remains one Rich block separated from adjacent blocks by the existing exact `\n\n` boundary.
+
+An Image Snippet has no truthful text payload. Its deterministic text projection is the empty string, and text-only Retrieval and Prompt Builder consumers exclude Image Snippets rather than inserting `[Image]`, an asset ID, or a filename. This empty compatibility projection is never a delivery representation.
+
+### Image Ownership and Authoring
+
+One Image Snippet owns and references exactly one `SnippetAsset`; that asset belongs to the same Snippet and no additional owned asset may exist. Existing 5 MiB per-asset and 20 MiB per-Snippet and 40 MiB project/profile limits remain. PNG, JPEG, and WebP validation, opaque Blob storage, ownership checks, orphan rejection, atomic Save/update/delete, and rollback reuse M14-E unchanged.
+
+The Image Snippet editor is separate from the Rich editor. New Snippet creation exposes Plain Snippet, Rich Snippet, and Image Snippet choices while retaining Plain as the default. Image authoring provides Title, Trigger, existing tags/metadata, one labelled paste/select target, local preview, replace, remove-before-Save, Save, Cancel, reopen, and the existing Delete Snippet workflow. Save is disabled while an Image Snippet draft has no image; a saved Image Snippet cannot persist with zero or multiple assets. Asset ID, Blob, base64, and storage implementation are never user-facing.
+
+Pasting into the extension-owned Image Snippet authoring surface uses the user-initiated paste event's `clipboardData`; it does not require clipboard read permission. Selecting from disk uses a labelled file input. Both paths validate before persistence and persist only through the existing atomic aggregate transaction.
+
+### Legacy Rich Local-Image Compatibility
+
+M14-E Rich local-image blocks remain a frozen legacy-compatible content shape. They remain parseable, preservable, importable through Backup v4, reopenable without destructive mutation, and fail-closed under Decision 38. No new Rich local-image block can be authored. The compatibility UI may identify that legacy image content is preserved, but it must not expose normal Rich image manipulation or imply current delivery.
+
+There is no automatic migration. A later M14-H implementation may offer an explicit, user-confirmed conversion only when a legacy Rich record has exactly one block, that block is one local-image block, the referenced asset is valid and owned by the same Snippet, and the Snippet owns no other asset. Empty paragraphs, references, text, lists, additional image blocks, missing/foreign assets, or any mixed content make conversion ineligible. Eligible conversion preserves Snippet identity, metadata, trigger, timestamps according to normal update semantics, and the same owned asset. Mixed Rich text/image records remain legacy Rich data indefinitely unless a separately approved migration preserves their complete semantics.
+
+### Persistence and Backup Evolution
+
+Dexie v5 remains the physical schema. `snippetEntries.content` is stored as project-owned structured JSON and is not indexed by discriminant or block shape, so adding list blocks and `ImageSnippetContent` requires no store or index change and does not justify Dexie v6. Historical v1-v5 declarations remain unchanged. A future physical index/store requirement must receive its own architecture review.
+
+Backup v4 is frozen and remains importable exactly as implemented. It cannot faithfully represent list blocks or the new top-level image discriminant, so Backup Format v5 is required. V5 remains one strict application-owned JSON envelope, owns dedicated exact v5 asset DTOs with the same byte/metadata semantics as v4, and retains the 96 MiB guard unless implementation evidence requires a separately approved tightening. Its exact version-owned content DTOs add lists and `ImageSnippetContent`, and restore Knowledge, Snippets, Settings, and assets atomically. V1 and v2 map strings to Plain content; v3 maps its exact Plain/Rich shapes; v4 maps its exact Plain/Rich and legacy local-image shapes without conversion; v5 round-trips Plain, text-only Rich with lists, legacy Rich local-image compatibility data, Image Snippets, and assets.
+
+M14-G introduces the list model, the minimal `ImageSnippetContent` public/domain discriminant needed to freeze one complete v5 contract, and Backup v5 together. It does not add Image Snippet authoring or delivery. This deliberate contract-only sequencing prevents a list-only Backup v5 immediately followed by an image-only Backup v6. Until M14-H creates Image Snippets through normal UI, the new discriminant remains protected by domain, backup, graph, and catalog validation.
+
+### Typed Trigger and Image Delivery Boundary
+
+Image Snippets reuse M13 trigger syntax, uniqueness, catalog publication barriers, frame ports, epochs/revisions, and bounded activation. The future catalog becomes a discriminated descriptor boundary:
+
+```ts
+type TriggerCatalogEntry =
+  | {
+      kind: 'text';
+      trigger: string;
+      snippetId: string;
+      plainText: string;
+    }
+  | {
+      kind: 'image';
+      trigger: string;
+      snippetId: string;
+    };
+```
+
+The exact field names remain an implementation detail. An image entry carries no Blob, base64, asset ID, filename, or continuously replicated binary. On activation, the content script sends the minimal Snippet/request identity to the service-worker delivery coordinator. The coordinator reloads the current Snippet and its one owned asset from Dexie on demand, revalidates catalog/request freshness and ownership, and sends only that requested Blob to the clipboard transport. M13-B.1 invalidation and publication guarantees remain mandatory.
+
+Before M14-I implements typed delivery, Image Snippets are omitted from the current plain catalog by a Decision 39 transitional guard. This is separate from Decision 38, which continues to govern legacy Rich local-image records. Unknown-trigger behavior preserves normal typing in both cases.
+
+Image delivery v1 is clipboard preparation followed by trusted user paste:
+
+```text
+activate Image Snippet trigger
+-> request and validate the owned image on demand
+-> prepare and successfully write an image to the system clipboard
+-> revalidate and remove only the unchanged trigger activation range
+-> show "Image copied — press Ctrl+V"
+-> user presses real Ctrl+V
+-> destination chooses inline/attachment/message behavior
+```
+
+The extension does not synthesize paste, fake keyboard input, reverse-engineer upload controls, or promise that a destination inserts or sends the image. It reports copy success, not destination delivery.
+
+Ordinary Space is allowed while the asynchronous copy is pending. After confirmed clipboard success, compare-and-swap cleanup may remove exactly the unchanged canonical trigger plus its activation U+0020 and collapse the caret at the start of the removed range. It leaves no trailing space or placeholder. If the editor root, exact text/range, selection, request identity, epoch, or revision changed, the image remains copied but user text is untouched and feedback reports that cleanup was skipped. Permission denial, asset/serialization/offscreen/write failure, or stale state leaves the trigger and surrounding editor content untouched and reports no successful delivery.
+
+### Verified Clipboard Platform Boundary
+
+The platform boundary was rechecked on 2026-08-09 against primary documentation:
+
+- Chrome documents `clipboardWrite` as allowing copy/cut through the web Clipboard API and displaying the warning "Modify data you copy and paste." `clipboardRead` is not approved. See [Chrome extension permissions](https://developer.chrome.com/docs/extensions/reference/permissions-list).
+- Chrome documents runtime optional permission requests, recommends optional permissions for optional features, and lists the permissions that cannot be optional; `clipboardWrite` and `offscreen` are not in that exception list. Permission requests must originate from a user gesture. See [`chrome.permissions`](https://developer.chrome.com/docs/extensions/reference/api/permissions).
+- MV3 service workers have no DOM. Chrome's Offscreen API is available in Chrome 109+, requires the `offscreen` manifest permission, uses one packaged static document, exposes only `chrome.runtime` from extension APIs, and explicitly provides the `CLIPBOARD` reason. See [`chrome.offscreen`](https://developer.chrome.com/docs/extensions/reference/api/offscreen).
+- The web Clipboard API writes `ClipboardItem` values in a secure document context. PNG is the mandatory/common portable image representation; JPEG and WebP are not a baseline clipboard-write guarantee. See [Clipboard API](https://www.w3.org/TR/clipboard-apis/#mandatory-data-types) and [MDN `Clipboard.write()`](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write).
+- Chromium writing requires transient activation or granted clipboard-write capability; extension documentation states that the `clipboardWrite` extension permission removes the transient-activation requirement. See [MDN Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [MDN extension clipboard guidance](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Interact_with_the_clipboard).
+
+The approved implementation direction is an explicit Settings/options enable action that explains and requests optional `clipboardWrite` and `offscreen` from a user gesture. WXT should express these only as generated MV3 `optional_permissions`; M14-F.1 changes no manifest. M14-I must prove in the minimum supported Chrome that WXT preserves both optional declarations, runtime grant makes `chrome.offscreen` usable without extension reload, a service-worker request can create/message/close the single packaged offscreen document, and granted `clipboardWrite` permits the offscreen write. If optional `offscreen` fails that proof, implementation stops for a focused architecture correction; it must not silently promote clipboard access or add clipboard read.
+
+The clipboard transport normalizes every stored PNG/JPEG/WebP asset to a validated `image/png` `ClipboardItem` in the offscreen document. Direct JPEG/WebP clipboard types are not assumed. M14-I must prove decoding, PNG conversion, transparency/orientation behavior, `ClipboardItem.supports('image/png')`, destination paste, memory bounds, and decoded-pixel safety in real Chrome. A decode/conversion or support failure preserves the trigger. The current 5 MiB encoded-byte limit is not by itself proof against excessive decoded dimensions, so M14-I must define and test a decoded-pixel guard before accepting transport.
+
+### Revised Milestone Sequence and Security
+
+- **M14-F.1 — Snippet Image Product Boundary Architecture Correction:** documentation only; cancels the former M14-F before implementation.
+- **M14-G — Rich Snippet Structured Lists and Backup v5 Foundation:** adds unordered/ordered lists, the minimal Image Snippet content contract needed for one Backup v5 transition, deterministic projections, strict Backup v5, and compatibility coverage; no Image Snippet UI or delivery.
+- **M14-H — Image Snippet Domain Completion and Authoring:** enforces exactly one asset, provides paste/select/preview/replace/remove-before-Save/reopen flows, supports explicit eligible legacy conversion, and keeps Image triggers excluded until M14-I.
+- **M14-I — Typed Trigger Delivery Planner and Clipboard Image Delivery:** adds typed catalog descriptors, on-demand Blob retrieval, optional permission UX, offscreen PNG transport, compare-and-swap cleanup, truthful feedback, and native-paste validation.
+- **M14-J — Rich Text Delivery and Destination Capability Validation:** delivers only paragraphs, marks, links, and lists through proven direct or clipboard-assisted text/HTML strategies and records Crisp/Intercom evidence. It has no normal Rich image delivery target.
+
+### Architecture Debt Classification
+
+#### Keep
+
+`SnippetAsset`, Blob persistence, MIME/signature/size validation, Dexie `snippetAssets`, the asset repository, atomic Snippet/asset transactions, Backup v4 import, base64 utilities, and ownership validation remain current infrastructure.
+
+#### Repurpose
+
+Asset graph validation, draft image ingestion, local preview lifecycle, and atomic replacement support the exactly-one Image Snippet workflow instead of inline Rich-image authoring.
+
+#### Legacy Compatibility Only
+
+Rich local-image blocks, their Backup v4 DTO/parser path, preservation UI, and Decision 38 catalog exclusion remain only to protect historical/imported data. They receive no new normal authoring or Rich delivery capability.
+
+#### Remove Later Only If Safe
+
+Potentially unreachable Rich-image authoring/rendering helpers may be removed only in a future implementation task after reference analysis, backup/import review, and regression proof. No architecture-only deletion is approved, and any retained unreachable path must have an explicit cleanup backlog item rather than becoming hidden debt.
+
+Image Snippet bytes remain local, are copied only after explicit trigger activation with the capability enabled, and are never uploaded, remotely fetched, sent to providers, included in telemetry/logs, page-scraped, or placed in every frame. No clipboard read, arbitrary HTML persistence, destination upload integration, shared asset library, cloud image hosting, or synthetic paste is approved.
+
+## Decision 40: Future Toolbar Action Opens Global Workspace Side Panel
+
+The current implementation remains unchanged: the generated action declares `default_popup: popup.html`; that popup's Open Workspace action opens the global Side Panel, and Open Libraries opens `options.html` in a normal browser tab. Decision 26 and the M9/M11 records remain authoritative history for that implemented flow.
+
+The approved future target is different. Clicking the extension toolbar action must open or show the existing global AI Support Workspace Side Panel directly, without an intermediate popup, using Chrome's supported `chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })` behavior documented by the [Chrome Side Panel API](https://developer.chrome.com/docs/extensions/reference/api/sidePanel). The Side Panel will provide a Library action that opens the existing full options/Library page in a normal browser tab. The full Knowledge, Snippets, Settings, Import / Export, and future management experience remains in the options page; this decision does not move full Library management into the panel or turn the panel into a second options shell.
+
+The existing `sidePanel` permission is expected to be sufficient. This decision adds no permission, manifest change, source change, test change, configuration change, or popup removal now. When the requirement is implemented, the task must inspect WXT's generated manifest and action configuration, retire the default popup/`action.default_popup` cleanly so the toolbar has no competing behaviors, preserve `side_panel.default_path`, and verify normal options-page navigation. The `capture-selection-to-workspace` keyboard shortcut and its established open/activate behavior remain unchanged.
+
+Acceptance requires real Chrome proof that a toolbar-action click opens or shows the global Workspace Side Panel directly with no intermediate popup; the panel's Library action opens the existing options/Library page in a normal browser tab; full management stays in options; the keyboard shortcut remains unchanged; no broader permission appears; and the generated manifest/action wiring contains no competing default-popup behavior.
+
+This is an unassigned future Workspace Shell/extension-action UX item. It is not M14-G, M14-H, M14-I, or M14-J, does not interrupt the Snippet roadmap, and does not alter Decision 39's product boundary or milestone sequence.
 
 ## Rationale
 

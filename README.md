@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M14 — Rich Snippet Templates is current. M14-E implements validated Snippet-owned local image assets, atomic Dexie v5 persistence, strict Backup v4, and Decision 38's temporary catalog exclusion. Unified image authoring, clipboard-assisted delivery, and Rich browser rendering remain M14-F through M14-H. M15 and M16 remain separate.
+Milestones 9 — Output Workspace, 10 — Keyboard Shortcut, 11 — Settings, 12 — Import / Export, and 13 — Snippet Trigger Expansion v1 are complete. M14 — Rich Snippet Templates / Snippet Delivery is current. M14-E at `1828f09` implements validated Snippet-owned local assets, atomic Dexie v5 persistence, strict Backup v4, and Decision 38 compatibility safety. Decision 39 cancels embedded local-image Rich authoring: Rich Snippets target portable formatted text and lists, while Image Snippets will be separate one-image Snippets using the same Library and trigger system. M15 Context Images remain separate generation inputs.
 
 ## Technology Stack
 
@@ -31,4 +31,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-Create M14-F — Unified Rich Editor Inline Image Authoring. Until M14-G, Snippets containing local-image blocks are omitted from the trigger catalog; no clipboard permission or transport exists.
+After M14-F.1 Principal approval, create M14-G — Rich Snippet Structured Lists and Backup v5 Foundation. Image Snippet authoring follows in M14-H, typed clipboard/native-paste image delivery in M14-I, and Rich text/list destination validation in M14-J. No clipboard permission or transport exists yet.

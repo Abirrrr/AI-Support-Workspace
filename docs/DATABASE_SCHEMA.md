@@ -60,6 +60,17 @@ interface RichSnippetLocalImageBlock {
 
 The block records document placement while a separately owned `SnippetAsset` stores the image bytes. The runtime database is Dexie v5 with `snippetAssets`, and current backup export is Format v4. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
 
+Decision 39 makes the local-image Rich block a legacy compatibility shape and approves the future target union:
+
+```ts
+type SnippetContent =
+  | PlainSnippetContent
+  | RichSnippetContent
+  | { kind: 'image'; assetId: string };
+```
+
+Future Rich content adds a non-recursive list block with `listType: 'unordered' | 'ordered'` and ordered items containing the existing text/link inline nodes and bold/italic booleans. New Rich authoring cannot create local-image blocks. One Image Snippet references exactly one same-owner `SnippetAsset` and owns no additional asset; bytes remain outside `SnippetContent`.
+
 ### Settings
 
 Represents the single local, extension-wide Settings aggregate approved for Milestone 11.
@@ -230,6 +241,8 @@ The local image block added to current rich content is exact project-owned data:
 
 Snippet Save uses one read-write transaction over `snippetEntries` and `snippetAssets` to create/update the Snippet, add validated draft assets, and delete removed owned assets. Snippet deletion removes the record and all owned assets in one transaction. Cancel performs no persistence mutation. Failure rolls back every participating write. Limits are 5 MiB (`5,242,880` bytes) per asset, 20 MiB (`20,971,520` bytes) per Snippet, and 40 MiB (`41,943,040` bytes) across the local project/profile; these are application validation limits rather than quota guesses.
 
+Decision 39 reuses this exact physical store for Image Snippets. Adding the `kind: 'image'` content discriminant and Rich list blocks changes only validated JSON stored inside the existing unindexed `content` field. No primary key, secondary index, compound index, or store shape changes, so Dexie remains version 5 and no v6 migration is approved. Existing legacy Rich local-image records remain unchanged. Application graph validation must distinguish the new exactly-one Image Snippet invariant from preservation of legacy Rich records.
+
 ## Record Identity
 
 - Record IDs are UUID strings generated with the browser-native `crypto.randomUUID()` API.
@@ -351,6 +364,7 @@ Milestone 3 validation passed all 13 persistence integration tests, including da
 - Version 2 adds only the singleton `settings` table, preserves the two version 1 stores and all their records, performs no Library transformation, creates no default record, and does not support rollback to version 1.
 - Version 3 adds only optional Snippet `trigger` data and unique index `&trigger`, preserves every version 2 record without generating triggers, and does not support rollback to version 2.
 - Version 4 changes only Snippet `content` from a string to canonical `SnippetContent`, preserves every other logical field and the version 3 indexes, adds no table, and does not support rollback to version 3.
+- Version 5 adds only `snippetAssets`, preserves every v4 record and declaration, and performs no content migration. Decision 39 list and Image Snippet discriminants remain valid within this physical version because they require no index/store change.
 
 ## Storage Approach
 
@@ -425,6 +439,20 @@ Assets export in `createdAt` ascending then `id` ascending order. V4 uses a 96 M
 
 Before any restore write, v4 validates exact keys, version, identity, timestamps, duplicate IDs/triggers/assets, asset limits, and the complete ownership graph. Every local image block must resolve to a same-owner asset; foreign, missing, unsupported, or unreferenced assets reject the whole backup. Import never downloads a legacy URL. Restore atomically replaces Knowledge, Snippets, Settings, and assets in one transaction with rollback on any failure. Export and restore remain one user-facing operation each, with deterministic ordering, metadata preview, and destructive acknowledgement.
 
+## Approved Milestone 14 Backup Format v5 Evolution
+
+Backup Format v4 is frozen and remains importable. It cannot faithfully encode the new Rich list block or top-level `ImageSnippetContent` discriminant, so Decision 39 requires Backup Format v5 rather than changing v4.
+
+V5 will retain the strict single-JSON envelope, exact version-owned DTOs, deterministic ordering, canonical base64 asset records, metadata preview, destructive acknowledgement, and atomic four-store restore. The 96 MiB serialized guard remains the planned limit unless implementation evidence requires a separately approved tightening. V5 Snippet DTOs will represent:
+
+- exact Plain content;
+- Rich paragraphs, marks, links, unordered/ordered lists, legacy URL references, and preserved legacy local-image blocks;
+- exact Image content containing only `kind: 'image'` and `assetId`.
+
+V5 graph validation requires each Image Snippet to reference exactly one asset owned by that same Snippet and prohibits any additional owned asset. Legacy Rich records continue using the frozen compatibility graph without automatic conversion. V1 and v2 strings continue mapping to Plain content; v3 continues mapping its exact Plain/Rich structures; and v4 continues mapping its exact Plain/Rich/local-image structures. New exports use v5 only after its implementation. Restore remains all-or-nothing across Knowledge, Snippets, Settings, and assets.
+
+M14-G will introduce the list model, minimal Image Snippet discriminant, and Backup v5 contract together. This avoids a list-only v5 immediately followed by an image-only v6 while keeping Image Snippet UI and clipboard delivery in later tasks.
+
 ## Future Capability Guidance
 
 ### Structured Knowledge
@@ -433,7 +461,7 @@ Knowledge should evolve beyond a single body-text field into structured troubles
 
 ### Richer Snippets
 
-M14 extends the M13 Snippet and trigger foundation with the Decision 36 structured model and Decision 37 local-image revision. M14-E implements locally owned PNG/JPEG/WebP assets, Dexie v5, and Backup v4. Variables, categories, usage statistics, shared assets, arbitrary attachments, and rich-to-plain conversion remain future decisions.
+M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local asset infrastructure, and Decision 39's split between text-only Rich Snippets and one-image Image Snippets. M14-E implements locally owned PNG/JPEG/WebP assets, Dexie v5, and Backup v4. M14-G will add lists and Backup v5; M14-H will add Image Snippet authoring. Variables, categories, usage statistics, shared assets, arbitrary attachments, and rich-to-plain conversion remain future decisions.
 
 ### Prompt Templates
 
@@ -445,4 +473,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 13 are complete. M14-E implements Dexie v5 and Backup v4; valid v1, v2, and v3 imports remain supported and restore an empty asset store. Retrieval and Prompt Builder still consume deterministic plain projection. Under Decision 38, only local-image-containing Snippets are omitted from the transient catalog until M14-G. The next action after review is M14-F — Unified Rich Editor Inline Image Authoring.
+Milestones 3 through 13 are complete. M14-E is complete at `1828f09` with Dexie v5 and Backup v4; valid v1, v2, and v3 imports remain supported and restore an empty asset store. Decision 39 requires no Dexie v6, freezes v4, and plans one Backup v5 for lists plus Image Snippets. Decision 38 continues to exclude legacy Rich local-image records. M14-F inline Rich-image authoring is cancelled before implementation; the next engineering action after M14-F.1 review is M14-G — Rich Snippet Structured Lists and Backup v5 Foundation.

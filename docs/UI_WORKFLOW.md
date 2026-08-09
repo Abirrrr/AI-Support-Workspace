@@ -79,7 +79,8 @@ Save as Snippet (optional)
 - The generated response should be editable before it is used or shared.
 - The user may save valuable content as knowledge or as a snippet for future reuse.
 - Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
-- The popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries continues to open the options page, where Knowledge and Snippet CRUD remain.
+- Current implementation: the popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries opens the options page in a normal browser tab, where Knowledge and Snippet CRUD remain.
+- Approved future target: clicking the extension toolbar action opens or shows the existing global Workspace Side Panel directly, with no intermediate popup. A Library action in the panel opens the existing full options/Library page in a normal browser tab; full Knowledge, Snippets, Settings, Import / Export, and future management stay in options.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
 ## 4. Knowledge Library Workflow
@@ -133,11 +134,11 @@ Create Snippet
 
 ↓
 
-Choose Plain Content or Explicitly Convert to Rich, then Add Content, Organization Details, and Optional Trigger
+Choose Plain Snippet, Rich Snippet, or Image Snippet, then Add Type-Appropriate Content, Organization Details, and Optional Trigger
 
 ↓
 
-Save Snippet
+Save Snippet Atomically
 
 ↓
 
@@ -159,13 +160,16 @@ Expand Snippet into Response
 - Existing and new Snippets default to the current fast plain-text editor. The existing Snippet Library remains the only surface; there is no Rich Templates page.
 - An existing plain Snippet may expose `Convert to rich template`. Conversion is explicit, preserves readable content, and does not change the Snippet's identity, metadata, trigger, or CRUD semantics. Ordinary editing never silently changes its content kind.
 - A Rich Snippet remains rich. M14 v1 does not provide a lossy rich-to-plain toggle.
-- M14-C Rich authoring currently uses extension-owned structured form state for paragraphs, bold, italic, links, labelled image references, and block order. Editor HTML is not persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
+- M14-C Rich authoring currently uses extension-owned structured form state for paragraphs, bold, italic, links, labelled image references, and block order. M14-G adds first-class unordered and ordered lists whose items reuse supported inline marks/links. Editor HTML is never persisted or trusted. Ordering is keyboard-accessible and does not require drag-and-drop.
 - Plain-to-Rich conversion changes only the current draft until Save. Cancel restores the stored Plain record unchanged; Save updates the same Snippet and preserves its title, tags, trigger, identity, and normal repository semantics. A lightweight confirmation explains that Rich-to-Plain conversion is unavailable after saving.
 - Paragraph authoring uses ordered text/link segments with explicit bold and italic controls. Link removal retains its readable text. Link and image-reference URLs show focused protocol feedback and remain subject to domain validation.
-- The current Label/URL Image Reference controls are transitional. Existing saved references remain editable/removable and are never fetched or automatically converted.
-- The target M14-F experience is one normal Rich document editor. With the caret at the desired position, the user pastes a PNG/JPEG/WebP through the editor's normal user-initiated paste event or chooses Insert Image from local disk; the actual locally owned image appears inline between surrounding paragraphs. This paste handling requires no `clipboardRead`. The user never needs a public URL or asset ID.
-- New images remain draft-only with local previews until Save. Cancel discards new bytes; removing a persisted image does not delete it until Save; Save updates content and assets atomically. Preview object URLs are temporary and revoked explicitly. Drag/drop remains optional later.
-- New local image blocks reference Snippet-owned assets; bytes do not live in paragraph text. Limits and malformed/unsupported feedback are explicit. Variables and dynamic customer fields remain unavailable.
+- Existing Label/URL Image References remain legacy Rich controls and are never fetched or automatically converted. Existing M14-E Rich local-image blocks remain visible preservation-only compatibility data with no normal move/remove/preview/edit controls. New embedded local-image Rich authoring is cancelled.
+- An Image Snippet opens a dedicated image-only editor, never the Rich editor. It shows Title, Trigger, existing tags/metadata, one labelled paste/select target, local preview, Replace, Remove before Save, Save, Cancel, reopen, and the existing Delete Snippet action.
+- Pasting one PNG/JPEG/WebP into the extension-owned editor uses user-initiated paste event data and requires no `clipboardRead`; selecting from disk uses a labelled file input. Validation errors are accessible and focused.
+- A new Image Snippet cannot Save without exactly one valid image. Removing a new draft clears its preview and disables Save; replacing a persisted image occurs only through successful atomic Save. Cancel preserves stored data. Object URLs are revoked on replacement, removal, cancel, and unmount.
+- Users never see asset IDs, Blob/base64, binary storage terms, or a URL requirement. There is no global Image Library, image collection, shared asset picker, or "Use as Context" action.
+- Legacy Rich content is never converted automatically. A future explicit conversion may appear only for a Rich record containing exactly one valid local-image block and no other block/asset; mixed Rich records remain preserved and fail-closed.
+- Variables and dynamic customer fields remain unavailable.
 
 ## 6. Snippet Trigger Expansion Workflow
 
@@ -195,19 +199,19 @@ Caret Rests after the Inserted Space
 - The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
 - A match replaces exactly the trigger range, inserts the saved content as plain text plus the intended single space, preserves surrounding content and line breaks, emits the normal bubbling composed host `input` notification without synthesizing `change`, and places the caret after the inserted space.
 - `textarea` always receives the deterministic plain projection. A supported single-line input expands only when that final projection contains no `\r` or `\n`; otherwise its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit.
-- Future direct Rich rendering may create only proven-safe target-owned text, paragraph, bold, italic, and validated-link nodes. It never parses stored HTML or automatically fetches a reference URL. Image delivery is capability/evidence-driven.
+- Future direct Rich rendering may create only proven-safe target-owned text, paragraph, bold, italic, validated-link, and list nodes. It never parses stored HTML or automatically fetches a reference URL. Image Snippet delivery is a separate clipboard/native-paste workflow.
 - A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
 - Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port`. Its transient cache is enabled only while the port is connected and holds a complete validated current-epoch snapshot; ordered invalidation and complete-snapshot messages use that port. Disconnection immediately clears and disables the cache, so no former snapshot can expand. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and stale epochs are rejected.
 - Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame and each clears immediately. Success publishes one rebuilt complete snapshot; persistence failure republishes the unchanged snapshot; publication failure leaves affected frames disabled until reconnect or successful refresh. Content scripts never open Dexie, and no persistent browser-storage catalog, durable queue, polling loop, or per-keystroke worker lookup is created.
 - Intercom, Crisp, generic textarea, and generic contenteditable are required real-world validation targets for the revised delivery architecture. Destination-specific adaptation may be added only behind capability resolution when concrete browser evidence justifies it.
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
 - Trigger expansion reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Current expansion uses no clipboard; future clipboard fallback is explicit opt-in.
-- For rich content, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, and renders an image reference as `[Image: label] url`. No block disappears.
+- For Rich text, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, renders unordered/ordered items with `- ` or one-based numeric prefixes, and preserves legacy image-reference projection. Image Snippets are excluded from text consumers rather than represented by a placeholder.
 
 ### Planned Destination Delivery Workflow
 
 ```text
-Type Trigger + Space
+Text/Rich Trigger + Space
 → Delivery Planner checks behavioral capabilities
 ├─ reliable direct target → insert directly and complete
 ├─ opted-in clipboard target → write clipboard successfully
@@ -217,10 +221,21 @@ Type Trigger + Space
 └─ unavailable/unsupported → preserve input and explain limitation
 ```
 
+```text
+Image Trigger + Space
+-> request and validate the one owned image on demand
+-> prepare and successfully write PNG to the clipboard
+-> safely remove only the unchanged trigger/activation space
+-> show "Image copied — press Ctrl+V"
+-> user performs real Ctrl+V
+-> destination chooses inline, attachment, or message behavior
+```
+
 - Clipboard assistance is real copy plus user native paste, never a synthetic paste event and never a claim that insertion has already occurred.
-- Clipboard capability is enabled globally through an explicit future Settings/options action. Permission denial, revocation, offscreen failure, or write failure preserves normal typing and the trigger. The application never requests clipboard permission silently from trigger input.
-- Because the write is asynchronous, ordinary Space proceeds. Trigger cleanup occurs only after confirmed clipboard success and exact editor/range/catalog/request revalidation; otherwise typed content remains and the copy result reports that cleanup did not occur.
-- `text/plain` always uses deterministic projection. Safe `text/html` contains only validated paragraphs, text, bold/italic, and links. Local images are not silently omitted: until ordered clipboard image delivery is proven, the result is unsupported or explicitly degraded.
+- Clipboard capability is enabled through an explanatory future Settings/options action that requests optional `clipboardWrite` and `offscreen`. Permission denial, revocation, offscreen failure, conversion failure, or write failure preserves normal typing and the trigger. Trigger input never silently requests permission, and `clipboardRead` is never requested.
+- Because the write is asynchronous, ordinary Space proceeds. Cleanup occurs only after confirmed copy and exact editor/range/catalog/request revalidation. Image cleanup removes the trigger and activation U+0020, leaves no placeholder or trailing space, and collapses the caret at the removed range start. Changed state leaves user text untouched while reporting copy accurately.
+- Text `text/plain` uses deterministic projection. Safe Rich `text/html` contains only validated paragraphs, text, bold/italic, links, and lists. Image delivery is a separate image-only PNG clipboard item; it never attempts ordered text-plus-image placement.
+- Blob/base64/asset IDs are not placed in frame catalog snapshots. The service worker retrieves the requested Image Snippet asset from Dexie only after activation and revalidates ownership before invoking the offscreen transport.
 - Current Crisp evidence is limited but actionable: ordinary direct Plain insertion fails in the tested Crisp editor, the same Snippet succeeds in another Rich editor, the speculative generic patch was removed, and manual native paste works. No Crisp-specific runtime is implemented or promised by M14-D.
 
 ## 7. Keyboard Shortcut Workflow
@@ -343,7 +358,7 @@ Copy
 
 ## 9. Settings Workflow
 
-Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. The popup remains unchanged: Open Workspace opens the global Side Panel, and Open Libraries opens the existing options page, where local navigation can reach Settings.
+Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. In the current implementation, the popup's Open Workspace action opens the global Side Panel and Open Libraries opens the existing options page, where local navigation can reach Settings. The approved future toolbar action opens the Side Panel directly; its Library action will retain this options-page ownership rather than moving Settings into the panel.
 
 ```text
 Open Options Page
@@ -462,11 +477,25 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Rich Snippet Templates:** Decision 36 defines the implemented structured foundation; Decision 37 revises image ownership and delivery. M14-B implements Dexie v4/Backup v3, M14-C implements structured authoring, and M14-D defines the target continuous editor, local assets, Dexie v5/Backup v4, and capability-based direct/clipboard delivery. M14-E is next, followed by M14-F through M14-H.
+- **M14 — Snippet Templates and Delivery:** M14-E implements reusable local asset infrastructure at `1828f09`; Decision 39 cancels inline Rich-image authoring and separates portable text-only Rich Snippets from one-image Image Snippets. The revised sequence is M14-G lists/Backup v5, M14-H Image Snippet authoring, M14-I typed clipboard image delivery, and M14-J Rich text/list destination delivery.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
-Context images provide transient visual information to generation. Snippet images are reusable Library-owned response content intended for editor expansion. Their domain ownership must remain separate.
+### Unassigned Future Workspace Shell Workflow
+
+```text
+Click extension toolbar action
+↓
+Open or show global AI Support Workspace Side Panel directly
+↓
+Use daily Workspace, or choose Library
+↓
+Open existing full options/Library page in a normal browser tab
+```
+
+This future workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest and retire the default popup without competing toolbar behaviors. It is not assigned to M14-G, M14-H, M14-I, or M14-J and does not interrupt the Snippet roadmap.
+
+Context images provide transient visual information to generation. Image Snippets are durable, reusable, one-image output shortcuts copied for destination-native paste. Their domain ownership, lifecycle, and privacy rules remain separate; no "Use as Context" bridge is approved.
 
 The following potential workflows are not part of the current core user experience definition and require their own approved scope before implementation:
 
