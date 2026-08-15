@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### M14-J.7 — M14-J Milestone Closeout & Git Checkpoint Preparation
+
+- Closed M14-J as COMPLETE and REAL-BROWSER VALIDATED after Principal validation of already-open Intercom and Crisp pages across extension reload without webpage refresh. Activation, exact cleanup, copied notice, retained focus, manual native paste, and duplicate safety passed in both destinations; repeated extension reloads also produced no duplicate activation, notice, or clipboard behavior.
+- Preserved the complete M14-J result: controlled destination fixtures; M14-J.2 structural contenteditable line/block boundaries; M14-J.3 generic Shadow-DOM retargeted editor resolution; M14-J.4 safe rich-inline hard-break serialization to `<br>`; M14-J.5's explicit production-excluded real-record diagnostic; Crisp Text/Image; Intercom Text/normal list/Image; and M14-J.6 always-on lifecycle recovery.
+- Preserved the correct list conclusion: the first `;bullet` record was an invalid two-item test fixture. The corrected three-item record passes persistence, exact serializer output, delivery-plan equality, and normal Intercom list paste. The Intercom bullet-after-Shift+Enter edge remains accepted, low priority, and non-blocking.
+- Recorded perceived Image Snippet latency as a non-blocking future performance investigation. Crisp and Intercom Image functionality remains PASS, and latency does not reopen M14-J or block M14-K.
+- Confirmed final Decision 44 exact persistent HTTP/HTTPS host access and unchanged static navigation injection. Decisions 42/43, Text and Windows native Image clipboard architecture, native companion, Dexie v5, Backup v5, manual `Ctrl+V`, and the absence of `tabs`, `file://`, `clipboardRead`, automatic paste, AutoHotkey, and `SendInput` remain unchanged.
+- Completed the Documentation Impact Review across project state, architecture, decisions, destination evidence, testing, workflow, roadmap, backlog, changelog, and README. M14-K Automatic Paste is exact next and NOT STARTED; the combined unstaged M14-J.6 implementation/tests/configuration plus M14-J.7 documentation awaits Principal Git review and an authorized checkpoint.
+
+### M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability
+
+- Preserved the exact HTTP/HTTPS, all-frame static content-script registration for normal navigation and added bounded service-worker recovery for eligible already-open tabs on install, extension update/unpacked reload, Chrome update, and browser startup. Recovery resolves the current packaged content-script files from the generated manifest, skips discarded tabs, limits concurrent tab injections to four, coalesces overlapping cycles, and isolates quiet per-tab failures.
+- Added one versioned frame-global runtime registry. Re-execution reconnects the current runtime without duplicating listeners; an obsolete or unrecoverable context is disposed and replaced one-for-one. Focus and the next qualifying `beforeinput` recover a disconnected catalog client, require a complete current-epoch snapshot, and retain normal typing on failure.
+- Added lifecycle, idempotency, concurrency, partial-failure, worker-reconnect, current-epoch, and generated-output regressions. Automated validation passes. Subsequent Principal real-Chrome validation confirms no-refresh Intercom/Crisp recovery and repeated-reload duplicate safety; M14-J.7 records milestone closeout.
+- Added Decision 44: persistent host access is exactly `http://*/*` and `https://*/*`. `activeTab` remains for the M10 gesture workflow but is not recovery authority. No `tabs`, `<all_urls>`, `file://`, `clipboardRead`, polling, alarms, artificial keepalive, page inspection, logging, destination branch, native change, automatic paste, AutoHotkey, or `SendInput` was introduced.
+- Preserved M14-J.1–J.5.1 at checkpoint `797a68a`, Decisions 42/43, Text and Windows native Image delivery, the production-excluded diagnostic, Dexie v5, Backup v5, manual native `Ctrl+V`, and the known low-priority Intercom bullet-after-Shift+Enter limitation. M14-K and M15 remain not started.
+
 ### M14-J.5.1 — Destination Validation Documentation Checkpoint
 
 - Recorded the completed live M14-J.5 evidence. The first `;bullet` diagnostic contained only two persisted items—`1st line`, then one item containing both remaining lines—and the serializer/planner faithfully matched that malformed structure. The Principal classified it as an invalid/incorrect test fixture, not a product authoring or persistence defect.

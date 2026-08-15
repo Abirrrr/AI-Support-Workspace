@@ -190,6 +190,57 @@ describe('typed trigger catalog privacy boundary', () => {
     for (const listener of disconnects.listeners) listener();
     expect(client.cache.isEnabled).toBe(false);
   });
+
+  it('reconnects once after worker disconnect and adopts the new epoch snapshot', () => {
+    const firstMessages = new EventHub<(message: unknown) => void>();
+    const firstDisconnects = new EventHub<() => void>();
+    const secondMessages = new EventHub<(message: unknown) => void>();
+    const secondDisconnects = new EventHub<() => void>();
+    const firstPost = vi.fn();
+    const secondPost = vi.fn();
+    const runtime = {
+      connect: vi
+        .fn()
+        .mockReturnValueOnce({
+          onMessage: firstMessages,
+          onDisconnect: firstDisconnects,
+          postMessage: firstPost,
+        })
+        .mockReturnValueOnce({
+          onMessage: secondMessages,
+          onDisconnect: secondDisconnects,
+          postMessage: secondPost,
+        }),
+    };
+    const client = new FrameTriggerCatalogClient(runtime);
+    expect(client.connect()).toBe(true);
+    for (const listener of firstMessages.listeners) {
+      listener({
+        type: 'trigger-catalog-snapshot',
+        epoch: 'epoch-1',
+        revision: 4,
+        entries: [{ kind: 'text', trigger: ';old', snippetId: 'old' }],
+      });
+    }
+    for (const listener of firstDisconnects.listeners) listener();
+    expect(client.cache.isEnabled).toBe(false);
+
+    expect(client.connect()).toBe(true);
+    expect(client.connect()).toBe(true);
+    expect(runtime.connect).toHaveBeenCalledTimes(2);
+    expect(secondPost).toHaveBeenCalledOnce();
+    for (const listener of secondMessages.listeners) {
+      listener({
+        type: 'trigger-catalog-snapshot',
+        epoch: 'epoch-2',
+        revision: 0,
+        entries: [{ kind: 'image', trigger: ';new', snippetId: 'new' }],
+      });
+    }
+    expect(client.cache.identity).toEqual({ epoch: 'epoch-2', revision: 0 });
+    expect(client.cache.find(';old')).toBeUndefined();
+    expect(client.cache.find(';new')?.kind).toBe('image');
+  });
 });
 
 describe('catalog mutation publication barrier', () => {

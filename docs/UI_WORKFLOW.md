@@ -497,7 +497,23 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Authoring and Delivery:** M14-I is complete at `ebe915f`. M14-J.2 is real-Crisp Text PASS. M14-J.3 generically resolves the actual supported editor and internal caret from a trusted retargeted Shadow DOM `beforeinput` event while preserving the Space workflow, exact success-gated cleanup, and manual native `Ctrl+V`; real Intercom activation and ordinary rich Text pass. M14-J.4 preserves canonical direct list-item HTML and converts supported rich inline hard breaks to `<br>`. M14-J.5 proves the initial apparent list failure was an invalid two-item fixture; the corrected three-item record, delivery payload, and normal Intercom list paste pass. Crisp and Intercom Image paste pass. Intercom bullet triggering after Shift+Enter remains a known low-priority compatibility limitation. M14-J.6 lifecycle recovery is next, and M14-J is incomplete until it is done.
+- **M14 — Snippet Authoring and Delivery:** M14-J is complete and real-browser validated. M14-J.2 is real-Crisp Text PASS. M14-J.3 generically resolves the actual supported editor and internal caret from a trusted retargeted Shadow DOM `beforeinput` event; real Intercom activation and ordinary rich Text pass. M14-J.4 preserves canonical direct list-item HTML and converts supported rich inline hard breaks to `<br>`. M14-J.5 proves the initial apparent list failure was an invalid two-item fixture; the corrected three-item record, delivery payload, and normal Intercom list paste pass. Crisp and Intercom Image paste pass. M14-J.6 Intercom/Crisp no-refresh recovery and repeated-reload duplicate safety pass. Intercom bullet triggering after Shift+Enter remains a known low-priority limitation, and perceived Image latency is a non-blocking performance follow-up. Manual native `Ctrl+V` remains current behavior. M14-K Automatic Paste is next and not started.
+
+The lifecycle availability flow is:
+
+```text
+Install / update / unpacked reload / browser startup
+↓
+Query eligible loaded HTTP/HTTPS tabs
+↓
+Inject the current packaged static content script in all matching frames
+↓
+Per-frame idempotent bootstrap or safe one-for-one replacement
+↓
+Connect and accept a complete current-epoch trigger catalog snapshot
+```
+
+Normal navigation continues to use static content-script injection. The user should not need to refresh an already-open supported page after extension lifecycle changes. Chrome site-access controls remain authoritative; denied, restricted, protected, discarded, non-HTTP(S), and `file://` pages are not forced into availability. Recovery never pastes automatically and never inspects page text.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 

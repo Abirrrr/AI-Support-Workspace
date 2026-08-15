@@ -34,15 +34,15 @@ export class FrameTriggerCatalogClient {
     return this.port !== undefined;
   }
 
-  connect(): void {
-    if (this.port !== undefined) return;
+  connect(): boolean {
+    if (this.port !== undefined) return true;
 
     let port: FrameCatalogPort;
     try {
       port = this.runtime.connect({ name: TRIGGER_CATALOG_PORT_NAME });
     } catch {
       this.cache.disconnect();
-      return;
+      return false;
     }
 
     const messageListener: MessageListener = (message) => {
@@ -64,7 +64,9 @@ export class FrameTriggerCatalogClient {
     } catch {
       this.detach(port);
       this.cache.disconnect();
+      return false;
     }
+    return true;
   }
 
   disconnect(): void {

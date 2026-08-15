@@ -34,6 +34,13 @@ import {
   registerNativeClipboardCapability,
   type NativeClipboardCapabilityRuntime,
 } from './snippet-trigger/native-clipboard-capability';
+import {
+  ContentScriptLifecycleRecovery,
+  registerContentScriptLifecycleRecovery,
+  resolveStaticContentScriptFiles,
+  type ContentScriptRecoveryChromeApi,
+  type LifecycleRecoveryRuntime,
+} from './snippet-trigger/lifecycle-recovery';
 
 export default defineBackground(() => {
   const chromeApi = getWorkspaceCaptureChromeApi();
@@ -46,15 +53,34 @@ export default defineBackground(() => {
     globalThis as typeof globalThis & {
       chrome?: Partial<ClipboardExtensionApi> & {
         permissions?: NativeClipboardExtensionApi['permissions'];
+        scripting?: ContentScriptRecoveryChromeApi['scripting'];
+        tabs?: ContentScriptRecoveryChromeApi['tabs'];
         runtime?: TriggerCatalogCoordinatorRuntime &
           SnippetDeliveryRuntime &
           NativeClipboardCapabilityRuntime &
-          NativeClipboardExtensionApi['runtime'];
+          NativeClipboardExtensionApi['runtime'] &
+          LifecycleRecoveryRuntime;
       };
     }
   ).chrome;
   const runtime = extensionApi?.runtime;
   if (runtime !== undefined) {
+    const contentScriptFiles = resolveStaticContentScriptFiles(runtime);
+    const scripting = extensionApi?.scripting;
+    const tabs = extensionApi?.tabs;
+    if (
+      contentScriptFiles !== undefined &&
+      scripting !== undefined &&
+      tabs !== undefined
+    ) {
+      registerContentScriptLifecycleRecovery(
+        runtime,
+        new ContentScriptLifecycleRecovery(
+          { scripting, tabs },
+          contentScriptFiles,
+        ),
+      );
+    }
     const database = createDatabase();
     const repository = new DexieSnippetEntryRepository(database);
     const coordinator = new TriggerCatalogCoordinator(

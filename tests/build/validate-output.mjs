@@ -51,7 +51,10 @@ if (nativeDevelopmentMode) {
 } else {
   assert.equal('key' in manifest, false);
 }
-assert.deepEqual(manifest.host_permissions ?? [], ['http://localhost/*']);
+assert.deepEqual(manifest.host_permissions ?? [], [
+  'http://*/*',
+  'https://*/*',
+]);
 assert.deepEqual(manifest.side_panel, { default_path: 'sidepanel.html' });
 assert.equal('sidebar_action' in manifest, false);
 assert.deepEqual(manifest.commands, {
@@ -144,6 +147,10 @@ if (nativeDevelopmentMode) {
     new RegExp(nativeDevelopment.hostName),
   );
 }
+assert.match(serviceWorkerSource, /onInstalled/);
+assert.match(serviceWorkerSource, /onStartup/);
+assert.match(serviceWorkerSource, /executeScript/);
+assert.match(serviceWorkerSource, /content_scripts/);
 
 const offscreenHtml = await readFile(
   resolve(outputDirectory, offscreenPage),
@@ -184,6 +191,10 @@ assert.doesNotMatch(
   /chrome\.storage|localStorage|indexedDB|Dexie/,
 );
 assert.match(contentScriptSource, /sendMessage/);
+assert.match(
+  contentScriptSource,
+  /__aiSupportWorkspaceSnippetContentRuntimeV1/,
+);
 assert.doesNotMatch(contentScriptSource, /indexedDB|Dexie/);
 assert.doesNotMatch(
   contentScriptSource,

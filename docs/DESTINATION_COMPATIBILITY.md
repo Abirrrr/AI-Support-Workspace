@@ -2,9 +2,9 @@
 
 ## Current Validation State
 
-- Task: M14-J.5.1 — Destination Validation Documentation Checkpoint
+- Task: M14-J.7 — M14-J Milestone Closeout & Git Checkpoint Preparation
 - Date: 2026-08-15
-- Status: DESTINATION EVIDENCE SYNCHRONIZED / CRISP TEXT AND IMAGE PASS / INTERCOM TEXT, NORMAL BULLET LIST, AND IMAGE PASS / INTERCOM BULLET AFTER SHIFT+ENTER IS A KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION / M14-J.6 NEXT
+- Status: M14-J COMPLETE / REAL-BROWSER VALIDATED / CRISP AND INTERCOM NO-REFRESH RECOVERY PASS / REPEATED-RELOAD IDEMPOTENCY PASS
 - Clipboard architecture: unchanged from M14-I
 - Current insertion UX: manual native `Ctrl+V`
 
@@ -295,21 +295,55 @@ Existing regressions continue to cover textarea failure preservation, stale cont
 | Crisp Text — inline | PASS |
 | Crisp Text — after Enter | PASS |
 | Crisp Text — after Shift+Enter | PASS |
+| Crisp bullet/list Text — normal use | PASS |
 | Crisp Image | PASS |
+| Crisp no-refresh lifecycle recovery | PASS |
+| Crisp repeated-reload duplicate safety | PASS |
 | Intercom normal Text | PASS |
+| Intercom Shadow-DOM trigger resolution | PASS |
 | Intercom normal bullet list | PASS |
 | Intercom Image | PASS |
+| Intercom no-refresh lifecycle recovery | PASS |
+| Intercom repeated-reload duplicate safety | PASS |
 | Intercom bullet list immediately after Shift+Enter | KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION |
 
 All PASS rows include activation, exact cleanup, copied notice, focus retention, manual native `Ctrl+V`, expected visible content/formatting, and no duplicate or stray trigger content. The limited Intercom sequence can omit the first bullet; it does not invalidate normal list, serializer, planner, Image, or Shadow-DOM results.
 
+## M14-J.6 Lifecycle Recovery Evidence
+
+The Principal validated both supported real destinations without refreshing their already-open pages:
+
+```text
+already-open destination
+→ reload AI Support Workspace extension
+→ do not refresh destination page
+→ activate Snippet
+→ trigger removed
+→ copied notice shown
+→ focus retained
+→ manual Ctrl+V inserts expected content
+```
+
+Intercom no-refresh recovery: PASS. Crisp no-refresh recovery: PASS. Repeated extension reloads against the same open destination also remained idempotent: one activation, one cleanup, one notice, and one clipboard preparation, with no duplicate behavior.
+
+Normal navigation continues to use the static HTTP/HTTPS all-frame content script. Install/update/unpacked-reload and startup recovery use bounded, best-effort programmatic reinjection of the current packaged content script, followed by one idempotent frame runtime and the authoritative current trigger catalog. Decision 44 fixes persistent access at exactly `http://*/*` and `https://*/*`; there is no `tabs`, `file://`, `<all_urls>`, or `clipboardRead` permission.
+
+Final classification:
+
+```text
+INTERCOM NO-REFRESH RECOVERY: PASS
+CRISP NO-REFRESH RECOVERY: PASS
+REPEATED-RELOAD / IDEMPOTENCY: PASS
+M14-J: COMPLETE / REAL-BROWSER VALIDATED
+```
+
 ## M14-K Focus Prerequisite
 
-The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. M14-K follows M14-J and is not started. It will compare a C# native OS paste-input implementation with AutoHotkey as a feasibility/reference option; no AutoHotkey permanent dependency, `SendInput`, or automatic-paste mechanism is implemented or approved.
+The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. Both destinations now also validate no-refresh lifecycle recovery and repeated-reload duplicate safety. M14-K follows completed M14-J and is not started. It will prefer extending the C# native companion for focus-safe OS paste if feasibility supports it, with AutoHotkey considered only as a reference comparison; no AutoHotkey permanent dependency, `SendInput`, or automatic-paste mechanism is implemented or approved.
 
-## Queued M14-J.6 Reliability Item
+## Completed M14-J.6 Reliability Item
 
-M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability is the exact next engineering task and is not started. Current development behavior can leave an already-open eligible page stale or inactive after extension install/update, reload/restart, or service-worker recreation, requiring a page refresh. M14-J.6 must recover the content-script listener and current catalog without refresh. Recovery must be idempotent: a current runtime reconnects or no-ops, while a missing/stale runtime recovers or is injected without duplicate listeners, subscriptions, or activations. The final host-permission/recovery architecture remains intentionally pending for M14-J.6; this checkpoint does not implement or decide it.
+M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability is implemented, automated-validated, and real-browser validated. Already-open eligible HTTP/HTTPS pages recover after install/update/unpacked reload and startup without requiring a webpage refresh. A current runtime reconnects or no-ops, while a missing, stale, or obsolete runtime is safely replaced without duplicate listeners, subscriptions, activations, notices, cleanup, or clipboard payloads. Decision 44 is final.
 
 ## Preserved Boundaries and Known Limitations
 
@@ -317,8 +351,9 @@ M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability is the ex
 - Decisions 42 and 43 are unchanged.
 - No browser Image fallback or direct-DOM Snippet insertion was reintroduced.
 - The frame catalog remains metadata-only: kind, trigger, and Snippet ID.
-- Permissions remain unchanged.
+- Decision 44 changes host access to exact persistent `http://*/*` and `https://*/*`; ordinary and optional permission sets otherwise remain unchanged, with no `tabs` or `clipboardRead`.
 - Native companion source and protocol remain unchanged.
 - No AutoHotkey, `SendInput`, keyboard simulation, synthetic paste, or destination-specific API/adapter exists.
 - Production native installation remains unimplemented.
 - Crisp Text (inline, Enter, and Shift+Enter) and Crisp Image are real-destination PASS. Intercom normal Text, normal bullet list, and Image are real-destination PASS. Intercom bullet-list triggering immediately after Shift+Enter is a known low-priority compatibility limitation and is not a blocker for the normal list, serializer, delivery planner, Image, or Shadow-DOM results.
+- The Principal reports that Image Snippets feel somewhat slower than Text Snippets. Crisp and Intercom Image behavior remains functionally PASS; perceived latency is a non-blocking future performance investigation and does not reopen M14-J or block M14-K.
