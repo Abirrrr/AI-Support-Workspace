@@ -191,7 +191,11 @@ After Confirmed Copy, Remove Only the Unchanged Trigger + Space
 
 ↓
 
-Press Native Ctrl+V
+Clipboard-only mode: show Copied — press Ctrl+V
+
+or, in future automatic mode:
+
+Revalidate focus and request exactly one Windows paste
 ```
 
 ### Workflow Notes
@@ -208,6 +212,7 @@ Press Native Ctrl+V
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
 - Trigger recognition reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Clipboard delivery is explicitly enabled in Settings.
 - For Rich text, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, renders unordered/ordered items with `- ` or one-based numeric prefixes, and preserves legacy image-reference projection. Image Snippets are excluded from text consumers rather than represented by a placeholder.
+- Decision 45 adds a future user-selectable `Clipboard only` / `Automatic` behavior. `Clipboard only` is the default and permanent supported workflow. Automatic mode remains additive: it uses the same clipboard preparation and exact cleanup, then attempts one focus-guarded Windows paste. Any declined, failed, unavailable, or indeterminate attempt leaves the clipboard available and returns to `Copied — press Ctrl+V`.
 
 ### Unified Clipboard Delivery Workflow
 
@@ -230,8 +235,8 @@ Image Trigger + Space
 -> destination chooses inline, attachment, or message behavior
 ```
 
-- Clipboard assistance is real copy plus user native paste, never a synthetic paste event and never a claim that insertion has already occurred.
-- The product owner accepts the one-extra-keystroke manual `Ctrl+V` workflow for the current product version. Automatic paste is not current M14-I scope.
+- Clipboard-only assistance is real copy plus user native paste. Decision 45 automatic mode may issue one guarded Windows Ctrl+V input sequence, never a synthetic DOM paste event; neither mode claims insertion merely from clipboard or input success.
+- The product owner accepts the one-extra-keystroke manual `Ctrl+V` workflow as a permanent supported mode and fallback. M14-K.1 defines—but does not implement—an optional Windows automatic mode after the same clipboard-success boundary.
 - Existing browser Text clipboard capability is enabled through an explanatory Settings/options action that requests optional `clipboardWrite` and `offscreen`. The independent Windows Image Snippets section requests optional `nativeMessaging` only from its own Enable button. It reports Not enabled, Companion not found, Companion incompatible, Ready, or unsupported platform without exposing host internals. Permission denial, revocation, helper absence/mismatch, conversion failure, or write failure preserves normal typing and the trigger. Trigger input never silently requests permission, and `clipboardRead` is never requested.
 - Decision 42 screens PNG IHDR, JPEG SOF, and WebP VP8X/VP8/VP8L dimensions before decoding. Width/height are capped at 8,192, pixels at 16,777,216, decoded RGBA at 64 MiB, and the planned two-surface raster working set at 128 MiB. Animated WebP and oversized images are rejected, not resized.
 - Because the write is asynchronous, ordinary Space proceeds. Cleanup occurs only after confirmed copy and exact editor/range/catalog/request revalidation. Image cleanup removes the trigger and activation U+0020, leaves no placeholder or trailing space, and collapses the caret at the removed range start. Changed state leaves user text untouched while reporting copy accurately.
@@ -256,7 +261,22 @@ Image trigger + Space
 -> user performs native Ctrl+V
 ```
 
-Missing permission/helper, incompatible version, busy clipboard, native failure, disconnect, or stale response leaves the trigger and page content unchanged and shows no false copied notice. If native preparation succeeded but the response is lost or page state became stale, the clipboard may remain prepared while cleanup is safely skipped. Text remains independent and never launches the helper.
+Missing permission/helper, incompatible version, busy clipboard, native failure, disconnect, or stale response leaves the trigger and page content unchanged and shows no false copied notice. If native preparation succeeded but the response is lost or page state became stale, the clipboard may remain prepared while cleanup is safely skipped. Text clipboard preparation remains independent and browser-only; only future automatic mode may launch the helper after Text clipboard success.
+
+Planned M14-K automatic-mode flow for both Text and Image:
+
+```text
+clipboard preparation succeeds
+→ browser sender/tab/window and native foreground context captured
+→ exact trigger cleanup succeeds
+→ same editor/caret revalidated
+→ one authorization consumed
+→ exact foreground/clipboard/modifier checks pass
+→ one native Ctrl+V sequence requested
+→ show "Paste sent"
+```
+
+`Paste sent` means Windows accepted the full input sequence; it does not prove that the destination inserted content. After clipboard success, unsafe or changed editor focus, tab switch, browser-window switch, application switch, changed clipboard, held modifier, native paste busy, paste-capability loss, input failure, or uncertain result shows `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V`. An automatic-only precheck failure does not suppress the normal exact cleanup attempt after clipboard success; if cleanup itself was not authorized, the existing `(trigger unchanged)` suffix remains. A second activation rejected before its own clipboard preparation instead retains its trigger plus ordinary Space and shows retry-later delivery busy without claiming copied. If the whole companion is missing before Image preparation, the existing Image delivery failure remains because no clipboard-success prerequisite exists; Text preparation remains browser-only. No automatic retry occurs after input may have begun, and the extension never clears the clipboard. A user who presses `Ctrl+V` after `Paste sent` will naturally paste the clipboard again.
 
 ## 7. Keyboard Shortcut Workflow
 
@@ -417,6 +437,8 @@ Transient Model Field Starts with Saved Default
 - The implemented controls retain a visible associated label, descriptive help, native keyboard operation, natural focus order, accessible loading state, live success/error announcements, and narrow-width-safe navigation and form layout.
 - Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
 - Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
+- M14-K.2 will extend the same Settings aggregate and explicit Save workflow with a `Snippet paste behavior` choice: `Clipboard only` (default) or `Automatic (Windows companion)`. Selecting Automatic must explain that clipboard preparation still happens first, the companion attempts one paste only when focus checks pass, manual `Ctrl+V` remains available, and unsupported/unavailable platforms fall back safely. It must not silently request native permission from trigger typing. M14-K.1 adds no control or persistence behavior.
+- The future preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It uses the existing singleton Settings record with no new store/index or Dexie version. Backup v5 remains frozen; M14-K.2 introduces strict Backup v6 for new exports and maps valid v1-v5 imports to `clipboard-only`.
 
 ## 10. Import / Export Workflow
 
@@ -497,7 +519,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Authoring and Delivery:** M14-J is complete and real-browser validated. M14-J.2 is real-Crisp Text PASS. M14-J.3 generically resolves the actual supported editor and internal caret from a trusted retargeted Shadow DOM `beforeinput` event; real Intercom activation and ordinary rich Text pass. M14-J.4 preserves canonical direct list-item HTML and converts supported rich inline hard breaks to `<br>`. M14-J.5 proves the initial apparent list failure was an invalid two-item fixture; the corrected three-item record, delivery payload, and normal Intercom list paste pass. Crisp and Intercom Image paste pass. M14-J.6 Intercom/Crisp no-refresh recovery and repeated-reload duplicate safety pass. Intercom bullet triggering after Shift+Enter remains a known low-priority limitation, and perceived Image latency is a non-blocking performance follow-up. Manual native `Ctrl+V` remains current behavior. M14-K Automatic Paste is next and not started.
+- **M14 — Snippet Authoring and Delivery:** M14-J is complete, real-browser validated, and synchronized at `e4e9645`. Crisp Text/Image/no-refresh and Intercom Shadow-DOM Text/normal list/Image/no-refresh pass; repeated reload is duplicate-safe. Intercom bullet triggering after Shift+Enter remains a known low-priority limitation, and perceived Image latency is a non-blocking performance follow-up. M14-K is active: M14-K.1 / Decision 45 defines optional additive Windows automatic paste, manual `Ctrl+V` remains current and permanently supported, and M14-K.2 is exact next after approval.
 
 The lifecycle availability flow is:
 
@@ -531,7 +553,7 @@ Open existing full options/Library page in a normal browser tab
 
 This future workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest and retire the default popup without competing toolbar behaviors. It is not assigned to M14-G, M14-H, M14-I, or M14-J and does not interrupt the Snippet roadmap.
 
-M14-I.2 defines architecture for an optional Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through a stable `native-dev` extension build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. Optional native auto-paste is a separate later capability: it must never paste after focus moves, requires independent approval, has no AutoHotkey/`SendInput` implementation, and must preserve manual `Ctrl+V` fallback.
+M14-I.2 defines architecture for an optional Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through a stable `native-dev` extension build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. Decision 45 defines the separate optional automatic-paste architecture through the same C# companion, rejects permanent AutoHotkey, and requires stale focus to decline. M14-K.1 has no `SendInput` implementation and manual `Ctrl+V` remains the fallback.
 
 Context images provide transient visual information to generation. Image Snippets are durable, reusable, one-image output shortcuts copied for destination-native paste. Their domain ownership, lifecycle, and privacy rules remain separate; no "Use as Context" bridge is approved.
 

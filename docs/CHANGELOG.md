@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M14-K.1 — Automatic Paste Architecture + Focus Safety
+
+- Added Decision 45 and activated M14-K. Automatic paste is optional, additive, and default-off; clipboard preparation remains authoritative; clipboard-only/manual `Ctrl+V` remains a permanent supported mode and fallback; the clipboard remains populated after an automatic attempt or success; and input that may have begun is never automatically retried.
+- Selected the existing C#/.NET Windows companion over a permanent AutoHotkey dependency. Defined a replaceable `AutomaticPasteTransport` after the shared Text/Image clipboard-success boundary, with no Crisp/Intercom branch and no arbitrary send-keys, command, path, executable, or content-bearing paste protocol.
+- Defined layered safety: a one-use content-script editor/Shadow-DOM guard; exact service-worker sender/document/frame/tab/window/catalog/request ownership; active-tab plus focused-window checks; and native foreground root HWND/process, clipboard-sequence, modifier, no-queue mutex, and one-call input checks. The residual same-window last-instant editor race is an explicit M14-K.2/M14-K.3 release gate.
+- Defined strict future protocol v2 operations `capture-paste-context` and `paste-clipboard` while freezing protocol v1. Future direct Win32 input is one Ctrl-down/V-down/V-up/Ctrl-up `SendInput` array; full acceptance means `Paste sent`, not proven destination insertion, while unsafe/failure/indeterminate results retain copied/manual-fallback UX.
+- Defined the future existing-Settings preference `snippetPasteMode: 'clipboard-only' | 'automatic'`, strict Backup v6 exports with v1-v5 imports defaulting to clipboard-only, no Dexie version change, Windows-only automatic scope, and non-Windows clipboard-only support.
+- Finalized M14-K.2 Windows implementation and M14-K.3 Crisp/Intercom validation acceptance. M14-K.1 changes documentation only: no Settings toggle, Backup v6 runtime, protocol-v2 operation, AutoHotkey dependency, `SendInput`, native behavior, source, test, dependency, permission, or configuration change was added. Decisions 42–44, native clipboard behavior, Dexie v5, and Backup v5 remain unchanged.
+
 ### M14-J.7 — M14-J Milestone Closeout & Git Checkpoint Preparation
 
 - Closed M14-J as COMPLETE and REAL-BROWSER VALIDATED after Principal validation of already-open Intercom and Crisp pages across extension reload without webpage refresh. Activation, exact cleanup, copied notice, retained focus, manual native paste, and duplicate safety passed in both destinations; repeated extension reloads also produced no duplicate activation, notice, or clipboard behavior.

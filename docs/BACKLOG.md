@@ -41,8 +41,10 @@
 - **COMMITTED AT `797a68a` — M14-J.1–J.5.1:** Crisp Text/Image and Intercom normal Text/bullet/Image are real-destination PASS. M14-J.5 proved the first list result used an invalid two-item fixture; the corrected three-item record passes persistence, serializer, delivery-payload equality, and normal Intercom paste. The production-excluded one-shot diagnostic remains available for explicit local inspection.
 - **KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION:** triggering the bullet-list Snippet immediately after Shift+Enter in Intercom can omit the first bullet. This does not block normal list paste or reopen the persistence, serializer, planner, Image, or Shadow-DOM results.
 - **COMPLETE / AUTOMATED PASS / REAL-CHROME PASS — M14-J.6:** Content Script Lifecycle Recovery & Always-On Availability preserves static injection, recovers eligible already-open HTTP/HTTPS frames after install/update/reload/startup, reconnects after ordinary worker termination, and prevents duplicate runtimes. Intercom/Crisp no-refresh recovery and repeated-reload idempotency pass. Decision 44 selects exact persistent HTTP/HTTPS host access; no `tabs`, polling, alarms, keepalive, page inspection, or automatic paste is introduced.
-- **COMPLETE / CHECKPOINT PENDING — M14-J.7:** final M14-J documentation is synchronized for Principal review of one combined M14-J.6 implementation/tests/configuration plus closeout checkpoint.
-- **NEXT / NOT STARTED — M14-K Automatic Paste:** begin with architecture and focus/race safety, then an approved Windows implementation, then Crisp/Intercom real-world validation. Prefer extending the existing C# native companion if feasible; AutoHotkey remains a reference comparison only. Manual `Ctrl+V` remains current behavior.
+- **COMPLETE / SYNCHRONIZED AT `e4e9645` — M14-J.7:** final M14-J documentation and lifecycle implementation are checkpointed locally and remotely.
+- **ACTIVE / ARCHITECTURE DEFINED — M14-K.1 Automatic Paste Architecture + Focus Safety:** Decision 45 makes automatic paste additive and opt-in, keeps clipboard-only/manual `Ctrl+V` permanent, selects the C# native companion, rejects permanent AutoHotkey, and defines layered focus, foreground, clipboard, modifier, concurrency, protocol-v2, no-retry, fallback, and privacy contracts. No production behavior is implemented.
+- **EXACT NEXT AFTER APPROVAL — M14-K.2 Windows Automatic Paste Implementation:** implement the Settings/Backup v6 evolution, shared post-clipboard application boundary, one-use browser authorization, strict native protocol v2, direct Win32 input, typed fallback UX, and automated safety/timing coverage without changing protocol v1, Decision 42/43 clipboard behavior, or manual mode.
+- **PLANNED — M14-K.3 Crisp/Intercom Real-World Validation:** validate Text and Image in both destinations, manual mode/fallback, and adversarial editor/tab/window/application focus changes before release.
 - **NON-BLOCKING PERFORMANCE FOLLOW-UP:** investigate perceived Image Snippet latency relative to Text Snippets. Crisp and Intercom Image delivery are functionally PASS; do not block M14-K on this investigation.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
@@ -75,10 +77,11 @@
 
 ### Optional Windows Automatic Native Paste
 
-- Investigate separately whether an installed Windows companion can later issue a focus-safe native `Ctrl+V` after clipboard preparation. Do not combine this with M14-I.2 clipboard writing prematurely.
-- A future auto-paste capability may extend the existing native companion or use separately approved Windows input mechanics. No AutoHotkey/`SendInput` implementation, new dependency, additional registration, or additional permission is approved now.
-- The helper must be optional, must never paste into a different focused window, must retain manual `Ctrl+V` as fallback, and must address installation, security, and cross-platform implications before becoming product scope.
-- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J and requires independent focus/race-safety approval.
+- Architecture investigation is complete in M14-K.1 / Decision 45. Windows automatic paste will extend the existing C# companion after authoritative clipboard preparation; it is not part of or a modification to Decision 43 protocol v1.
+- Automatic mode is optional and defaults off. Clipboard-only/manual `Ctrl+V` remains a permanent supported workflow and fallback, and clipboard content remains available after automatic success.
+- M14-K.2 owns the first `SendInput` implementation and strict protocol v2. Arbitrary send-keys, AutoHotkey as a permanent dependency, focus stealing, retries after possible input, stale request queues, and non-Windows native hosts remain prohibited.
+- M14-K.3 must validate that stale editor/tab/window/application focus prevents automatic paste. The known residual same-window last-instant race is a release gate, not permission to weaken focus safety.
+- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J. Decision 45 supplies its independent focus/race-safety architecture; M14-K.2 still requires Principal implementation approval.
 
 ### Production Native Companion Packaging
 
@@ -91,4 +94,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J.6 plus M14-J.7 await one Principal-approved combined checkpoint. M14-J is complete and real-browser validated, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. The Intercom Shift+Enter bullet edge and perceived Image latency are non-blocking follow-ups. M14-K is exact next and not started; M15 remains separate and not started.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete, real-browser validated, and synchronized at `e4e9645`, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. The Intercom Shift+Enter bullet edge and perceived Image latency are non-blocking follow-ups. M14-K is active; M14-K.1 architecture is defined and M14-K.2 is exact next after Principal approval. M15 remains separate and not started.

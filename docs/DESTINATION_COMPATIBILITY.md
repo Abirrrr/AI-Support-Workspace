@@ -339,7 +339,7 @@ M14-J: COMPLETE / REAL-BROWSER VALIDATED
 
 ## M14-K Focus Prerequisite
 
-The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. Both destinations now also validate no-refresh lifecycle recovery and repeated-reload duplicate safety. M14-K follows completed M14-J and is not started. It will prefer extending the C# native companion for focus-safe OS paste if feasibility supports it, with AutoHotkey considered only as a reference comparison; no AutoHotkey permanent dependency, `SendInput`, or automatic-paste mechanism is implemented or approved.
+The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. Both destinations now also validate no-refresh lifecycle recovery and repeated-reload duplicate safety. M14-K is active, and M14-K.1 / Decision 45 selects the C# companion for an optional focus-guarded OS paste after clipboard success while rejecting permanent AutoHotkey. No `SendInput`, protocol-v2 operation, Settings toggle, or automatic-paste runtime is implemented. M14-K.3 must repeat the Text/Image destination matrix with adversarial editor/tab/window/application focus changes; any wrong-editor result blocks automatic-mode release.
 
 ## Completed M14-J.6 Reliability Item
 

@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–13 and M14-J are complete. M14-J validates Text, list, Image, Shadow-DOM, and no-refresh lifecycle behavior in Crisp and Intercom. The approved C#/.NET 10 Windows Native Clipboard Companion remains the Image clipboard path; production installation and automatic paste remain absent.
+Milestones 9–13 and M14-J are complete. M14-J validates Text, list, Image, Shadow-DOM, and no-refresh lifecycle behavior in Crisp and Intercom. M14-K is active: Decision 45 defines optional focus-safe Windows automatic paste through the existing C#/.NET 10 companion, while production automatic paste remains absent and manual `Ctrl+V` remains permanently supported.
 
 ## Technology Stack
 
@@ -32,4 +32,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-M14-J is complete and real-browser validated. Crisp Text/Enter/Shift+Enter/Image/no-refresh and Intercom Shadow-DOM Text/normal bullet/Image/no-refresh pass; repeated extension reloads remain duplicate-safe. Decision 44 uses exact persistent HTTP/HTTPS host access, while normal navigation retains static all-frame injection. Intercom bullet triggering immediately after Shift+Enter remains a non-blocking limitation, and perceived Image latency is a future performance follow-up. M14-K Automatic Paste is next but not started: manual native `Ctrl+V` remains the workflow, with no AutoHotkey, `SendInput`, or automatic paste implemented. See [the compatibility record](docs/DESTINATION_COMPATIBILITY.md), [the native companion](native/windows-clipboard-companion/README.md), [the architecture](docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md), and [the feasibility history](docs/NATIVE_IMAGE_CLIPBOARD_FEASIBILITY.md).
+M14-K.1 architecture is defined for Principal review. Automatic mode is additive and default-off, uses the same authoritative Text/Image clipboard preparation, and falls back to the preserved clipboard-only/manual `Ctrl+V` workflow whenever focus or native safety is unavailable. The existing C# companion is selected; permanent AutoHotkey and arbitrary send-keys are rejected. M14-K.2 Windows implementation is exact next after approval, followed by M14-K.3 Crisp/Intercom validation. No Settings toggle, protocol-v2 operation, `SendInput`, or automatic-paste runtime exists yet. See [the compatibility record](docs/DESTINATION_COMPATIBILITY.md), [the native companion architecture](docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md), and [Decision 45](docs/DECISIONS.md).

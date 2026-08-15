@@ -119,7 +119,7 @@ The architecture resolves:
 
 ## Automatic Native-Paste Separation
 
-A future companion might later offer optional Windows-level `Ctrl+V`/input injection, but this is separate from native image clipboard writing. Clipboard writing comes first. Automatic paste requires separate focus/race-safety approval, remains optional and separable, and has no approved AutoHotkey or `SendInput` implementation. Manual `Ctrl+V` remains accepted and is the fallback.
+Decision 45 now defines a future optional Windows-level `Ctrl+V` input capability, separate from native image clipboard writing. Clipboard preparation still comes first. M14-K.1 approves the layered focus/race-safety architecture and existing C# companion direction while rejecting permanent AutoHotkey; it implements no `SendInput` or protocol-v2 operation. Manual `Ctrl+V` remains permanently supported and is the fallback.
 
 ## Current Native Implementation Status
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-M14-I.2 defines the normative Windows-only, optional Native Clipboard Companion architecture. The decision itself was architecture/documentation only; M14-I.3 through M14-I.4.1 subsequently implemented and corrected the native foundation, Chrome development integration, registration, and Settings capability path, and M14-I.5 completed post-validation cleanup. No production installer/registration, AutoHotkey integration, keyboard injection, or automatic paste is implemented.
+M14-I.2 defines the normative Windows-only, optional Native Clipboard Companion architecture. The decision itself was architecture/documentation only; M14-I.3 through M14-I.4.1 subsequently implemented and corrected the native foundation, Chrome development integration, registration, and Settings capability path, and M14-I.5 completed post-validation cleanup. M14-K.1 now defines a separate optional automatic-paste extension to that companion. No production installer/registration, AutoHotkey integration, keyboard injection, protocol-v2 operation, or automatic paste is implemented.
 
 Decision 43 is the permanent decision record. Decision 42 remains authoritative before native transfer. The companion repeats the same applicable limits as defense in depth; it does not redefine them.
 
@@ -13,6 +13,74 @@ M14-I.3 now implements the standalone native foundation at `native/windows-clipb
 The default M14-I.3 artifact deliberately has no configured caller origin and therefore accepts no caller. M14-I.4 adds a separate stable `native-dev` extension identity, optional `nativeMessaging`, service-worker `sendNativeMessage`, exact `.dev` host manifest, and reversible HKCU registration. M14-I.4.1 preserves callback-aligned native responses and truthful Settings status. Real Chrome validates Settings `Ready` and end-to-end Image trigger/native preparation/cleanup/notice/visible paste through that development integration. M14-I.5 removes the failed M14-I.1.4 browser File/offscreen Image path and feasibility probes. Production installer, signing, identity, and registration remain absent.
 
 M14-I.3.1 corrects the framing implementation so the declared request frame is consumed and processed without waiting for EOF or inspecting later stdin, and adds explicit fault-injection coverage for failed best-effort partial clearing and close-error precedence. This is a clarification of Decision 43 implementation semantics, not a new architecture decision.
+
+## M14-K.1 Automatic Paste Extension (Design Only)
+
+Decision 45 selects the existing C#/.NET companion rather than AutoHotkey for a future Windows-only automatic-paste adapter. The feature is additive and opt-in. Clipboard preparation remains authoritative, `clipboard-only` is the default Settings mode, manual `Ctrl+V` remains permanently supported, and the clipboard is never cleared after an automatic attempt or success. M14-K.1 changes no host, protocol, Settings, permission, registration, or runtime behavior.
+
+### Primary-source findings for input and focus
+
+- [Chrome `runtime.MessageSender`](https://developer.chrome.com/docs/extensions/reference/api/runtime#type-MessageSender) supplies the sending document UUID, frame ID, and source tab when a content script messages the extension. [Chrome `tabs.Tab`](https://developer.chrome.com/docs/extensions/reference/api/tabs#type-Tab) explicitly says an active tab need not be in a focused window; [Chrome `windows.Window`](https://developer.chrome.com/docs/extensions/reference/api/windows#type-Window) separately exposes focused-window state. The service worker must therefore validate sender identity, active tab, and focused window rather than infer one from another.
+- [Microsoft `GetForegroundWindow`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getforegroundwindow), [`GetAncestor(GA_ROOT)`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getancestor), and [`GetWindowThreadProcessId`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowthreadprocessid) provide provider-independent foreground root-window and process evidence. A null result is unsafe. The companion must not call `SetForegroundWindow` or otherwise steal focus.
+- [Microsoft `GetClipboardSequenceNumber`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber) changes when clipboard content changes. Capturing it only after successful Text/Image preparation and requiring the same value before input prevents an intervening clipboard write from being pasted automatically.
+- [Microsoft `SendInput`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput) inserts one supplied event array serially, returns the number of events inserted, does not reset keyboard state, and is limited by User Interface Privilege Isolation to equal- or lower-integrity targets. Windows does not report UIPI as the cause of a zero return. [`GetAsyncKeyState`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate) supplies the current high-order down bit used for the pre-input modifier guard.
+- AutoHotkey's official [Send documentation](https://www.autohotkey.com/docs/v2/lib/Send.htm) uses SendInput by default and retains Windows/UAC limitations. Its official [script documentation](https://www.autohotkey.com/docs/v2/Scripts.htm) shows that scripts require the AutoHotkey executable unless compiled, while compiled scripts package the interpreter and script. That extra runtime/toolchain, packaging, signing, update, diagnostic, and attack surface provides no stronger focus proof than direct C# Win32 interop.
+
+### Layer ownership and focus contract
+
+The content script owns one activation guard created from the existing generic editor adapter and Shadow-DOM composed focus/selection resolution. It binds the supported editor, frame document, exact trigger/range/caret state, request, and catalog epoch/revision. It becomes permanently invalid on focusout/blur, selection or caret departure, any input/content mutation other than its own exact authorized cleanup, editor disconnection, document hidden/pagehide, or navigation. Exact cleanup atomically transitions the guard to the expected collapsed cleanup caret before immediate revalidation. Focus returning later does not revive the guard.
+
+The service worker owns `MessageSender.documentId`, `frameId`, `tab.id`, and `tab.windowId`, plus current active-tab and focused-window checks. It creates one random 32-lowercase-hex paste authorization, keeps it only in memory for the one in-flight request, consumes it once, and holds one extension-wide no-queue delivery critical section before clipboard preparation can begin. A second activation is declined before it can overwrite the clipboard. Completion or abandonment discards the authorization; worker restart, sender/document/frame mismatch, inactive tab, unfocused browser window, or stale catalog/request state declines automatic paste.
+
+The native companion owns only the Windows foreground root `HWND`, its process ID, clipboard sequence number, immediate modifier state, one no-wait paste mutex, and the single input call. It has no DOM/editor/site/provider/browser-profile knowledge and does not identify Chrome by executable name. Multiple browser windows are distinguished by exact root `HWND`; browser profile and tab ownership remain browser-side proofs. The native check prevents input from following the user to another window/application. It cannot atomically prove which DOM editor inside the same unchanged window owns focus at the exact `SendInput` instant, so M14-K.2/M14-K.3 must stress the remaining same-window time-of-check/time-of-use race; failure to bound it safely blocks release.
+
+The approved sequence is:
+
+```text
+clipboard preparation succeeds
+→ service worker revalidates sender + active tab + focused window
+→ protocol v2 captures foreground root HWND + PID + clipboard sequence
+→ content script performs existing exact compare-and-swap cleanup
+→ content script immediately revalidates the same editor and collapsed cleanup caret
+→ service worker atomically consumes the one-use authorization
+→ service worker revalidates sender + active tab + focused window again
+→ native host validates exact HWND/PID/clipboard sequence and modifier state
+→ one SendInput call may issue Ctrl+V
+```
+
+There is no arbitrary sleep. If future measured destination behavior requires a bounded delay, browser/editor and native evidence must be checked after the delay. Failure to capture a safe automatic context skips input but does not suppress the normal exact cleanup attempt authorized by clipboard success. Cleanup failure never issues automatic paste. The clipboard remains populated in every post-copy outcome.
+
+### Exact protocol-v2 direction
+
+Protocol v1 remains frozen byte-for-byte and newer hosts must continue to accept its exact `get-capabilities` and `write-image-png` shapes. M14-K.2 may add strict protocol v2 to the same one-process-per-`sendNativeMessage()` host. A v2 process still consumes exactly one declared frame, writes at most one bounded response, and exits. V2 capability discovery advertises v2 operations without changing a v1 capabilities response.
+
+The new capture request has exactly:
+
+```json
+{"protocolVersion":2,"requestId":"<32-lowercase-hex>","operation":"capture-paste-context"}
+```
+
+Its success result has exactly `operation: "capture-paste-context"`, `foregroundRootWindowHandle` as 16 lowercase hexadecimal characters, `foregroundProcessId` as a nonzero unsigned 32-bit integer, and `clipboardSequenceNumber` as an unsigned 32-bit integer. A null/invalid foreground root fails safely.
+
+The new paste request has exactly:
+
+```json
+{"protocolVersion":2,"requestId":"<32-lowercase-hex>","operation":"paste-clipboard","authorizationId":"<32-lowercase-hex>","expectedContext":{"foregroundRootWindowHandle":"<16-lowercase-hex>","foregroundProcessId":1,"clipboardSequenceNumber":1}}
+```
+
+The successful result has exactly `operation: "paste-clipboard"` and `outcome: "paste-issued"`. The host accepts no arbitrary key name/code/sequence, executable, command, path, URL, page/editor/Snippet/customer data, HTML, or image bytes in either new operation. Unknown, duplicate, extra, inexact, oversized, or wrong-version fields fail closed. Request correlation and authorization identity are never treated as permission to bypass the current native checks.
+
+### Input, modifiers, concurrency, and results
+
+Immediately before input, the host samples left/right Ctrl, Shift, Alt, and Windows high-order key state. Any modifier down returns `unsafe-keyboard-state`; there is no keyboard hook, `BlockInput`, polling loop, or wait for release. The approved single `SendInput` array is Ctrl down, V down, V up, Ctrl up using virtual-key accelerator semantics. It pastes the existing clipboard instead of typing content, so no Unicode or keyboard-layout translation of the Snippet payload occurs.
+
+Exactly four accepted events yield application outcome `paste-issued`; this means Windows accepted the events, not that a destination inserted them. Zero accepted events yields `input-injection-failed`. A partial return, process disconnect, timeout, or lost response after input may have begun yields `indeterminate`. The requested balanced four-event array is the only approved modifier-state measure: the host issues no speculative key-up or second sequence after an uncertain result, because it cannot safely know what a later input would duplicate or which physical state changed. One activation permits at most one `SendInput` call, and authorization is consumed before it.
+
+The extension-wide delivery guard has no queue. A second activation rejected before its own clipboard preparation keeps its trigger plus ordinary Space and reports retry-later delivery busy without claiming it was copied. The host adds `Local\AI.SupportWorkspace.ClipboardCompanion.Paste.v2` as a separate immediate-fail per-user/session mutex while preserving the existing Image-write mutex and behavior. Typed automatic-paste outcomes are `paste-issued`, `clipboard-only`, `unsafe-focus`, `not-foreground`, `clipboard-changed`, `unsafe-keyboard-state`, `busy`, `native-unavailable`, `input-injection-failed`, and `indeterminate`; protocol details map to these safe categories. `Paste sent` is truthful automatic-success UI. All automatic non-success outcomes after confirmed clipboard preparation use `Snippet copied — press Ctrl+V` or `Image copied — press Ctrl+V`, with `(trigger unchanged)` if cleanup was not authorized. No automatic retry occurs after input may have begun.
+
+### Security, privacy, and platform disposition
+
+The existing exact allowed-origin and compiled caller-origin checks remain mandatory. Logging remains off by default and there is no network telemetry. Opt-in diagnostics may contain only request/authorization correlation, bounded timing, and result/safety category—not clipboard content, text, HTML, PNG, page/editor content, customer/merchant data, paths, raw JSON, exceptions, or stack traces. Windows is the only M14-K automatic-paste platform. Non-Windows and missing/incompatible companion states remain supported through clipboard-only mode and manual `Ctrl+V`.
 
 ## Established Evidence
 
@@ -47,9 +115,9 @@ Before verified native success, the trigger, activation Space, surrounding text,
 
 ## Scope and Non-goals
 
-The companion is a request-scoped infrastructure adapter. Its only v1 data operation is `write-image-png`. It is not a Snippet repository, database client, image-authoring service, JPEG/WebP domain, AI provider, prompt builder, browser automation engine, general command runner, updater, or keyboard injector.
+The companion is a request-scoped infrastructure adapter. Its only v1 data operation is `write-image-png`. Decision 45 permits only the future protocol-v2 paste capability defined above; the host is not a Snippet repository, database client, image-authoring service, JPEG/WebP domain, AI provider, prompt builder, general browser-automation engine, command runner, or updater.
 
-Clipboard requests are local and memory-only. The host accepts no URL, path, filename, asset ID, Snippet ID/title/trigger, HTML, page content, executable name, shell fragment, or arbitrary command. It performs no network access and creates no temporary image file. Manual `Ctrl+V` is the accepted insertion step. M14-J, macOS/Linux companions, automatic paste, AutoHotkey, `SendInput`, and keyboard hooks are outside M14-I.2.
+Clipboard requests are local and memory-only. The host accepts no URL, path, filename, asset ID, Snippet ID/title/trigger, HTML, page content, executable name, shell fragment, or arbitrary command. It performs no network access and creates no temporary image file. Manual `Ctrl+V` remains accepted. M14-J, macOS/Linux companions, AutoHotkey, and keyboard hooks remain outside M14-I.2; M14-K.1 defines but does not implement the one narrow protocol-v2 automatic-paste operation.
 
 ## Primary-source Findings
 
@@ -450,7 +518,7 @@ M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J.2 is real-Cris
 
 ## Cleanup and Handoff
 
-Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J.3 through M14-J.5.1 change no native boundary. The exact next engineering task is M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability. Its idempotent recovery and final host-access architecture are defined there; this document does not pre-decide them.
+Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J is complete, real-browser validated, and synchronized at `e4e9645`; it changed no native clipboard boundary. M14-K.1 / Decision 45 now defines the separate automatic-paste extension without implementing it. The exact next engineering task after Principal approval is M14-K.2 — Windows Automatic Paste Implementation; M14-K.3 then validates Crisp/Intercom Text/Image and adversarial focus behavior.
 
 Implementation sequence:
 
@@ -466,6 +534,11 @@ M14-I.2 architecture
 -> preserve validated Text transport and feasibility history
 -> final M14-I review and checkpoint
 -> M14-J destination compatibility validation
+-> M14-J lifecycle closeout at e4e9645
+-> M14-K.1 optional automatic-paste architecture and focus safety
+-> Principal approval
+-> M14-K.2 Windows implementation
+-> M14-K.3 Crisp/Intercom real-world validation
 ```
 
 Backup v5, Dexie v5, Decision 42, metadata-only trigger catalogs, Decision 40, and M15 remain unchanged.
