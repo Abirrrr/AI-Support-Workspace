@@ -145,7 +145,7 @@ The developer-only M14-I.1.5 probe served its feasibility purpose. M14-I.5 remov
 - Decision 42 remains unchanged: 5 MiB encoded maximum; 8192 width/height; 16,777,216 pixels; 64 MiB decoded RGBA; two-surface/128 MiB conceptual working set; metadata-before-decode; post-decode validation; animated WebP rejection; genuine JPEG/WebP-to-PNG conversion; and no silent resizing/downsampling.
 - Backup v5 and Dexie v5 remain current.
 - Text/Image domains, `SnippetAsset`, metadata-only `{ kind, trigger, snippetId }` catalogs, authoritative service-worker planning, freshness checks, compare-and-swap cleanup, M13-B.1 publication barrier, Decisions 38/41/42, and M15 separation remain unchanged by Decision 43.
-- M14-J remains `NOT STARTED` until Principal final M14-I review, the post-cleanup smoke test, and the M14-I checkpoint.
+- M14-I is complete at committed/pushed checkpoint `ebe915f`; its post-cleanup smoke test passed. M14-J is next and remains `NOT STARTED`.
 - Decision 40 remains separate future Workspace Shell work. M15 Context Images remain separate future AI input work with no Image Snippet bridge.
 
 ## Sequence
@@ -157,7 +157,7 @@ M14-I.1.5.2 feasibility conclusion
 → M14-I.3/M14-I.4 implementation
 → Image real-Chrome validation: PASS
 → M14-I.5 M14-I.1.4 and probe cleanup: COMPLETE
-→ Principal final review and post-cleanup smoke test
-→ M14-I checkpoint
+→ post-cleanup smoke test: PASS
+→ M14-I implementation checkpoint: ebe915f
 → M14-J destination validation
 ```

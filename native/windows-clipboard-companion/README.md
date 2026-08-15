@@ -60,4 +60,4 @@ If registered PNG transfer succeeds but the required CF_DIBV5 transfer fails, th
 
 Small language-neutral golden fixtures live in `fixtures/protocol-v1/` and are consumed by both the native tests and M14-I.4 TypeScript conformance tests.
 
-M14-I.5 leaves this native source and protocol unchanged. It removes the failed browser Image/File transports and feasibility probes from the extension while preserving the Text offscreen transport. The post-cleanup Principal smoke test reloads the `native-dev` build, confirms Settings `Ready`, activates one existing Image Snippet, confirms cleanup and `Image copied — press Ctrl+V`, and verifies a visible image through native `Ctrl+V`.
+M14-I.5 leaves this native source and protocol unchanged. It removes the failed browser Image/File transports and feasibility probes from the extension while preserving the Text offscreen transport. The post-cleanup real-Chrome smoke test passed: the reloaded `native-dev` build reported Settings `Ready`, activation removed the trigger, `Image copied — press Ctrl+V` appeared, and native `Ctrl+V` pasted a visible image. M14-I is complete at committed/pushed checkpoint `ebe915f`.

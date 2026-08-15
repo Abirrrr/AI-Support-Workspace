@@ -444,13 +444,13 @@ M14-I.3/M14-I.3.1 implement the approved native foundation. M14-I.4/M14-I.4.1 im
 - OpenClipboard contention/retry timing, partial-write cleanup, Close failure, concurrent host mutex, disconnect/lost response, and no automatic retry tests;
 - development registration checks for exact HKCU registration, absolute paths, prod/dev isolation, missing manifest/executable, and project-owned cleanup; production installer/repair/upgrade/rollback/signing tests remain future scope;
 - extension tests proving optional permission UX, Windows-only detection, Text independence, authoritative planning, both freshness checks, success-before-cleanup, stale-response suppression, compare-and-swap behavior, and safe errors/logs;
-- completed real-Chrome proof on Windows that a Decision 42-safe PNG is prepared by the helper and native `Ctrl+V` yields a visible genuine image; one small post-cleanup smoke test remains pending Principal Engineer.
+- completed real-Chrome proof on Windows that a Decision 42-safe PNG is prepared by the helper and native `Ctrl+V` yields a visible genuine image; the post-cleanup smoke test passed with Settings Ready, trigger disappearance, copied notice, and visible-image paste.
 
-M14-J remains `NOT STARTED` until final M14-I review, the post-cleanup smoke test, and the M14-I checkpoint.
+M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J is `NEXT` and remains `NOT STARTED`.
 
 ## Cleanup and Handoff
 
-Real-Chrome Image validation passed before cleanup. M14-I.5 removes the failed M14-I.1.4 File/offscreen Image path, obsolete Image-only contracts/errors/tests, and all feasibility-probe runtime/dev UI while preserving the Text offscreen copy-event path and feasibility history. The exact next action is Principal final source/status review followed by one post-cleanup smoke test and the M14-I checkpoint.
+Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed M14-I.1.4 File/offscreen Image path, obsolete Image-only contracts/errors/tests, and all feasibility-probe runtime/dev UI while preserving the Text offscreen copy-event path and feasibility history. The post-cleanup smoke test passed, and M14-I was committed/pushed at `ebe915f`. The exact next action is Principal review of the documentation closeout, commit/push the closeout docs, then create the M14-J implementation/validation task.
 
 Implementation sequence:
 

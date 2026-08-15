@@ -32,13 +32,13 @@
 - **Completed at `672185e` — M14-G/G.2:** implemented lists, the Image discriminant, Backup v5, semantic isolation, constrained Text WYSIWYG, simplified Library, and screenshot/file Image authoring with atomic asset lifecycle reuse.
 - **M14-H:** ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.
 - **Text compatibility correction — M14-I.1.3:** Real Chrome identified `clipboard-write-failed` at the final offscreen Async Clipboard Text write. Text now uses a temporary copy-event/`execCommand('copy')` path for both planned representations. Real Chrome validates preparation, cleanup, notice, formatting, and lists.
-- **Image compatibility correction — M14-I.1.4:** The previous Decision 42-gated Async Clipboard path failed at `offscreen-write` / `clipboard-write-failed`. The copy-event `image/png` File path then reported success but real Chrome pasted `snippet.png`, not the intended image. It is not a valid Image Snippet transport; revert is recommended after Principal review.
+- **Image compatibility correction — M14-I.1.4 (historical):** The previous Decision 42-gated Async Clipboard path failed at `offscreen-write` / `clipboard-write-failed`. The copy-event `image/png` File path then reported success but real Chrome pasted `snippet.png`, not the intended image. It was not a valid Image Snippet transport and was removed during M14-I cleanup.
 - **Native representation feasibility — M14-I.1.5.2 conclusion:** offscreen Async, M14-I.1.4 `snippet.png`, and focused-content A1 `TEXT` are real-Chrome failures for Image semantics. Focused extension-page B `VISIBLE IMAGE` is a real-Chrome capability pass but not acceptable production UX. A2/F9 was not run and is no longer required for this decision.
 - **ARCHITECTURE DEFINED — M14-I.2 Windows Native Clipboard Companion Architecture:** Decision 43 selects the exact Windows-only optional companion boundary, one-shot protocol, .NET 10 LTS host, WIC/PNG+CF_DIBV5 clipboard path, origin controls, validation, failure, installation, versioning, concurrency, and cleanup policies. M14-I.2 itself was documentation-only; M14-I.3 now implements the standalone foundation.
-- **FOUNDATION IMPLEMENTED — M14-I.3 Windows Native Clipboard Companion Foundation:** the standalone .NET 10 `win-x64` host, strict v1, WIC, registered PNG + CF_DIBV5, HWND, ownership, retry, mutex, fixtures, and native automated tests are implemented and uncommitted.
-- **IMPLEMENTED / REAL-CHROME VALIDATED — M14-I.4/M14-I.4.1:** stable development identity, optional `nativeMessaging`, truthful Settings readiness UX, callback-aligned service-worker native transport, strict protocol/golden-fixture conformance, `.dev` host generation, and reversible HKCU development registration are implemented and uncommitted. Settings `Ready` and native Image end-to-end delivery passed.
-- **CLEANUP COMPLETE — M14-I.5:** failed browser Image transports, obsolete Image-only contracts/errors/tests, and A1/A2/B feasibility runtime probes are removed. Validated Text offscreen delivery, Windows native Image delivery, historical evidence, Decision 42, Decision 43, and development registration remain. Principal final review, one smoke test, and checkpoint are next.
-- **Then — M14-J:** only after the M14-I checkpoint, validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors.
+- **COMPLETE AT `ebe915f` — M14-I.3 Windows Native Clipboard Companion Foundation:** the standalone .NET 10 `win-x64` host, strict v1, WIC, registered PNG + CF_DIBV5, HWND, ownership, retry, mutex, fixtures, and native automated tests are implemented and committed.
+- **COMPLETE / REAL-CHROME VALIDATED AT `ebe915f` — M14-I.4/M14-I.4.1:** stable development identity, optional `nativeMessaging`, truthful Settings readiness UX, callback-aligned service-worker native transport, strict protocol/golden-fixture conformance, `.dev` host generation, and reversible HKCU development registration are implemented. Settings `Ready` and native Image end-to-end delivery passed.
+- **COMPLETE / POST-CLEANUP SMOKE PASS AT `ebe915f` — M14-I.5:** failed browser Image transports, obsolete Image-only contracts/errors/tests, and A1/A2/B feasibility runtime probes are removed. Validated Text offscreen delivery, Windows native Image delivery, historical evidence, Decision 42, Decision 43, and development registration remain.
+- **NEXT / NOT STARTED — M14-J:** validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
 ### M15 — Multimodal Screenshot Context
@@ -75,8 +75,15 @@
 - The helper must be optional, must never paste into a different focused window, must retain manual `Ctrl+V` as fallback, and must address installation, security, and cross-platform implications before becoming product scope.
 - This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J and requires independent focus/race-safety approval.
 
+### Production Native Companion Packaging
+
+- Build a production native installer only through a separately approved packaging task. Production installer technology, stable installation paths, repair, rollback, and uninstall remain unimplemented.
+- Production code signing, publisher reputation, release identity, exact production Native Messaging registration, and production companion identity remain deferred.
+- A production updater is not implemented; update and rollback mechanics require their own validated release workflow.
+- Non-Windows companion support remains future platform work and is not part of M14-J.
+
 Context screenshots and Snippet images remain separate domains: Context images are transient inputs to generation, while Snippet images are reusable Library-owned response content for editor expansion.
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 at `b7d16ec`, and M14-G/G.2 at `672185e`. M14-I through M14-I.5 remains uncommitted. Text, Settings readiness, and native Image end-to-end delivery are real-Chrome validated; browser Image/probe cleanup is complete. Principal final review, one post-cleanup smoke test, and the M14-I checkpoint are next. M14-J remains blocked until that checkpoint, and M15 remains separate.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 at `b7d16ec`, M14-G/G.2 at `672185e`, and M14-I through M14-I.5 at `ebe915f`. Text, Settings readiness, native Image end-to-end delivery, and the post-cleanup smoke test are real-Chrome validated; browser Image/probe cleanup is complete. M14-J is next but not started, and M15 remains separate.

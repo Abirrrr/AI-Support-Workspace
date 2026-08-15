@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### M14-I — Clipboard Delivery Completion
+
+- Completed, committed, and pushed M14-I at `ebe915f` (`feat: add clipboard delivery for text and image snippets`); local `master` and `origin/master` were synchronized and the working tree was clean immediately after the implementation checkpoint.
+- Recorded the real-Chrome Text PASS for clipboard preparation, trigger cleanup, copied notice, bold/italic/link paste, and bullet/numbered-list paste through the preserved offscreen Text copy-event transport.
+- Recorded the Windows Image `REAL-CHROME END-TO-END PASS`: Native Messaging capability exchange and Settings readiness, trigger activation, native PNG preparation, exact cleanup, copied notice, and visible genuine image after manual native `Ctrl+V` all passed. The post-cleanup smoke test also passed all four checks.
+- Confirmed M14-I.5 removed the failed offscreen Async Image path, the M14-I.1.4 `snippet.png` File transport, and A1/A2/B feasibility runtime probes while preserving their historical evidence. Windows native Image delivery is the final active Windows Image route; Text offscreen delivery remains active.
+- Manual `Ctrl+V` remains the current UX. Automatic paste, the production installer, signing, updater, production identity/registration, and non-Windows companion support remain future work and are not promoted into M14-J.
+- Decision 42 and Decision 43 are unchanged. M14-J — Destination Compatibility Validation is next but not started.
+
 ### M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization
 
 - Recorded the authoritative real-Chrome M14-I result: Text preparation/cleanup/notice/formatting remains PASS; Windows Image Snippets Settings readiness is `Ready`; Image trigger activation, native clipboard preparation, trigger cleanup, copied notice, and visible genuine image after native `Ctrl+V` are PASS. The Windows Native Clipboard Companion is the only normal Windows Image transport.
