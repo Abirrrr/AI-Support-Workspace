@@ -145,7 +145,7 @@ The developer-only M14-I.1.5 probe served its feasibility purpose. M14-I.5 remov
 - Decision 42 remains unchanged: 5 MiB encoded maximum; 8192 width/height; 16,777,216 pixels; 64 MiB decoded RGBA; two-surface/128 MiB conceptual working set; metadata-before-decode; post-decode validation; animated WebP rejection; genuine JPEG/WebP-to-PNG conversion; and no silent resizing/downsampling.
 - Backup v5 and Dexie v5 remain current.
 - Text/Image domains, `SnippetAsset`, metadata-only `{ kind, trigger, snippetId }` catalogs, authoritative service-worker planning, freshness checks, compare-and-swap cleanup, M13-B.1 publication barrier, Decisions 38/41/42, and M15 separation remain unchanged by Decision 43.
-- M14-I is complete at committed/pushed checkpoint `ebe915f`; its post-cleanup smoke test passed. M14-J is next and remains `NOT STARTED`.
+- M14-I is complete at committed/pushed checkpoint `ebe915f`; its post-cleanup smoke test passed. M14-J.2 is real-Crisp Text PASS, M14-J.3 generic pre-delivery Shadow DOM editor/range resolution plus ordinary rich Text are real-Intercom PASS, and M14-J.4 preserves canonical list serialization plus the generic hard-break correction. M14-J.5 proves the initial list result used an invalid two-item fixture; the corrected three-item record passes persistence, serializer, delivery-payload equality, and normal Intercom paste. Crisp and Intercom Image destination paste pass through the existing Windows native path. Intercom bullet triggering after Shift+Enter remains a known low-priority compatibility limitation. No historical browser Image transport is reopened.
 - Decision 40 remains separate future Workspace Shell work. M15 Context Images remain separate future AI input work with no Image Snippet bridge.
 
 ## Sequence

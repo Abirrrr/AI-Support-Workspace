@@ -91,6 +91,8 @@ describe('isolated-world beforeinput boundary', () => {
     { cancelable: 'true' },
     { isComposing: 0 },
     { preventDefault: undefined },
+    { composedPath: [] },
+    { getTargetRanges: [] },
   ])('rejects malformed event shape %#', (override) => {
     const raw =
       override === null ? null : { ...beforeInput(document.body), ...override };

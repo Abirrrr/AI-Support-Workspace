@@ -7,11 +7,11 @@ import { isSnippetDeliveryFailureCode } from '../../shared/snippet-delivery-mess
 import type { FrameTriggerCatalogCache } from './frame-catalog-cache';
 import {
   createEditorAdapter,
+  type EditorActivationEventLike,
   type TriggerActivationSnapshot,
 } from './editor-adapters';
 
-export interface BeforeInputEventLike {
-  readonly target: EventTarget | null;
+export interface BeforeInputEventLike extends EditorActivationEventLike {
   readonly inputType: string;
   readonly data: string | null;
   readonly isTrusted: boolean;
@@ -48,7 +48,11 @@ export function toBeforeInputEventLike(
       typeof candidate.isTrusted !== 'boolean' ||
       typeof candidate.cancelable !== 'boolean' ||
       typeof candidate.isComposing !== 'boolean' ||
-      typeof candidate.preventDefault !== 'function'
+      typeof candidate.preventDefault !== 'function' ||
+      (candidate.composedPath !== undefined &&
+        typeof candidate.composedPath !== 'function') ||
+      (candidate.getTargetRanges !== undefined &&
+        typeof candidate.getTargetRanges !== 'function')
     ) {
       return undefined;
     }
@@ -102,7 +106,7 @@ export class SnippetExpansionController {
       return false;
     }
 
-    const adapter = createEditorAdapter(event.target, this.document);
+    const adapter = createEditorAdapter(event, this.document);
     const candidate = adapter?.readTriggerCandidate(SNIPPET_TRIGGER_MAX_LENGTH);
     if (adapter === undefined || candidate === undefined) return false;
     const catalogEntry = this.cache.find(candidate.text.toLowerCase());

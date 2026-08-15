@@ -38,7 +38,9 @@
 - **COMPLETE AT `ebe915f` — M14-I.3 Windows Native Clipboard Companion Foundation:** the standalone .NET 10 `win-x64` host, strict v1, WIC, registered PNG + CF_DIBV5, HWND, ownership, retry, mutex, fixtures, and native automated tests are implemented and committed.
 - **COMPLETE / REAL-CHROME VALIDATED AT `ebe915f` — M14-I.4/M14-I.4.1:** stable development identity, optional `nativeMessaging`, truthful Settings readiness UX, callback-aligned service-worker native transport, strict protocol/golden-fixture conformance, `.dev` host generation, and reversible HKCU development registration are implemented. Settings `Ready` and native Image end-to-end delivery passed.
 - **COMPLETE / POST-CLEANUP SMOKE PASS AT `ebe915f` — M14-I.5:** failed browser Image transports, obsolete Image-only contracts/errors/tests, and A1/A2/B feasibility runtime probes are removed. Validated Text offscreen delivery, Windows native Image delivery, historical evidence, Decision 42, Decision 43, and development registration remain.
-- **NEXT / NOT STARTED — M14-J:** validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors.
+- **DOCUMENTATION CHECKPOINT — M14-J.5.1:** Crisp Text/Image and Intercom normal Text/bullet/Image are real-destination PASS. M14-J.5 proved the first list result used an invalid two-item fixture; the corrected three-item record passes persistence, serializer, delivery-payload equality, and normal Intercom paste. The production-excluded one-shot diagnostic remains available for explicit local inspection.
+- **KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION:** triggering the bullet-list Snippet immediately after Shift+Enter in Intercom can omit the first bullet. This does not block normal list paste or reopen the persistence, serializer, planner, Image, or Shadow-DOM results.
+- **NEXT — M14-J.6:** Content Script Lifecycle Recovery & Always-On Availability must recover eligible already-open pages after install/update, extension reload/restart, or service-worker recreation without refresh and without duplicate listeners, subscriptions, or activations. The final host-access architecture remains pending for M14-J.6.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
 ### M15 — Multimodal Screenshot Context
@@ -86,4 +88,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 at `b7d16ec`, M14-G/G.2 at `672185e`, and M14-I through M14-I.5 at `ebe915f`. Text, Settings readiness, native Image end-to-end delivery, and the post-cleanup smoke test are real-Chrome validated; browser Image/probe cleanup is complete. M14-J is next but not started, and M15 remains separate.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J.1 through M14-J.5 remain uncommitted; Crisp Text/Image and Intercom Shadow-DOM/ordinary Text/normal bullet/Image pass. Intercom bullet triggering after Shift+Enter is a known low-priority limitation. M14-J.5.1 is the current documentation checkpoint, and M14-J.6 is next but not started. M14-K follows M14-J; M15 remains separate and is not started.

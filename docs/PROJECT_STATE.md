@@ -8,11 +8,126 @@
 ## Current Milestone
 
 - Milestone 14 — Snippet Authoring and Delivery
-- Status: M14-I — Clipboard Delivery is complete, committed, and pushed at `ebe915f` (`feat: add clipboard delivery for text and image snippets`). Text delivery and Windows native Image delivery are `REAL-CHROME PASS`, including the post-cleanup smoke test. Failed browser Image transports and A1/A2/B feasibility probes are historical only and absent from active runtime. M14-J — Destination Compatibility Validation is next but not started.
+- Status: M14-I — Clipboard Delivery is complete. M14-J — Destination Compatibility Validation / Reliability is current. M14-J.2 is real-Crisp validated, and M14-J.3 is real-Intercom validated for Shadow-DOM trigger resolution, cleanup, focus, manual paste, and ordinary rich Text. M14-J.4 confirmed canonical simple-list serialization and corrected generic inline hard breaks. M14-J.5 traced the real `;bullet` record: the first capture proved an incorrectly authored two-item fixture, while the corrected three-item record passed persistence, serializer, delivery-payload equality, and normal Intercom paste. Crisp and Intercom Image paste also pass. The only accepted destination edge is Intercom bullet-list triggering immediately after Shift+Enter, classified as a known low-priority compatibility limitation. M14-J.5.1 synchronizes this evidence; M14-J.6 lifecycle recovery is next, so M14-J remains incomplete.
 
 ## Task State
 
-### M14-I Closeout Handoff
+### M14-J.5.1 — Destination Validation Documentation Checkpoint
+
+```text
+Current milestone: M14-J — Destination Compatibility Validation / Reliability
+Latest completed implementation/validation: M14-J.5 — Real Snippet List Serialization Diagnostic
+Current documentation checkpoint: M14-J.5.1 — Destination Validation Documentation Checkpoint
+Active task: M14-J.5.1 — Destination Validation Documentation Checkpoint
+Starting repository checkpoint: 28dcf53 — docs: close out clipboard delivery milestone
+Previous implementation checkpoint: ebe915f — feat: add clipboard delivery for text and image snippets
+M14-J.1/M14-J.2/M14-J.3/M14-J.4/M14-J.5 state: UNCOMMITTED WORK PRESERVED
+
+Status:
+DESTINATION VALIDATION DOCUMENTATION SYNCHRONIZED
+M14-J.5 DIAGNOSTIC CAPTURE COMPLETE
+AUTOMATED VALIDATION PASS FROM M14-J.5
+CRISP TEXT REAL-DESTINATION PASS
+INTERCOM SHADOW-DOM RESOLUTION REAL-DESTINATION PASS
+INTERCOM ORDINARY RICH TEXT PASS
+INTERCOM NORMAL SIMPLE-LIST FIDELITY PASS
+CRISP IMAGE REAL-DESTINATION PASS
+INTERCOM IMAGE REAL-DESTINATION PASS
+INTERCOM BULLET AFTER SHIFT+ENTER: KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION
+
+M14-J.1 controlled fixtures:
+STANDARD SINGLE-LINE INPUT: PASS
+STANDARD TEXTAREA: PASS
+GENERIC CONTENTEDITABLE: PASS
+STRUCTURED NESTED RICH-EDITOR APPROXIMATION: PASS
+
+M14-J.2 structural boundaries (controlled and real-Crisp validated):
+EDITOR START: PASS
+UNICODE WHITESPACE: PASS
+BR LINE BOUNDARY: PASS
+NEW DIV BLOCK: PASS
+NEW PARAGRAPH BLOCK: PASS
+NESTED INLINE AT NEW BLOCK: PASS
+INLINE NON-WHITESPACE CONTINUATION: CORRECTLY REJECTED
+
+Controlled focus/caret result:
+FOCUS PRESERVED: YES — original editor remains active
+SELECTION/CARET PRESERVED: YES — collapsed at removed-range start
+SURROUNDING CONTENT PRESERVED: YES
+DUPLICATE/STRAY CONTENT: NO
+
+Real destinations:
+CRISP BASELINE INLINE TEXT: PASS / FORMATTING FULL / FOCUS PASS
+CRISP ENTER TEXT AFTER M14-J.2: PASS
+CRISP SHIFT+ENTER TEXT AFTER M14-J.2: PASS
+CRISP TEXT CLASSIFICATION: REAL-DESTINATION PASS
+INTERCOM TRUSTED CHARACTER/SPACE EVENTS: PASS
+INTERCOM EVENT TARGET: RETARGETED NON-EDITABLE SHADOW HOST
+INTERCOM INTERNAL EDITOR: PRESENT IN COMPOSED PATH
+INTERCOM INTERNAL CARET: PRESENT IN TARGET RANGE
+INTERCOM CONTROLLED SHADOW-DOM CORRECTION: IMPLEMENTED
+INTERCOM TRIGGER/CLEANUP/NOTICE/FOCUS/MANUAL PASTE: PASS
+INTERCOM ORDINARY RICH TEXT: PASS
+INTERCOM NORMAL SIMPLE-LIST FIDELITY: PASS
+INTERCOM IMAGE: PASS
+CRISP IMAGE: PASS
+INTERCOM BULLET AFTER SHIFT+ENTER: KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION
+
+M14-J.4 serializer audit:
+SIMPLE BULLET HTML: <ul> WITH THREE DIRECT <li> SIBLINGS — CANONICAL / UNCHANGED
+SIMPLE NUMBERED HTML: <ol> WITH THREE DIRECT <li> SIBLINGS — CANONICAL / UNCHANGED
+PARAGRAPH/LIST/PARAGRAPH SIBLINGS: PASS
+INLINE MARKS INSIDE LIST ITEMS: PASS
+SUPPORTED HARD BREAK INSIDE LIST ITEM: GENERIC <br> CORRECTION IMPLEMENTED
+DOM NORMALIZATION: PASS
+TEXT/PLAIN: UNCHANGED / PASS
+PERSISTED SNIPPETCONTENT: UNCHANGED
+
+M14-J.5 diagnostic:
+ACCESS METHOD: NATIVE-DEV OPTIONS/LIBRARY DEVTOOLS CONSOLE
+INVOCATION: EXPLICIT ONE-SHOT BY EXACT TRIGGER
+REPOSITORY PATH: DEXIE SNIPPET REPOSITORY
+SERIALIZER PATH: PRODUCTION SERIALIZER
+DELIVERY PATH: PRODUCTION DELIVERY PLANNER
+FIRST CAPTURE: TWO PERSISTED ITEMS; ITEM 2 CONTAINED BOTH SECOND AND THIRD LINES
+FIRST CAPTURE CLASSIFICATION: INVALID / INCORRECT TEST FIXTURE
+CORRECTED CAPTURE: THREE INDEPENDENT ITEMS
+CORRECTED HTML: <ul><li>1st line</li><li>2nd line</li><li>3 rd line</li></ul>
+CORRECTED PLAIN TEXT: THREE DASH-PREFIXED LINES
+PERSISTENCE: PASS
+SERIALIZER: PASS
+DELIVERY PAYLOAD: PASS / HTML AND PLAIN-TEXT EQUALITY TRUE
+NORMAL INTERCOM BULLET PASTE: PASS
+PRODUCTION BUILD EXPOSURE: NONE
+PERSISTENCE MUTATION: NONE
+NETWORK: NONE
+CLIPBOARD WRITE: NONE
+DIAGNOSTIC SEAM: RETAINED IN NATIVE-DEV FOR EXPLICIT LOCAL USE
+
+Architecture and scope:
+TEXT CLIPBOARD ARCHITECTURE: UNCHANGED
+WINDOWS IMAGE ARCHITECTURE: UNCHANGED
+DECISION 42: UNCHANGED
+DECISION 43: UNCHANGED
+MANUAL CTRL+V: CURRENT UX
+AUTOMATIC PASTE: NOT IMPLEMENTED
+M14-J.6: EXACT NEXT ENGINEERING TASK / NOT STARTED
+M14-K — AUTOMATIC PASTE FEASIBILITY + WINDOWS IMPLEMENTATION: QUEUED AFTER M14-J / NOT STARTED
+M14-K COMPARISON: C# NATIVE OS PASTE INPUT VS AUTOHOTKEY FEASIBILITY/REFERENCE
+AUTOHOTKEY PERMANENT DEPENDENCY: NOT APPROVED
+SENDINPUT IMPLEMENTATION: NONE
+M15: NOT STARTED
+
+Exact next action:
+M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability
+→ define the final lifecycle/host-access architecture during M14-J.6
+→ recover eligible already-open pages after install, update, reload, restart, or service-worker recreation without requiring refresh
+→ make recovery idempotent: connected/current runtimes reconnect or no-op; missing/stale runtimes recover without duplicate listeners, subscriptions, or activations
+```
+
+The authoritative compatibility evidence and retained diagnostic boundary are in `docs/DESTINATION_COMPATIBILITY.md`. M14-J.1 through M14-J.5 evidence is preserved. M14-J.6 lifecycle recovery is the exact next engineering task but is not started; its final host-permission architecture remains intentionally undecided until that task. M14-J is not complete until M14-J.6 is complete.
+
+### Prior M14-I Closeout Handoff
 
 ```text
 Current milestone: M14 — Snippet Authoring and Delivery
@@ -120,7 +235,7 @@ Image trigger + Space
 - M14-F — Unified Rich Editor Inline Image Authoring: CANCELLED BEFORE IMPLEMENTATION.
 - M14-I.5 cleanup status: COMPLETE / AUTOMATED-VALIDATED / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED.
 - M14-H — Image Snippet Domain Completion and Authoring: ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.
-- Exact next action: Principal review of this documentation closeout, commit/push the closeout documentation, then create the M14-J implementation/validation task. M14-J is `NEXT` and remains `NOT STARTED`.
+- Exact next action: define and implement M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability, including an explicit architecture decision for idempotent recovery and host access. M14-J remains incomplete; M14-K follows only after M14-J.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
 - M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
@@ -150,7 +265,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is current. M14-I is complete at committed and pushed checkpoint `ebe915f`. Text delivery is `REAL-CHROME PASS`. Settings companion readiness and Windows native Image delivery are `REAL-CHROME END-TO-END PASS`; the post-cleanup smoke test passed, and browser Image experiments and feasibility runtime probes are removed from active runtime. M14-J is next but not started.
+- Status: Milestone 14 is current. M14-I is complete at `ebe915f`. M14-J.2 is real-Crisp validated, and M14-J.3 Shadow-DOM resolution plus ordinary rich Text are real-Intercom validated. M14-J.4 confirmed canonical list serialization and corrected generic hard-break HTML. M14-J.5's first real capture identified an invalid two-item fixture; its corrected three-item capture passed persistence, serializer, delivery-payload equality, and normal Intercom list paste. Crisp and Intercom Image paste pass. Intercom bullet-list triggering after Shift+Enter is a known low-priority compatibility limitation. M14-J.5.1 documents that closure; M14-J.6 is next and not started. Text clipboard transport and Windows native Image architecture are unchanged.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -159,7 +274,7 @@ Image trigger + Space
 
 ## Approved Future Product Directions
 
-- **M14 — Snippet Authoring and Delivery:** The existing `SnippetEntry` aggregate remains authoritative. M14-I.1.5.2 retains the historical browser findings; M14-I.2 / Decision 43 defines the optional Windows companion architecture; M14-I.3/M14-I.3.1 implement the native foundation; M14-I.4/M14-I.4.1 implement and correct development Chrome integration; and M14-I.5 removes superseded browser Image/probe runtime after real-Chrome native success. M14-I is complete at `ebe915f`; Backup v1-v5, Dexie v5, Decision 42, metadata-only catalogs, and legacy compatibility remain unchanged. M14-J is next but not started.
+- **M14 — Snippet Authoring and Delivery:** The existing `SnippetEntry` aggregate remains authoritative. M14-I is complete at `ebe915f`; Backup v1-v5, Dexie v5, Decisions 42/43, metadata-only catalogs, and legacy compatibility remain unchanged. M14-J.2 is real-Crisp PASS. M14-J.3 is real-Intercom PASS for activation and ordinary rich Text. M14-J.4 preserves canonical direct `li` serialization and the generic `<br>` correction. M14-J.5's corrected real record passes persistence, serialization, delivery-payload equality, and normal Intercom list paste; the native-dev-only diagnostic remains explicitly invoked and production-excluded. Crisp and Intercom Image paste pass. M14-J.6 lifecycle recovery is next.
 - **M14-I.3 — Windows Native Clipboard Companion Foundation:** IMPLEMENTED / PRINCIPAL ENGINEER APPROVED / COMMITTED IN `ebe915f`. M14-I.4 consumes this foundation without changing its framing or clipboard guarantees.
 - **M14-I.3.1 — Native Host Framing and Partial-Failure Safety Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / COMMITTED IN `ebe915f`. Production processing no longer inspects stdin after the declared frame, and deterministic fault-injection coverage records best-effort partial clearing, ownership, no retry, and close-error precedence. Decision 42 and Decision 43 architecture remain unchanged.
 - **M14-I.4 — Chrome Native Messaging Integration and Development Registration:** IMPLEMENTED / AUTOMATED-VALIDATED / DEVELOPMENT HOST REGISTERED UNDER HKCU / REAL-CHROME IMAGE VALIDATED / COMMITTED IN `ebe915f`. `nativeMessaging` is optional and requested only from the Settings action; Text remains browser-only. Normal Windows Image delivery uses the `.dev` native host with no browser fallback.
@@ -384,8 +499,9 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal review of the M14-I.6 documentation closeout is the immediate gate. Then commit/push the closeout documentation and create the M14-J implementation/validation task.
-- M14-J is next but not started. Automatic native paste remains deferred and is not part of M14-J.
+- M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability is the exact next engineering task. Define its final recovery/host-access architecture and recover eligible already-open pages after install/update, extension reload/restart, or service-worker recreation without requiring refresh.
+- Recovery must be idempotent: a connected/current runtime reconnects or no-ops; a missing/stale runtime recovers or is injected; no duplicate listener, subscription, or activation may result. M14-J.5.1 makes no implementation or final host-permission decision for M14-J.6.
+- M14-J.2 is real-Crisp PASS. M14-J.3 Shadow DOM support and ordinary rich Text are real-Intercom PASS. M14-J.4 controlled list/hard-break serialization passes. M14-J.5's corrected record and normal Intercom list paste pass, as do Crisp and Intercom Image paste. Intercom bullet triggering after Shift+Enter remains a known low-priority compatibility limitation. Automatic native paste remains deferred and is not part of M14-J.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
 - A2/F9 was not run and is no longer required for the current decision tree. Do not request it again unless a future architecture task explicitly reopens it for a justified reason.
 
@@ -401,6 +517,7 @@ Image trigger + Space
 - The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the M11 implementation checkpoint is `d40e031` (`feat: add default Ollama model settings`).
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
 - M14-I implementation is committed and pushed at `ebe915f` (`feat: add clipboard delivery for text and image snippets`); immediately after that checkpoint, local `master` matched `origin/master` and the working tree was clean.
+- M14-I closeout documentation is committed and pushed at `28dcf53` (`docs: close out clipboard delivery milestone`). M14-J.1 through M14-J.5 remain uncommitted work built from this clean synchronized checkpoint.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and remain unchanged. Rich Snippet Templates is assigned to M14, Multimodal Screenshot Context to M15, OpenAI Provider Expansion to M16, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
@@ -408,7 +525,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 14 — Snippet Authoring and Delivery. M14-I through M14-I.5 is complete at committed/pushed checkpoint `ebe915f`. Text is `REAL-CHROME PASS`. Native host registration, Settings readiness, Image trigger/native preparation/cleanup/notice, visible native paste, and the post-cleanup smoke test are `PASS`; superseded browser Image/probe runtime is removed. M14-J is next but not started.
+- Current roadmap milestone: M14-J — Destination Compatibility Validation. M14-J.2 is real-Crisp PASS for inline, Enter, and Shift+Enter Text. M14-J.3 controlled open/closed Shadow DOM behavior and real Intercom activation/ordinary rich Text pass. M14-J.4 confirms canonical direct-list HTML and preserves the generic `<br>` correction. M14-J.5 confirms that the initial real failure came from an invalid two-item fixture; the corrected three-item record and normal Intercom paste pass. Crisp and Intercom Image paste pass. The Intercom bullet-after-Shift+Enter edge remains a known low-priority limitation. M14-J.6 lifecycle recovery is next, so M14-J is incomplete.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -417,12 +534,12 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal review of the documentation closeout, commit/push the closeout documentation, then create the M14-J implementation/validation task. M14-J remains not started.
+- Exact next action: define and implement M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability. The task must recover eligible already-open pages after lifecycle events without refresh and without duplicate runtime behavior; the final host-permission architecture is decided there, not in this checkpoint.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
-- Browser-specific behaviors introduced by future milestones will require their own automated and manual validation. JSDOM focus assertions do not prove Chrome WebContents activation or browser-level keyboard routing.
+- Browser-specific behaviors require automated and manual validation. M14-J.3 JSDOM event-shaped composed-path/target-range fixtures prove controlled logic, and real Intercom validates that correction plus ordinary rich Text. M14-J.4 JSDOM parsing proves standards-valid list topology and hard-break output. M14-J.5 confirms the corrected live record through persistence, serialization, delivery-payload equality, and normal Intercom paste. Intercom bullet-list triggering immediately after Shift+Enter remains a known low-priority compatibility limitation. Crisp validates the M14-J.2 structural path and Image paste; Intercom Image paste also passes.
 - Chrome may retain webpage keyboard routing when an already-visible Side Panel receives an internal Guidance focus/caret request. The user may need to click Guidance until Chrome exposes a supported panel-activation API; no M10 workaround is authorized.
 - Cross-world preload mismatch and unused generated preload warnings are currently classified as non-blocking WXT/Vite/Chrome generated-output observations with no functional impact. Revisit only with functional or performance evidence.
 - Broad normal-site access is intentional for M13 trigger expansion: generated output must match exactly `http://*/*` and `https://*/*` with frame-local `all_frames: true`. Chrome-protected and non-HTTP(S) pages remain unavailable. This increases permission exposure, so bounded candidate reading, password/specialized-input exclusion, no logging or transmission, no persistent catalog, and fail-closed unsupported-editor behavior remain mandatory.
@@ -445,5 +562,5 @@ Image trigger + Space
 - M14-D architecture checkpoint: `64504df` (`docs: define rich snippet delivery and local image architecture`).
 - M14-D.2 architecture clarification checkpoint: `f9b5097` (`docs: define pre-delivery local image trigger safety`).
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
-- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`. Text, Settings readiness, native Image end-to-end delivery, and the post-cleanup smoke test are real-Chrome validated; browser Image experiments and feasibility probes are removed from active runtime. M14-J is next but not started.
+- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; and its documentation closeout is committed at `28dcf53`. M14-J.1 through M14-J.5 are preserved uncommitted. M14-J.2 is real-Crisp PASS; M14-J.3 is real-Intercom PASS for Shadow-DOM activation and ordinary Text; M14-J.4 preserves canonical list output and fixes generic hard breaks; and M14-J.5's corrected real diagnostic plus normal Intercom paste and both destination Image checks pass. M14-J.5.1 is the current documentation checkpoint; M14-J.6 is next.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

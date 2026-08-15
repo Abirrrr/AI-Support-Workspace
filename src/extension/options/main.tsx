@@ -73,11 +73,23 @@ const windowsImageClipboard =
         permissions: optionsChrome.permissions,
         runtime: optionsChrome.runtime,
       });
+const snippetRepository = new DexieSnippetEntryRepository(database);
+const snippetAssetRepository = new DexieSnippetAssetRepository(database);
 const snippetLibrary = new SnippetLibraryService(
-  new DexieSnippetEntryRepository(database),
+  snippetRepository,
   catalogMutationPort,
-  new DexieSnippetAssetRepository(database),
+  snippetAssetRepository,
 );
+if (import.meta.env.MODE === 'native-dev') {
+  void import('./snippet-list-serialization-diagnostic').then(
+    ({ registerSnippetListSerializationDiagnostic }) =>
+      registerSnippetListSerializationDiagnostic(
+        globalThis,
+        snippetRepository,
+        snippetAssetRepository,
+      ),
+  );
+}
 const backupExport = new BackupExportService(
   new DexieBackupSnapshotReader(database),
   new BrowserBackupDownloadAdapter(),

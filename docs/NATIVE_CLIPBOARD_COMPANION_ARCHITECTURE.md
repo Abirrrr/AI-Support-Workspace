@@ -446,11 +446,11 @@ M14-I.3/M14-I.3.1 implement the approved native foundation. M14-I.4/M14-I.4.1 im
 - extension tests proving optional permission UX, Windows-only detection, Text independence, authoritative planning, both freshness checks, success-before-cleanup, stale-response suppression, compare-and-swap behavior, and safe errors/logs;
 - completed real-Chrome proof on Windows that a Decision 42-safe PNG is prepared by the helper and native `Ctrl+V` yields a visible genuine image; the post-cleanup smoke test passed with Settings Ready, trigger disappearance, copied notice, and visible-image paste.
 
-M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J is `NEXT` and remains `NOT STARTED`.
+M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J.2 is real-Crisp Text PASS, and M14-J.3 pre-delivery Shadow DOM editor/range resolution plus ordinary rich Text are real-Intercom PASS. M14-J.4 retains canonical list serialization and corrects generic inline hard breaks. M14-J.5 proves the initial apparent list failure used an invalid two-item fixture; the corrected three-item record passes persistence, serializer, delivery-payload equality, and normal Intercom paste. Crisp and Intercom Image destination paste pass. Intercom bullet triggering after Shift+Enter remains a known low-priority compatibility limitation. The native-dev diagnostic changes no clipboard or native boundary.
 
 ## Cleanup and Handoff
 
-Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed M14-I.1.4 File/offscreen Image path, obsolete Image-only contracts/errors/tests, and all feasibility-probe runtime/dev UI while preserving the Text offscreen copy-event path and feasibility history. The post-cleanup smoke test passed, and M14-I was committed/pushed at `ebe915f`. The exact next action is Principal review of the documentation closeout, commit/push the closeout docs, then create the M14-J implementation/validation task.
+Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J.3 through M14-J.5.1 change no native boundary. The exact next engineering task is M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability. Its idempotent recovery and final host-access architecture are defined there; this document does not pre-decide them.
 
 Implementation sequence:
 

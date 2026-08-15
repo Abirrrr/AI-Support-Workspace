@@ -26,8 +26,17 @@ function escapeAttribute(value: string): string {
   return escapeText(value).replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
+function serializeInlineText(text: string): string {
+  return text
+    .replaceAll('\r\n', '\n')
+    .replaceAll('\r', '\n')
+    .split('\n')
+    .map(escapeText)
+    .join('<br>');
+}
+
 function serializeMarkedText(text: string, bold: boolean, italic: boolean) {
-  let result = escapeText(text);
+  let result = serializeInlineText(text);
   if (italic) result = `<em>${result}</em>`;
   if (bold) result = `<strong>${result}</strong>`;
   return result;

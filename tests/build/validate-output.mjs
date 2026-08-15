@@ -202,6 +202,23 @@ const optionsScriptSource = await readFile(
   resolve(outputDirectory, optionsScriptPath),
   'utf8',
 );
+const generatedJavaScriptPaths = (
+  await readdir(outputDirectory, { recursive: true })
+)
+  .filter((relativePath) => relativePath.endsWith('.js'))
+  .map((relativePath) => resolve(outputDirectory, relativePath));
+const generatedJavaScript = (
+  await Promise.all(
+    generatedJavaScriptPaths.map((path) => readFile(path, 'utf8')),
+  )
+).join('\n');
+if (nativeDevelopmentMode) {
+  assert.match(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
+  assert.match(generatedJavaScript, /diagnoseSnippetListSerialization/);
+} else {
+  assert.doesNotMatch(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
+  assert.doesNotMatch(generatedJavaScript, /diagnoseSnippetListSerialization/);
+}
 const packagedRuntimeSource = [
   serviceWorkerSource,
   offscreenScriptSource,
