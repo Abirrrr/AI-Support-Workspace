@@ -7,4 +7,5 @@ playwright-report/
 test-results/
 README.md
 pnpm-lock.yaml
+native/windows-clipboard-companion/fixtures/protocol-v1/*.json
 **/desktop.ini

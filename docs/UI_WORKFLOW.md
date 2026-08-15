@@ -183,39 +183,41 @@ Press Space
 
 ↓
 
-Replace Only the Trigger with Saved Plain-Text Snippet + Space
+Prepare the Authoritative Text/Image Snippet on the Clipboard
 
 ↓
 
-Caret Rests after the Inserted Space
+After Confirmed Copy, Remove Only the Unchanged Trigger + Space
+
+↓
+
+Press Native Ctrl+V
 ```
 
 ### Workflow Notes
 
-- The implemented expansion runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. Browser delivery is currently deterministic plain insertion.
+- Trigger activation runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. M14-I prepares deterministic plain plus safe rich Text representations or a portable Image representation, and the user performs native paste.
 - The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
-- A match replaces exactly the trigger range, inserts the saved content as plain text plus the intended single space, preserves surrounding content and line breaks, emits the normal bubbling composed host `input` notification without synthesizing `change`, and places the caret after the inserted space.
-- `textarea` always receives the deterministic plain projection. A supported single-line input expands only when that final projection contains no `\r` or `\n`; otherwise its adapter declines before preventing Space, does not mutate the host value, and lets normal Space behavior continue unchanged. It never flattens, truncates, normalizes, or partially inserts content merely to fit.
-- Future direct Rich rendering may create only proven-safe target-owned text, paragraph, bold, italic, validated-link, and list nodes. It never parses stored HTML or automatically fetches a reference URL. Image Snippet delivery is a separate clipboard/native-paste workflow.
+- A known deliverable match starts asynchronous clipboard preparation without preventing the activation Space. Only confirmed clipboard success permits exact compare-and-swap removal of the unchanged trigger plus that Space; the caret then collapses at the removed range start.
+- `textarea`, supported text/search input, and generic contenteditable share destination-independent clipboard preparation. Their native paste behavior chooses the plain or rich representation; the extension does not reconstruct saved formatting through destination DOM mutation.
+- Text and Image delivery use the same typed planner and native-paste workflow. Stored HTML is never parsed and reference URLs are never fetched.
 - A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
 - Each matched content-script frame maintains one long-lived typed `chrome.runtime.Port`. Its transient cache is enabled only while the port is connected and holds a complete validated current-epoch snapshot; ordered invalidation and complete-snapshot messages use that port. Disconnection immediately clears and disables the cache, so no former snapshot can expand. Reconnection requests a complete snapshot, worker restart establishes a new epoch, and stale epochs are rejected.
 - Before Snippet create, edit, delete, import, or restore persistence, the coordinator invalidates every currently connected frame and each clears immediately. Success publishes one rebuilt complete snapshot; persistence failure republishes the unchanged snapshot; publication failure leaves affected frames disabled until reconnect or successful refresh. Content scripts never open Dexie, and no persistent browser-storage catalog, durable queue, polling loop, or per-keystroke worker lookup is created.
 - Intercom, Crisp, generic textarea, and generic contenteditable are required real-world validation targets for the revised delivery architecture. Destination-specific adaptation may be added only behind capability resolution when concrete browser evidence justifies it.
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
-- Trigger expansion reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Current expansion uses no clipboard; future clipboard fallback is explicit opt-in.
+- Trigger recognition reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Clipboard delivery is explicitly enabled in Settings.
 - For Rich text, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, renders unordered/ordered items with `- ` or one-based numeric prefixes, and preserves legacy image-reference projection. Image Snippets are excluded from text consumers rather than represented by a placeholder.
 
-### Planned Destination Delivery Workflow
+### Unified Clipboard Delivery Workflow
 
 ```text
-Text/Rich Trigger + Space
-→ Delivery Planner checks behavioral capabilities
-├─ reliable direct target → insert directly and complete
-├─ opted-in clipboard target → write clipboard successfully
-│  → safely remove only unchanged trigger/activation space
-│  → show “Snippet copied — press Ctrl+V”
-│  → user presses Ctrl+V for native destination paste
-└─ unavailable/unsupported → preserve input and explain limitation
+Text Trigger + Space
+→ authoritative typed Delivery Planner
+→ write safe text/html + deterministic text/plain successfully
+→ safely remove only unchanged trigger/activation space
+→ show “Snippet copied — press Ctrl+V”
+→ user presses Ctrl+V for native destination paste
 ```
 
 ```text
@@ -229,11 +231,32 @@ Image Trigger + Space
 ```
 
 - Clipboard assistance is real copy plus user native paste, never a synthetic paste event and never a claim that insertion has already occurred.
-- Clipboard capability is enabled through an explanatory future Settings/options action that requests optional `clipboardWrite` and `offscreen`. Permission denial, revocation, offscreen failure, conversion failure, or write failure preserves normal typing and the trigger. Trigger input never silently requests permission, and `clipboardRead` is never requested.
+- The product owner accepts the one-extra-keystroke manual `Ctrl+V` workflow for the current product version. Automatic paste is not current M14-I scope.
+- Existing browser Text clipboard capability is enabled through an explanatory Settings/options action that requests optional `clipboardWrite` and `offscreen`. The independent Windows Image Snippets section requests optional `nativeMessaging` only from its own Enable button. It reports Not enabled, Companion not found, Companion incompatible, Ready, or unsupported platform without exposing host internals. Permission denial, revocation, helper absence/mismatch, conversion failure, or write failure preserves normal typing and the trigger. Trigger input never silently requests permission, and `clipboardRead` is never requested.
+- Decision 42 screens PNG IHDR, JPEG SOF, and WebP VP8X/VP8/VP8L dimensions before decoding. Width/height are capped at 8,192, pixels at 16,777,216, decoded RGBA at 64 MiB, and the planned two-surface raster working set at 128 MiB. Animated WebP and oversized images are rejected, not resized.
 - Because the write is asynchronous, ordinary Space proceeds. Cleanup occurs only after confirmed copy and exact editor/range/catalog/request revalidation. Image cleanup removes the trigger and activation U+0020, leaves no placeholder or trailing space, and collapses the caret at the removed range start. Changed state leaves user text untouched while reporting copy accurately.
 - Text `text/plain` uses deterministic projection. Safe Rich `text/html` contains only validated paragraphs, text, bold/italic, links, and lists. Image delivery is a separate image-only PNG clipboard item; it never attempts ordered text-plus-image placement.
-- Blob/base64/asset IDs are not placed in frame catalog snapshots. The service worker retrieves the requested Image Snippet asset from Dexie only after activation and revalidates ownership before invoking the offscreen transport.
+- Blob/base64/asset IDs are not placed in frame catalog snapshots. The service worker retrieves the requested Image Snippet asset from Dexie only after activation, revalidates ownership, applies Decision 42 PNG preparation, rechecks catalog freshness, and then invokes the Windows native transport.
 - Current Crisp evidence is limited but actionable: ordinary direct Plain insertion fails in the tested Crisp editor, the same Snippet succeeds in another Rich editor, the speculative generic patch was removed, and manual native paste works. No Crisp-specific runtime is implemented or promised by M14-D.
+- Real Chrome validates the Text workflow end to end through clipboard preparation, trigger cleanup, copied notice, and native paste with bold, italic, links, bullet lists, and numbered lists. Text normally uses one temporary offscreen `copy` handler plus `document.execCommand('copy')`, not `navigator.clipboard.write()`.
+- The previous Image Async Clipboard path failed at the offscreen write; M14-I.1.4 pasted a `snippet.png` File; and focused-content A1 pasted `TEXT`. Focused extension-page B pasted the visible deterministic PNG as an image, proving focused-extension clipboard capability but not an acceptable workflow. M14-I.5 removes these mechanisms and their probes from active runtime. The product never opens/focuses an extension page for Image delivery.
+- M14-I.4.1 aligns the shared native call with Chrome's callback response and keeps the Settings runtime channel open through `sendResponse` plus literal `true`. `Check companion again` always performs a fresh check and replaces a prior failure with `Ready` after compatible success. Real Chrome validates `Ready` and the first complete Image workflow: trigger activation, native clipboard preparation, trigger cleanup, `Image copied — press Ctrl+V`, and visible genuine image after native paste.
+
+Current Windows Image flow:
+
+```text
+Image trigger + Space
+-> authoritative service-worker planning and Decision 42 PNG
+-> second catalog freshness check
+-> one strict Windows Native Messaging request
+-> companion writes registered PNG + CF_DIBV5
+-> exact correlated native success
+-> content compare-and-swap cleanup
+-> "Image copied — press Ctrl+V"
+-> user performs native Ctrl+V
+```
+
+Missing permission/helper, incompatible version, busy clipboard, native failure, disconnect, or stale response leaves the trigger and page content unchanged and shows no false copied notice. If native preparation succeeded but the response is lost or page state became stale, the clipboard may remain prepared while cleanup is safely skipped. Text remains independent and never launches the helper.
 
 ## 7. Keyboard Shortcut Workflow
 
@@ -289,7 +312,7 @@ Ready to Generate
 - Empty selection preserves Context and shows `Select text on the page, then use the shortcut again.` Restricted or failed page capture preserves Context and shows `Couldn't capture selected text from this page. Copy and paste it into Merchant Context.` These paths also preserve Output, do not force Guidance focus or Generate, and expose no raw Chrome error.
 - The shortcut workflow is intended to reduce friction and accelerate the support task.
 - Selection capture is text-only, main-frame-only, transient, and user-invoked. It does not scrape surrounding page content, read cross-origin frames, expand persistent content-script matches, or capture screenshots.
-- This application-level keyboard shortcut is distinct from future Snippet Trigger Expansion. M10 opens or invokes extension behavior through a key combination; typed text such as `;hello` expands saved Snippet content inside a supported editor.
+- This application-level keyboard shortcut is distinct from Snippet trigger delivery. M10 opens or invokes extension behavior through a key combination; typed text such as `;hello` prepares the authoritative saved Snippet for native paste after safe trigger cleanup.
 - M10 real Chrome validation passed normal document, textarea, and contenteditable selection; first and repeated capture; empty and restricted-page feedback; state preservation; manual Generate using the new Context and existing Guidance; exact edited-output Copy with line breaks; popup Workspace and Library navigation; and both Knowledge and Snippet Library regressions. The already-visible-panel keyboard-routing limitation remains the only documented focus caveat and is not an implementation failure.
 
 ## 8. AI Generation Workflow
@@ -474,7 +497,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Authoring and Delivery:** M14-G/G.2 implements lists, Backup v5, unified Text WYSIWYG, and one-image screenshot/file authoring. M14-H is absorbed. Remaining work is M14-I unified Text+Image clipboard delivery/trigger planning and M14-J destination compatibility validation.
+- **M14 — Snippet Authoring and Delivery:** M14-G/G.2 implements lists, Backup v5, unified Text WYSIWYG, and one-image screenshot/file authoring. M14-H is absorbed. M14-I implements unified Text/Image planning; Text is real-Chrome validated. M14-I.1.5.2 retains browser feasibility history, M14-I.2 / Decision 43 defines the Windows Native Clipboard Companion, M14-I.3/M14-I.3.1 implement the native foundation, M14-I.4/M14-I.4.1 implement and validate development Chrome integration, and M14-I.5 removes superseded browser Image/probe runtime. Final review, one smoke test, and checkpoint precede M14-J.
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
@@ -491,6 +514,8 @@ Open existing full options/Library page in a normal browser tab
 ```
 
 This future workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest and retire the default popup without competing toolbar behaviors. It is not assigned to M14-G, M14-H, M14-I, or M14-J and does not interrupt the Snippet roadmap.
+
+M14-I.2 defines architecture for an optional Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through a stable `native-dev` extension build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. Optional native auto-paste is a separate later capability: it must never paste after focus moves, requires independent approval, has no AutoHotkey/`SendInput` implementation, and must preserve manual `Ctrl+V` fallback.
 
 Context images provide transient visual information to generation. Image Snippets are durable, reusable, one-image output shortcuts copied for destination-native paste. Their domain ownership, lifecycle, and privacy rules remain separate; no "Use as Context" bridge is approved.
 

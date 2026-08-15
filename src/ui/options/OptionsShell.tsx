@@ -3,6 +3,8 @@ import { useState } from 'react';
 import type { KnowledgeLibrary } from '../../application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../application/settings/settings-service';
 import type { SnippetLibrary } from '../../application/snippet/snippet-library';
+import type { ClipboardDeliveryPermission } from '../../extension/snippet-trigger/clipboard-permission';
+import type { WindowsImageClipboardCapability } from '../../extension/snippet-trigger/native-clipboard-capability';
 import {
   ImportExportView,
   type ImportExportActions,
@@ -16,6 +18,8 @@ interface OptionsShellProps {
   settings: SettingsApplication;
   snippetLibrary: SnippetLibrary;
   importExport: ImportExportActions;
+  clipboardDelivery?: ClipboardDeliveryPermission | undefined;
+  windowsImageClipboard?: WindowsImageClipboardCapability | undefined;
 }
 
 export function OptionsShell({
@@ -23,6 +27,8 @@ export function OptionsShell({
   settings,
   snippetLibrary,
   importExport,
+  clipboardDelivery,
+  windowsImageClipboard,
 }: OptionsShellProps) {
   const [activeSection, setActiveSection] = useState<
     'knowledge' | 'snippets' | 'settings' | 'import-export'
@@ -147,7 +153,12 @@ export function OptionsShell({
           id="settings-panel"
           role="tabpanel"
         >
-          <SettingsView key={`settings-${dataRevision}`} settings={settings} />
+          <SettingsView
+            clipboardDelivery={clipboardDelivery}
+            key={`settings-${dataRevision}`}
+            settings={settings}
+            windowsImageClipboard={windowsImageClipboard}
+          />
         </div>
       ) : null}
       {importExportVisited ? (

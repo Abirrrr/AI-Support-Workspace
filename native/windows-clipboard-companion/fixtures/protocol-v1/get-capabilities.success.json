@@ -1,0 +1,1 @@
+{"protocolVersion":1,"requestId":"0123456789abcdef0123456789abcdef","status":"success","hostVersion":"1.0.0","result":{"operation":"get-capabilities","supportedProtocolVersions":[1],"supportedOperations":["write-image-png"],"maxPngBytes":5242880,"clipboardFormats":["png","cf-dibv5"]}}

@@ -15,6 +15,13 @@ export class FrameTriggerCatalogCache {
     return this.connected && this.enabled;
   }
 
+  get identity():
+    { readonly epoch: string; readonly revision: number } | undefined {
+    return this.isEnabled && this.epoch !== undefined
+      ? { epoch: this.epoch, revision: this.revision }
+      : undefined;
+  }
+
   markConnected(): void {
     this.clear(true);
     this.connected = true;

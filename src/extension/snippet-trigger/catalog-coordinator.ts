@@ -62,6 +62,14 @@ export class TriggerCatalogCoordinator {
     return this.frames.size;
   }
 
+  isCurrentSnapshot(epoch: string, revision: number): boolean {
+    return (
+      this.mutations.size === 0 &&
+      epoch === this.epoch &&
+      revision === this.revision
+    );
+  }
+
   connect(port: TriggerCatalogRuntimePort): void {
     if (port.name !== TRIGGER_CATALOG_PORT_NAME || this.frames.has(port))
       return;

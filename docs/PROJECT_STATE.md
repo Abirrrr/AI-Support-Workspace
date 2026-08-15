@@ -8,19 +8,68 @@
 ## Current Milestone
 
 - Milestone 14 — Snippet Authoring and Delivery
-- Status: M14-G.2 unified Text/Image authoring is implemented on the uncommitted M14-G foundation. Unified clipboard delivery remains pending under Decision 41.
+- Status: M14-I through M14-I.5 is an intentionally uncommitted implementation/validation/cleanup package over committed checkpoint `672185e` (`feat: unify snippet authoring and image snippets`). Text delivery, Windows companion Settings readiness, and Windows native Image delivery through visible native `Ctrl+V` are `REAL-CHROME PASS`. M14-I.5 removes the failed browser Image transports and A1/A2/B feasibility runtime probes while preserving their historical evidence, the validated Text path, and development native integration. The package is pending Principal final review, one post-cleanup real-Chrome smoke test, and an authorized Git checkpoint.
 
 ## Task State
 
-- Last completed task: M14-G.2 — Unified Snippet Library UX and Image Snippet Authoring.
-- M14 status: Text is the unified user-facing text type; new Text Snippets are Rich; Tiptap supplies constrained WYSIWYG authoring; historical Plain converts only on successful Save; and the simplified Library provides All/Text/Images plus Text/Image creation. Image Snippet clipboard paste, file selection, validation, preview, atomic Save/replace/delete, and reopen are implemented. Backup v5, Dexie v5, and Decision 38 isolation remain authoritative. Unified clipboard delivery remains pending.
-- Last completed implementation task: M14-G.2 — Unified Snippet Library UX and Image Snippet Authoring.
-- Active implementation task: None.
-- Latest architecture correction: M14-G.2 / Decision 41 — unified Snippet authoring and native-paste delivery direction. Decisions 39 and 40 remain authoritative within their separate scopes.
+### M14-I.5 Principal Final-Review Handoff
+
+```text
+Current milestone: M14 — Snippet Authoring and Delivery
+Latest committed checkpoint: 672185e — feat: unify snippet authoring and image snippets
+Current uncommitted task: M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization
+
+M14-I overall status:
+IMPLEMENTED
+REAL-CHROME VALIDATED
+CLEANUP COMPLETE
+PENDING PRINCIPAL FINAL REVIEW
+NOT COMMITTED
+
+Text:
+REAL-CHROME PASS
+
+Windows Image:
+SETTINGS COMPANION READINESS: PASS
+TRIGGER ACTIVATION: PASS
+NATIVE CLIPBOARD PREPARATION: PASS
+TRIGGER CLEANUP: PASS
+COPIED NOTICE: PASS
+NATIVE CTRL+V VISIBLE IMAGE: PASS
+
+Browser Image experimental paths:
+REMOVED FROM ACTIVE RUNTIME
+HISTORICAL EVIDENCE PRESERVED IN DOCUMENTATION
+
+Native development integration:
+ACTIVE FOR DEVELOPMENT
+
+Production native installer:
+NOT IMPLEMENTED
+
+Automatic paste:
+NOT IMPLEMENTED
+FUTURE BACKLOG
+
+Post-cleanup real-Chrome smoke test:
+NOT PERFORMED — pending Principal Engineer.
+
+Exact next action:
+Principal final M14-I source/status review
+→ one post-cleanup real-Chrome smoke test
+→ Git checkpoint
+→ M14-J
+```
+
+- Last completed task before the active package: M14-G.2 — Unified Snippet Library UX and Image Snippet Authoring at `672185e`.
+- M14 status: M14-I.3/M14-I.3.1 provide the approved native foundation. M14-I.4 connects it through a service-worker-only `WindowsNativeImageClipboardTransport`, strict TypeScript protocol-v1 validation, stable `native-dev` identity, optional `nativeMessaging`, and an exact `.dev` HKCU registration. M14-I.4.1 preserves callback-delivered Native Messaging, stable `sendResponse`/literal-`true` Settings lifetime, strict response validation, and truthful readiness states. Real Chrome validates Settings `Ready`, Image activation, native clipboard preparation, exact success-gated cleanup, copied notice, and visible native paste. M14-I.5 removes the superseded browser Image/probe runtime. Production installation remains future work.
+- Last completed implementation checkpoint: `672185e` — `feat: unify snippet authoring and image snippets`.
+- Latest feasibility conclusion: M14-I.1.5.2 remains the historical browser evidence. A1 produced `TEXT` and failed; focused extension-page B produced `VISIBLE IMAGE` as a capability-only pass; A2/F9 was not run and is no longer required. M14-I.5 removes those probes and the failed M14-I.1.4 File path from active runtime after the native replacement passed.
+- Latest architecture decision: M14-I.2 / Decision 43 — optional Windows Native Clipboard Companion. Decisions 39–42 remain authoritative within their separate scopes.
 - M14-F — Unified Rich Editor Inline Image Authoring: CANCELLED BEFORE IMPLEMENTATION.
-- Active documentation task: None.
+- Current uncommitted task: M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization.
 - M14-H — Image Snippet Domain Completion and Authoring: ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.
-- Exact next engineering action after Principal approval/checkpoint: M14-I — Unified Snippet Clipboard Delivery and Trigger Planner.
+- Exact next action: Principal final M14-I source/status review, one post-cleanup native-dev smoke test, an authorized Git checkpoint, and then M14-J. M14-J remains `NOT STARTED` until that checkpoint.
 - Continuity: M12-A ran only a Principal-readiness self-check, produced no repository changes, and was superseded by M12-A.1. M12-A must not be reused for another independent task.
 - M12-A.1 passed Principal review and is complete at documentation checkpoint `f09e776` (`docs: add task identifiers and assign future milestones`).
 - M12-B completed the readiness review with verdict `ARCHITECTURE DEFINITION REQUIRED`.
@@ -50,7 +99,7 @@
 
 ## Project Status
 
-- Status: Milestone 13 — Snippet Trigger Expansion v1 is complete at implementation checkpoint `b76fcb4` and closeout checkpoint `9a3c7ef`. Milestone 14 is current. M14-A is complete at `c1105d4`, M14-B at `ed23f30`, M14-C at `a787100`, M14-D at `64504df`, Decision 38 at `f9b5097`, M14-E at `1828f09`, and M14-F.1/F.1.1 at `b7d16ec`. M14-G/G.1/G.2 are the latest uncommitted implementation package and have no checkpoint hash before Principal review.
+- Status: Milestone 14 is current. M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is the current uncommitted package. Text delivery is `REAL-CHROME PASS`. Settings companion readiness and Windows native Image delivery are `REAL-CHROME PASS`; browser Image experiments and feasibility runtime probes are removed. M14-I is pending Principal final review, one post-cleanup smoke test, and an authorized checkpoint.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -59,7 +108,13 @@
 
 ## Approved Future Product Directions
 
-- **M14 — Snippet Authoring and Delivery:** The existing `SnippetEntry` aggregate remains authoritative. Decision 41 exposes Text and Image Snippets, implements constrained WYSIWYG and one-image authoring over the M14-E asset boundary, and keeps Backup v1-v5 and legacy Rich local-image records compatible. M14-I unified clipboard delivery remains pending.
+- **M14 — Snippet Authoring and Delivery:** The existing `SnippetEntry` aggregate remains authoritative. M14-I.1.5.2 retains the historical browser findings; M14-I.2 / Decision 43 defines the optional Windows companion architecture; M14-I.3/M14-I.3.1 implement the native foundation; M14-I.4/M14-I.4.1 implement and correct development Chrome integration; and M14-I.5 removes superseded browser Image/probe runtime after real-Chrome native success. Backup v1-v5, Dexie v5, Decision 42, metadata-only catalogs, and legacy compatibility remain unchanged; M14-J remains blocked until checkpoint.
+- **M14-I.3 — Windows Native Clipboard Companion Foundation:** NATIVE HOST FOUNDATION IMPLEMENTED / PRINCIPAL ENGINEER APPROVED / NOT COMMITTED. M14-I.4 consumes this foundation without changing its framing or clipboard guarantees.
+- **M14-I.3.1 — Native Host Framing and Partial-Failure Safety Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / PENDING PRINCIPAL ENGINEER REVIEW / NOT COMMITTED. Production processing no longer inspects stdin after the declared frame, and deterministic fault-injection coverage records best-effort partial clearing, ownership, no retry, and close-error precedence. Decision 42 and Decision 43 architecture remain unchanged.
+- **M14-I.4 — Chrome Native Messaging Integration and Development Registration:** IMPLEMENTED / AUTOMATED-VALIDATED / DEVELOPMENT HOST REGISTERED UNDER HKCU / REAL-CHROME IMAGE VALIDATED / NOT COMMITTED. `nativeMessaging` is optional and requested only from the Settings action; Text remains browser-only. Normal Windows Image delivery uses the `.dev` native host with no browser fallback.
+- **M14-I.4.1 — Native Companion Capability Status Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / REAL-CHROME SETTINGS READINESS PASS / NOT COMMITTED. Callback-aligned Native Messaging and stable service-worker `sendResponse` handling map compatible success to Ready while keeping unavailable, incompatible, and invalid responses distinct.
+- **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / PENDING PRINCIPAL FINAL REVIEW AND POST-CLEANUP SMOKE TEST / NOT COMMITTED. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
+- **Optional Automatic Native Paste Helper — Future Investigation:** A later separable capability could explore carefully focus-gated native `Ctrl+V`/input injection. It is not part of the M14-I.2 clipboard foundation, has no AutoHotkey or `SendInput` implementation approval, and must preserve manual `Ctrl+V` as fallback.
 - **Workspace Shell Action UX — Unassigned:** The current toolbar action still opens the popup. A future shell task will make the toolbar action open the existing global Workspace Side Panel directly and add a panel Library action that opens the full options/Library page in a normal browser tab. Full Library, Settings, and Import / Export management stays in options. This is not M14-G through M14-J and does not interrupt the Snippet sequence.
 - **M15 — Multimodal Screenshot Context:** Merchant Context should eventually combine text with one or more transient clipboard screenshots for generation through a provider-independent capability boundary. Unsupported screenshots must never disappear silently. Detailed M15 architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
@@ -105,10 +160,10 @@
 - M14-G implements non-recursive unordered/ordered Rich lists with inline marks/links and deterministic plain projection. M14-G.2 replaces its manual authoring controls with normal WYSIWYG behavior while keeping the structured domain authoritative. New embedded local-image Rich authoring remains cancelled.
 - `ImageSnippetContent` exists as exactly `{ kind: 'image', assetId }`, owns exactly one same-Snippet asset, and has no truthful text projection. M14-G.2 implements direct screenshot paste, secondary file selection, local preview, and atomic lifecycle operations. No Image Library or "Use as Context" bridge is approved.
 - Backup v4 remains frozen/importable. M14-G implements strict explicit Backup v5 DTOs/mappings for lists and Image content with the retained 96 MiB guard and atomic four-store restore. Dexie remains version 5 with no store/index/migration changes.
-- Until M14-I, Image Snippets are explicitly excluded from Retrieval, Prompt Builder reference content, and the current plain trigger catalog. The Library authors and previews them without exposing asset IDs or binary data.
+- Image Snippets remain excluded from Retrieval and Prompt Builder, but M14-I publishes metadata-only typed trigger descriptors. Asset IDs and binary data remain outside frame catalogs.
 - M14-H is absorbed into M14-G.2. The implemented fastest workflow is screenshot to clipboard, New Image Snippet, focused paste target, `Ctrl+V`, preview, metadata, and Save; labelled file selection is secondary.
 - Future Image delivery is opt-in clipboard preparation followed by real user `Ctrl+V`. The typed frame catalog carries no image bytes/base64/asset ID. `clipboardRead` and synthetic paste are prohibited. M14-F.1 adds no permission or transport.
-- Decision 38 remains the fail-closed rule for legacy Rich local-image records. Decision 39 separately keeps future Image Snippets out of the plain catalog until M14-I adds typed delivery. Plain and portable Rich text behavior remains unchanged.
+- Decision 38 remains the fail-closed rule for legacy Rich local-image records. M14-I replaces Decision 39's transitional Image catalog exclusion with typed delivery while preserving Plain and portable Rich compatibility.
 - Context Images remain a separate future M15 multimodal-input domain with generation-time provider/privacy rules.
 - Variables, placeholders, customer-field interpolation, conditional logic, loops, scripting, arbitrary HTML/CSS, tables, video, embeds, AI-generated fields, page scraping, analytics, trigger syntax changes, provider changes, OpenAI, collaboration, sync, and new Chrome permissions are explicit non-goals.
 
@@ -277,9 +332,10 @@
 
 ## Next Engineering Action
 
-- M14-G/G.2 is the latest uncommitted implementation package pending Principal Engineer checkpoint. It implements lists, deterministic projection, the Image contract/invariant, Backup v5, unified Text WYSIWYG, simplified Library, and screenshot/file Image authoring with M14-E atomic lifecycle reuse.
-- M14-H is absorbed into M14-G.2 and is not separately active.
-- The exact next engineering action after approval/checkpoint is M14-I — Unified Snippet Clipboard Delivery and Trigger Planner. M14-J then owns destination compatibility validation.
+- Principal final M14-I source/status review is the immediate gate. Then perform only the documented post-cleanup native-dev smoke test before authorizing the Git checkpoint.
+- Do not start automatic native paste or M14-J before the M14-I checkpoint.
+- M14-H remains absorbed into M14-G.2 and is not separately active.
+- A2/F9 was not run and is no longer required for the current decision tree. Do not request it again unless a future architecture task explicitly reopens it for a justified reason.
 
 ## Repository Status
 
@@ -299,7 +355,7 @@
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current roadmap milestone: Milestone 14 — Snippet Authoring and Delivery. M14-G/G.2 is the latest implementation pending checkpoint: lists, projection, `ImageSnippetContent`, Backup v5, unified Text WYSIWYG, and Image authoring are implemented. Decisions 39 and 41 define separate Text/Image products and native-paste delivery direction; no implementation task is active.
+- Current roadmap milestone: Milestone 14 — Snippet Authoring and Delivery. M14-I through M14-I.5 is uncommitted over committed checkpoint `672185e`. Text is `REAL-CHROME PASS`. Native host registration, Settings readiness, Image trigger/native preparation/cleanup/notice, and visible native paste are `PASS`; superseded browser Image/probe runtime is removed.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -307,8 +363,8 @@
 - Future continuity: M14-A is complete and approved architecture. A future thread must not treat it as active, pending, uncommitted architecture work, or work that must be recreated.
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
-- Latest architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation.
-- Exact next action after approval/checkpoint: M14-I — Unified Snippet Clipboard Delivery and Trigger Planner. M14-H is absorbed into M14-G.2.
+- Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. Latest uncommitted architecture is M14-I.2 / Decision 43; latest uncommitted integration is M14-I.4 over the M14-I.3/M14-I.3.1 native foundation.
+- Exact next action: Principal final review, one post-cleanup native-dev smoke test, and an authorized M14-I checkpoint. M14-J begins only after that checkpoint.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -319,7 +375,8 @@
 - Broad normal-site access is intentional for M13 trigger expansion: generated output must match exactly `http://*/*` and `https://*/*` with frame-local `all_frames: true`. Chrome-protected and non-HTTP(S) pages remain unavailable. This increases permission exposure, so bounded candidate reading, password/specialized-input exclusion, no logging or transmission, no persistent catalog, and fail-closed unsupported-editor behavior remain mandatory.
 - Real browser generation depends on the M9 `sidePanel` permission, localhost host permission, and environment-specific external Ollama `OLLAMA_ORIGINS` configuration. These boundaries passed manual Chrome validation, but environment setup remains external and must not be changed automatically.
 - Local-model instruction following is not perfect; one validated `qwen2.5:7b` response used the phrase “Delivery should be soon.” despite Guidance not to promise a delivery date. This is a future prompt/model-quality concern rather than an M9 workflow failure.
-- M14-G/G.2 implements structured lists, Backup v5, unified Text WYSIWYG, and one-image authoring over M14-E assets. Inline Rich-image authoring will not be implemented. Unified external clipboard delivery and destination validation remain pending; Crisp direct insertion remains unresolved. M15 Context Images and M16 OpenAI remain separate future work.
+- M14-I.1.5.2 preserves historical evidence: Offscreen Async, M14-I.1.4 `snippet.png`, and A1 `TEXT` failed Image semantics; focused extension-page B `VISIBLE IMAGE` passed only as a capability control. M14-I.5 removes all of those experimental runtime paths and probes. M15 Context Images and M16 OpenAI remain separate.
+- Decision 43 is now backed by native automated coverage and a real-Chrome end-to-end Image pass through the registered development companion. Production installer/signing/reputation, enterprise user-level-host policy, broad destination compatibility, and the post-cleanup smoke test remain unresolved; the development pass is not a production-packaging claim.
 - Product-owner Chrome validation passed the real Intercom editor and another normal website, but did not test every website or editor framework. Unsupported or unsafe editor structures continue to fail closed, and Chrome-protected, browser-internal, extension, `file://`, and unsupported-scheme pages remain unavailable.
 - History remains intentionally undecided and must not be assumed to be in scope.
 - The already-mounted Side Panel does not live-refresh a restored default model; recreating the Side Panel loads the restored value. This edge case and a manual oversized-file exercise were not repeated during M12 closeout and are non-blocking because their required behavior is covered by source review and automated tests.
@@ -335,5 +392,5 @@
 - M14-D architecture checkpoint: `64504df` (`docs: define rich snippet delivery and local image architecture`).
 - M14-D.2 architecture clarification checkpoint: `f9b5097` (`docs: define pre-delivery local image trigger safety`).
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
-- M14-F.1 Decision 39 is committed at `b7d16ec`. M14-G/G.1/G.2 are the current uncommitted package awaiting Principal review.
+- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 remains uncommitted. Text, Settings readiness, and native Image end-to-end delivery are real-Chrome validated; browser Image experiments and feasibility probes are removed from active runtime. Final review, one smoke test, and checkpoint remain.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

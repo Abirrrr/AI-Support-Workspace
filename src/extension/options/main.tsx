@@ -22,6 +22,8 @@ import { DexieSettingsRepository } from '../../infrastructure/persistence/dexie-
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
 import { DexieSnippetAssetRepository } from '../../infrastructure/persistence/dexie-snippet-asset-repository';
 import { RuntimeCatalogMutationPort } from '../../infrastructure/snippet-trigger/runtime-catalog-mutation-port';
+import { ChromeClipboardDeliveryPermission } from '../snippet-trigger/clipboard-permission';
+import { ChromeWindowsImageClipboardCapability } from '../snippet-trigger/native-clipboard-capability';
 import { OptionsShell } from '../../ui/options/OptionsShell';
 import '../../ui/styles.css';
 
@@ -47,6 +49,30 @@ const knowledgeLibrary = new KnowledgeLibraryService(
   new DexieKnowledgeEntryRepository(database),
 );
 const settings = new SettingsService(new DexieSettingsRepository(database));
+const optionsChrome = (
+  globalThis as typeof globalThis & {
+    chrome?: {
+      permissions?: ConstructorParameters<
+        typeof ChromeClipboardDeliveryPermission
+      >[0];
+      runtime?: ConstructorParameters<
+        typeof ChromeWindowsImageClipboardCapability
+      >[0]['runtime'];
+    };
+  }
+).chrome;
+const clipboardDelivery =
+  optionsChrome?.permissions === undefined
+    ? undefined
+    : new ChromeClipboardDeliveryPermission(optionsChrome.permissions);
+const windowsImageClipboard =
+  optionsChrome?.permissions === undefined ||
+  optionsChrome.runtime === undefined
+    ? undefined
+    : new ChromeWindowsImageClipboardCapability({
+        permissions: optionsChrome.permissions,
+        runtime: optionsChrome.runtime,
+      });
 const snippetLibrary = new SnippetLibraryService(
   new DexieSnippetEntryRepository(database),
   catalogMutationPort,
@@ -72,10 +98,12 @@ const importExport = {
 createRoot(root).render(
   <StrictMode>
     <OptionsShell
+      clipboardDelivery={clipboardDelivery}
       knowledgeLibrary={knowledgeLibrary}
       importExport={importExport}
       settings={settings}
       snippetLibrary={snippetLibrary}
+      windowsImageClipboard={windowsImageClipboard}
     />
   </StrictMode>,
 );

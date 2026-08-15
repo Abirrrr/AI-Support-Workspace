@@ -53,9 +53,10 @@ async function flushCoordinatorQueue() {
 }
 
 function catalogReader(content = 'Current content'): TriggerCatalogReader {
+  void content;
   return {
     readCatalog: vi.fn(async () => [
-      { trigger: ';hello', snippetId: 'snippet-1', content },
+      { kind: 'text' as const, trigger: ';hello', snippetId: 'snippet-1' },
     ]),
   };
 }
@@ -78,7 +79,7 @@ describe('service-worker trigger catalog coordinator', () => {
         {
           trigger: ';hello',
           snippetId: 'snippet-1',
-          content: 'Current content',
+          kind: 'text',
         },
       ],
     });
@@ -101,7 +102,7 @@ describe('service-worker trigger catalog coordinator', () => {
       revision: 1,
     });
     await expect(coordinator.finishMutation(mutationId)).resolves.toBe(true);
-    expect(cache.find(';hello')?.content).toBe('Refreshed content');
+    expect(cache.find(';hello')?.kind).toBe('text');
     expect(port.messages.at(-1)).toMatchObject({
       type: 'trigger-catalog-snapshot',
       revision: 2,
@@ -117,13 +118,13 @@ describe('service-worker trigger catalog coordinator', () => {
     const readCatalog = vi
       .fn<TriggerCatalogReader['readCatalog']>()
       .mockResolvedValueOnce([
-        { trigger: ';hello', snippetId: 'snippet-1', content: 'Old content' },
+        { kind: 'text', trigger: ';hello', snippetId: 'snippet-1' },
       ])
       .mockResolvedValueOnce([
         {
           trigger: ';hello',
           snippetId: 'snippet-1',
-          content: 'Authoritative content',
+          kind: 'text',
         },
       ]);
     const coordinator = new TriggerCatalogCoordinator(
@@ -162,7 +163,7 @@ describe('service-worker trigger catalog coordinator', () => {
             (message as { type?: string }).type === 'trigger-catalog-snapshot',
         ),
     ).toHaveLength(1);
-    expect(cache.find(';hello')?.content).toBe('Authoritative content');
+    expect(cache.find(';hello')?.kind).toBe('text');
   });
 
   it('keeps a frame connected during a mutation disabled until the final snapshot', async () => {
@@ -184,7 +185,7 @@ describe('service-worker trigger catalog coordinator', () => {
     await expect(coordinator.finishMutation(mutationId)).resolves.toBe(true);
     expect(reader.readCatalog).toHaveBeenCalledOnce();
     expect(port.messages).toHaveLength(1);
-    expect(cache.find(';hello')?.content).toBe('Authoritative content');
+    expect(cache.find(';hello')?.kind).toBe('text');
   });
 
   it.each([
@@ -240,12 +241,12 @@ describe('service-worker trigger catalog coordinator', () => {
             {
               trigger: ';hello',
               snippetId: 'snippet-1',
-              content: 'Authoritative content',
+              kind: 'text',
             },
           ],
         },
       ]);
-      expect(cache.find(';hello')?.content).toBe('Authoritative content');
+      expect(cache.find(';hello')?.kind).toBe('text');
     },
   );
 
@@ -326,7 +327,7 @@ describe('service-worker trigger catalog coordinator', () => {
       type: 'trigger-catalog-snapshot',
       epoch: 'epoch-1',
       revision: 0,
-      entries: [{ trigger: ';old', snippetId: 'old', content: 'Old' }],
+      entries: [{ kind: 'text', trigger: ';old', snippetId: 'old' }],
     });
     const port = createPort((message) => {
       if ((message as { type?: string }).type === 'trigger-catalog-snapshot') {
@@ -359,7 +360,7 @@ describe('service-worker trigger catalog coordinator', () => {
       type: 'trigger-catalog-snapshot',
       epoch: 'epoch-1',
       revision: 0,
-      entries: [{ trigger: ';old', snippetId: 'old', content: 'Old' }],
+      entries: [{ kind: 'text', trigger: ';old', snippetId: 'old' }],
     });
     const port = createPort((message) => cache.receive(message));
     const coordinator = new TriggerCatalogCoordinator(reader, () => 'epoch-1');

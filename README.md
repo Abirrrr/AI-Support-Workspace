@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–13 are complete. M14 — Snippet Authoring and Delivery is current. The uncommitted M14-G/G.2 package implements structured lists, strict Backup v5, unified Tiptap Text authoring, and screenshot-first Image Snippet authoring over M14-E's atomic Dexie v5 asset foundation. Historical Plain remains compatible and converts only on Save; Image Snippets remain isolated from Retrieval, Prompt Builder, and trigger delivery. M15 Context Images remain separate generation inputs.
+Milestones 9–13 are complete. M14 — Snippet Authoring and Delivery is current. M14-G/G.2 is committed at `672185e`; M14-I through M14-I.5 remains uncommitted. Text clipboard/native-paste delivery is real-Chrome validated. The approved C#/.NET 10 Windows Native Clipboard Companion is connected through a stable development extension identity, optional `nativeMessaging`, strict service-worker transport, and reversible per-user development registration; Settings readiness and end-to-end native Image delivery are real-Chrome PASS. M14-I.5 removes failed browser Image transports and A1/A2/B probes from active runtime while retaining historical evidence. Production installation and automatic paste remain absent.
 
 ## Technology Stack
 
@@ -23,6 +23,7 @@ Milestones 9–13 are complete. M14 — Snippet Authoring and Delivery is curren
 - docs/: project documentation and planning artifacts
 - src/: extension runtime and presentation source code
 - tests/: automated unit, integration, build-output, and browser-test foundations
+- native/windows-clipboard-companion/: Windows native clipboard companion, protocol fixtures, and development registration tooling
 - .github/workflows/: CI and workflow configuration
 
 ## Documentation
@@ -31,4 +32,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-After Principal approval/checkpoint, implement M14-I — Unified Snippet Clipboard Delivery and Trigger Planner for both Text and Image Snippets. M14-H is absorbed into M14-G.2. External clipboard transport, permissions, and native destination paste are not implemented yet; M14-J remains destination compatibility validation.
+M14-I is implemented, real-Chrome validated, cleanup-complete, and pending Principal final review, one post-cleanup `native-dev` smoke test, and an authorized Git checkpoint. M14-J starts only after that checkpoint. Production installation, signing, production identity, AutoHotkey, and automatic paste do not exist. Manual native `Ctrl+V` remains the workflow. See [the native companion](native/windows-clipboard-companion/README.md), [the architecture](docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md), and [the feasibility history](docs/NATIVE_IMAGE_CLIPBOARD_FEASIBILITY.md).

@@ -29,10 +29,16 @@
 - Apply Decision 39: Rich Snippets target paragraphs, bold, italic, links, bullet lists, and numbered lists. M14-F inline local-image Rich authoring is cancelled before implementation.
 - Add Image Snippets as a distinct `SnippetContent` type with exactly one same-owner local PNG/JPEG/WebP asset and the normal trigger system. Do not create an Image Library, galleries, shared assets, image/text combinations, or "Use as Context."
 - Preserve legacy HTTP(S) Image References without fetching/conversion. Preserve existing Rich local-image blocks as compatibility-only Backup-v4 data under Decision 38; allow no new authoring or automatic mixed-record conversion.
-- **Completed, uncommitted — M14-G/G.2:** implemented lists, the Image discriminant, Backup v5, semantic isolation, constrained Text WYSIWYG, simplified Library, and screenshot/file Image authoring with atomic asset lifecycle reuse.
+- **Completed at `672185e` — M14-G/G.2:** implemented lists, the Image discriminant, Backup v5, semantic isolation, constrained Text WYSIWYG, simplified Library, and screenshot/file Image authoring with atomic asset lifecycle reuse.
 - **M14-H:** ABSORBED INTO M14-G.2 / NOT A SEPARATE ACTIVE TASK.
-- **Next — M14-I:** implement unified Text + Image clipboard delivery and trigger planning: safe Text HTML/plain serialization, portable local image preparation, no binary catalog payload, safe post-copy cleanup, truthful feedback, and real native paste. Never use clipboard read or synthetic paste.
-- **Then — M14-J:** validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors; add direct insertion only where evidence proves it worthwhile and retain graceful fallback.
+- **Text compatibility correction — M14-I.1.3:** Real Chrome identified `clipboard-write-failed` at the final offscreen Async Clipboard Text write. Text now uses a temporary copy-event/`execCommand('copy')` path for both planned representations. Real Chrome validates preparation, cleanup, notice, formatting, and lists.
+- **Image compatibility correction — M14-I.1.4:** The previous Decision 42-gated Async Clipboard path failed at `offscreen-write` / `clipboard-write-failed`. The copy-event `image/png` File path then reported success but real Chrome pasted `snippet.png`, not the intended image. It is not a valid Image Snippet transport; revert is recommended after Principal review.
+- **Native representation feasibility — M14-I.1.5.2 conclusion:** offscreen Async, M14-I.1.4 `snippet.png`, and focused-content A1 `TEXT` are real-Chrome failures for Image semantics. Focused extension-page B `VISIBLE IMAGE` is a real-Chrome capability pass but not acceptable production UX. A2/F9 was not run and is no longer required for this decision.
+- **ARCHITECTURE DEFINED — M14-I.2 Windows Native Clipboard Companion Architecture:** Decision 43 selects the exact Windows-only optional companion boundary, one-shot protocol, .NET 10 LTS host, WIC/PNG+CF_DIBV5 clipboard path, origin controls, validation, failure, installation, versioning, concurrency, and cleanup policies. M14-I.2 itself was documentation-only; M14-I.3 now implements the standalone foundation.
+- **FOUNDATION IMPLEMENTED — M14-I.3 Windows Native Clipboard Companion Foundation:** the standalone .NET 10 `win-x64` host, strict v1, WIC, registered PNG + CF_DIBV5, HWND, ownership, retry, mutex, fixtures, and native automated tests are implemented and uncommitted.
+- **IMPLEMENTED / REAL-CHROME VALIDATED — M14-I.4/M14-I.4.1:** stable development identity, optional `nativeMessaging`, truthful Settings readiness UX, callback-aligned service-worker native transport, strict protocol/golden-fixture conformance, `.dev` host generation, and reversible HKCU development registration are implemented and uncommitted. Settings `Ready` and native Image end-to-end delivery passed.
+- **CLEANUP COMPLETE — M14-I.5:** failed browser Image transports, obsolete Image-only contracts/errors/tests, and A1/A2/B feasibility runtime probes are removed. Validated Text offscreen delivery, Windows native Image delivery, historical evidence, Decision 42, Decision 43, and development registration remain. Principal final review, one smoke test, and checkpoint are next.
+- **Then — M14-J:** only after the M14-I checkpoint, validate clipboard/native-paste fidelity in Crisp, Intercom, and representative editors.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
 ### M15 — Multimodal Screenshot Context
@@ -62,8 +68,15 @@
 - Inspect WXT's generated manifest/action configuration and retire the default popup cleanly so direct Side Panel opening and `action.default_popup` do not compete. Preserve the existing keyboard shortcut, global Side Panel behavior, and least-privilege permissions; no new permission is expected solely for this change.
 - This capability is unassigned, has no milestone, is not M14-G through M14-J, and must not interrupt the approved Snippet sequence.
 
+### Optional Windows Automatic Native Paste
+
+- Investigate separately whether an installed Windows companion can later issue a focus-safe native `Ctrl+V` after clipboard preparation. Do not combine this with M14-I.2 clipboard writing prematurely.
+- A future auto-paste capability may extend the existing native companion or use separately approved Windows input mechanics. No AutoHotkey/`SendInput` implementation, new dependency, additional registration, or additional permission is approved now.
+- The helper must be optional, must never paste into a different focused window, must retain manual `Ctrl+V` as fallback, and must address installation, security, and cross-platform implications before becoming product scope.
+- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J and requires independent focus/race-safety approval.
+
 Context screenshots and Snippet images remain separate domains: Context images are transient inputs to generation, while Snippet images are reusable Library-owned response content for editor expansion.
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 is committed at `b7d16ec`, and M14-G/G.2 is implemented but uncommitted pending review. The next action after approval is M14-I — Unified Snippet Clipboard Delivery and Trigger Planner. M15 remains Multimodal Screenshot Context and separate from reusable Image Snippets.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-E is complete at `1828f09`, Decision 39 at `b7d16ec`, and M14-G/G.2 at `672185e`. M14-I through M14-I.5 remains uncommitted. Text, Settings readiness, and native Image end-to-end delivery are real-Chrome validated; browser Image/probe cleanup is complete. Principal final review, one post-cleanup smoke test, and the M14-I checkpoint are next. M14-J remains blocked until that checkpoint, and M15 remains separate.

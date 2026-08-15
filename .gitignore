@@ -10,6 +10,9 @@ node_modules/
 /coverage/
 /playwright-report/
 /test-results/
+**/bin/
+**/obj/
+native/windows-clipboard-companion/artifacts/
 
 # Logs
 *.log

@@ -1,10 +1,12 @@
 export const TRIGGER_CATALOG_PORT_NAME = 'snippet-trigger-catalog-v1';
 const CANONICAL_TRIGGER_PATTERN = /^;[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+export type TriggerCatalogEntryKind = 'text' | 'image';
+
 export interface TriggerCatalogEntry {
+  readonly kind: TriggerCatalogEntryKind;
   readonly trigger: string;
   readonly snippetId: string;
-  readonly content: string;
 }
 
 export interface TriggerCatalogSnapshotMessage {
@@ -76,11 +78,11 @@ function isCanonicalSnippetTrigger(value: unknown): value is string {
 function isCatalogEntry(value: unknown): value is TriggerCatalogEntry {
   return (
     isRecord(value) &&
-    hasExactKeys(value, ['trigger', 'snippetId', 'content']) &&
+    hasExactKeys(value, ['kind', 'trigger', 'snippetId']) &&
+    (value.kind === 'text' || value.kind === 'image') &&
     isCanonicalSnippetTrigger(value.trigger) &&
     typeof value.snippetId === 'string' &&
-    value.snippetId.length > 0 &&
-    typeof value.content === 'string'
+    value.snippetId.length > 0
   );
 }
 

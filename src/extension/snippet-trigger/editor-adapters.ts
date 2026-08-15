@@ -5,10 +5,13 @@ export interface TriggerCandidate {
 export interface EditorAdapter {
   readonly kind: 'textarea' | 'textInput' | 'contenteditable';
   readTriggerCandidate(maxLength: number): TriggerCandidate | undefined;
-  replaceTriggerWithPlainText(
+  captureActivation(
     candidate: TriggerCandidate,
-    text: string,
-  ): boolean;
+  ): TriggerActivationSnapshot | undefined;
+}
+
+export interface TriggerActivationSnapshot {
+  cleanupAfterClipboardSuccess(): boolean;
 }
 
 interface TextTriggerCandidate extends TriggerCandidate {
@@ -93,7 +96,7 @@ function createInputNotification(document: Document): InputEvent | undefined {
     return new InputEventConstructor('input', {
       bubbles: true,
       composed: true,
-      inputType: 'insertText',
+      inputType: 'deleteContentBackward',
       data: null,
     });
   } catch {
@@ -120,35 +123,46 @@ class TextControlAdapter implements EditorAdapter {
     return candidate;
   }
 
-  replaceTriggerWithPlainText(
+  captureActivation(
     candidate: TriggerCandidate,
-    text: string,
-  ): boolean {
+  ): TriggerActivationSnapshot | undefined {
     if (
       typeof candidate !== 'object' ||
       candidate === null ||
       !this.candidates.delete(candidate)
     ) {
-      return false;
+      return undefined;
     }
     const typedCandidate = candidate as Partial<TextTriggerCandidate>;
     if (
       typeof typedCandidate.start !== 'number' ||
-      typeof typedCandidate.end !== 'number' ||
-      (this.kind === 'textInput' && /[\r\n]/.test(text))
+      typeof typedCandidate.end !== 'number'
     ) {
-      return false;
+      return undefined;
     }
-    const notification = createInputNotification(this.document);
-    if (notification === undefined) return false;
-    this.element.setRangeText(
-      `${text} `,
-      typedCandidate.start,
-      typedCandidate.end,
-      'end',
-    );
-    this.element.dispatchEvent(notification);
-    return true;
+    const start = typedCandidate.start;
+    const end = typedCandidate.end;
+    const expected = `${candidate.text} `;
+    let consumed = false;
+    return {
+      cleanupAfterClipboardSuccess: () => {
+        if (consumed) return false;
+        consumed = true;
+        if (
+          this.document.activeElement !== this.element ||
+          this.element.selectionStart !== end + 1 ||
+          this.element.selectionEnd !== end + 1 ||
+          this.element.value.slice(start, end + 1) !== expected
+        ) {
+          return false;
+        }
+        const notification = createInputNotification(this.document);
+        if (notification === undefined) return false;
+        this.element.setRangeText('', start, end + 1, 'start');
+        this.element.dispatchEvent(notification);
+        return true;
+      },
+    };
   }
 }
 
@@ -332,16 +346,15 @@ class ContenteditableAdapter implements EditorAdapter {
     return candidate;
   }
 
-  replaceTriggerWithPlainText(
+  captureActivation(
     candidate: TriggerCandidate,
-    text: string,
-  ): boolean {
+  ): TriggerActivationSnapshot | undefined {
     if (
       typeof candidate !== 'object' ||
       candidate === null ||
       !this.candidates.delete(candidate)
     ) {
-      return false;
+      return undefined;
     }
     const typedCandidate = candidate as Partial<DomTriggerCandidate>;
     if (
@@ -351,30 +364,57 @@ class ContenteditableAdapter implements EditorAdapter {
       typedCandidate.range.startContainer.ownerDocument !== this.document ||
       typedCandidate.range.endContainer.ownerDocument !== this.document
     ) {
-      return false;
+      return undefined;
     }
-    const notification = createInputNotification(this.document);
-    if (notification === undefined) return false;
-    const selection = this.document.getSelection();
-    if (selection === null) return false;
-    const caret = this.document.createRange();
-    const fragment = this.document.createDocumentFragment();
-    const lines = text.split(/\r\n|\r|\n/);
-    for (const [index, line] of lines.entries()) {
-      if (index > 0) fragment.append(this.document.createElement('br'));
-      fragment.append(this.document.createTextNode(line));
-    }
-    const trailingSpace = this.document.createTextNode(' ');
-    fragment.append(trailingSpace);
-
-    typedCandidate.range.deleteContents();
-    typedCandidate.range.insertNode(fragment);
-    caret.setStartAfter(trailingSpace);
-    caret.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(caret);
-    this.root.dispatchEvent(notification);
-    return true;
+    const range = typedCandidate.range.cloneRange();
+    const startContainer = range.startContainer;
+    const startOffset = range.startOffset;
+    const expected = `${candidate.text} `;
+    let consumed = false;
+    return {
+      cleanupAfterClipboardSuccess: () => {
+        if (consumed) return false;
+        consumed = true;
+        const selection = this.document.getSelection();
+        if (
+          !this.root.isConnected ||
+          !startContainer.isConnected ||
+          startContainer.ownerDocument !== this.document ||
+          selection === null ||
+          selection.rangeCount !== 1 ||
+          !selection.isCollapsed
+        ) {
+          return false;
+        }
+        const caret = selection.getRangeAt(0);
+        if (
+          !this.root.contains(caret.startContainer) ||
+          (this.document.activeElement !== this.root &&
+            !this.root.contains(this.document.activeElement))
+        ) {
+          return false;
+        }
+        const cleanupRange = this.document.createRange();
+        try {
+          cleanupRange.setStart(startContainer, startOffset);
+          cleanupRange.setEnd(caret.startContainer, caret.startOffset);
+        } catch {
+          return false;
+        }
+        const actual = cleanupRange.toString();
+        if (actual !== expected && actual !== `${candidate.text}\u00a0`) {
+          return false;
+        }
+        const notification = createInputNotification(this.document);
+        if (notification === undefined) return false;
+        cleanupRange.deleteContents();
+        cleanupRange.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(cleanupRange);
+        this.root.dispatchEvent(notification);
+        return true;
+      },
+    };
   }
 }
 

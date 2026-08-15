@@ -1,8 +1,24 @@
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
+import { createHash } from 'node:crypto';
 import { access, readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import process from 'node:process';
 
-const outputDirectory = resolve('.output/chrome-mv3');
+const nativeDevelopment = JSON.parse(
+  await readFile(
+    resolve('config/native-clipboard-companion.development.json'),
+    'utf8',
+  ),
+);
+const nativeDevelopmentMode = process.argv.includes('--mode')
+  ? process.argv[process.argv.indexOf('--mode') + 1] === 'native-dev'
+  : false;
+const outputDirectory = resolve(
+  nativeDevelopmentMode
+    ? '.output/chrome-mv3-native-dev'
+    : '.output/chrome-mv3',
+);
 const manifestPath = resolve(outputDirectory, 'manifest.json');
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
@@ -13,6 +29,28 @@ assert.deepEqual(manifest.permissions ?? [], [
   'activeTab',
   'scripting',
 ]);
+assert.deepEqual(manifest.optional_permissions ?? [], [
+  'clipboardWrite',
+  'offscreen',
+  'nativeMessaging',
+]);
+if (nativeDevelopmentMode) {
+  assert.equal(manifest.key, nativeDevelopment.manifestKey);
+  const publicKey = Buffer.from(manifest.key, 'base64');
+  const digest = createHash('sha256').update(publicKey).digest();
+  const alphabet = 'abcdefghijklmnop';
+  let derivedId = '';
+  for (const byte of digest.subarray(0, 16)) {
+    derivedId += alphabet[byte >> 4] + alphabet[byte & 15];
+  }
+  assert.equal(derivedId, nativeDevelopment.extensionId);
+  assert.equal(
+    `chrome-extension://${derivedId}/`,
+    nativeDevelopment.extensionOrigin,
+  );
+} else {
+  assert.equal('key' in manifest, false);
+}
 assert.deepEqual(manifest.host_permissions ?? [], ['http://localhost/*']);
 assert.deepEqual(manifest.side_panel, { default_path: 'sidepanel.html' });
 assert.equal('sidebar_action' in manifest, false);
@@ -33,7 +71,13 @@ assert.equal('devtools_page' in manifest, false);
 assert.equal(manifest.permissions.includes('tabs'), false);
 assert.equal(manifest.permissions.includes('storage'), false);
 assert.equal(manifest.permissions.includes('clipboardRead'), false);
+assert.equal(manifest.permissions.includes('nativeMessaging'), false);
+assert.equal(manifest.permissions.includes('debugger'), false);
 assert.equal(manifest.permissions.includes('clipboardWrite'), false);
+assert.equal(manifest.permissions.includes('offscreen'), false);
+assert.equal(manifest.optional_permissions.includes('clipboardRead'), false);
+assert.equal(manifest.optional_permissions.includes('nativeMessaging'), true);
+assert.equal(manifest.optional_permissions.includes('debugger'), false);
 assert.equal(manifest.host_permissions.includes('<all_urls>'), false);
 assert.equal(
   manifest.host_permissions.some((match) => match.startsWith('file:')),
@@ -44,6 +88,7 @@ const serviceWorker = manifest.background?.service_worker;
 const popupPage = manifest.action?.default_popup;
 const optionsPage = manifest.options_ui?.page;
 const sidePanelPage = manifest.side_panel?.default_path;
+const offscreenPage = 'offscreen.html';
 
 assert.equal(typeof serviceWorker, 'string');
 assert.equal(typeof popupPage, 'string');
@@ -80,10 +125,55 @@ await Promise.all(
     popupPage,
     optionsPage,
     sidePanelPage,
+    offscreenPage,
     manifest.content_scripts[0].js[0],
   ].map((relativePath) => access(resolve(outputDirectory, relativePath))),
 );
 await assert.rejects(access(resolve(outputDirectory, 'workspace.html')));
+
+const serviceWorkerSource = await readFile(
+  resolve(outputDirectory, serviceWorker),
+  'utf8',
+);
+if (nativeDevelopmentMode) {
+  assert.match(serviceWorkerSource, /sendNativeMessage/);
+  assert.match(serviceWorkerSource, new RegExp(nativeDevelopment.hostName));
+} else {
+  assert.doesNotMatch(
+    serviceWorkerSource,
+    new RegExp(nativeDevelopment.hostName),
+  );
+}
+
+const offscreenHtml = await readFile(
+  resolve(outputDirectory, offscreenPage),
+  'utf8',
+);
+const offscreenScriptPath = offscreenHtml.match(
+  /<script[^>]+src="\/([^"]*offscreen[^"]*\.js)"/,
+)?.[1];
+assert.equal(typeof offscreenScriptPath, 'string');
+const offscreenScriptSource = await readFile(
+  resolve(outputDirectory, offscreenScriptPath),
+  'utf8',
+);
+assert.doesNotMatch(
+  offscreenScriptSource,
+  /navigator\.clipboard|clipboard\.write|ClipboardItem/,
+);
+assert.doesNotMatch(
+  offscreenScriptSource,
+  /setData\(["']image\/png|createElement\(["']img["']|contenteditable/,
+);
+assert.doesNotMatch(
+  offscreenScriptSource,
+  /snippet\.png|image\/png|encodedBytesBase64|createImageBitmap|toBlob|\.items\.add/,
+);
+assert.match(offscreenScriptSource, /text\/plain/);
+assert.match(offscreenScriptSource, /text\/html/);
+assert.match(offscreenScriptSource, /execCommand/);
+assert.match(offscreenScriptSource, /addEventListener/);
+assert.match(offscreenScriptSource, /removeEventListener/);
 
 const contentScriptSource = await readFile(
   resolve(outputDirectory, manifest.content_scripts[0].js[0]),
@@ -93,7 +183,39 @@ assert.doesNotMatch(
   contentScriptSource,
   /chrome\.storage|localStorage|indexedDB|Dexie/,
 );
-assert.doesNotMatch(contentScriptSource, /sendMessage/);
+assert.match(contentScriptSource, /sendMessage/);
+assert.doesNotMatch(contentScriptSource, /indexedDB|Dexie/);
+assert.doesNotMatch(
+  contentScriptSource,
+  /m14-i-1-5-image-clipboard-probe|M14-I\.1\.5|navigator\.clipboard|ClipboardItem/,
+);
+
+const optionsHtml = await readFile(
+  resolve(outputDirectory, optionsPage),
+  'utf8',
+);
+const optionsScriptPath = optionsHtml.match(
+  /<script[^>]+src="\/([^"]*options[^"]*\.js)"/,
+)?.[1];
+assert.equal(typeof optionsScriptPath, 'string');
+const optionsScriptSource = await readFile(
+  resolve(outputDirectory, optionsScriptPath),
+  'utf8',
+);
+const packagedRuntimeSource = [
+  serviceWorkerSource,
+  offscreenScriptSource,
+  contentScriptSource,
+  optionsScriptSource,
+].join('\n');
+assert.doesNotMatch(
+  packagedRuntimeSource,
+  /#m14-i-1-5-image-clipboard-probe|m14-i-1-5-image-clipboard-probe|M14-I\.1\.5/,
+);
+assert.doesNotMatch(
+  packagedRuntimeSource,
+  /snippet\.png|clipboardData\.items\.add|\.items\.add\(/,
+);
 
 const assetFiles = await readdir(resolve(outputDirectory, 'assets'));
 const stylesheetPaths = assetFiles

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishAot>false</PublishAot>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>AI.SupportWorkspace.ClipboardCompanion</AssemblyName>
+    <RootNamespace>AI.SupportWorkspace.ClipboardCompanion</RootNamespace>
+    <Version>1.0.0</Version>
+    <ExpectedExtensionOrigin Condition="'$(ExpectedExtensionOrigin)' == ''"></ExpectedExtensionOrigin>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ExpectedExtensionOrigin</_Parameter1>
+      <_Parameter2>$(ExpectedExtensionOrigin)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

@@ -12,6 +12,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { Settings } from '../../src/domain/settings';
 import { SettingsView } from '../../src/ui/settings/SettingsView';
+import type { ClipboardDeliveryPermission } from '../../src/extension/snippet-trigger/clipboard-permission';
+import type { WindowsImageClipboardCapability } from '../../src/extension/snippet-trigger/native-clipboard-capability';
 
 function createDeferred<T>() {
   let resolvePromise!: (value: T) => void;
@@ -206,5 +208,198 @@ describe('SettingsView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     expect(await screen.findByText('Settings saved.')).toBeTruthy();
     expect(save).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('Text Snippet clipboard enablement', () => {
+  function permission(
+    enabled: boolean,
+    granted = true,
+  ): ClipboardDeliveryPermission {
+    return {
+      isEnabled: vi.fn(async () => enabled),
+      requestEnable: vi.fn(async () => granted),
+    };
+  }
+
+  it('shows explanatory disabled state without requesting on load', async () => {
+    const clipboardDelivery = permission(false);
+    render(
+      <SettingsView
+        clipboardDelivery={clipboardDelivery}
+        settings={createSettings()}
+      />,
+    );
+    expect(await screen.findByText('Text Snippet Clipboard')).toBeTruthy();
+    expect(
+      screen.getByText(
+        /prepare Text Snippets as plain text and safe formatted text/,
+      ),
+    ).toBeTruthy();
+    expect(
+      await screen.findByRole('button', { name: 'Enable Text clipboard' }),
+    ).toBeTruthy();
+    expect(clipboardDelivery.requestEnable).not.toHaveBeenCalled();
+  });
+
+  it('requests only after the explicit enable click and reports grant success', async () => {
+    const clipboardDelivery = permission(false, true);
+    render(
+      <SettingsView
+        clipboardDelivery={clipboardDelivery}
+        settings={createSettings()}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Enable Text clipboard' }),
+    );
+    expect(
+      await screen.findByText('Text clipboard delivery enabled.'),
+    ).toBeTruthy();
+    expect(clipboardDelivery.requestEnable).toHaveBeenCalledOnce();
+    expect(
+      screen.getByText('Text clipboard delivery is enabled.'),
+    ).toBeTruthy();
+  });
+
+  it('keeps the capability disabled after denial and allows explicit retry', async () => {
+    const clipboardDelivery = permission(false, false);
+    render(
+      <SettingsView
+        clipboardDelivery={clipboardDelivery}
+        settings={createSettings()}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Enable Text clipboard' }),
+    );
+    expect(
+      await screen.findByText('Text clipboard delivery was not enabled.'),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Enable Text clipboard' }),
+    ).toBeTruthy();
+  });
+});
+
+describe('Windows Image Snippets capability', () => {
+  function capability(
+    status:
+      | 'unsupported-platform'
+      | 'permission-not-granted'
+      | 'host-unavailable'
+      | 'host-version-mismatch'
+      | 'invalid-host-response'
+      | 'ready',
+    enabledStatus = status,
+  ): WindowsImageClipboardCapability {
+    return {
+      getStatus: vi.fn(async () => status),
+      requestEnable: vi.fn(async () => enabledStatus),
+    };
+  }
+
+  it.each([
+    ['host-unavailable', 'Companion not found'],
+    ['host-version-mismatch', 'Companion incompatible'],
+    ['invalid-host-response', 'Companion incompatible'],
+    ['ready', 'Ready'],
+    ['unsupported-platform', 'Available on Windows only'],
+  ] as const)('shows status %s as actionable text', async (status, text) => {
+    const windowsImageClipboard = capability(status);
+    render(
+      <SettingsView
+        settings={createSettings()}
+        windowsImageClipboard={windowsImageClipboard}
+      />,
+    );
+    expect(await screen.findByText('Windows Image Snippets')).toBeTruthy();
+    expect(await screen.findByText(text)).toBeTruthy();
+    expect(windowsImageClipboard.requestEnable).not.toHaveBeenCalled();
+    expect(screen.queryByText(/registry|protocol|com\.ai_support/i)).toBeNull();
+  });
+
+  it('does not request permission while loading an ungranted status', async () => {
+    const windowsImageClipboard = capability('permission-not-granted');
+    render(
+      <SettingsView
+        settings={createSettings()}
+        windowsImageClipboard={windowsImageClipboard}
+      />,
+    );
+    expect(await screen.findByText('Not enabled')).toBeTruthy();
+    expect(windowsImageClipboard.getStatus).toHaveBeenCalledOnce();
+    expect(windowsImageClipboard.requestEnable).not.toHaveBeenCalled();
+  });
+
+  it('requests native permission only after explicit enable and distinguishes host readiness', async () => {
+    const windowsImageClipboard = capability(
+      'permission-not-granted',
+      'host-unavailable',
+    );
+    render(
+      <SettingsView
+        settings={createSettings()}
+        windowsImageClipboard={windowsImageClipboard}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: 'Enable Windows Image Snippets',
+      }),
+    );
+    expect(await screen.findByText('Companion not found')).toBeTruthy();
+    expect(windowsImageClipboard.requestEnable).toHaveBeenCalledOnce();
+    expect(screen.queryByText('Ready')).toBeNull();
+  });
+
+  it('keeps permission disabled after denial and allows another explicit click', async () => {
+    const windowsImageClipboard = capability(
+      'permission-not-granted',
+      'permission-not-granted',
+    );
+    render(
+      <SettingsView
+        settings={createSettings()}
+        windowsImageClipboard={windowsImageClipboard}
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: 'Enable Windows Image Snippets',
+      }),
+    );
+    expect(
+      await screen.findByRole('button', {
+        name: 'Enable Windows Image Snippets',
+      }),
+    ).toBeTruthy();
+    expect(windowsImageClipboard.requestEnable).toHaveBeenCalledOnce();
+  });
+
+  it('replaces a previous unavailable result with Ready after explicit refresh', async () => {
+    const getStatus = vi
+      .fn<WindowsImageClipboardCapability['getStatus']>()
+      .mockResolvedValueOnce('host-unavailable')
+      .mockResolvedValueOnce('ready');
+    const windowsImageClipboard: WindowsImageClipboardCapability = {
+      getStatus,
+      requestEnable: vi.fn<WindowsImageClipboardCapability['requestEnable']>(
+        async () => 'ready',
+      ),
+    };
+    render(
+      <SettingsView
+        settings={createSettings()}
+        windowsImageClipboard={windowsImageClipboard}
+      />,
+    );
+    expect(await screen.findByText('Companion not found')).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Check companion again' }),
+    );
+    expect(await screen.findByText('Ready')).toBeTruthy();
+    expect(getStatus).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Companion not found')).toBeNull();
   });
 });
