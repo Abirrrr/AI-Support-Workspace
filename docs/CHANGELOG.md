@@ -1,5 +1,18 @@
 # Changelog
 
+### M14-M.0 — Selected-Folder Backup Feasibility Gate
+
+- Principal real-Chrome validation is complete: explicit-gesture picker, scratch IndexedDB handle storage, Options reload, browser restart, permission query, independent service-worker recovery/reuse, exact owned-file creation/read verification/deletion, no remaining artifact, same-folder recognition, unrelated-file isolation, and unavailable/deleted-location fail-safe behavior all pass without new filesystem, `alarms`, or `downloads` permission.
+- The successful worker report recorded `backgroundHandleRecovered`, write, read verification, and deletion as true, `testArtifactMayRemain` false, and `round-trip-verified`. Restart retained the granted handle; unavailable-location handling failed safe with no remaining artifact.
+- Different-folder distinction did not produce reliable positive evidence and is non-blocking for M14-M.0. M14-N must prove it over the final production adapter before managed retention relies on it; exact manifest/digest ownership proof remains mandatory.
+- Gate status: **PASS / REAL-CHROME VALIDATED**. The selected-folder architecture is feasible, and M14-M.1 is unblocked for separate Principal review/authorization but remains unimplemented.
+
+- Implemented a native-dev-only Options diagnostic for explicit-click directory selection, explicit reauthorization, lifecycle recovery, `isSameEntry` comparisons, browser-restart confirmation, revoked/unavailable classification, and one privacy-safe report.
+- Added a separate raw IndexedDB scratch database and a service-worker handler that retrieves the handle itself, queries read/write permission without prompting, and performs one collision-checked random exact-file create/write/close/reopen/read/identity/delete round trip. It never enumerates the selected folder and refuses deletion without exact run ownership.
+- Added deterministic scratch, permission, ownership, round-trip, collision, and fail-closed tests. Generated-output validation requires the diagnostic in native-dev and rejects it from production.
+- Preserved Dexie v5, Backup v6, production Settings/schema, dependencies, and manifest permissions. Added no `alarms`, `downloads`, broad filesystem/file-host access, scheduler, usage statistics, generated tags, AI work, staging, commit, or push.
+- Current production state remains Dexie v5 / Backup v6 with no automatic-backup product behavior.
+
 ### M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
 
 - Preserved unique contiguous Decisions 1–54 and Decision 54's toolbar → Workspace Side Panel → Settings gear → Options / Libraries contract. Recorded Principal approval of Decisions 50–53 in substance without redesign.

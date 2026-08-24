@@ -84,6 +84,10 @@ const snippetLibrary = new SnippetLibraryService(
   snippetAssetRepository,
 );
 if (import.meta.env.MODE === 'native-dev' && catalogRuntime !== undefined) {
+  void import('./selected-folder-feasibility-diagnostic').then(
+    ({ registerSelectedFolderFeasibilityDiagnostic }) =>
+      registerSelectedFolderFeasibilityDiagnostic(catalogRuntime),
+  );
   void import('./snippet-list-serialization-diagnostic').then(
     ({ registerSnippetListSerializationDiagnostic }) =>
       registerSnippetListSerializationDiagnostic(

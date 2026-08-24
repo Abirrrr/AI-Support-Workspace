@@ -225,6 +225,18 @@ const generatedJavaScript = (
   )
 ).join('\n');
 if (nativeDevelopmentMode) {
+  assert.match(
+    generatedJavaScript,
+    /native-dev-selected-folder-backup-feasibility-v1/,
+  );
+  assert.match(
+    generatedJavaScript,
+    /native-dev-selected-folder-background-round-trip/,
+  );
+  assert.match(
+    generatedJavaScript,
+    /ai-support-workspace-selected-folder-feasibility-v1/,
+  );
   assert.match(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.match(generatedJavaScript, /diagnoseSnippetListSerialization/);
   assert.match(generatedJavaScript, /getAutomaticPasteResult/);
@@ -269,6 +281,18 @@ if (nativeDevelopmentMode) {
   assert.match(generatedJavaScript, /hostSessionMatchesTarget/);
   assert.match(generatedJavaScript, /hostIntegrityRelation/);
 } else {
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /native-dev-selected-folder-backup-feasibility-v1/,
+  );
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /native-dev-selected-folder-background-round-trip/,
+  );
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /ai-support-workspace-selected-folder-feasibility-v1/,
+  );
   assert.doesNotMatch(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.doesNotMatch(generatedJavaScript, /diagnoseSnippetListSerialization/);
   assert.doesNotMatch(generatedJavaScript, /getAutomaticPasteResult/);

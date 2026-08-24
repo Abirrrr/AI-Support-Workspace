@@ -7,12 +7,64 @@
 
 ## Current Milestone
 
-- M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
-- Status: M14-K remains CLOSED / COMPLETE at implementation checkpoint `e34cd76` and closeout checkpoint `3e5d545`. M14-L Decisions 50–53 are Principal-approved in substance, Decision 54 remains intact, and M14-L.1 is the active documentation-only correction. M14-M.0 through M14-P are assigned but NOT STARTED. M15 AI drafting implementation is NOT STARTED.
+- M14-M.0 — Selected-Folder Backup Feasibility Gate
+- Status: **PASS / REAL-CHROME VALIDATED**. M14-K remains CLOSED / COMPLETE. The approved M14-L checkpoint at `5450cff` is preserved. M14-M.1 is unblocked for Principal review/authorization but remains NOT STARTED; M14-M through M14-P and M15 AI drafting remain NOT STARTED.
 
 ## Task State
 
-### M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
+### M14-M.0 — Selected-Folder Backup Feasibility Gate
+
+```text
+Completed task: M14-M.0 — Selected-Folder Backup Feasibility Gate
+Starting checkpoint: 5450cff — docs: define snippet hardening architecture
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+M14-K: CLOSED / COMPLETE / REAL-BROWSER VALIDATED
+M14-L: CHECKPOINT PRESERVED
+M14-M.0: PASS / REAL-CHROME VALIDATED
+M14-M.1/M14-M/M14-N/M14-O/M14-P: NOT STARTED
+M15 AI drafting: NOT STARTED
+
+Current physical Dexie: 5
+Current canonical Backup: 6
+Production schema/Settings migration: NONE
+Manifest permission addition: NONE
+Alarms/downloads: NONE
+Staging/commit/push: NONE
+```
+
+The native-development Options diagnostic invokes `showDirectoryPicker({mode:'readwrite'})` directly from an explicit click and stores only its task-scoped state in `ai-support-workspace-selected-folder-feasibility-v1`, separate from production Dexie. The service worker independently recovers the handle, queries permission without prompting, collision-checks a cryptographically random exact test name, creates/writes/closes/reopens/reads/verifies it, and removes only that run-owned artifact. Same/different-folder checks use `isSameEntry`; reauthorization is an explicit Options click; revoked/unavailable checks perform no write when authority is not `granted`. The report contains classifications and booleans only—never paths, folder names, listings, unrelated filenames, or user content.
+
+Automated tests protect scratch persistence plumbing, permission classification, exact ownership, successful round trip, collision refusal, and fail-closed behavior. Generated-output assertions require the diagnostic in `native-dev` and prohibit all harness markers from the ordinary production build. Principal real-Chrome validation proves the explicit-gesture picker; scratch handle storage; Options reload and browser-restart recovery; granted permission query; independent service-worker recovery and reuse without another picker; exact owned-file create/read/verify/delete with no remaining artifact; same-folder `isSameEntry` recognition; unavailable/deleted-location fail-safe behavior; unrelated-file isolation; and no required `alarms`, `downloads`, or arbitrary filesystem permission. M14-M.0 is **PASS / REAL-CHROME VALIDATED**.
+
+The exploratory different-folder identity control did not produce reliable positive evidence. This is non-blocking for the feasibility gate because the critical persistence, background reuse, exact ownership-safe file operations, restart recovery, and unavailable-location premises passed independently. M14-N must revalidate the final production adapter and prove any different-folder identity behavior before managed backup-set deletion or retention relies on it. Uncertainty never weakens deterministic ownership proof or authorizes deletion.
+
+Authoritative Principal evidence:
+
+```text
+Successful service-worker round trip:
+backgroundHandleRecovered: true
+backgroundWriteSucceeded: true
+backgroundReadVerified: true
+backgroundDeleteSucceeded: true
+testArtifactMayRemain: false
+lastOutcome: "round-trip-verified"
+
+Browser restart:
+browserRestartRecovered: true
+handleRecovered: true
+permissionState: granted
+backgroundHandleRecovered: true
+
+Unavailable/deleted location:
+handleRecovered: true
+backgroundHandleRecovered: true
+unavailableLocationFailsSafe: true
+testArtifactMayRemain: false
+lastOutcome: "unavailable-location-failed-safe"
+```
+
+### Prior M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
 
 ```text
 Active task: M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
@@ -23,7 +75,8 @@ M14-L.1 input tree: existing 11-file documentation-only M14-L worktree preserved
 M14-K: CLOSED / COMPLETE / REAL-BROWSER VALIDATED
 M14-L: PRINCIPAL-APPROVED IN SUBSTANCE / DOCUMENTATION ONLY
 M14-L.1: ACTIVE / CONTINUITY AND FEASIBILITY-ORDER RECONCILIATION
-M14-M.0/M14-M.1/M14-M/M14-N/M14-O/M14-P: ASSIGNED / NOT STARTED
+M14-M.0: PASS / REAL-CHROME VALIDATED
+M14-M.1/M14-M/M14-N/M14-O/M14-P: ASSIGNED / NOT STARTED
 M15 AI drafting: NOT STARTED
 
 Current physical Dexie: 5
@@ -37,7 +90,7 @@ Staging/commit/push: NONE
 
 Principal-approved Decisions 50–53 define a future coordinated Dexie v6/Backup v7 foundation, a separate Text/Image usage sidecar and one-use cleanup receipt, user-selected File System Access backup location plus eventual `chrome.alarms`, Daily latest-seven and Weekly latest-four managed retention, and fingerprinted provider-independent generated Text tags with deterministic lexical retrieval. Decision 54 remains intact and locks the toolbar-to-Side-Panel/Settings-gear navigation model. Current code and data remain unchanged.
 
-Persistent selected-folder reuse remains conditional until **M14-M.0 — Selected-Folder Backup Feasibility Gate** passes in real Chrome. M14-M.0 uses scratch persistence and one exact self-owned test file to prove picker activation, handle cloning/recovery, permission truth, later background-context reuse without prompting, exact file verification/removal, unrelated-file isolation, and safe revocation/unavailability. FAIL stops before M14-M.1 and returns to Principal review. Daily latest seven and Weekly latest four are now final approved retention values.
+Persistent selected-folder reuse is proven by **M14-M.0 — Selected-Folder Backup Feasibility Gate** real-Chrome PASS. M14-M.1 may now be considered for separate Principal authorization; no production persistence or automatic-backup behavior exists yet. Daily latest seven and Weekly latest four remain final approved retention values, with different-folder identity proof deferred to M14-N before retention may rely on it.
 
 ### Prior M14-K.5 — Milestone Closeout & Checkpoint Recording
 
@@ -655,7 +708,7 @@ Image trigger + Space
 - **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED IN `ebe915f`. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
 - **M14-K Optional Automatic Native Paste:** COMPLETE AT `e34cd76`. Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
 - **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** ACTIVE / DOCUMENTATION ONLY. Decisions 50–53 are Principal-approved in substance; Decision 54 remains intact. M14-L.1 corrects feasibility order, approved retention, and restored-cadence activation semantics without implementation.
-- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** NOT STARTED. Mandatory scratch/real-Chrome proof before any permanent Dexie v6/Backup v7 or selected-folder state commitment. FAIL returns to Principal review and blocks M14-M.1.
+- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** PASS / REAL-CHROME VALIDATED. The File System Access selected-folder model, restart recovery, service-worker reuse, exact owned-file lifecycle, and unavailable-location safety are proven. Different-folder distinction remains an M14-N non-blocking verification before retention reliance.
 - **M14-M — Snippet Usage Statistics:** NOT STARTED. After M14-M.0 PASS, M14-M.1 owns the shared Dexie v6/Backup v7 foundation; usage receipt/sidecar/UI follows.
 - **M14-N — Periodic Automatic Backup:** NOT STARTED. File System Access + `alarms`, selected-folder production revalidation, exact Daily latest-seven and Weekly latest-four retention, and manual fallback.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
@@ -878,7 +931,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews the M14-L.1 reconciliation and, if correct, authorizes its documentation checkpoint and **M14-M.0 only**. Decisions 50–53 and Daily-seven/Weekly-four retention are already approved in substance; Decision 54 remains intact. M14-M.1 may begin only after recorded M14-M.0 real-Chrome PASS. Do not start M14-M.1/M14-M/N/O/P or M15 before their gates.
+- Principal reviews this recorded M14-M.0 PASS and separately authorizes or defers M14-M.1. Do not implement M14-M.1, M14-M/N/O/P, or M15 without their explicit authorization/gates.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -905,7 +958,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed milestone task: M14-K — Automatic Paste, CLOSED / COMPLETE and REAL-BROWSER VALIDATED at `e34cd76`, with closeout synchronized at `3e5d545`. M14-L.1 is the active documentation-only reconciliation task. M14-M.0 through M14-P are assigned and not started.
+- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 is the next planned gate, unblocked for Principal review but not authorized or started.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -914,7 +967,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal approves or corrects the M14-L.1 reconciliation, authorizes its documentation checkpoint, then authorizes M14-M.0 as the only next engineering task. M14-M.0 PASS is required before M14-M.1; M14-M/N/O/P and M15 remain unstarted.
+- Exact next action: Principal reviews the recorded M14-M.0 PASS and explicitly authorizes or defers M14-M.1. M14-M.1, M14-M/N/O/P, and M15 remain unstarted.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks

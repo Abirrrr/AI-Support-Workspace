@@ -90,6 +90,16 @@ export default defineBackground(() => {
       );
       reportAutomaticPasteTrace = diagnostic.reportTrace;
     }
+    if (import.meta.env.MODE === 'native-dev') {
+      void import('./backup-feasibility/background-handler').then(
+        ({ registerSelectedFolderFeasibilityBackground }) =>
+          registerSelectedFolderFeasibilityBackground(
+            runtime as unknown as Parameters<
+              typeof registerSelectedFolderFeasibilityBackground
+            >[0],
+          ),
+      );
+    }
     const contentScriptFiles = resolveStaticContentScriptFiles(runtime);
     const scripting = extensionApi?.scripting;
     const tabs = extensionApi?.tabs;

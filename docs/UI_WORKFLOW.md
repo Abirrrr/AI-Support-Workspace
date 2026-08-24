@@ -563,7 +563,8 @@ Local persistence
 ### Assigned Future Capability Workflows
 
 - **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
-- **M14-L/M14-L.1 — Snippet Hardening Architecture:** current documentation-only reconciliation. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact. M14-M.0 selected-folder feasibility must pass before M14-M.1; M14-M usage, M14-N backup, M14-O generated Text tags/retrieval, and M14-P validation remain unimplemented. No current UI changes; Decision 54 carries toolbar/Settings navigation into M15.
+- **M14-L/M14-L.1 — Snippet Hardening Architecture:** checkpointed documentation architecture. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact.
+- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. Ordinary production Options still has no diagnostic or automatic-backup product UI; M14-M.1 remains unimplemented.
 
 The lifecycle availability flow is:
 
