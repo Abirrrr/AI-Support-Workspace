@@ -78,8 +78,9 @@ Represents the single local, extension-wide Settings aggregate approved for Mile
 Fields:
 
 - defaultModel: string | null
+- snippetPasteMode: 'clipboard-only' | 'automatic'
 
-`defaultModel` is an opaque Ollama model identifier after leading and trailing whitespace are trimmed. `null` means that no default is saved and a new Workspace Side Panel session starts with a blank transient model field. M11 adds no provider, provider-base-URL, theme, shortcut, writing-preference, credential, or arbitrary key/value setting.
+`defaultModel` is an opaque Ollama model identifier after leading and trailing whitespace are trimmed. `null` means that no default is saved and a new Workspace Side Panel session starts with a blank transient model field. `snippetPasteMode` is the M14-K.2 opt-in delivery preference and defaults to `clipboard-only`; automatic mode is never inferred from companion installation. No provider, provider-base-URL, theme, shortcut, credential, or arbitrary key/value setting is added.
 
 The application-owned aggregate does not expose persistence identity. Milestone 11 implemented the physical singleton record and typed Settings persistence contract described below in database version 2.
 
@@ -147,12 +148,13 @@ The `settings` table contains at most one physical record:
 interface SettingsRecord {
   id: 'global';
   defaultModel: string | null;
+  snippetPasteMode?: 'clipboard-only' | 'automatic';
 }
 ```
 
 `id` is the inbound primary key. The literal singleton identity is `global`. No secondary, compound, or multi-entry index is approved. The record has no timestamps because singleton load/save behavior does not require ordering or audit metadata, and the existing timestamp rules are entity-specific rather than a universal repository requirement.
 
-The version 1 to version 2 migration performs no Knowledge or Snippet transformation and preserves every existing Library record. It does not create a Settings record automatically. Absence of the singleton record is normal and is resolved by the application layer to `{ defaultModel: null }`. Dexie schema rollback from version 2 to version 1 is not supported; migration is forward-only. No other table, field, or index changes were made in M11.
+The version 1 to version 2 migration performs no Knowledge or Snippet transformation and preserves every existing Library record. It does not create a Settings record automatically. Absence of the singleton record is normal. M14-K.2 adds the unindexed optional physical `snippetPasteMode` property without changing the store declaration or physical schema version; absent historical records resolve to `clipboard-only`, while invalid present values fail at the repository safety boundary.
 
 All version 1 and version 2 persisted fields are required. M13's version 3 physical Snippet record adds only an optional omitted-when-null `trigger` property as defined below.
 
@@ -304,6 +306,7 @@ interface SnippetEntryRepository {
 
 interface Settings {
   defaultModel: string | null;
+  snippetPasteMode: 'clipboard-only' | 'automatic';
 }
 
 interface SettingsRepository {
@@ -312,7 +315,7 @@ interface SettingsRepository {
 }
 ```
 
-`SettingsRepository.load()` returns `undefined` when the physical singleton record is absent. A focused application load service resolves that normal result to `{ defaultModel: null }`. `save()` upserts the one global record and returns the saved application aggregate. A focused save service trims leading and trailing model whitespace, saves a non-empty result, and saves `null` for empty or whitespace-only input. No Settings list, create, update-by-ID, delete, search, or generic CRUD operation is approved.
+`SettingsRepository.load()` returns `undefined` when the physical singleton record is absent. A focused application load service resolves that normal result to `{ defaultModel: null, snippetPasteMode: 'clipboard-only' }`. `save()` upserts the one global record and returns the saved application aggregate. The save service normalizes the model field and persists only one of the two exact paste modes. No Settings list, create, update-by-ID, delete, search, or generic CRUD operation is approved.
 
 The Knowledge repository retains its existing operations. M13 adds only canonical `findByTrigger` lookup to the Snippet repository:
 
@@ -453,15 +456,23 @@ V5 graph validation reuses the authoritative domain graph validator. Each Image 
 
 M14-G implements the list model, minimal Image Snippet discriminant, and Backup v5 contract together. No Dexie v6, store, index, or record-rewrite migration is added. Image Snippet UI and clipboard delivery remain later tasks.
 
+## Implemented M14-K.2 Backup Format v6
+
+Backup v5 remains frozen and importable. New exports use strict Backup v6, retaining the v5 Knowledge, Snippet, and asset DTO shapes and exact four-store atomic restore while evolving only Settings to the exact keys `defaultModel` and `snippetPasteMode`. The paste mode accepts only `clipboard-only` or `automatic`; missing, unknown, or malformed v6 values reject the whole import. Valid v1-v5 imports contain no paste mode and restore it as `clipboard-only`. The serialized limit remains 96 MiB. This backup evolution and the unindexed Settings property do not change Dexie physical version 5, store declarations, indexes, or migration code.
+
 ## Future Capability Guidance
 
-### Structured Knowledge
+### Knowledge Compatibility
 
-Knowledge should evolve beyond a single body-text field into structured troubleshooting knowledge. The exact structure must be decided and documented in the milestone that introduces it rather than assumed by this planning document.
+Decision 46 retires Knowledge from the future active AI workflow/UI but does not remove current persistence. `knowledgeEntries`, `KnowledgeEntry`, repository contracts, Backup v1-v6 data, and restore compatibility remain current and unchanged. Permanent removal, migration into Text Snippets, Backup evolution, or store cleanup requires a separately approved schema/migration task; no future structure or deletion is implied here.
 
-### Richer Snippets
+### Richer Snippets and Future Hardening Metadata
 
-M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local assets, Decision 39's Text/Image split, and Decision 41's unified authoring. M14-G/G.2 implements lists, the image discriminant, Backup v5, constrained Text WYSIWYG, and Image authoring without changing Dexie v5 stores or indexes. M14-H is absorbed. Variables, categories, usage statistics, shared assets, and arbitrary attachments remain future decisions.
+M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local assets, Decision 39's Text/Image split, and Decision 41's unified authoring. M14-G/G.2 implements lists, the image discriminant, Backup v5, constrained Text WYSIWYG, and Image authoring without changing Dexie v5 stores or indexes. M14-H is absorbed.
+
+Decision 48 approves generated Text Snippet tags and lightweight usage statistics as future requirements without selecting physical storage. Current `SnippetEntry.tags: string[]` remains the caller-authored ordered array with no generated/authored provenance. A future generated-tag representation must coexist with and preserve those values rather than silently overwrite them. Conceptual `snippetId`, `usageCount`, and `lastUsedAt` are mutable operational metadata and should be evaluated for a separate sidecar/store/repository rather than being assumed as authored `SnippetEntry` fields. Any field/store/index, Dexie version, migration, application contract, timestamp semantics, Backup version, validation, and restore mapping require a separate implementation-ready schema decision.
+
+Decision 48 also approves periodic automatic local backup, but it adds no table, scheduler record, retention record, filesystem location, or Settings field here. Cadence/retention persistence, if needed, must be defined with Chrome capability and permission review during implementation. The canonical Backup v6 remains the only current export representation.
 
 ### Prompt Templates
 
@@ -473,4 +484,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 13 are complete. M14-E is complete at `1828f09` with Dexie v5 and frozen Backup v4. M14-G/G.2 is committed at `672185e` with lists, `ImageSnippetContent`, Backup v5, and unified authoring while valid v1-v4 imports remain supported. Decision 38 continues to exclude legacy Rich local-image records from delivery, and Image Snippets remain excluded from text Retrieval and Prompt Builder consumers. M14-I/Decision 43 changes no persistence: metadata-only catalogs, authoritative planning, Dexie v5, and Backup v1-v5 remain unchanged. Native requests contain only request-scoped validated PNG bytes and protocol metadata; no host state, capability state, native path, installation data, request ID, or image delivery payload is persisted or backed up. M14-I.5 removes failed browser Image/probe runtime without a schema, store, index, migration, or backup-format change. Text and Windows native Image delivery are real-Chrome validated. Backup v5 and Dexie v5 remain current; no Backup v6 or Dexie v6 is required.
+Milestones 3 through 13 are complete. M14-G/G.2 remains the frozen Backup v5 foundation. M14-I/Decision 43 changes no persistence. M14-K.2 adds only the Settings paste-mode value and strict Backup v6 described above. M14-K.4 is documentation-only: Knowledge remains stored/backed up, and generated tags, usage statistics, automatic-backup cadence/retention, Context Images, and compact Workspace state are not persisted. No native context, request, authorization, capability, HWND, PID, clipboard sequence, or delivery result is persisted or backed up. Dexie physical version 5 remains current; there is no Dexie v6.

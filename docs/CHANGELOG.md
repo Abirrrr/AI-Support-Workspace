@@ -1,5 +1,41 @@
 # Changelog
 
+### M14-K.4 — Product Decision Lockdown & AI Handoff
+
+- Recorded Principal approval of M14-K.3. M14-K implementation is real-browser validated and Principal-approved; the combined checkpoint still requires final Principal review/Git authorization, and M14-K is not closed.
+- Added Decisions 46–49: future Text-Snippet-only active AI reference, non-destructive Knowledge UI/workflow retirement, Guidance / Gist semantics and factual grounding, compact Workspace/Context Images/provider-independent model selection, periodic canonical automatic backup, generated Text Snippet tags, usage metadata/retrieval signals, and M14-K class-C optimization/production-packaging deferral.
+- Preserved current implementation truth: Knowledge domain/store/repositories/Backup compatibility remain; current M6/M7/M9 contracts remain; Dexie is physical v5; Backup v6 is current; M14-K.4 adds no runtime, tests, migration, permissions, dependencies, telemetry, scheduler, provider call, staging, commit, or push.
+- Reconciled future sequencing without renumbering established M15/M16: an approved post-M14 Snippet-hardening gate with task ID pending precedes expanded M15 AI drafting/multimodal Context work; M16 remains OpenAI/provider expansion.
+- Status: **DOCUMENTATION/ARCHITECTURE RECONCILED / FINAL PRINCIPAL REVIEW PENDING / NOT COMMITTED / NOT CLOSED**.
+
+### M14-K.3 — Automatic Paste Validation, Performance Audit & Closeout Preparation
+
+- Incorporated authoritative Principal real-browser PASS evidence for automatic Text and Image in both Intercom and Crisp; clipboard-only Text and Image with exactly one deliberate manual `Ctrl+V`; unknown-trigger ordinary-Space safety; and live clipboard-only-to-automatic Settings propagation without destination reload.
+- Recorded the successful Intercom trace: automatic mode at every layer, accepted Space suppressed before input, no activation input, valid post-cleanup authorization and all physical predicates, extension-owned cleanup input, `paste-issued`, 4/4 `SendInput`, last error 0, and win-x64 struct size 40.
+- Completed source, lifecycle, privacy, memory, persistence, diagnostics, packaging-boundary, and performance-path review. Performance is **C — ARCHITECTURAL PERFORMANCE OPPORTUNITY**: direct PNG preparation measured approximately 0.2 ms for 64×64 and 2.0 ms for 1440×900, while controlled 1440×900 JPEG/WebP-to-PNG conversion measured approximately 1.04–1.06 s and content-free one-shot host startup measured 67.0 ms median / 76.1 ms p95. No speculative optimization, telemetry, feature, architecture redesign, AI work, commit, or push was added.
+- Status: **IMPLEMENTED / REAL-BROWSER VALIDATED / CLOSEOUT PREPARED / PRINCIPAL REVIEW PENDING**. M14-K is not yet marked committed or closed.
+
+### M14-K.2.3.4 — Synchronous Activation Space Suppression
+
+- Corrected the proven real-Intercom activation race: the document runtime now synchronously prevents Space only after the complete trigger/editor/catalog path returns an explicit accepted result, then starts asynchronous delivery exactly once. Rejected activations retain ordinary Space; accepted asynchronous failures preserve the trigger and do not replay Space.
+- Changed textarea, supported-input, generic-contenteditable, and Shadow-DOM cleanup CAS to match the unchanged trigger-only state. Removed the obsolete activation-input/mutation tolerance while retaining exact synchronous ownership of the extension cleanup `InputEvent`; every later genuine input or mutation still permanently invalidates authorization without a grace period.
+- Added privacy-safe single-line eligibility metadata so multiline Text remains rejected in supported single-line inputs before prevention. Expanded deterministic accepted/rejected, clipboard-only, automatic orchestration, later-input, stale-cleanup, diagnostics, and production-exclusion coverage. Native protocol, `SendInput`, mutex, retry policy, AutoHotkey status, and manual `Ctrl+V` are unchanged.
+- Status: **CONTROLLED CORRECTION PASS / REAL INTERCOM AUTOMATIC RETEST PENDING**. M14-K.3 is not started.
+
+### M14-K.2.3 — Post-Cleanup Focus Authorization Correction
+
+- Corrected the generic contenteditable post-cleanup authorization predicate after the first real Intercom automatic Text trace reached `post-cleanup-check` with `unsafe-focus` in the same worker. Exact cleanup succeeded, but authorization compared raw caret-node identity instead of the equivalent live root-relative editor boundary.
+- Added one scoped cleanup-state transition and exact post-cleanup editor-structure plus boundary-path validation. Extension-owned cleanup/selection changes and structurally identical live-node normalization remain authorized; unrelated content mutation, caret movement, focus departure/return, disconnection, lifecycle change, and stale cleanup remain permanent declines across ordinary and Shadow-DOM contenteditable editors. Input/textarea checks are unchanged.
+- Added deterministic guard and orchestration regressions for authorized cleanup, mutation/selection/focus safety, retargeted Shadow DOM, stale cleanup, clipboard-only/manual fallback continuity, and exactly one fake native paste request. No Intercom/Crisp production branch, native protocol, `SendInput`, retry, or diagnostic-output change was added.
+- Status: **CONTROLLED CORRECTION PASS / REAL INTERCOM AUTOMATIC RETEST PENDING**. M14-K.3 is not started.
+
+### M14-K.2 — Windows Automatic Paste Implementation
+
+- Implemented Decision 45 end to end with opt-in `snippetPasteMode`, clipboard-only default/permanent manual fallback, strict Backup v6 with v1-v5 imports defaulting to clipboard-only, and no Dexie physical-version change.
+- Added one shared post-clipboard Text/Image automatic-paste boundary, request-lifetime one-use editor authorization, generic Shadow-DOM focus/selection invalidation, exact cleanup and sender/document/frame/tab/window binding, a no-queue extension guard, truthful notices, no replay, and content-free bounded phase timings.
+- Extended the existing companion with strict protocol v2 `capture-paste-context` and `paste-clipboard`, canonical 16-lowercase-hex HWND values, foreground/root/PID/clipboard and eight-modifier validation, a separate immediate-fail paste mutex, and one fixed four-event `SendInput` call. Protocol v1 Image behavior remains compatible; no arbitrary keys, focus stealing, hook, AutoHotkey, elevation, retry, or clipboard clearing was added.
+- Added deterministic browser, settings, Backup v6/historical-import, TypeScript protocol/transport, native capture, modifier, mutex, one-call ordering, partial-result, concurrency, and restart coverage. Native tests use fakes and inject no real keyboard input. Real Crisp/Intercom automatic-paste validation remains pending in M14-K.3.
+
 ## [Unreleased]
 
 ### M14-K.1 — Automatic Paste Architecture + Focus Safety
@@ -9,7 +45,7 @@
 - Defined layered safety: a one-use content-script editor/Shadow-DOM guard; exact service-worker sender/document/frame/tab/window/catalog/request ownership; active-tab plus focused-window checks; and native foreground root HWND/process, clipboard-sequence, modifier, no-queue mutex, and one-call input checks. The residual same-window last-instant editor race is an explicit M14-K.2/M14-K.3 release gate.
 - Defined strict future protocol v2 operations `capture-paste-context` and `paste-clipboard` while freezing protocol v1. Future direct Win32 input is one Ctrl-down/V-down/V-up/Ctrl-up `SendInput` array; full acceptance means `Paste sent`, not proven destination insertion, while unsafe/failure/indeterminate results retain copied/manual-fallback UX.
 - Defined the future existing-Settings preference `snippetPasteMode: 'clipboard-only' | 'automatic'`, strict Backup v6 exports with v1-v5 imports defaulting to clipboard-only, no Dexie version change, Windows-only automatic scope, and non-Windows clipboard-only support.
-- Finalized M14-K.2 Windows implementation and M14-K.3 Crisp/Intercom validation acceptance. M14-K.1 changes documentation only: no Settings toggle, Backup v6 runtime, protocol-v2 operation, AutoHotkey dependency, `SendInput`, native behavior, source, test, dependency, permission, or configuration change was added. Decisions 42–44, native clipboard behavior, Dexie v5, and Backup v5 remain unchanged.
+- Defined M14-K.2 Windows implementation and M14-K.3 Crisp/Intercom validation acceptance. M14-K.1 itself changed documentation only: no Settings toggle, Backup v6 runtime, protocol-v2 operation, AutoHotkey dependency, `SendInput`, native behavior, source, test, dependency, permission, or configuration change was added at that checkpoint.
 
 ### M14-J.7 — M14-J Milestone Closeout & Git Checkpoint Preparation
 

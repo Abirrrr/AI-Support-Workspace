@@ -12,6 +12,8 @@
     <RootNamespace>AI.SupportWorkspace.ClipboardCompanion</RootNamespace>
     <Version>1.0.0</Version>
     <ExpectedExtensionOrigin Condition="'$(ExpectedExtensionOrigin)' == ''"></ExpectedExtensionOrigin>
+    <NativeDiagnostics Condition="'$(NativeDiagnostics)' == ''">false</NativeDiagnostics>
+    <DefineConstants Condition="'$(NativeDiagnostics)' == 'true'">$(DefineConstants);NATIVE_DIAGNOSTICS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

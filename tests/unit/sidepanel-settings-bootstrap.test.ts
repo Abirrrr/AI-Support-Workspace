@@ -9,7 +9,10 @@ import {
 describe('Side Panel Settings bootstrap', () => {
   it('resolves a saved model before Workspace initialization', async () => {
     const settings: Pick<SettingsApplication, 'load'> = {
-      load: vi.fn(async () => ({ defaultModel: 'qwen2.5:7b' })),
+      load: vi.fn(async () => ({
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'clipboard-only' as const,
+      })),
     };
 
     await expect(loadWorkspaceSettings(settings)).resolves.toEqual({
@@ -19,14 +22,14 @@ describe('Side Panel Settings bootstrap', () => {
     expect(settings.load).toHaveBeenCalledOnce();
   });
 
-  it.each([{ defaultModel: null }, { defaultModel: '' }])(
-    'initializes blank for $defaultModel',
-    async (loaded) => {
-      await expect(
-        loadWorkspaceSettings({ load: vi.fn(async () => loaded) }),
-      ).resolves.toEqual({ initialModel: '', loadFailureMessage: null });
-    },
-  );
+  it.each([
+    { defaultModel: null, snippetPasteMode: 'clipboard-only' as const },
+    { defaultModel: '', snippetPasteMode: 'clipboard-only' as const },
+  ])('initializes blank for $defaultModel', async (loaded) => {
+    await expect(
+      loadWorkspaceSettings({ load: vi.fn(async () => loaded) }),
+    ).resolves.toEqual({ initialModel: '', loadFailureMessage: null });
+  });
 
   it('maps load failure to blank non-blocking bootstrap feedback', async () => {
     await expect(

@@ -22,18 +22,25 @@ describe('SettingsService', () => {
   it('resolves a missing record to the null application default', async () => {
     const service = new SettingsService(createRepository());
 
-    await expect(service.load()).resolves.toEqual({ defaultModel: null });
+    await expect(service.load()).resolves.toEqual({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
   });
 
   it('loads a saved non-null model unchanged', async () => {
     const service = new SettingsService(
       createRepository({
-        load: vi.fn(async () => ({ defaultModel: 'qwen2.5:7b' })),
+        load: vi.fn(async () => ({
+          defaultModel: 'qwen2.5:7b',
+          snippetPasteMode: 'automatic' as const,
+        })),
       }),
     );
 
     await expect(service.load()).resolves.toEqual({
       defaultModel: 'qwen2.5:7b',
+      snippetPasteMode: 'automatic',
     });
   });
 
@@ -42,10 +49,14 @@ describe('SettingsService', () => {
     const service = new SettingsService(repository);
 
     await expect(
-      service.save('  registry/model:tag@sha256:value  '),
-    ).resolves.toEqual({ defaultModel: 'registry/model:tag@sha256:value' });
+      service.save('  registry/model:tag@sha256:value  ', 'automatic'),
+    ).resolves.toEqual({
+      defaultModel: 'registry/model:tag@sha256:value',
+      snippetPasteMode: 'automatic',
+    });
     expect(repository.save).toHaveBeenCalledWith({
       defaultModel: 'registry/model:tag@sha256:value',
+      snippetPasteMode: 'automatic',
     });
   });
 
@@ -55,9 +66,12 @@ describe('SettingsService', () => {
 
     const repository = createRepository();
     const service = new SettingsService(repository);
-    await service.save(' \t\n ');
+    await service.save(' \t\n ', 'clipboard-only');
 
-    expect(repository.save).toHaveBeenCalledWith({ defaultModel: null });
+    expect(repository.save).toHaveBeenCalledWith({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
   });
 
   it('maps repository load failures to a focused safe error', async () => {
@@ -88,12 +102,12 @@ describe('SettingsService', () => {
       }),
     );
 
-    await expect(service.save('model')).rejects.toMatchObject({
+    await expect(service.save('model', 'automatic')).rejects.toMatchObject({
       name: 'SettingsSaveError',
       message: 'Failed to save settings.',
       cause,
     });
-    await expect(service.save('model')).rejects.toBeInstanceOf(
+    await expect(service.save('model', 'automatic')).rejects.toBeInstanceOf(
       SettingsSaveError,
     );
   });

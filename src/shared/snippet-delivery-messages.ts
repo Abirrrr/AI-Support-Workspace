@@ -26,6 +26,7 @@ export type SnippetDeliveryFailureCode =
   | 'host-version-mismatch'
   | 'invalid-host-response'
   | 'native-delivery-busy'
+  | 'automatic-delivery-busy'
   | 'stale-catalog'
   | 'unexpected-delivery-failure';
 
@@ -54,10 +55,40 @@ export type TriggerActivationResponseMessage =
   | {
       readonly type: 'snippet-trigger-activation-result';
       readonly requestId: string;
+      readonly outcome: 'automatic-ready';
+      readonly kind: TriggerCatalogEntryKind;
+      readonly authorizationId: string;
+    }
+  | {
+      readonly type: 'snippet-trigger-activation-result';
+      readonly requestId: string;
       readonly outcome: 'permission-required' | 'failed';
       readonly code: SnippetDeliveryFailureCode;
       readonly message: string;
     };
+
+export interface AutomaticPasteFinalizeMessage {
+  readonly type: 'snippet-automatic-paste-finalize';
+  readonly requestId: string;
+  readonly authorizationId: string;
+  readonly editorState: 'ready' | 'unsafe-focus' | 'cleanup-failed';
+}
+
+export interface AutomaticPasteFinalizeResponse {
+  readonly type: 'snippet-automatic-paste-result';
+  readonly requestId: string;
+  readonly kind: TriggerCatalogEntryKind;
+  readonly result:
+    | 'paste-issued'
+    | 'unsafe-focus'
+    | 'not-foreground'
+    | 'clipboard-changed'
+    | 'unsafe-keyboard-state'
+    | 'busy'
+    | 'native-unavailable'
+    | 'input-injection-failed'
+    | 'indeterminate';
+}
 
 export interface OffscreenClipboardWriteMessage {
   readonly type: 'offscreen-clipboard-write';
@@ -183,7 +214,46 @@ export function isSnippetDeliveryFailureCode(
     value === 'host-version-mismatch' ||
     value === 'invalid-host-response' ||
     value === 'native-delivery-busy' ||
+    value === 'automatic-delivery-busy' ||
     value === 'stale-catalog' ||
     value === 'unexpected-delivery-failure'
+  );
+}
+
+export function isAutomaticPasteFinalizeMessage(
+  value: unknown,
+): value is AutomaticPasteFinalizeMessage {
+  return (
+    isRecord(value) &&
+    exactKeys(value, ['type', 'requestId', 'authorizationId', 'editorState']) &&
+    value.type === 'snippet-automatic-paste-finalize' &&
+    typeof value.requestId === 'string' &&
+    value.requestId.length > 0 &&
+    typeof value.authorizationId === 'string' &&
+    /^[0-9a-f]{32}$/.test(value.authorizationId) &&
+    (value.editorState === 'ready' ||
+      value.editorState === 'unsafe-focus' ||
+      value.editorState === 'cleanup-failed')
+  );
+}
+
+export function isAutomaticPasteFinalizeResponse(
+  value: unknown,
+): value is AutomaticPasteFinalizeResponse {
+  return (
+    isRecord(value) &&
+    exactKeys(value, ['type', 'requestId', 'kind', 'result']) &&
+    value.type === 'snippet-automatic-paste-result' &&
+    typeof value.requestId === 'string' &&
+    (value.kind === 'text' || value.kind === 'image') &&
+    (value.result === 'paste-issued' ||
+      value.result === 'unsafe-focus' ||
+      value.result === 'not-foreground' ||
+      value.result === 'clipboard-changed' ||
+      value.result === 'unsafe-keyboard-state' ||
+      value.result === 'busy' ||
+      value.result === 'native-unavailable' ||
+      value.result === 'input-injection-failed' ||
+      value.result === 'indeterminate')
   );
 }

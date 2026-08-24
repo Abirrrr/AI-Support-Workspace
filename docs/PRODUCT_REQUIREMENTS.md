@@ -2,34 +2,53 @@
 
 ## Product Scope
 
-The product will eventually provide an integrated support workspace for Intercom users, combining local knowledge retrieval, reusable snippets, and AI-assisted drafting.
+The product provides a local-first support workspace with reusable Snippet delivery and AI-assisted drafting. The current implementation still includes Knowledge and Snippet Libraries. The approved future drafting experience makes Text Snippets the sole active user-managed AI reference library while retaining the underlying Knowledge implementation for compatibility until a separate cleanup/migration is approved.
 
 ## Functional Requirements (Planned)
 
 - Capture support context from the browser and local workspace.
-- Store reusable knowledge entries locally as a Knowledge Library.
+- Preserve currently implemented Knowledge records locally for compatibility; retire the Knowledge Library from the future active AI workflow/UI only after a separately approved implementation task.
 - Store reusable snippets locally as a Snippet Library.
 - Prepare a triggered Text or Image Snippet on the clipboard, remove only the unchanged trigger after confirmed copy, and let the user insert it with native Ctrl+V in a supported focused web editor.
 - Retrieve relevant content quickly during support work.
 - Build prompts for AI assistance without coupling business logic to a specific provider.
 - Allow users to review and edit AI-generated drafts before use.
 
-## Knowledge Library vs. Snippet Library
+## Current Knowledge Compatibility vs. Future Active Text Snippet Library
 
-- The Knowledge Library owns broader, contextual support knowledge used for troubleshooting, reference, and retrieval during support work.
-- The Snippet Library owns compact, reusable response content and message fragments intended for quick insertion or expansion into a reply. The current implementation is plain text; the approved future rich-Snippet direction may add ordered structured content after architecture and migration review.
+- Current implementation: Knowledge and Snippet remain separate persisted domains, repositories, Backup data, options-page surfaces, retrieval collections, and Prompt Builder sections.
+- Approved future active product: Text Snippets are the sole user-managed AI reference library and may provide relevant support information, phrasing, response patterns, prior examples, and workflow/reference wording.
+- The Knowledge Library retires from the future active AI workflow/UI, but its domain, Dexie data/store, repository interfaces, Backup compatibility, and tests are not deleted or migrated by M14-K.4. Permanent removal requires a separate approved cleanup/migration task.
+- Image Snippets remain reusable delivery assets and are excluded from AI retrieval/reference content.
 
-The libraries may both contribute to a support response, but they have different responsibilities and must remain separate concepts in the product experience, persistence model, and documentation.
+## Future AI Drafting Semantics
 
-## Prompt Composition Semantics
+- The user-facing field is **Guidance / Gist**. It is optional request-specific direction, not a complete-prompt requirement. Minimal Gist such as `follow up`, `keep it short`, or `ask for the URL` is valid.
+- Merchant Context is optional. With Context and no Gist, Generate infers that a sensible response is required. With Gist and no Context, Generate drafts directly from the Gist. When both are present, Gist controls the current requested action/presentation and Context supplies current-case facts.
+- Generate is enabled for Context-only, Gist-only, or Context-plus-Gist. It is disabled only when both are empty.
+- Application-owned default drafting instructions always apply; users need not repeat them.
+- Product authority is `Safety/application rules → current Guidance / Gist → Merchant Context factual grounding → relevant Text Snippet reference material → default drafting behavior`.
+- Guidance / Gist controls intent, action, length, structure, tone modification, and drafting direction, but does not authorize invented facts contradicted or unsupported by Merchant Context.
+- Retrieved Text Snippets are reference/evidence, not current instructions. They never override Gist, Context facts, or safety rules, and must not introduce unsupported case-specific facts.
+- Current Prompt Builder v1 remains implemented with separate Knowledge/Snippet inputs until a future versioned application-contract change implements this product direction.
 
-- Prompt composition accepts Merchant Context, explicit Guidance, or both as the current-task input. At least one must contain non-whitespace text; retrieved Library material alone cannot define the user's task.
-- Guidance is the user's highest-priority current instruction. Any non-whitespace Guidance is valid, including a minimal instruction such as `follow up`.
-- Merchant Context represents the current support conversation or situation and takes priority over retrieved Library material.
-- Retrieved Knowledge is supporting factual or reference material. Retrieved Snippets are lower-priority reusable wording, style, or examples and are not instructions or independent factual authority.
-- Dynamic input conflicts follow `Guidance > Merchant Context > Knowledge > Snippets`.
-- Prompt composition produces a structured provider-independent assembly. Provider selection, provider serialization, and AI execution occur outside this product boundary.
-- Images and screenshots are not Prompt Builder v1 inputs. Multimodal Context Attachments are an approved future product direction, but their Prompt Builder, provider-capability, serialization, and runtime architecture remains deferred.
+## Future Compact AI Workspace
+
+- Order: Merchant Context, compact Context Image attachments when present, Guidance / Gist, one horizontal `[Model dropdown] [Generate]` row, then Generated Output with Copy on the same output-header row.
+- Merchant Context and Guidance / Gist begin approximately one visual line high, auto-grow to a sensible maximum, then scroll internally. Context remains multiline-capable and accepts pasted text.
+- Merchant Context accepts removable request-scoped Context Images. They are transient multimodal AI input, not Image Snippets, Knowledge records, or permanent Library records. Provider translation and any workspace-continuity lifetime belong to future M15 architecture.
+- Guidance / Gist v1 accepts text only.
+- Model is a compact provider-independent dropdown. Discovery and selection belong behind project-owned provider/application boundaries, not Ollama-specific Workspace logic.
+- Generated Output remains editable and persists while the user changes Context/Gist and regenerates. Generation does not clear inputs. Copy remains; no direct Insert/Paste action is approved.
+- Permanent intro/helper copy, redundant headings, and Ollama installation guidance leave the primary drafting surface; configuration/troubleshooting stays elsewhere.
+
+## Future Snippet Hardening
+
+- Periodic local automatic backup is approved with `Off | Daily | Weekly`, weekly recommended/default. It reuses the canonical Backup/Export format, preserves manual Export, has bounded retention, never blocks Snippet use on failure, and requires an explicit Chrome capability/permission review before implementation.
+- Automatically generated Text Snippet tags are approved as non-authoritative retrieval metadata. They coexist with and never overwrite current authored ordered tags, never become the sole eligibility condition, and are produced through the provider-independent AI boundary.
+- Lightweight `usageCount` / `lastUsedAt` metadata is approved. One use means authoritative clipboard preparation plus successful exact trigger cleanup, regardless of later automatic-paste outcome or whether manual `Ctrl+V` occurs. Persistence is best-effort and never blocks delivery.
+- Future retrieval keeps textual relevance primary, generated tags supporting, and usage/recency weak secondary or tie-breaking signals. Popularity never dominates relevance.
+- These requirements add no current schema, Backup, permission, provider call, scheduler, or ranking behavior.
 
 ## Output Workspace v1
 
@@ -65,7 +84,7 @@ The libraries may both contribute to a support response, but they have different
 
 ## Import / Export v1
 
-- M12 provides manual local backup, recovery after reinstall or browser-data loss, and user-mediated transfer to another Chrome profile or computer. It does not provide cloud sync, collaboration, sharing, bulk editing, automatic backup, or scheduled backup.
+- M12 provides the current manual local backup, recovery after reinstall or browser-data loss, and user-mediated transfer to another Chrome profile or computer. M12 itself does not provide cloud sync, collaboration, sharing, bulk editing, automatic backup, or scheduled backup. Decision 48 separately approves future periodic local backup through the same canonical format.
 - Export produces one JSON file with exact format identifier `ai-support-workspace-backup`, independently versioned `formatVersion: 1`, UTC `exportedAt`, and required Knowledge, Snippet, and Settings data. Database and application versions, physical table names, and the Settings record ID are not public backup data.
 - Knowledge includes exactly `id`, `title`, `body`, `tags`, `createdAt`, `updatedAt`, and `source`; Snippets include exactly `id`, `title`, `content`, `tags`, `createdAt`, and `updatedAt`; Settings always includes exactly `defaultModel`, including `null` when no default is saved.
 - Transient Merchant Context, Guidance, Output, Workspace model overrides, capture state, webpage or browser state, Ollama models or availability, secrets, credentials, M15 screenshots, M13 triggers, and M14 rich-Snippet content are excluded from frozen Backup Format v1.
@@ -120,7 +139,7 @@ M14 builds on the existing M13 Snippet aggregate, Library, trigger catalog, and 
 - M14-I publishes Image Snippets through metadata-only typed catalog entries. Decision 38 separately continues to exclude legacy Rich local-image records. Unknown-trigger behavior preserves normal typing.
 - Image delivery v1 retrieves and revalidates the one owned asset from Dexie only after activation, prepares a PNG image on the clipboard, removes the unchanged trigger only after copy success, reports `Image copied — press Ctrl+V`, and relies on the user's real native paste. Destination inline/attachment/message behavior is not promised.
 - Existing browser Text clipboard delivery is opt-in through optional `clipboardWrite` and `offscreen`. Windows native Image delivery additionally uses optional `nativeMessaging`, requested only from its explanatory Settings user gesture. Text remains independent and does not require or launch the companion. `clipboardRead`, synthetic paste, fake keyboard events, upload-control reverse engineering, and silent permission prompts are prohibited.
-- Permission denial, stale state, asset failure, PNG conversion failure, Text offscreen failure, or native Image clipboard failure preserves the trigger and surrounding content and produces no copied-success notice. Successful compare-and-swap cleanup removes the trigger plus activation space, leaves no placeholder or trailing U+0020, and collapses the caret at the removed range start.
+- A fully accepted trigger consumes its Space synchronously before asynchronous delivery. Permission denial, stale state, asset failure, PNG conversion failure, Text offscreen failure, or native Image clipboard failure preserves the trigger and surrounding content and produces no copied-success notice; the consumed activation command is not replayed. Successful compare-and-swap cleanup removes only the trigger from the no-inserted-Space state, leaves no placeholder or trailing U+0020, and collapses the caret at the removed range start.
 - Rich browser delivery prepares safe project-owned `text/html` plus deterministic `text/plain` for paragraphs, bold, italic, links, and lists. Native paste is the implemented base path; destination-specific compatibility corrections require evidence. The unresolved Crisp direct Plain insertion behavior does not authorize a site-specific adapter by itself.
 - Variables, merge fields, conditions, loops, scripting, arbitrary HTML/CSS, AI-generated content, page scraping, analytics, alternate triggers, collaboration, sync, provider changes, Context Images, and M15 implementation remain excluded.
 - Deliverable Text and Image Snippets use one typed trigger-to-clipboard planner. Catalog snapshots expose only delivery kind, trigger, and Snippet ID; content, HTML, Blob, base64, asset IDs, filenames, MIME types, and binary bytes remain out of page frames.
@@ -130,8 +149,9 @@ M14 builds on the existing M13 Snippet aggregate, Library, trigger catalog, and 
 - Manual native `Ctrl+V` after successful clipboard preparation and trigger cleanup is accepted for the current product version. Automatic paste is not a current M14 requirement.
 - Real Chrome validates Text clipboard preparation, cleanup, copied notice, and native-paste fidelity for bold, italic, links, bullet lists, and numbered lists. Text normally uses the offscreen `copy` event plus `document.execCommand('copy')` with exact `text/plain` and safe `text/html`, not `navigator.clipboard.write()`.
 - Historical browser Image evidence remains: offscreen Async Clipboard failed with `clipboard-write-failed`; M14-I.1.4 pasted `snippet.png`; focused-content A1 pasted `TEXT`; and focused extension-page B pasted `VISIBLE IMAGE` but required unacceptable focus-stealing UX. M14-I.5 removes all of those mechanisms and probes from active runtime.
-- M14-I.2 / Decision 43 defines the optional Windows Native Clipboard Companion architecture. The service worker may send only one strict, bounded, request-scoped Decision 42-safe PNG to a separately installed exact-origin host. Native success requires registered `PNG` plus `CF_DIBV5` to be prepared through the complete Win32 clipboard sequence before cleanup. The host accepts no arbitrary commands, paths, URLs, files, HTML, Snippet/page metadata, network operation, or temporary image staging. It is Windows-only; manual `Ctrl+V` remains the insertion step and automatic paste stays separate.
-- M14-I.3/M14-I.3.1 implement the standalone C#/.NET 10 Windows native-host foundation, strict v1, WIC, and registered PNG + CF_DIBV5 clipboard machinery. M14-I.4/M14-I.4.1 implement the development Chrome integration and corrected capability status: stable dev identity, optional `nativeMessaging`, Settings readiness, validated one-shot service-worker requests, exact `.dev` manifest, and reversible HKCU registration. Real Chrome validates Settings `Ready` and complete Image trigger/native preparation/cleanup/notice/visible paste. M14-I.5 leaves the Windows native companion as the only normal Windows Image path with no browser fallback. No production installer, production identity/registration, signing, keyboard injection, or AutoHotkey dependency exists.
+- M14-I.2 / Decision 43 defines the optional Windows Native Clipboard Companion architecture. The service worker may send only one strict, bounded, request-scoped Decision 42-safe PNG to a separately installed exact-origin host. Native success requires registered `PNG` plus `CF_DIBV5` to be prepared through the complete Win32 clipboard sequence before cleanup. The host accepts no arbitrary commands, paths, URLs, files, HTML, Snippet/page metadata, network operation, or temporary image staging. M14-K.2 preserves this protocol-v1 Image behavior.
+- M14-K.2 implements Decision 45's additive Windows automatic-paste mode. `clipboard-only` is the default and permanent manual `Ctrl+V` workflow; `automatic` is explicit opt-in. Both Text and Image require authoritative clipboard success, exact cleanup, one-use editor/sender/tab/window authorization, unchanged native foreground/PID/clipboard context, and safe modifier state before at most one Ctrl+V input attempt. The clipboard is never cleared, uncertain results are never retried, and every safe decline after clipboard success retains manual paste fallback. No destination-specific behavior, arbitrary send-keys, focus stealing, keyboard hook, AutoHotkey, elevation, telemetry, or non-Windows host is permitted.
+- M14-I.3/M14-I.3.1 implement the standalone C#/.NET 10 Windows native-host foundation, strict v1, WIC, and registered PNG + CF_DIBV5 clipboard machinery. M14-I.4/M14-I.4.1 implement the development Chrome integration and corrected capability status: stable dev identity, optional `nativeMessaging`, Settings readiness, validated one-shot service-worker requests, exact `.dev` manifest, and reversible HKCU registration. Real Chrome validates Settings `Ready`, complete Image preparation/manual paste, and M14-K automatic Text/Image paste in Intercom and Crisp. M14-I.5 leaves the Windows native companion as the only normal Windows Image path with no browser fallback. No production installer, production identity/registration, signing, updater, version-migration workflow, or AutoHotkey dependency exists; those distribution items are separate future work and do not block local/development closeout.
 
 Representative Image Snippet:
 

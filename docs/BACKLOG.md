@@ -42,20 +42,32 @@
 - **KNOWN LOW-PRIORITY COMPATIBILITY LIMITATION:** triggering the bullet-list Snippet immediately after Shift+Enter in Intercom can omit the first bullet. This does not block normal list paste or reopen the persistence, serializer, planner, Image, or Shadow-DOM results.
 - **COMPLETE / AUTOMATED PASS / REAL-CHROME PASS — M14-J.6:** Content Script Lifecycle Recovery & Always-On Availability preserves static injection, recovers eligible already-open HTTP/HTTPS frames after install/update/reload/startup, reconnects after ordinary worker termination, and prevents duplicate runtimes. Intercom/Crisp no-refresh recovery and repeated-reload idempotency pass. Decision 44 selects exact persistent HTTP/HTTPS host access; no `tabs`, polling, alarms, keepalive, page inspection, or automatic paste is introduced.
 - **COMPLETE / SYNCHRONIZED AT `e4e9645` — M14-J.7:** final M14-J documentation and lifecycle implementation are checkpointed locally and remotely.
-- **ACTIVE / ARCHITECTURE DEFINED — M14-K.1 Automatic Paste Architecture + Focus Safety:** Decision 45 makes automatic paste additive and opt-in, keeps clipboard-only/manual `Ctrl+V` permanent, selects the C# native companion, rejects permanent AutoHotkey, and defines layered focus, foreground, clipboard, modifier, concurrency, protocol-v2, no-retry, fallback, and privacy contracts. No production behavior is implemented.
-- **EXACT NEXT AFTER APPROVAL — M14-K.2 Windows Automatic Paste Implementation:** implement the Settings/Backup v6 evolution, shared post-clipboard application boundary, one-use browser authorization, strict native protocol v2, direct Win32 input, typed fallback UX, and automated safety/timing coverage without changing protocol v1, Decision 42/43 clipboard behavior, or manual mode.
-- **PLANNED — M14-K.3 Crisp/Intercom Real-World Validation:** validate Text and Image in both destinations, manual mode/fallback, and adversarial editor/tab/window/application focus changes before release.
-- **NON-BLOCKING PERFORMANCE FOLLOW-UP:** investigate perceived Image Snippet latency relative to Text Snippets. Crisp and Intercom Image delivery are functionally PASS; do not block M14-K on this investigation.
+- **COMPLETE AT `5066476` — M14-K.1 Automatic Paste Architecture + Focus Safety:** Decision 45 defines the additive, opt-in, focus-safe architecture and permanent manual fallback.
+- **IMPLEMENTED / AUTOMATED PASS / REAL-BROWSER PASS — M14-K.2 Windows Automatic Paste Implementation:** Settings/Backup v6 evolution, shared boundary, one-use browser authorization, strict protocol v2, direct Win32 input, typed fallback UX, and deterministic browser/native safety coverage are implemented without changing protocol v1 or Decisions 42/43.
+- **PRINCIPAL APPROVED — M14-K.3:** automatic and clipboard-only Text/Image pass in Intercom and Crisp; unknown-trigger safety and live Settings propagation pass; the successful native trace records 4/4 input, last error 0, and struct size 40.
+- **ACTIVE / DOCUMENTATION ONLY — M14-K.4:** lock Decisions 46–49 and the AI handoff. M14-K implementation is real-browser validated/Principal-approved, but the checkpoint remains pending final Principal review and Git authorization; M14-K is not closed.
+- **FUTURE ARCHITECTURAL PERFORMANCE OPPORTUNITY (C):** consider reducing JPEG/WebP-to-PNG conversion latency and consolidating repeated one-shot native-host contacts only in a separately approved architecture task. Controlled 1440×900 conversions measured about 1.04–1.06 s; content-free host startup measured 67.0 ms median / 76.1 ms p95. Direct PNG preparation is already fast. Do not replace one-shot Native Messaging inside M14-K closeout.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
-### M15 — Multimodal Screenshot Context
+### Approved Post-M14 Snippet Hardening (Task ID Pending)
 
-- Extend Merchant Context beyond ordinary text to one or more screenshots for AI generation when the selected provider and model support image understanding.
+- Add periodic local automatic backup by reusing the canonical Backup/Export format. Cadence is `Off | Daily | Weekly`, weekly recommended/default; manual Export remains; failure never blocks Snippet use; retention is bounded. Determine location, retention count, Chrome capabilities, and permissions during implementation architecture review.
+- Add provider-independent generated Text Snippet tags as non-authoritative retrieval hints. Preserve current caller-authored ordered tags, never overwrite content, never make generated tags the sole eligibility condition, and explicitly design generated/authored coexistence plus any schema/Backup evolution.
+- Add best-effort mutable usage metadata conceptually containing `snippetId`, `usageCount`, and `lastUsedAt`. Count after clipboard success plus exact trigger cleanup in either paste mode, do not observe physical `Ctrl+V`, and never block delivery. Prefer separation from authored Snippet content subject to schema review.
+- Keep textual relevance primary, generated tags supporting, and usage/recency weak tie-breakers. Popularity must not dominate relevance.
+- This gate occurs after M14 closes and before M15 implementation. Its task ID remains intentionally unassigned because M15/M16 already have established meanings.
+
+### M15 — AI Drafting Workflow Refinement and Multimodal Context
+
+- Make Text Snippets the sole active user-managed AI reference library; retire Knowledge from the active AI workflow/UI without deleting the compatibility domain/store/backups until a separate cleanup task.
+- Implement optional Guidance / Gist, Context/Gist empty-state rules, factual grounding, application defaults, and Text-Snippet reference precedence from Decision 46.
+- Implement the compact Decision 47 Workspace order, bounded auto-growing inputs, provider-independent Model dropdown, editable preserved output, Copy, and reduced primary-workflow explanatory copy.
+- Extend Merchant Context beyond ordinary text to one or more request-scoped screenshots/images for AI generation when the selected provider and model support image understanding.
 - Allow direct screenshot clipboard paste without requiring a disk save or cloud upload first.
 - Provide visible attachment indication, appropriate preview, and removal before generation. Image reordering remains unresolved.
 - Keep screenshots transient and local-first by default; no persistence or image table is currently approved.
 - Preserve provider independence through a future capability boundary and never silently discard screenshots when a provider is text-only.
-- Defer representation, unsupported-provider UX details, count/size/format limits, persistence, Prompt Builder changes, provider serialization, and implementation tasks to future M15 architecture work.
+- Defer representation, unsupported-provider UX details, count/size/format limits, workspace-continuity persistence, Prompt Builder/retrieval contract changes, provider serialization, and implementation decomposition to future M15 architecture work.
 
 ### M16 — OpenAI Provider Expansion
 
@@ -79,9 +91,9 @@
 
 - Architecture investigation is complete in M14-K.1 / Decision 45. Windows automatic paste will extend the existing C# companion after authoritative clipboard preparation; it is not part of or a modification to Decision 43 protocol v1.
 - Automatic mode is optional and defaults off. Clipboard-only/manual `Ctrl+V` remains a permanent supported workflow and fallback, and clipboard content remains available after automatic success.
-- M14-K.2 owns the first `SendInput` implementation and strict protocol v2. Arbitrary send-keys, AutoHotkey as a permanent dependency, focus stealing, retries after possible input, stale request queues, and non-Windows native hosts remain prohibited.
-- M14-K.3 must validate that stale editor/tab/window/application focus prevents automatic paste. The known residual same-window last-instant race is a release gate, not permission to weaken focus safety.
-- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J. Decision 45 supplies its independent focus/race-safety architecture; M14-K.2 still requires Principal implementation approval.
+- M14-K.2 implements one direct four-event `SendInput` call and strict protocol v2. Arbitrary send-keys, AutoHotkey, focus stealing, retries after possible input, stale request queues, and non-Windows native hosts remain prohibited.
+- M14-K.3 incorporates successful live automatic delivery plus deterministic stale editor/tab/window/application focus coverage. The known residual same-window last-instant race remains documented and is not permission to weaken focus safety.
+- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J. Decision 45 supplies its independent focus/race-safety architecture; the complete M14-K tree now awaits Principal closeout review.
 
 ### Production Native Companion Packaging
 
@@ -94,4 +106,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete, real-browser validated, and synchronized at `e4e9645`, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. The Intercom Shift+Enter bullet edge and perceived Image latency are non-blocking follow-ups. M14-K is active; M14-K.1 architecture is defined and M14-K.2 is exact next after Principal approval. M15 remains separate and not started.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete and real-browser validated, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. The Intercom Shift+Enter bullet edge and measured class-C Image performance opportunity are non-blocking follow-ups. M14-K.3 is Principal-approved; M14-K.4 decision lockdown is active. The M14-K checkpoint awaits final Principal review/Git authorization and M14-K is not closed. Post-M14 Snippet hardening precedes M15, whose implementation is not started.

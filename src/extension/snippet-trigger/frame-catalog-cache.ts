@@ -10,6 +10,7 @@ export class FrameTriggerCatalogCache {
   private epoch: string | undefined;
   private revision = -1;
   private entries = new Map<string, TriggerCatalogEntry>();
+  private pasteMode: 'clipboard-only' | 'automatic' = 'clipboard-only';
 
   get isEnabled(): boolean {
     return this.connected && this.enabled;
@@ -20,6 +21,10 @@ export class FrameTriggerCatalogCache {
     return this.isEnabled && this.epoch !== undefined
       ? { epoch: this.epoch, revision: this.revision }
       : undefined;
+  }
+
+  get snippetPasteMode(): 'clipboard-only' | 'automatic' {
+    return this.isEnabled ? this.pasteMode : 'clipboard-only';
   }
 
   markConnected(): void {
@@ -63,6 +68,7 @@ export class FrameTriggerCatalogCache {
       this.entries = new Map(
         message.entries.map((entry) => [entry.trigger, { ...entry }]),
       );
+      this.pasteMode = message.snippetPasteMode ?? 'clipboard-only';
       this.enabled = true;
       return;
     }
@@ -81,5 +87,6 @@ export class FrameTriggerCatalogCache {
       this.revision = -1;
     }
     this.entries.clear();
+    this.pasteMode = 'clipboard-only';
   }
 }

@@ -12,7 +12,9 @@ internal static class HostProcess
         Stream input,
         Stream output,
         string expectedOrigin,
-        IImageWriteService? imageWriteService = null)
+        IImageWriteService? imageWriteService = null,
+        IPasteService? pasteService = null,
+        bool includePasteDiagnostics = false)
     {
         if (!InvocationValidator.TryValidate(args, expectedOrigin, out _))
         {
@@ -20,6 +22,7 @@ internal static class HostProcess
         }
 
         string? correlationId = null;
+        int responseProtocolVersion = 1;
         bool responseAttempted = false;
         void WriteResponseOnce(byte[] response)
         {
@@ -43,16 +46,53 @@ internal static class HostProcess
 
             ProtocolParseResult parsed = ProtocolParser.Parse(frame.Body!);
             correlationId = parsed.RequestId;
+            responseProtocolVersion = parsed.ProtocolVersion ?? 1;
             if (parsed.Error is HostErrorCode parseError)
             {
-                WriteResponseOnce(ProtocolJson.Error(parsed.RequestId, parseError));
+                WriteResponseOnce(ProtocolJson.Error(responseProtocolVersion, parsed.RequestId, parseError));
                 return 1;
             }
 
             if (parsed.Request is GetCapabilitiesRequest capabilities)
             {
-                WriteResponseOnce(ProtocolJson.CapabilitiesSuccess(capabilities.RequestId));
+                WriteResponseOnce(capabilities.ProtocolVersion == 1
+                    ? ProtocolJson.CapabilitiesSuccess(capabilities.RequestId)
+                    : ProtocolJson.CapabilitiesV2Success(capabilities.RequestId));
                 return 0;
+            }
+
+            IPasteService resolvedPasteService = pasteService
+                ?? PasteService.CreateDefault(includePasteDiagnostics);
+            if (parsed.Request is CapturePasteContextRequest captureRequest)
+            {
+                (PasteContext? context, HostErrorCode? error) = resolvedPasteService.CaptureContext();
+                if (context is PasteContext captured)
+                {
+                    WriteResponseOnce(ProtocolJson.CapturePasteContextSuccess(
+                        captureRequest.RequestId,
+                        captureRequest.ActivationId,
+                        captured.ForegroundHwnd,
+                        captured.RootHwnd,
+                        captured.ProcessId,
+                        captured.ClipboardSequenceNumber));
+                    return 0;
+                }
+
+                WriteResponseOnce(ProtocolJson.Error(2, captureRequest.RequestId, error ?? HostErrorCode.InternalFailure));
+                return 1;
+            }
+
+            if (parsed.Request is PasteClipboardRequest pasteRequest)
+            {
+                PasteOperationResult result = resolvedPasteService.Paste(pasteRequest);
+                WriteResponseOnce(result.Error is null
+                    ? ProtocolJson.PasteIssuedSuccess(
+                        pasteRequest.RequestId,
+                        includePasteDiagnostics ? result.Diagnostic : null)
+                    : includePasteDiagnostics
+                        ? ProtocolJson.Error(2, pasteRequest.RequestId, result.Error.Value, result.Diagnostic)
+                        : ProtocolJson.Error(2, pasteRequest.RequestId, result.Error.Value));
+                return result.Error is null ? 0 : 1;
             }
 
             var writeRequest = (WriteImagePngRequest)parsed.Request!;
@@ -62,8 +102,8 @@ internal static class HostProcess
                     imageWriteService ?? ImageWriteService.CreateDefault(),
                     writeRequest.PngBytes);
                 byte[] response = error is null
-                    ? ProtocolJson.WriteSuccess(writeRequest.RequestId)
-                    : ProtocolJson.Error(writeRequest.RequestId, error.Value);
+                    ? ProtocolJson.WriteSuccess(writeRequest.ProtocolVersion, writeRequest.RequestId)
+                    : ProtocolJson.Error(writeRequest.ProtocolVersion, writeRequest.RequestId, error.Value);
                 WriteResponseOnce(response);
                 return error is null ? 0 : 1;
             }
@@ -78,7 +118,7 @@ internal static class HostProcess
             {
                 try
                 {
-                    WriteResponseOnce(ProtocolJson.Error(correlationId, HostErrorCode.InternalFailure));
+                    WriteResponseOnce(ProtocolJson.Error(responseProtocolVersion, correlationId, HostErrorCode.InternalFailure));
                 }
                 catch (Exception)
                 {

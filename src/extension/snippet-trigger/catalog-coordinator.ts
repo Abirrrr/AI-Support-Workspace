@@ -1,4 +1,5 @@
 import type { TriggerCatalogReader } from '../../application/snippet/trigger-catalog';
+import type { SettingsRepository } from '../../application/persistence/settings-repository';
 import {
   TRIGGER_CATALOG_PORT_NAME,
   isTriggerCatalogMutationBeginMessage,
@@ -54,6 +55,7 @@ export class TriggerCatalogCoordinator {
   constructor(
     private readonly catalogReader: TriggerCatalogReader,
     createId: () => string = () => crypto.randomUUID(),
+    private readonly settingsRepository?: SettingsRepository,
   ) {
     this.epoch = createId();
   }
@@ -114,13 +116,21 @@ export class TriggerCatalogCoordinator {
   async finishMutation(mutationId: string): Promise<boolean> {
     if (!this.mutations.delete(mutationId)) return false;
     if (this.mutations.size > 0) return false;
-    const entries = await this.catalogReader.readCatalog();
+    const [entries, settings] = await Promise.all([
+      this.catalogReader.readCatalog(),
+      this.settingsRepository?.load(),
+    ]);
     this.revision += 1;
     const message: TriggerCatalogSnapshotMessage = {
       type: 'trigger-catalog-snapshot',
       epoch: this.epoch,
       revision: this.revision,
       entries,
+      ...(this.settingsRepository === undefined
+        ? {}
+        : {
+            snippetPasteMode: settings?.snippetPasteMode ?? 'clipboard-only',
+          }),
     };
     if (!isTriggerCatalogSnapshotMessage(message)) return false;
     return this.postToAll(message);
@@ -130,12 +140,20 @@ export class TriggerCatalogCoordinator {
     port: TriggerCatalogRuntimePort,
   ): Promise<boolean> {
     if (!this.frames.has(port) || this.mutations.size > 0) return false;
-    const entries = await this.catalogReader.readCatalog();
+    const [entries, settings] = await Promise.all([
+      this.catalogReader.readCatalog(),
+      this.settingsRepository?.load(),
+    ]);
     const message: TriggerCatalogSnapshotMessage = {
       type: 'trigger-catalog-snapshot',
       epoch: this.epoch,
       revision: this.revision,
       entries,
+      ...(this.settingsRepository === undefined
+        ? {}
+        : {
+            snippetPasteMode: settings?.snippetPasteMode ?? 'clipboard-only',
+          }),
     };
     if (!isTriggerCatalogSnapshotMessage(message)) {
       this.invalidatePort(port);

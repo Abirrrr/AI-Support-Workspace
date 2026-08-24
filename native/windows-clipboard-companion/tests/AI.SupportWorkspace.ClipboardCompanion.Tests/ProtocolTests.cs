@@ -66,11 +66,45 @@ public sealed class ProtocolTests
     }
 
     [Fact]
-    public void UnsupportedVersionWinsBeforeV1FieldRules()
+    public void UnsupportedFutureVersionWinsBeforeFieldRules()
     {
-        ProtocolParseResult result = Parse($"{{\"protocolVersion\":2,\"requestId\":\"{Id}\",\"future\":{{\"anything\":true}}}}");
+        ProtocolParseResult result = Parse($"{{\"protocolVersion\":3,\"requestId\":\"{Id}\",\"future\":{{\"anything\":true}}}}");
         Assert.Equal(HostErrorCode.ProtocolVersionUnsupported, result.Error);
         Assert.Equal(Id, result.RequestId);
+    }
+
+    [Fact]
+    public void ParsesStrictV2CaptureAndPasteRequests()
+    {
+        ProtocolParseResult capture = Parse($"{{\"protocolVersion\":2,\"requestId\":\"{Id}\",\"activationId\":\"{Id}\",\"operation\":\"capture-paste-context\"}}");
+        Assert.IsType<CapturePasteContextRequest>(capture.Request);
+
+        ProtocolParseResult paste = Parse($"{{\"protocolVersion\":2,\"requestId\":\"{Id}\",\"activationId\":\"{Id}\",\"operation\":\"paste-clipboard\",\"expectedForegroundHwnd\":\"0000000000001234\",\"expectedRootHwnd\":\"0000000000001000\",\"expectedProcessId\":44,\"expectedClipboardSequenceNumber\":77}}");
+        var request = Assert.IsType<PasteClipboardRequest>(paste.Request);
+        Assert.Equal((nint)0x1234, request.ExpectedForegroundHwnd);
+        Assert.Equal((nint)0x1000, request.ExpectedRootHwnd);
+    }
+
+    [Theory]
+    [InlineData("0x0000000000001234")]
+    [InlineData("0000000000000000")]
+    [InlineData("000000000000123")]
+    [InlineData("000000000000123G")]
+    [InlineData("FFFFFFFFFFFFFFFF")]
+    public void RejectsNoncanonicalOrOverflowingWindowHandles(string handle)
+    {
+        string json = $"{{\"protocolVersion\":2,\"requestId\":\"{Id}\",\"activationId\":\"{Id}\",\"operation\":\"paste-clipboard\",\"expectedForegroundHwnd\":\"{handle}\",\"expectedRootHwnd\":\"0000000000001000\",\"expectedProcessId\":44,\"expectedClipboardSequenceNumber\":77}}";
+        Assert.Equal(HostErrorCode.InvalidRequest, Parse(json).Error);
+    }
+
+    [Fact]
+    public void V2CapabilitiesAdvertiseImageAndAutomaticPasteSeparately()
+    {
+        string json = Encoding.UTF8.GetString(ProtocolJson.CapabilitiesV2Success(Id));
+        Assert.Contains("\"supportedProtocolVersions\":[1,2]", json, StringComparison.Ordinal);
+        Assert.Contains("\"write-image-png\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"capture-paste-context\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"paste-clipboard\"", json, StringComparison.Ordinal);
     }
 
     [Fact]

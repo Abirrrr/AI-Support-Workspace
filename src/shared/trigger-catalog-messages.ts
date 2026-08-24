@@ -7,6 +7,7 @@ export interface TriggerCatalogEntry {
   readonly kind: TriggerCatalogEntryKind;
   readonly trigger: string;
   readonly snippetId: string;
+  readonly singleLineEligible?: boolean;
 }
 
 export interface TriggerCatalogSnapshotMessage {
@@ -14,6 +15,7 @@ export interface TriggerCatalogSnapshotMessage {
   readonly epoch: string;
   readonly revision: number;
   readonly entries: readonly TriggerCatalogEntry[];
+  readonly snippetPasteMode?: 'clipboard-only' | 'automatic';
 }
 
 export interface TriggerCatalogInvalidateMessage {
@@ -78,11 +80,19 @@ function isCanonicalSnippetTrigger(value: unknown): value is string {
 function isCatalogEntry(value: unknown): value is TriggerCatalogEntry {
   return (
     isRecord(value) &&
-    hasExactKeys(value, ['kind', 'trigger', 'snippetId']) &&
+    (hasExactKeys(value, ['kind', 'trigger', 'snippetId']) ||
+      hasExactKeys(value, [
+        'kind',
+        'trigger',
+        'snippetId',
+        'singleLineEligible',
+      ])) &&
     (value.kind === 'text' || value.kind === 'image') &&
     isCanonicalSnippetTrigger(value.trigger) &&
     typeof value.snippetId === 'string' &&
-    value.snippetId.length > 0
+    value.snippetId.length > 0 &&
+    (value.singleLineEligible === undefined ||
+      typeof value.singleLineEligible === 'boolean')
   );
 }
 
@@ -91,13 +101,23 @@ export function isTriggerCatalogSnapshotMessage(
 ): value is TriggerCatalogSnapshotMessage {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ['type', 'epoch', 'revision', 'entries']) ||
+    (!hasExactKeys(value, ['type', 'epoch', 'revision', 'entries']) &&
+      !hasExactKeys(value, [
+        'type',
+        'epoch',
+        'revision',
+        'entries',
+        'snippetPasteMode',
+      ])) ||
     value.type !== 'trigger-catalog-snapshot' ||
     typeof value.epoch !== 'string' ||
     value.epoch.length === 0 ||
     !isRevision(value.revision) ||
     !Array.isArray(value.entries) ||
-    !value.entries.every(isCatalogEntry)
+    !value.entries.every(isCatalogEntry) ||
+    (value.snippetPasteMode !== undefined &&
+      value.snippetPasteMode !== 'clipboard-only' &&
+      value.snippetPasteMode !== 'automatic')
   ) {
     return false;
   }

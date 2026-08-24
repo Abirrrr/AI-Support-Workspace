@@ -136,6 +136,62 @@ public sealed class FramingAndHostTests
         Assert.Equal("success", response.RootElement.GetProperty("status").GetString());
     }
 
+    [Fact]
+    public void NativeDevelopmentPasteFailureReturnsOnlySafeAttemptEvidence()
+    {
+        const string id = "0123456789abcdef0123456789abcdef";
+        string request = $"{{\"protocolVersion\":2,\"requestId\":\"{id}\",\"activationId\":\"{id}\",\"operation\":\"paste-clipboard\",\"expectedForegroundHwnd\":\"0000000000001234\",\"expectedRootHwnd\":\"0000000000001000\",\"expectedProcessId\":44,\"expectedClipboardSequenceNumber\":77}}";
+        using var output = new MemoryStream();
+        var service = new FakePasteService();
+
+        int exitCode = HostProcess.Run(
+            Invocation,
+            Frame(Encoding.UTF8.GetBytes(request)),
+            output,
+            Origin,
+            pasteService: service,
+            includePasteDiagnostics: true);
+
+        Assert.Equal(1, exitCode);
+        using JsonDocument response = JsonDocument.Parse(ReadSingleResponse(output));
+        JsonElement root = response.RootElement;
+        Assert.Equal(
+            ["hostVersion", "nativePasteDiagnostic", "protocolVersion", "requestId", "safeErrorCode", "status"],
+            root.EnumerateObject().Select(property => property.Name).Order().ToArray());
+        Assert.Equal("input-injection-failed", root.GetProperty("safeErrorCode").GetString());
+        JsonElement diagnostic = root.GetProperty("nativePasteDiagnostic");
+        Assert.Equal(4u, diagnostic.GetProperty("sendInputRequestedCount").GetUInt32());
+        Assert.Equal(0u, diagnostic.GetProperty("sendInputInsertedCount").GetUInt32());
+        Assert.Equal(40, diagnostic.GetProperty("sendInputStructSize").GetInt32());
+        Assert.Equal(87, diagnostic.GetProperty("sendInputLastError").GetInt32());
+        Assert.True(diagnostic.GetProperty("foregroundValidationPassed").GetBoolean());
+        Assert.True(diagnostic.GetProperty("rootWindowValidationPassed").GetBoolean());
+        Assert.True(diagnostic.GetProperty("pidValidationPassed").GetBoolean());
+        Assert.True(diagnostic.GetProperty("clipboardSequenceValidationPassed").GetBoolean());
+        Assert.True(diagnostic.GetProperty("modifierValidationPassed").GetBoolean());
+        Assert.True(diagnostic.GetProperty("hostSessionMatchesTarget").GetBoolean());
+        Assert.Equal("same", diagnostic.GetProperty("hostIntegrityRelation").GetString());
+        Assert.DoesNotContain("path", Encoding.UTF8.GetString(ReadSingleResponse(output)), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ProductionPasteFailureExcludesNativeAttemptDiagnostic()
+    {
+        const string id = "0123456789abcdef0123456789abcdef";
+        string request = $"{{\"protocolVersion\":2,\"requestId\":\"{id}\",\"activationId\":\"{id}\",\"operation\":\"paste-clipboard\",\"expectedForegroundHwnd\":\"0000000000001234\",\"expectedRootHwnd\":\"0000000000001000\",\"expectedProcessId\":44,\"expectedClipboardSequenceNumber\":77}}";
+        using var output = new MemoryStream();
+
+        _ = HostProcess.Run(
+            Invocation,
+            Frame(Encoding.UTF8.GetBytes(request)),
+            output,
+            Origin,
+            pasteService: new FakePasteService());
+
+        using JsonDocument response = JsonDocument.Parse(ReadSingleResponse(output));
+        Assert.False(response.RootElement.TryGetProperty("nativePasteDiagnostic", out _));
+    }
+
     private static MemoryStream Frame(byte[] body) => new(FramedBytes(body));
 
     private static byte[] FramedBytes(byte[] body)
@@ -165,6 +221,27 @@ public sealed class FramingAndHostTests
             CallCount++;
             return null;
         }
+    }
+
+    private sealed class FakePasteService : IPasteService
+    {
+        public (PasteContext? Context, HostErrorCode? Error) CaptureContext() =>
+            (new PasteContext((nint)0x1234, (nint)0x1000, 44, 77), null);
+
+        public PasteOperationResult Paste(PasteClipboardRequest request) => new(
+            HostErrorCode.InputInjectionFailed,
+            new PasteAttemptDiagnostic(
+                4,
+                0,
+                40,
+                87,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                HostIntegrityRelation.Same));
     }
 
     private sealed class ThrowsAfterDeclaredFrameStream(byte[] framedRequest) : Stream

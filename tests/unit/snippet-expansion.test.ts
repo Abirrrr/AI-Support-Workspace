@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FrameTriggerCatalogCache } from '../../src/extension/snippet-trigger/frame-catalog-cache';
+import { handleSnippetBeforeInput } from '../../src/extension/snippet-trigger/content-runtime';
 import {
   type BeforeInputEventLike,
   SnippetExpansionController,
@@ -11,14 +12,25 @@ import {
   type SnippetDeliveryRequester,
 } from '../../src/extension/snippet-trigger/expansion-controller';
 
-function enabledCache(kind: 'text' | 'image' = 'text', trigger = ';hello') {
+function enabledCache(
+  kind: 'text' | 'image' = 'text',
+  trigger = ';hello',
+  singleLineEligible?: boolean,
+) {
   const cache = new FrameTriggerCatalogCache();
   cache.markConnected();
   cache.receive({
     type: 'trigger-catalog-snapshot',
     epoch: 'epoch-1',
     revision: 1,
-    entries: [{ kind, trigger, snippetId: 'snippet-1' }],
+    entries: [
+      {
+        kind,
+        trigger,
+        snippetId: 'snippet-1',
+        ...(singleLineEligible === undefined ? {} : { singleLineEligible }),
+      },
+    ],
   });
   return cache;
 }
@@ -27,6 +39,10 @@ function beforeInput(
   target: EventTarget,
   overrides: Partial<BeforeInputEventLike> = {},
 ): BeforeInputEventLike {
+  let defaultPrevented = overrides.defaultPrevented ?? false;
+  const preventDefault = vi.fn(() => {
+    defaultPrevented = true;
+  });
   return {
     target,
     inputType: 'insertText',
@@ -34,7 +50,10 @@ function beforeInput(
     isTrusted: true,
     cancelable: true,
     isComposing: false,
-    preventDefault: vi.fn(),
+    get defaultPrevented() {
+      return defaultPrevented;
+    },
+    preventDefault,
     ...overrides,
   };
 }
@@ -70,12 +89,6 @@ async function flush() {
   await Promise.resolve();
 }
 
-function insertDefaultSpace(element: HTMLTextAreaElement | HTMLInputElement) {
-  const caret = element.selectionEnd;
-  if (caret === null) throw new Error('Expected a caret.');
-  element.setRangeText(' ', caret, caret, 'end');
-}
-
 describe('isolated-world beforeinput boundary', () => {
   it('accepts a structurally valid event without constructor identity', () => {
     const raw = beforeInput(document.body);
@@ -90,6 +103,7 @@ describe('isolated-world beforeinput boundary', () => {
     { isTrusted: 'true' },
     { cancelable: 'true' },
     { isComposing: 0 },
+    { defaultPrevented: 'false' },
     { preventDefault: undefined },
     { composedPath: [] },
     { getTargetRanges: [] },
@@ -103,7 +117,7 @@ describe('isolated-world beforeinput boundary', () => {
 describe('asynchronous clipboard activation and compare-and-swap cleanup', () => {
   beforeEach(() => document.body.replaceChildren());
 
-  it('allows the activation Space, copies, then removes exactly trigger plus Space', async () => {
+  it('synchronously consumes the activation Space, then removes exactly the trigger', async () => {
     const textarea = document.createElement('textarea');
     textarea.value = 'Before ;HELLO after';
     document.body.append(textarea);
@@ -114,8 +128,9 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     const event = beforeInput(textarea);
     const { controller, delivery, requester, feedback } = harness();
 
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    expect(event.defaultPrevented).toBe(true);
     expect(textarea.value).toBe('Before ;HELLO after');
     expect(requester.requestDelivery).toHaveBeenCalledWith({
       type: 'snippet-trigger-activation',
@@ -127,7 +142,6 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       revision: 1,
     });
 
-    insertDefaultSpace(textarea);
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -162,8 +176,9 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       input.focus();
       input.setSelectionRange(6, 6);
       const { controller, delivery } = harness();
-      expect(controller.handleBeforeInput(beforeInput(input))).toBe(true);
-      insertDefaultSpace(input);
+      expect(handleSnippetBeforeInput(controller, beforeInput(input))).toBe(
+        true,
+      );
       delivery.resolve({
         type: 'snippet-trigger-activation-result',
         requestId: 'request-1',
@@ -176,15 +191,16 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     },
   );
 
-  it('preserves trigger, Space, and surrounding content when delivery fails', async () => {
+  it('preserves the trigger and surrounding content when delivery fails', async () => {
     const textarea = document.createElement('textarea');
     textarea.value = 'A ;hello B';
     document.body.append(textarea);
     textarea.focus();
     textarea.setSelectionRange(8, 8);
     const { controller, delivery, feedback } = harness('image');
-    expect(controller.handleBeforeInput(beforeInput(textarea))).toBe(true);
-    insertDefaultSpace(textarea);
+    expect(handleSnippetBeforeInput(controller, beforeInput(textarea))).toBe(
+      true,
+    );
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -194,7 +210,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
         "Windows Image Snippets aren't ready. Check Settings. [host-unavailable]",
     });
     await flush();
-    expect(textarea.value).toBe('A ;hello  B');
+    expect(textarea.value).toBe('A ;hello B');
     expect(feedback.show).toHaveBeenCalledWith(
       "Windows Image Snippets aren't ready. Check Settings. [host-unavailable]",
       'error',
@@ -220,8 +236,9 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       textarea.focus();
       textarea.setSelectionRange(8, 8);
       const { controller, delivery, feedback } = harness('image');
-      expect(controller.handleBeforeInput(beforeInput(textarea))).toBe(true);
-      insertDefaultSpace(textarea);
+      expect(handleSnippetBeforeInput(controller, beforeInput(textarea))).toBe(
+        true,
+      );
       delivery.resolve({
         type: 'snippet-trigger-activation-result',
         requestId: 'request-1',
@@ -230,7 +247,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
         message: `Safe native failure [${code}]`,
       });
       await flush();
-      expect(textarea.value).toBe('A ;hello  B');
+      expect(textarea.value).toBe('A ;hello B');
       expect(feedback.show).toHaveBeenCalledWith(
         `Safe native failure [${code}]`,
         'error',
@@ -249,8 +266,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     textarea.focus();
     textarea.setSelectionRange(6, 6);
     const { controller, delivery, feedback } = harness('image');
-    controller.handleBeforeInput(beforeInput(textarea));
-    insertDefaultSpace(textarea);
+    handleSnippetBeforeInput(controller, beforeInput(textarea));
     textarea.value = ';hello edited';
     textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     delivery.resolve({
@@ -274,8 +290,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     textarea.focus();
     textarea.setSelectionRange(6, 6);
     const { controller, delivery } = harness();
-    controller.handleBeforeInput(beforeInput(textarea));
-    insertDefaultSpace(textarea);
+    handleSnippetBeforeInput(controller, beforeInput(textarea));
     textarea.setSelectionRange(0, 0);
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
@@ -284,7 +299,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       kind: 'text',
     });
     await flush();
-    expect(textarea.value).toBe(';hello ');
+    expect(textarea.value).toBe(';hello');
   });
 
   it('skips cleanup if the catalog epoch/revision changes while copying', async () => {
@@ -303,8 +318,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       feedback,
       () => 'request-1',
     );
-    controller.handleBeforeInput(beforeInput(textarea));
-    insertDefaultSpace(textarea);
+    handleSnippetBeforeInput(controller, beforeInput(textarea));
     cache.receive({
       type: 'trigger-catalog-invalidate',
       epoch: 'epoch-1',
@@ -317,7 +331,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       kind: 'text',
     });
     await flush();
-    expect(textarea.value).toBe(';hello ');
+    expect(textarea.value).toBe(';hello');
     expect(feedback.show).toHaveBeenCalledWith(
       'Snippet copied — press Ctrl+V (trigger unchanged)',
       'success',
@@ -340,13 +354,10 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     const input = vi.fn();
     editor.addEventListener('input', input);
     const { controller, delivery, feedback } = harness('image');
-    expect(controller.handleBeforeInput(beforeInput(editor))).toBe(true);
+    expect(handleSnippetBeforeInput(controller, beforeInput(editor))).toBe(
+      true,
+    );
 
-    text.data += ' ';
-    caret.setStart(text, text.length);
-    caret.collapse(true);
-    selection?.removeAllRanges();
-    selection?.addRange(caret);
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -386,12 +397,10 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     );
     first.focus();
     first.setSelectionRange(6, 6);
-    controller.handleBeforeInput(beforeInput(first));
-    insertDefaultSpace(first);
+    handleSnippetBeforeInput(controller, beforeInput(first));
     second.focus();
     second.setSelectionRange(6, 6);
-    controller.handleBeforeInput(beforeInput(second));
-    insertDefaultSpace(second);
+    handleSnippetBeforeInput(controller, beforeInput(second));
     deliveries[1]?.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-2',
@@ -400,9 +409,9 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     });
     await flush();
     expect(second.value).toBe('');
-    expect(first.value).toBe(';hello ');
+    expect(first.value).toBe(';hello');
     first.focus();
-    first.setSelectionRange(7, 7);
+    first.setSelectionRange(6, 6);
     deliveries[0]?.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -420,16 +429,105 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     textarea.focus();
     textarea.setSelectionRange(8, 8);
     const { controller, requester } = harness();
-    expect(controller.handleBeforeInput(beforeInput(textarea))).toBe(false);
+    expect(handleSnippetBeforeInput(controller, beforeInput(textarea))).toBe(
+      false,
+    );
     textarea.value = ';hello';
     textarea.setSelectionRange(0, 6);
-    expect(controller.handleBeforeInput(beforeInput(textarea))).toBe(false);
+    expect(handleSnippetBeforeInput(controller, beforeInput(textarea))).toBe(
+      false,
+    );
     textarea.setSelectionRange(6, 6);
     expect(
-      controller.handleBeforeInput(
+      handleSnippetBeforeInput(
+        controller,
         beforeInput(textarea, { isComposing: true }),
       ),
     ).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
+  });
+
+  it('leaves ordinary Space untouched for every synchronously rejected activation', () => {
+    const createController = (cache = enabledCache()) => {
+      const requester: SnippetDeliveryRequester = {
+        requestDelivery: vi.fn(async () => undefined),
+      };
+      return {
+        controller: new SnippetExpansionController(document, cache, requester, {
+          show: vi.fn(),
+        }),
+        requester,
+      };
+    };
+    const textControl = (
+      value: string,
+      selectionStart = value.length,
+      selectionEnd = selectionStart,
+      type: 'textarea' | 'input' = 'textarea',
+    ) => {
+      const editor = document.createElement(
+        type === 'textarea' ? 'textarea' : 'input',
+      );
+      editor.value = value;
+      document.body.append(editor);
+      editor.focus();
+      editor.setSelectionRange(selectionStart, selectionEnd);
+      return editor;
+    };
+    const cases: Array<{
+      readonly name: string;
+      readonly target: EventTarget;
+      readonly overrides?: Partial<BeforeInputEventLike>;
+      readonly cache?: FrameTriggerCatalogCache;
+    }> = [
+      { name: 'no trigger', target: textControl('hello') },
+      { name: 'unknown trigger', target: textControl(';unknown') },
+      { name: 'invalid boundary', target: textControl('x;hello') },
+      { name: 'unsupported editor', target: document.body },
+      {
+        name: 'non-collapsed selection',
+        target: textControl(';hello', 0, 6),
+      },
+      {
+        name: 'composition',
+        target: textControl(';hello'),
+        overrides: { isComposing: true },
+      },
+      {
+        name: 'untrusted event',
+        target: textControl(';hello'),
+        overrides: { isTrusted: false },
+      },
+      {
+        name: 'non-cancelable event',
+        target: textControl(';hello'),
+        overrides: { cancelable: false },
+      },
+      {
+        name: 'multiline Snippet in input',
+        target: textControl(';hello', 6, 6, 'input'),
+        cache: enabledCache('text', ';hello', false),
+      },
+    ];
+    const disconnected = enabledCache();
+    disconnected.disconnect();
+    cases.push({
+      name: 'disconnected runtime',
+      target: textControl(';hello'),
+      cache: disconnected,
+    });
+
+    for (const testCase of cases) {
+      testCase.target.dispatchEvent(new Event('focus'));
+      (testCase.target as HTMLElement).focus();
+      const event = beforeInput(testCase.target, testCase.overrides);
+      const { controller, requester } = createController(testCase.cache);
+      expect(handleSnippetBeforeInput(controller, event), testCase.name).toBe(
+        false,
+      );
+      expect(event.preventDefault, testCase.name).not.toHaveBeenCalled();
+      expect(event.defaultPrevented, testCase.name).toBe(false);
+      expect(requester.requestDelivery, testCase.name).not.toHaveBeenCalled();
+    }
   });
 });

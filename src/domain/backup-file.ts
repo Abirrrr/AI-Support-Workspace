@@ -4,11 +4,13 @@ export const BACKUP_FORMAT_VERSION_2 = 2 as const;
 export const BACKUP_FORMAT_VERSION_3 = 3 as const;
 export const BACKUP_FORMAT_VERSION_4 = 4 as const;
 export const BACKUP_FORMAT_VERSION_5 = 5 as const;
-export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_5;
+export const BACKUP_FORMAT_VERSION_6 = 6 as const;
+export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_6;
 export const MAX_LEGACY_BACKUP_BYTES = 26_214_400;
 export const MAX_BACKUP_V4_BYTES = 100_663_296;
 export const MAX_BACKUP_V5_BYTES = 100_663_296;
-export const MAX_BACKUP_BYTES = MAX_BACKUP_V5_BYTES;
+export const MAX_BACKUP_V6_BYTES = 100_663_296;
+export const MAX_BACKUP_BYTES = MAX_BACKUP_V6_BYTES;
 
 export interface BackupKnowledgeRecordV1 {
   readonly id: string;
@@ -390,12 +392,42 @@ export interface BackupFileV5 {
   readonly data: BackupDataV5;
 }
 
+// Backup v6 intentionally reuses the frozen v5 record DTO shapes for data
+// whose public representation did not change. Settings is a new exact v6 DTO.
+export type BackupKnowledgeRecordV6 = BackupKnowledgeRecordV5;
+export type BackupSnippetRecordV6 = BackupSnippetRecordV5;
+export type BackupSnippetAssetRecordV6 = BackupSnippetAssetRecordV5;
+
+export interface BackupSettingsV6 {
+  readonly defaultModel: string | null;
+  readonly snippetPasteMode: 'clipboard-only' | 'automatic';
+}
+
+export interface BackupDataV6 {
+  readonly knowledge: readonly BackupKnowledgeRecordV6[];
+  readonly snippets: readonly BackupSnippetRecordV6[];
+  readonly snippetAssets: readonly BackupSnippetAssetRecordV6[];
+  readonly settings: BackupSettingsV6;
+}
+
+export interface BackupFileV6 {
+  readonly format: typeof BACKUP_FORMAT;
+  readonly formatVersion: typeof BACKUP_FORMAT_VERSION_6;
+  readonly exportedAt: string;
+  readonly data: BackupDataV6;
+}
+
 export type BackupFile =
-  BackupFileV1 | BackupFileV2 | BackupFileV3 | BackupFileV4 | BackupFileV5;
+  | BackupFileV1
+  | BackupFileV2
+  | BackupFileV3
+  | BackupFileV4
+  | BackupFileV5
+  | BackupFileV6;
 
 export interface BackupImportPreview {
   readonly filename: string;
-  readonly formatVersion: 1 | 2 | 3 | 4 | 5;
+  readonly formatVersion: 1 | 2 | 3 | 4 | 5 | 6;
   readonly exportedAt: string;
   readonly knowledgeCount: number;
   readonly snippetCount: number;

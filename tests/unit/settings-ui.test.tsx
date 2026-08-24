@@ -27,9 +27,13 @@ function createSettings(
   overrides: Partial<SettingsApplication> = {},
 ): SettingsApplication {
   return {
-    load: vi.fn(async () => ({ defaultModel: null })),
-    save: vi.fn(async (defaultModelInput) => ({
+    load: vi.fn(async () => ({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only' as const,
+    })),
+    save: vi.fn(async (defaultModelInput, snippetPasteMode) => ({
       defaultModel: defaultModelInput.trim() || null,
+      snippetPasteMode,
     })),
     ...overrides,
   };
@@ -66,7 +70,10 @@ describe('SettingsView', () => {
       screen.getByText(/New Workspace Side Panel sessions start with/),
     ).toBeTruthy();
 
-    deferred.resolve({ defaultModel: null });
+    deferred.resolve({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
     await waitFor(() => expect(input).toHaveProperty('disabled', false));
   });
 
@@ -86,7 +93,10 @@ describe('SettingsView', () => {
 
   it('populates a saved model and compares dirty state after normalization', async () => {
     const settings = createSettings({
-      load: vi.fn(async () => ({ defaultModel: 'qwen2.5:7b' })),
+      load: vi.fn(async () => ({
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'clipboard-only' as const,
+      })),
     });
     render(<SettingsView settings={settings} />);
 
@@ -111,7 +121,10 @@ describe('SettingsView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
 
     await waitFor(() =>
-      expect(settings.save).toHaveBeenCalledWith('  llama3.2:latest  '),
+      expect(settings.save).toHaveBeenCalledWith(
+        '  llama3.2:latest  ',
+        'clipboard-only',
+      ),
     );
     expect(await screen.findByText('Settings saved.')).toBeTruthy();
     expect(input).toHaveProperty('value', 'llama3.2:latest');
@@ -137,14 +150,23 @@ describe('SettingsView', () => {
     expect(saving).toHaveProperty('disabled', true);
     expect(input).toHaveProperty('disabled', true);
 
-    deferred.resolve({ defaultModel: 'llama3.2:latest' });
+    deferred.resolve({
+      defaultModel: 'llama3.2:latest',
+      snippetPasteMode: 'clipboard-only',
+    });
     expect(await screen.findByText('Settings saved.')).toBeTruthy();
   });
 
   it('clears the saved default to null and leaves the input blank', async () => {
-    const save = vi.fn(async () => ({ defaultModel: null }));
+    const save = vi.fn(async () => ({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only' as const,
+    }));
     const settings = createSettings({
-      load: vi.fn(async () => ({ defaultModel: 'qwen2.5:7b' })),
+      load: vi.fn(async () => ({
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'clipboard-only' as const,
+      })),
       save,
     });
     render(<SettingsView settings={settings} />);
@@ -153,7 +175,9 @@ describe('SettingsView', () => {
     fireEvent.change(input, { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
 
-    await waitFor(() => expect(save).toHaveBeenCalledWith('   '));
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith('   ', 'clipboard-only'),
+    );
     expect(input).toHaveProperty('value', '');
     expect(screen.getByText('Settings saved.')).toBeTruthy();
   });
@@ -189,7 +213,10 @@ describe('SettingsView', () => {
     const save = vi
       .fn<SettingsApplication['save']>()
       .mockRejectedValueOnce(new Error('raw save failure'))
-      .mockResolvedValueOnce({ defaultModel: 'retry-model' });
+      .mockResolvedValueOnce({
+        defaultModel: 'retry-model',
+        snippetPasteMode: 'clipboard-only',
+      });
     render(<SettingsView settings={createSettings({ save })} />);
     const input = await screen.findByLabelText('Default Ollama model');
     await waitFor(() => expect(input).toHaveProperty('disabled', false));

@@ -6,10 +6,17 @@ import { describe, expect, it } from 'vitest';
 import nativeDevelopment from '../../config/native-clipboard-companion.development.json';
 import {
   createGetCapabilitiesRequest,
+  createGetCapabilitiesV2Request,
+  createCapturePasteContextRequest,
+  createPasteClipboardRequest,
   createNativeClipboardRequestId,
   createWriteImagePngRequest,
   NATIVE_CLIPBOARD_MAX_PNG_BYTES,
   parseGetCapabilitiesResponse,
+  parseGetCapabilitiesV2Response,
+  parseCapturePasteContextResponse,
+  parsePasteClipboardResponse,
+  parsePasteClipboardResponseWithDiagnostic,
   parseWriteImagePngResponse,
 } from '../../src/infrastructure/clipboard/native-clipboard-protocol';
 
@@ -174,5 +181,171 @@ describe('native clipboard protocol v1', () => {
     expect(nativeDevelopment.hostName).not.toBe(
       'com.ai_support_workspace.clipboard',
     );
+  });
+});
+
+describe('native clipboard protocol v2', () => {
+  const id = '0123456789abcdef0123456789abcdef';
+  const context = {
+    foregroundWindowHandle: '0000000000001234',
+    rootWindowHandle: '0000000000001000',
+    processId: 44,
+    clipboardSequenceNumber: 77,
+  };
+
+  it('constructs only strict capability, capture, and paste requests', () => {
+    expect(createGetCapabilitiesV2Request(id)).toEqual({
+      protocolVersion: 2,
+      requestId: id,
+      operation: 'get-capabilities',
+    });
+    expect(createCapturePasteContextRequest(id, id)).toEqual({
+      protocolVersion: 2,
+      requestId: id,
+      activationId: id,
+      operation: 'capture-paste-context',
+    });
+    expect(createPasteClipboardRequest(id, id, context)).toEqual({
+      protocolVersion: 2,
+      requestId: id,
+      activationId: id,
+      operation: 'paste-clipboard',
+      expectedForegroundHwnd: context.foregroundWindowHandle,
+      expectedRootHwnd: context.rootWindowHandle,
+      expectedProcessId: 44,
+      expectedClipboardSequenceNumber: 77,
+    });
+  });
+
+  it.each([
+    '0x0000000000001234',
+    '0000000000000000',
+    '000000000000123',
+    '000000000000123G',
+    '8000000000000000',
+    'ffffffffffffffff',
+  ])('rejects noncanonical handle %s', (handle) => {
+    expect(() =>
+      createPasteClipboardRequest(id, id, {
+        ...context,
+        foregroundWindowHandle: handle,
+      }),
+    ).toThrow(TypeError);
+  });
+
+  it('strictly parses v2 capabilities and capture context', () => {
+    expect(
+      parseGetCapabilitiesV2Response(
+        {
+          protocolVersion: 2,
+          requestId: id,
+          status: 'success',
+          hostVersion: '1.0.0',
+          result: {
+            operation: 'get-capabilities',
+            supportedProtocolVersions: [1, 2],
+            supportedOperations: [
+              'write-image-png',
+              'capture-paste-context',
+              'paste-clipboard',
+            ],
+            maxPngBytes: NATIVE_CLIPBOARD_MAX_PNG_BYTES,
+            clipboardFormats: ['png', 'cf-dibv5'],
+          },
+        },
+        id,
+      ),
+    ).toEqual({ status: 'success', hostVersion: '1.0.0' });
+    expect(
+      parseCapturePasteContextResponse(
+        {
+          protocolVersion: 2,
+          requestId: id,
+          status: 'success',
+          hostVersion: '1.0.0',
+          result: {
+            operation: 'capture-paste-context',
+            activationId: id,
+            foregroundHwnd: context.foregroundWindowHandle,
+            rootHwnd: context.rootWindowHandle,
+            processId: 44,
+            clipboardSequenceNumber: 77,
+          },
+        },
+        id,
+        id,
+      ),
+    ).toEqual(context);
+  });
+
+  it('maps paste success and safe declines without accepting extra fields', () => {
+    const success = {
+      protocolVersion: 2,
+      requestId: id,
+      status: 'success',
+      hostVersion: '1.0.0',
+      result: { operation: 'paste-clipboard', outcome: 'paste-issued' },
+    };
+    expect(parsePasteClipboardResponse(success, id)).toBe('paste-issued');
+    expect(
+      parsePasteClipboardResponse(
+        {
+          protocolVersion: 2,
+          requestId: id,
+          status: 'error',
+          hostVersion: '1.0.0',
+          safeErrorCode: 'unsafe-keyboard-state',
+        },
+        id,
+      ),
+    ).toBe('unsafe-keyboard-state');
+    expect(() =>
+      parsePasteClipboardResponse({ ...success, keys: ['V'] }, id),
+    ).toThrow(expect.objectContaining({ code: 'invalid-host-response' }));
+  });
+
+  it('accepts bounded native paste evidence only at the explicit diagnostic boundary', () => {
+    const response = {
+      protocolVersion: 2,
+      requestId: id,
+      status: 'error',
+      hostVersion: '1.0.0',
+      safeErrorCode: 'input-injection-failed',
+      nativePasteDiagnostic: {
+        sendInputRequestedCount: 4,
+        sendInputInsertedCount: 0,
+        sendInputStructSize: 40,
+        sendInputLastError: 87,
+        foregroundValidationPassed: true,
+        rootWindowValidationPassed: true,
+        pidValidationPassed: true,
+        clipboardSequenceValidationPassed: true,
+        modifierValidationPassed: true,
+        hostSessionMatchesTarget: true,
+        hostIntegrityRelation: 'same',
+      },
+    };
+    expect(
+      parsePasteClipboardResponseWithDiagnostic(response, id, true),
+    ).toEqual({
+      result: 'input-injection-failed',
+      diagnostic: response.nativePasteDiagnostic,
+    });
+    expect(() => parsePasteClipboardResponse(response, id)).toThrow(
+      expect.objectContaining({ code: 'invalid-host-response' }),
+    );
+    expect(() =>
+      parsePasteClipboardResponseWithDiagnostic(
+        {
+          ...response,
+          nativePasteDiagnostic: {
+            ...response.nativePasteDiagnostic,
+            windowTitle: 'forbidden',
+          },
+        },
+        id,
+        true,
+      ),
+    ).toThrow(expect.objectContaining({ code: 'invalid-host-response' }));
   });
 });

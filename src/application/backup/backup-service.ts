@@ -6,12 +6,14 @@ import {
   BACKUP_FORMAT_VERSION_3,
   BACKUP_FORMAT_VERSION_4,
   BACKUP_FORMAT_VERSION_5,
+  BACKUP_FORMAT_VERSION_6,
   MAX_BACKUP_V4_BYTES,
   MAX_BACKUP_V5_BYTES,
+  MAX_BACKUP_V6_BYTES,
   MAX_LEGACY_BACKUP_BYTES,
   MAX_BACKUP_BYTES,
   type BackupFile,
-  type BackupFileV5,
+  type BackupFileV6,
   type BackupImportPreview,
   type BackupKnowledgeRecordV3,
   type BackupKnowledgeRecordV5,
@@ -456,7 +458,7 @@ export function measureUtf8Bytes(value: string): number {
 
 export function assertBackupFitsByteLimit(
   serialized: string,
-  maxBytes: number = MAX_BACKUP_V5_BYTES,
+  maxBytes: number = MAX_BACKUP_V6_BYTES,
 ): void {
   if (measureUtf8Bytes(serialized) > maxBytes) {
     throw new BackupExportError('too-large');
@@ -478,7 +480,7 @@ export class BackupExportService implements BackupExportApplication {
       await Promise.all(snapshotAssets.map(validateSnippetAsset));
       validateSnippetAssetGraph(snapshot.snippets, snapshotAssets);
       const sortedAssets = [...snapshotAssets].sort(compareByCreatedAtAndId);
-      const backup: BackupFileV5 = {
+      const backup: BackupFileV6 = {
         format: BACKUP_FORMAT,
         formatVersion: BACKUP_FORMAT_VERSION,
         exportedAt,
@@ -492,7 +494,10 @@ export class BackupExportService implements BackupExportApplication {
           snippetAssets: await Promise.all(
             sortedAssets.map(toBackupSnippetAssetRecordV5),
           ),
-          settings: { defaultModel: snapshot.settings.defaultModel },
+          settings: {
+            defaultModel: snapshot.settings.defaultModel,
+            snippetPasteMode: snapshot.settings.snippetPasteMode,
+          },
         },
       };
       const serialized = JSON.stringify(backup);
@@ -526,10 +531,13 @@ export class BackupImportService implements BackupImportApplication {
     const backup = parseBackupFile(serialized);
     const versionLimit =
       backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
-      backup.formatVersion === BACKUP_FORMAT_VERSION_5
-        ? backup.formatVersion === BACKUP_FORMAT_VERSION_5
-          ? MAX_BACKUP_V5_BYTES
-          : MAX_BACKUP_V4_BYTES
+      backup.formatVersion === BACKUP_FORMAT_VERSION_5 ||
+      backup.formatVersion === BACKUP_FORMAT_VERSION_6
+        ? backup.formatVersion === BACKUP_FORMAT_VERSION_6
+          ? MAX_BACKUP_V6_BYTES
+          : backup.formatVersion === BACKUP_FORMAT_VERSION_5
+            ? MAX_BACKUP_V5_BYTES
+            : MAX_BACKUP_V4_BYTES
         : MAX_LEGACY_BACKUP_BYTES;
     if (measureUtf8Bytes(serialized) > versionLimit) {
       throw new BackupImportError('too-large');
@@ -544,7 +552,8 @@ export class BackupImportService implements BackupImportApplication {
         snippetCount: backup.data.snippets.length,
         assetCount:
           backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
-          backup.formatVersion === BACKUP_FORMAT_VERSION_5
+          backup.formatVersion === BACKUP_FORMAT_VERSION_5 ||
+          backup.formatVersion === BACKUP_FORMAT_VERSION_6
             ? backup.data.snippetAssets.length
             : 0,
         defaultModel: backup.data.settings.defaultModel,
@@ -582,8 +591,16 @@ export class BackupRestoreService implements BackupRestoreApplication {
             ? backup.data.snippetAssets.map(toRestoreSnippetAssetV4)
             : backup.formatVersion === BACKUP_FORMAT_VERSION_5
               ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
-              : [],
-        settings: { defaultModel: backup.data.settings.defaultModel },
+              : backup.formatVersion === BACKUP_FORMAT_VERSION_6
+                ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
+                : [],
+        settings: {
+          defaultModel: backup.data.settings.defaultModel,
+          snippetPasteMode:
+            backup.formatVersion === BACKUP_FORMAT_VERSION_6
+              ? backup.data.settings.snippetPasteMode
+              : 'clipboard-only',
+        },
       };
 
       await runCatalogCoordinatedMutation(this.catalogMutationPort, () =>

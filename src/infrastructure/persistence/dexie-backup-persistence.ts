@@ -65,6 +65,10 @@ export class DexieBackupSnapshotReader implements BackupSnapshotReader {
             snippetAssets: snippetAssets.map(toSnippetAsset),
             settings: {
               defaultModel: settingsRecord?.defaultModel ?? null,
+              snippetPasteMode:
+                settingsRecord?.snippetPasteMode === 'automatic'
+                  ? 'automatic'
+                  : 'clipboard-only',
             },
           };
         },
@@ -129,6 +133,7 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
           await this.database.settings.put({
             id: GLOBAL_SETTINGS_ID,
             defaultModel: data.settings.defaultModel,
+            snippetPasteMode: data.settings.snippetPasteMode,
           });
           await runHook(this.testHooks, 'settings-written');
         },

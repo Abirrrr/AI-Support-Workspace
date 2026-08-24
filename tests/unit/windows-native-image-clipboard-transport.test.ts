@@ -41,6 +41,26 @@ function writeSuccess(requestId: string) {
   };
 }
 
+function capabilitiesV2Success(requestId: string) {
+  return {
+    protocolVersion: 2,
+    requestId,
+    status: 'success',
+    hostVersion: '1.0.0',
+    result: {
+      operation: 'get-capabilities',
+      supportedProtocolVersions: [1, 2],
+      supportedOperations: [
+        'write-image-png',
+        'capture-paste-context',
+        'paste-clipboard',
+      ],
+      maxPngBytes: 5_242_880,
+      clipboardFormats: ['png', 'cf-dibv5'],
+    },
+  };
+}
+
 function api(options: { os?: string; granted?: boolean } = {}) {
   const value: NativeClipboardExtensionApi = {
     permissions: {
@@ -328,5 +348,214 @@ describe('Windows native Image clipboard transport', () => {
     finish?.(writeSuccess(secondId));
     await expect(first).resolves.toBeUndefined();
     expect(chromeApi.runtime.sendNativeMessage).toHaveBeenCalledOnce();
+  });
+});
+
+describe('Windows native automatic paste transport', () => {
+  const activationId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const context = {
+    foregroundWindowHandle: '0000000000001234',
+    rootWindowHandle: '0000000000001000',
+    processId: 44,
+    clipboardSequenceNumber: 77,
+  };
+
+  it('captures narrow context then requests one clipboard paste without content', async () => {
+    const chromeApi = api();
+    vi.mocked(chromeApi.runtime.sendNativeMessage).mockImplementation(
+      (_hostName, message, callback) => {
+        const request = message as {
+          protocolVersion: number;
+          requestId: string;
+          operation: string;
+          activationId?: string;
+        };
+        if (request.operation === 'get-capabilities') {
+          callback(capabilitiesV2Success(request.requestId));
+        } else if (request.operation === 'capture-paste-context') {
+          callback({
+            protocolVersion: 2,
+            requestId: request.requestId,
+            status: 'success',
+            hostVersion: '1.0.0',
+            result: {
+              operation: 'capture-paste-context',
+              activationId,
+              foregroundHwnd: context.foregroundWindowHandle,
+              rootHwnd: context.rootWindowHandle,
+              processId: context.processId,
+              clipboardSequenceNumber: context.clipboardSequenceNumber,
+            },
+          });
+        } else {
+          callback({
+            protocolVersion: 2,
+            requestId: request.requestId,
+            status: 'success',
+            hostVersion: '1.0.0',
+            result: {
+              operation: 'paste-clipboard',
+              outcome: 'paste-issued',
+            },
+          });
+        }
+      },
+    );
+    const transport = new WindowsNativeImageClipboardTransport(
+      chromeApi,
+      nativeDevelopment.hostName,
+      ids(),
+    );
+    await expect(transport.capturePasteContext(activationId)).resolves.toEqual(
+      context,
+    );
+    await expect(
+      transport.requestPaste({ activationId, ...context }),
+    ).resolves.toBe('paste-issued');
+    expect(chromeApi.runtime.sendNativeMessage).toHaveBeenCalledTimes(3);
+    const pasteMessage = vi.mocked(chromeApi.runtime.sendNativeMessage).mock
+      .calls[2]?.[1] as Record<string, unknown>;
+    expect(Object.keys(pasteMessage).sort()).toEqual(
+      [
+        'protocolVersion',
+        'requestId',
+        'activationId',
+        'operation',
+        'expectedForegroundHwnd',
+        'expectedRootHwnd',
+        'expectedProcessId',
+        'expectedClipboardSequenceNumber',
+      ].sort(),
+    );
+    expect(JSON.stringify(pasteMessage)).not.toMatch(
+      /text|html|image|data|url|path|filename|keys|virtual/i,
+    );
+  });
+
+  it('keeps a v1 Image host usable while automatic capture falls back', async () => {
+    const chromeApi = api();
+    const transport = new WindowsNativeImageClipboardTransport(
+      chromeApi,
+      nativeDevelopment.hostName,
+      ids(),
+    );
+    await expect(transport.getStatus()).resolves.toBe('ready');
+    await expect(transport.writePng(png)).resolves.toBeUndefined();
+    await expect(
+      transport.capturePasteContext(activationId),
+    ).rejects.toMatchObject({ name: 'AutomaticPasteUnavailableError' });
+  });
+
+  it('exposes one privacy-safe native-dev attempt diagnostic and consumes it once', async () => {
+    const chromeApi = api();
+    const nativePasteDiagnostic = {
+      sendInputRequestedCount: 4,
+      sendInputInsertedCount: 0,
+      sendInputStructSize: 40,
+      sendInputLastError: 87,
+      foregroundValidationPassed: true,
+      rootWindowValidationPassed: true,
+      pidValidationPassed: true,
+      clipboardSequenceValidationPassed: true,
+      modifierValidationPassed: true,
+      hostSessionMatchesTarget: true,
+      hostIntegrityRelation: 'same',
+    } as const;
+    vi.mocked(chromeApi.runtime.sendNativeMessage).mockImplementation(
+      (_hostName, message, callback) => {
+        const request = message as {
+          requestId: string;
+          operation: string;
+        };
+        if (request.operation === 'get-capabilities') {
+          callback(capabilitiesV2Success(request.requestId));
+        } else if (request.operation === 'capture-paste-context') {
+          callback({
+            protocolVersion: 2,
+            requestId: request.requestId,
+            status: 'success',
+            hostVersion: '1.0.0',
+            result: {
+              operation: 'capture-paste-context',
+              activationId,
+              foregroundHwnd: context.foregroundWindowHandle,
+              rootHwnd: context.rootWindowHandle,
+              processId: context.processId,
+              clipboardSequenceNumber: context.clipboardSequenceNumber,
+            },
+          });
+        } else {
+          callback({
+            protocolVersion: 2,
+            requestId: request.requestId,
+            status: 'error',
+            hostVersion: '1.0.0',
+            safeErrorCode: 'input-injection-failed',
+            nativePasteDiagnostic,
+          });
+        }
+      },
+    );
+    const transport = new WindowsNativeImageClipboardTransport(
+      chromeApi,
+      nativeDevelopment.hostName,
+      ids(),
+    );
+    await transport.capturePasteContext(activationId);
+
+    await expect(
+      transport.requestPaste({ activationId, ...context }),
+    ).resolves.toBe('input-injection-failed');
+    expect(transport.takeLastPasteAttemptDiagnostic()).toEqual(
+      nativePasteDiagnostic,
+    );
+    expect(transport.takeLastPasteAttemptDiagnostic()).toBeUndefined();
+  });
+
+  it('treats a lost paste response as indeterminate and never retries', async () => {
+    const chromeApi = api();
+    vi.mocked(chromeApi.runtime.sendNativeMessage).mockImplementation(
+      (_hostName, message, callback) => {
+        const request = message as {
+          protocolVersion: number;
+          requestId: string;
+          operation: string;
+        };
+        if (request.operation === 'get-capabilities') {
+          callback(capabilitiesV2Success(request.requestId));
+        } else if (request.operation === 'capture-paste-context') {
+          callback({
+            protocolVersion: 2,
+            requestId: request.requestId,
+            status: 'success',
+            hostVersion: '1.0.0',
+            result: {
+              operation: 'capture-paste-context',
+              activationId,
+              foregroundHwnd: context.foregroundWindowHandle,
+              rootHwnd: context.rootWindowHandle,
+              processId: 44,
+              clipboardSequenceNumber: 77,
+            },
+          });
+        } else {
+          Object.defineProperty(chromeApi.runtime, 'lastError', {
+            configurable: true,
+            value: { message: 'lost response' },
+          });
+          callback(undefined);
+        }
+      },
+    );
+    const transport = new WindowsNativeImageClipboardTransport(
+      chromeApi,
+      nativeDevelopment.hostName,
+      ids(),
+    );
+    await transport.capturePasteContext(activationId);
+    await expect(
+      transport.requestPaste({ activationId, ...context }),
+    ).resolves.toBe('indeterminate');
+    expect(chromeApi.runtime.sendNativeMessage).toHaveBeenCalledTimes(3);
   });
 });

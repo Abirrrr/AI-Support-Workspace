@@ -66,7 +66,10 @@ function createData(): BackupSnapshot {
       },
     ],
     snippetAssets: [],
-    settings: { defaultModel: 'qwen2.5:7b' },
+    settings: {
+      defaultModel: 'qwen2.5:7b',
+      snippetPasteMode: 'automatic',
+    },
   };
 }
 
@@ -533,7 +536,7 @@ describe('Backup Format v2 and v3 parser and validator', () => {
   it('rejects unsupported future versions explicitly', () => {
     expect(() =>
       parseBackupFile(
-        JSON.stringify({ ...createCurrentBackup(), formatVersion: 6 }),
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 7 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
@@ -587,7 +590,7 @@ describe('backup application services', () => {
 
     await new BackupRestoreService({ replaceAll }).restoreBackup(parsed);
 
-    expect(parsed.formatVersion).toBe(5);
+    expect(parsed.formatVersion).toBe(6);
     expect(replaceAll).toHaveBeenCalledWith({
       knowledge: data.knowledge,
       snippets: [{ ...snippet, content: richContent }],
@@ -658,7 +661,7 @@ describe('backup application services', () => {
     );
     const parsed = JSON.parse(serialized) as BackupFileV5;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(5);
+    expect(parsed.formatVersion).toBe(6);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -685,7 +688,10 @@ describe('backup application services', () => {
           knowledge: [],
           snippets: [],
           snippetAssets: [],
-          settings: { defaultModel: null },
+          settings: {
+            defaultModel: null,
+            snippetPasteMode: 'clipboard-only',
+          },
         }),
       },
       { download },
@@ -698,7 +704,10 @@ describe('backup application services', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
-      settings: { defaultModel: null },
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+      },
     });
   });
 
@@ -731,7 +740,7 @@ describe('backup application services', () => {
       ...original,
       snippetAssets: [],
     });
-    expect(prepared.backup.formatVersion).toBe(5);
+    expect(prepared.backup.formatVersion).toBe(6);
   });
 
   it('excludes simulated future live-domain fields from serialized format v2', async () => {
@@ -745,7 +754,10 @@ describe('backup application services', () => {
       { futureSnippetField: '/future', richContent: { blocks: [] } },
     );
     const settings = Object.assign(
-      { defaultModel: data.settings.defaultModel },
+      {
+        defaultModel: data.settings.defaultModel,
+        snippetPasteMode: data.settings.snippetPasteMode,
+      },
       { futureSettingsField: true },
     );
     const download = vi.fn<BackupDownloadPort['download']>(
@@ -792,7 +804,10 @@ describe('backup application services', () => {
         'trigger',
       ].sort(),
     );
-    expect(Object.keys(parsed.data.settings)).toEqual(['defaultModel']);
+    expect(Object.keys(parsed.data.settings).sort()).toEqual([
+      'defaultModel',
+      'snippetPasteMode',
+    ]);
     expect(serialized).not.toContain('futureKnowledgeField');
     expect(serialized).not.toContain('usageCount');
     expect(serialized).not.toContain('futureSnippetField');
@@ -890,7 +905,10 @@ describe('backup application services', () => {
       knowledge: backup.data.knowledge,
       snippets: backup.data.snippets,
       snippetAssets: [],
-      settings: backup.data.settings,
+      settings: {
+        defaultModel: backup.data.settings.defaultModel,
+        snippetPasteMode: 'clipboard-only',
+      },
     });
   });
 
@@ -909,7 +927,10 @@ describe('backup application services', () => {
         trigger: null,
       })),
       snippetAssets: [],
-      settings: backup.data.settings,
+      settings: {
+        defaultModel: backup.data.settings.defaultModel,
+        snippetPasteMode: 'clipboard-only',
+      },
     });
 
     const failed = new BackupRestoreService({

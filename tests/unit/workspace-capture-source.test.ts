@@ -40,7 +40,10 @@ function createDeferred<T>() {
 
 describe('ChromeWorkspaceCaptureSource', () => {
   it('announces readiness only after delayed settings bootstrap permits Workspace subscription', async () => {
-    const deferred = createDeferred<{ defaultModel: string | null }>();
+    const deferred = createDeferred<{
+      defaultModel: string | null;
+      snippetPasteMode: 'clipboard-only';
+    }>();
     const settings = { load: vi.fn(async () => deferred.promise) };
     const { listeners, runtime, sendMessage } = createRuntime();
 
@@ -49,7 +52,10 @@ describe('ChromeWorkspaceCaptureSource', () => {
     expect(listeners).toHaveLength(0);
     expect(sendMessage).not.toHaveBeenCalled();
 
-    deferred.resolve({ defaultModel: 'saved-model:latest' });
+    deferred.resolve({
+      defaultModel: 'saved-model:latest',
+      snippetPasteMode: 'clipboard-only',
+    });
     const bootstrap = await bootstrapPromise;
     const source = new ChromeWorkspaceCaptureSource(runtime);
     const handler = vi.fn(async () => undefined);

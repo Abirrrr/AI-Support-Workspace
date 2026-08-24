@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This project is a local-first, Chrome-based AI support workspace that helps support agents work faster with reusable knowledge, contextual retrieval, and AI-assisted drafting.
+This project is a local-first, Chrome-based AI support workspace that helps support agents work faster with reusable Text Snippet reference material, contextual drafting inputs, and AI-assisted drafting.
 
 ## Product Definition
 
@@ -11,8 +11,7 @@ The product is intended to be:
 - Local-first
 - A Chrome extension
 - An AI-assisted support workspace
-- A Knowledge Library
-- A Snippet Library
+- One active user-managed Text Snippet reference/delivery Library, plus Image Snippet delivery assets
 - Optimized for fast local retrieval
 - Provider-independent, with Ollama as the initial implementation target and OpenAI as a future provider
 - Backend-free and cloud-free
@@ -22,6 +21,8 @@ The product is intended to be:
 ## Core User Value
 
 The product should reduce the time required to find the right information, reuse proven replies, and compose support responses with AI assistance without sending sensitive data to an external service.
+
+The implemented Knowledge Library remains available for compatibility today. Decision 46 approves its future retirement from the active workflow/UI without destructive deletion or migration; underlying data and Backup support remain until separately approved cleanup work.
 
 ## Guiding Principles
 

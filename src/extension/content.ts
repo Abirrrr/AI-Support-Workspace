@@ -4,6 +4,10 @@ import {
   SnippetContentRuntime,
   type SnippetContentRuntimeApi,
 } from './snippet-trigger/content-runtime';
+import {
+  reportAutomaticPasteActivationTrace,
+  reportAutomaticPastePostCleanupTrace,
+} from './snippet-trigger/automatic-paste-result-diagnostic';
 
 export default defineContentScript({
   matches: ['http://*/*', 'https://*/*'],
@@ -19,7 +23,27 @@ export default defineContentScript({
     bootstrapSnippetContentRuntime(
       globalThis as unknown as Record<string, unknown>,
       runtime,
-      () => new SnippetContentRuntime(runtime, document, globalThis),
+      () =>
+        new SnippetContentRuntime(
+          runtime,
+          document,
+          globalThis,
+          import.meta.env.MODE === 'native-dev'
+            ? ({ requestId, kind, activationPasteMode }) => {
+                void reportAutomaticPasteActivationTrace(
+                  runtime,
+                  requestId,
+                  kind,
+                  activationPasteMode,
+                );
+              }
+            : undefined,
+          import.meta.env.MODE === 'native-dev'
+            ? (diagnostic) => {
+                void reportAutomaticPastePostCleanupTrace(runtime, diagnostic);
+              }
+            : undefined,
+        ),
     );
   },
 });

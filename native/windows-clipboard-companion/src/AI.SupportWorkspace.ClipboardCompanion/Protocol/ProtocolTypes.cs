@@ -14,6 +14,13 @@ internal enum HostErrorCode
     ClipboardOpenFailed,
     ClipboardWriteFailed,
     ClipboardCloseFailed,
+    ForegroundUnavailable,
+    NotForeground,
+    ClipboardChanged,
+    UnsafeKeyboardState,
+    PasteBusy,
+    InputInjectionFailed,
+    Indeterminate,
     InternalFailure,
 }
 
@@ -33,19 +40,35 @@ internal static class HostErrorCodeExtensions
         HostErrorCode.ClipboardOpenFailed => "clipboard-open-failed",
         HostErrorCode.ClipboardWriteFailed => "clipboard-write-failed",
         HostErrorCode.ClipboardCloseFailed => "clipboard-close-failed",
+        HostErrorCode.ForegroundUnavailable => "foreground-unavailable",
+        HostErrorCode.NotForeground => "not-foreground",
+        HostErrorCode.ClipboardChanged => "clipboard-changed",
+        HostErrorCode.UnsafeKeyboardState => "unsafe-keyboard-state",
+        HostErrorCode.PasteBusy => "paste-busy",
+        HostErrorCode.InputInjectionFailed => "input-injection-failed",
+        HostErrorCode.Indeterminate => "indeterminate",
         _ => "internal-failure",
     };
 }
 
-internal abstract record ProtocolRequest(string RequestId);
-internal sealed record GetCapabilitiesRequest(string Id) : ProtocolRequest(Id);
-internal sealed record WriteImagePngRequest(string Id, byte[] PngBytes) : ProtocolRequest(Id);
+internal abstract record ProtocolRequest(int ProtocolVersion, string RequestId);
+internal sealed record GetCapabilitiesRequest(int Version, string Id) : ProtocolRequest(Version, Id);
+internal sealed record WriteImagePngRequest(int Version, string Id, byte[] PngBytes) : ProtocolRequest(Version, Id);
+internal sealed record CapturePasteContextRequest(string Id, string ActivationId) : ProtocolRequest(2, Id);
+internal sealed record PasteClipboardRequest(
+    string Id,
+    string ActivationId,
+    nint ExpectedForegroundHwnd,
+    nint ExpectedRootHwnd,
+    uint ExpectedProcessId,
+    uint ExpectedClipboardSequenceNumber) : ProtocolRequest(2, Id);
 
 internal readonly record struct ProtocolParseResult(
     ProtocolRequest? Request,
     HostErrorCode? Error,
-    string? RequestId)
+    string? RequestId,
+    int? ProtocolVersion)
 {
-    internal static ProtocolParseResult Success(ProtocolRequest request) => new(request, null, request.RequestId);
-    internal static ProtocolParseResult Failure(HostErrorCode error, string? requestId) => new(null, error, requestId);
+    internal static ProtocolParseResult Success(ProtocolRequest request) => new(request, null, request.RequestId, request.ProtocolVersion);
+    internal static ProtocolParseResult Failure(HostErrorCode error, string? requestId, int? protocolVersion = null) => new(null, error, requestId, protocolVersion);
 }

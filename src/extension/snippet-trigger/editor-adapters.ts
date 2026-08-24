@@ -24,7 +24,125 @@ export interface EditorAdapter {
 }
 
 export interface TriggerActivationSnapshot {
+  beginAutomaticPasteAuthorization(): void;
+  recordAutomaticPasteActivationBeforeInputOutcome?(prevented: boolean): void;
+  isAutomaticPasteSafe(): boolean;
   cleanupAfterClipboardSuccess(): boolean;
+  consumeAutomaticPasteAuthorization(): boolean;
+  invalidateAutomaticPasteAuthorization(): void;
+  readAutomaticPasteDiagnostic?(): AutomaticPasteEditorDiagnostic;
+}
+
+export type PostCleanupFailure =
+  | 'authorization-invalidated'
+  | 'editor-disconnected'
+  | 'document-changed'
+  | 'composed-focus-mismatch'
+  | 'selection-missing'
+  | 'selection-not-collapsed'
+  | 'caret-root-mismatch'
+  | 'caret-path-mismatch'
+  | 'caret-offset-mismatch'
+  | 'structure-mismatch'
+  | 'lifecycle-invalidated'
+  | 'mutation-invalidated'
+  | 'selection-invalidated'
+  | 'focus-invalidated'
+  | 'other'
+  | null;
+
+export type AutomaticPasteInvalidationCause =
+  | 'mutation'
+  | 'selectionchange'
+  | 'focusout'
+  | 'focusin'
+  | 'window-blur'
+  | 'editor-disconnected'
+  | 'pagehide'
+  | 'visibility-hidden'
+  | 'unrelated-input'
+  | 'lifecycle'
+  | 'explicit-cancellation'
+  | 'predicate-failed'
+  | null;
+
+export type AutomaticPasteFocusTopology =
+  'direct-editor' | 'shadow-host-retargeted' | 'no-valid-composed-focus';
+
+export type AutomaticPasteSafeInputType =
+  | 'insertText'
+  | 'insertLineBreak'
+  | 'insertParagraph'
+  | 'insertFromPaste'
+  | 'insertFromDrop'
+  | 'insertCompositionText'
+  | 'deleteContentBackward'
+  | 'deleteContentForward'
+  | 'deleteByCut'
+  | 'historyUndo'
+  | 'historyRedo'
+  | 'other';
+
+export type AutomaticPasteExternalInputRelativePhase =
+  | 'activation'
+  | 'pre-cleanup'
+  | 'cleanup-before-owned-input'
+  | 'during-owned-cleanup-input'
+  | 'cleanup-after-owned-input'
+  | 'post-cleanup'
+  | 'unknown';
+
+export type AutomaticPasteExternalInputSequenceRelation =
+  | 'before-owned-cleanup-input'
+  | 'during-owned-cleanup-input'
+  | 'immediately-after-owned-cleanup-input'
+  | 'later'
+  | 'unknown';
+
+export interface PostCleanupChecks {
+  readonly authorizationStillValid: boolean;
+  readonly editorConnected: boolean;
+  readonly sameDocument: boolean;
+  readonly composedFocusValid: boolean;
+  readonly selectionExists: boolean;
+  readonly selectionCollapsed: boolean;
+  readonly caretRootMatches: boolean;
+  readonly caretPathMatches: boolean;
+  readonly caretOffsetMatches: boolean;
+  readonly structureMatches: boolean;
+  readonly lifecycleValid: boolean;
+  readonly mutationValid: boolean;
+  readonly selectionValid: boolean;
+  readonly focusValid: boolean;
+}
+
+export interface AutomaticPasteEditorDiagnostic {
+  readonly postCleanupFailure: PostCleanupFailure;
+  readonly postCleanupChecks: PostCleanupChecks;
+  readonly firstInvalidationCause: AutomaticPasteInvalidationCause;
+  readonly focusTopology: AutomaticPasteFocusTopology;
+  readonly noticeMutationWithinAuthorizationObserverScope: boolean;
+  readonly noticeMountedInsideEditor: false;
+  readonly cleanupInputProvenance:
+    | 'extension-owned'
+    | 'nested-destination-input'
+    | 'external-input'
+    | 'none'
+    | 'unknown';
+  readonly firstInvalidatingInputPhase:
+    | 'during-authorized-cleanup-dispatch'
+    | 'outside-authorized-cleanup-dispatch'
+    | null;
+  readonly activationBeforeInputPrevented: boolean;
+  readonly activationInputObserved: boolean;
+  readonly externalInputTrusted: boolean | null;
+  readonly externalInputType: AutomaticPasteSafeInputType | null;
+  readonly externalInputSameEditor: boolean | null;
+  readonly externalInputSameRoot: boolean | null;
+  readonly externalInputComposed: boolean | null;
+  readonly externalInputSameActivationTask: boolean | null;
+  readonly externalInputRelativePhase: AutomaticPasteExternalInputRelativePhase | null;
+  readonly externalInputSequenceRelation: AutomaticPasteExternalInputSequenceRelation | null;
 }
 
 interface TextTriggerCandidate extends TriggerCandidate {
@@ -103,6 +221,577 @@ const LOGICAL_BLOCK_CONTAINER_NAMES = new Set([
   'tr',
   'ul',
 ]);
+
+type AutomaticGuardState =
+  | 'inactive'
+  | 'activation'
+  | 'pre-cleanup'
+  | 'post-cleanup'
+  | 'invalid'
+  | 'consumed';
+
+type PostCleanupPredicateTuple = readonly [
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+];
+
+const SAFE_INPUT_TYPES = new Set<AutomaticPasteSafeInputType>([
+  'insertText',
+  'insertLineBreak',
+  'insertParagraph',
+  'insertFromPaste',
+  'insertFromDrop',
+  'insertCompositionText',
+  'deleteContentBackward',
+  'deleteContentForward',
+  'deleteByCut',
+  'historyUndo',
+  'historyRedo',
+]);
+
+function readSafeInputType(event: Event): AutomaticPasteSafeInputType {
+  try {
+    const inputType = (event as Partial<InputEvent>).inputType;
+    return typeof inputType === 'string' &&
+      SAFE_INPUT_TYPES.has(inputType as AutomaticPasteSafeInputType)
+      ? (inputType as AutomaticPasteSafeInputType)
+      : 'other';
+  } catch {
+    return 'other';
+  }
+}
+
+class EditorAutomaticPasteGuard {
+  private state: AutomaticGuardState = 'inactive';
+  private observer: MutationObserver | undefined;
+  private lifecycleObserver: MutationObserver | undefined;
+  private internalCleanup = false;
+  private firstCause: AutomaticPasteInvalidationCause = null;
+  private lastPostCleanupChecks: PostCleanupPredicateTuple | undefined;
+  private ownedCleanupInput: Event | undefined;
+  private ownedCleanupInputObserved = false;
+  private ownedCleanupInputDispatchStarted = false;
+  private ownedCleanupInputDispatchFinished = false;
+  private activationPreventedEvidence = false;
+  private activationInputSeenEvidence = false;
+  private activationTaskOpen = false;
+  private firstInvalidatingInputProvenance:
+    'nested-destination-input' | 'external-input' | 'unknown' | undefined;
+  private firstInvalidatingInputDuringOwnedDispatch: boolean | undefined;
+  private invalidInputTrustedEvidence: boolean | null = null;
+  private invalidInputTypeEvidence: AutomaticPasteSafeInputType | null = null;
+  private invalidInputEditorEvidence: boolean | null = null;
+  private invalidInputRootEvidence: boolean | null = null;
+  private invalidInputComposedEvidence: boolean | null = null;
+  private invalidInputActivationTaskEvidence: boolean | null = null;
+  private invalidInputPhaseEvidence: AutomaticPasteExternalInputRelativePhase | null =
+    null;
+  private invalidInputSequenceEvidence: AutomaticPasteExternalInputSequenceRelation | null =
+    null;
+
+  private readonly invalidateOnPageHide = () => this.invalidate('pagehide');
+  private readonly invalidateOnWindowBlur = () =>
+    this.invalidate('window-blur');
+  private readonly validateVisibility = () => {
+    if (this.document.visibilityState === 'hidden')
+      this.invalidate('visibility-hidden');
+  };
+  private readonly validateSelection = () => {
+    if (this.internalCleanup && this.state === 'pre-cleanup') return;
+    if (
+      this.state !== 'inactive' &&
+      this.state !== 'invalid' &&
+      this.state !== 'consumed' &&
+      !this.currentStateIsValid()
+    ) {
+      this.invalidate('selectionchange');
+    }
+  };
+  private readonly handleFocusOut = (event: Event) => {
+    if (this.editorContains(event.target)) this.invalidate('focusout');
+  };
+  private readonly handleFocusIn = (event: Event) => {
+    if (!this.editorContains(event.target)) this.invalidate('focusin');
+  };
+  private readonly handleInput = (event: Event) => {
+    if (event === this.ownedCleanupInput) {
+      this.ownedCleanupInputObserved = true;
+      return;
+    }
+    if (this.ownedCleanupInput !== undefined) {
+      this.recordInvalidatingInput('nested-destination-input', true, event);
+      this.invalidate('unrelated-input');
+      return;
+    }
+    if (this.internalCleanup) {
+      this.recordInvalidatingInput('external-input', false, event);
+      this.invalidate('unrelated-input');
+      return;
+    }
+    if (
+      (import.meta.env.MODE === 'native-dev' ||
+        import.meta.env.MODE === 'test') &&
+      this.state === 'activation' &&
+      readSafeInputType(event) === 'insertText' &&
+      this.eventBelongsToEditor(event)
+    ) {
+      try {
+        this.activationInputSeenEvidence =
+          (event as Partial<InputEvent>).data === ' ';
+      } catch {
+        this.activationInputSeenEvidence = false;
+      }
+    }
+    this.recordInvalidatingInput('external-input', false, event);
+    this.invalidate('unrelated-input');
+  };
+
+  constructor(
+    private readonly document: Document,
+    private readonly editor: HTMLElement,
+    private readonly validateActivation: () => boolean,
+    private readonly validatePreCleanup: () => boolean,
+    private readonly validatePostCleanup: () => PostCleanupPredicateTuple,
+  ) {}
+
+  begin(): void {
+    if (this.state !== 'inactive') return;
+    if (!this.validateActivation()) {
+      this.state = 'invalid';
+      return;
+    }
+    this.state = 'activation';
+    if (
+      import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+    ) {
+      this.activationTaskOpen = true;
+      void Promise.resolve().then(() => {
+        this.activationTaskOpen = false;
+      });
+    }
+    this.document.addEventListener(
+      'selectionchange',
+      this.validateSelection,
+      true,
+    );
+    this.document.addEventListener(
+      'visibilitychange',
+      this.validateVisibility,
+      true,
+    );
+    this.document.addEventListener('focusout', this.handleFocusOut, true);
+    this.document.addEventListener('focusin', this.handleFocusIn, true);
+    this.document.addEventListener('input', this.handleInput, true);
+    this.document.defaultView?.addEventListener(
+      'pagehide',
+      this.invalidateOnPageHide,
+      {
+        once: true,
+      },
+    );
+    this.document.defaultView?.addEventListener(
+      'blur',
+      this.invalidateOnWindowBlur,
+      true,
+    );
+    const MutationObserverConstructor =
+      this.document.defaultView?.MutationObserver;
+    if (MutationObserverConstructor !== undefined) {
+      this.observer = new MutationObserverConstructor(() => {
+        if (this.internalCleanup) return;
+        this.invalidate('mutation');
+      });
+      this.observer.observe(this.editor, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+      this.lifecycleObserver = new MutationObserverConstructor((records) => {
+        if (this.removedEditor(records)) this.invalidate('editor-disconnected');
+      });
+      this.lifecycleObserver.observe(this.editor.getRootNode(), {
+        childList: true,
+        subtree: true,
+      });
+    }
+  }
+
+  recordActivationBeforeInputOutcome(prevented: boolean): void {
+    this.activationPreventedEvidence = prevented;
+  }
+
+  isSafeBeforeCleanup(): boolean {
+    if (this.state === 'activation' && this.validatePreCleanup()) {
+      this.state = 'pre-cleanup';
+    }
+    return this.state === 'pre-cleanup' && this.validatePreCleanup();
+  }
+
+  beginCleanup(): boolean {
+    if (!this.isSafeBeforeCleanup()) return false;
+    this.internalCleanup = true;
+    this.observer?.takeRecords();
+    return true;
+  }
+
+  acceptCleanupState(): boolean {
+    if (
+      !this.internalCleanup ||
+      this.state !== 'pre-cleanup' ||
+      !this.postCleanupIsValid()
+    ) {
+      this.invalidate('predicate-failed');
+      return false;
+    }
+    this.state = 'post-cleanup';
+    this.observer?.takeRecords();
+    return true;
+  }
+
+  dispatchOwnedCleanupInput(target: HTMLElement, event: Event): boolean {
+    if (
+      target !== this.editor ||
+      !this.internalCleanup ||
+      this.state !== 'post-cleanup' ||
+      this.ownedCleanupInput !== undefined
+    ) {
+      this.invalidate('predicate-failed');
+      return false;
+    }
+    if (
+      import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+    ) {
+      this.ownedCleanupInputDispatchStarted = true;
+    }
+    this.ownedCleanupInput = event;
+    try {
+      return target.dispatchEvent(event);
+    } catch {
+      return false;
+    } finally {
+      this.ownedCleanupInput = undefined;
+      if (
+        import.meta.env.MODE === 'native-dev' ||
+        import.meta.env.MODE === 'test'
+      ) {
+        this.ownedCleanupInputDispatchFinished = true;
+      }
+    }
+  }
+
+  finishCleanup(succeeded: boolean): boolean {
+    const cleanupWasActive = this.internalCleanup;
+    const editorWasRemoved = this.removedEditor(
+      this.lifecycleObserver?.takeRecords() ?? [],
+    );
+    this.internalCleanup = false;
+    if (
+      !cleanupWasActive ||
+      !succeeded ||
+      editorWasRemoved ||
+      this.state !== 'post-cleanup' ||
+      !this.postCleanupIsValid()
+    ) {
+      this.invalidate(
+        editorWasRemoved ? 'editor-disconnected' : 'predicate-failed',
+      );
+      return false;
+    }
+    this.observer?.takeRecords();
+    return true;
+  }
+
+  consume(): boolean {
+    if (this.state !== 'post-cleanup' || !this.postCleanupIsValid()) {
+      this.invalidate('predicate-failed');
+      return false;
+    }
+    this.state = 'consumed';
+    this.detach();
+    return true;
+  }
+
+  invalidate(
+    cause: Exclude<
+      AutomaticPasteInvalidationCause,
+      null
+    > = 'explicit-cancellation',
+  ): void {
+    if (this.state === 'consumed' || this.state === 'invalid') return;
+    if (this.firstCause === null) {
+      this.firstCause = cause;
+    }
+    this.state = 'invalid';
+    this.detach();
+  }
+
+  readDiagnostic(): AutomaticPasteEditorDiagnostic {
+    if (
+      import.meta.env.MODE !== 'native-dev' &&
+      import.meta.env.MODE !== 'test'
+    ) {
+      throw new Error('Unavailable outside diagnostic builds.');
+    }
+    const rawChecks = this.lastPostCleanupChecks ?? this.validatePostCleanup();
+    const cause = this.firstCause;
+    const checks: PostCleanupChecks = {
+      editorConnected: rawChecks[1],
+      sameDocument: rawChecks[2],
+      composedFocusValid: rawChecks[3],
+      selectionExists: rawChecks[4],
+      selectionCollapsed: rawChecks[5],
+      caretRootMatches: rawChecks[6],
+      caretPathMatches: rawChecks[7],
+      caretOffsetMatches: rawChecks[8],
+      structureMatches: rawChecks[9],
+      authorizationStillValid:
+        this.state === 'post-cleanup' || this.state === 'consumed',
+      lifecycleValid:
+        cause !== 'pagehide' &&
+        cause !== 'visibility-hidden' &&
+        cause !== 'lifecycle' &&
+        cause !== 'editor-disconnected',
+      mutationValid: cause !== 'mutation',
+      selectionValid: cause !== 'selectionchange',
+      focusValid:
+        cause !== 'focusout' && cause !== 'focusin' && cause !== 'window-blur',
+    };
+    const postCleanupFailure = classifyPostCleanupFailure(
+      this.state,
+      this.firstCause,
+      checks,
+    );
+    const root = this.editor.getRootNode();
+    return {
+      postCleanupFailure,
+      postCleanupChecks: checks,
+      firstInvalidationCause: this.firstCause,
+      focusTopology: readFocusTopology(this.editor, this.document),
+      noticeMutationWithinAuthorizationObserverScope: root === this.document,
+      noticeMountedInsideEditor: false,
+      cleanupInputProvenance:
+        this.firstInvalidatingInputProvenance ??
+        (this.ownedCleanupInputObserved ? 'extension-owned' : 'none'),
+      firstInvalidatingInputPhase:
+        this.firstInvalidatingInputDuringOwnedDispatch === undefined
+          ? null
+          : this.firstInvalidatingInputDuringOwnedDispatch
+            ? 'during-authorized-cleanup-dispatch'
+            : 'outside-authorized-cleanup-dispatch',
+      activationBeforeInputPrevented: this.activationPreventedEvidence,
+      activationInputObserved: this.activationInputSeenEvidence,
+      externalInputTrusted: this.invalidInputTrustedEvidence,
+      externalInputType: this.invalidInputTypeEvidence,
+      externalInputSameEditor: this.invalidInputEditorEvidence,
+      externalInputSameRoot: this.invalidInputRootEvidence,
+      externalInputComposed: this.invalidInputComposedEvidence,
+      externalInputSameActivationTask: this.invalidInputActivationTaskEvidence,
+      externalInputRelativePhase: this.invalidInputPhaseEvidence,
+      externalInputSequenceRelation: this.invalidInputSequenceEvidence,
+    };
+  }
+
+  private recordInvalidatingInput(
+    provenance: 'nested-destination-input' | 'external-input' | 'unknown',
+    duringOwnedDispatch: boolean,
+    event: Event,
+  ): void {
+    if (
+      import.meta.env.MODE !== 'native-dev' &&
+      import.meta.env.MODE !== 'test'
+    ) {
+      return;
+    }
+    if (this.firstInvalidatingInputProvenance !== undefined) return;
+    this.firstInvalidatingInputProvenance = provenance;
+    this.firstInvalidatingInputDuringOwnedDispatch = duringOwnedDispatch;
+    this.invalidInputTrustedEvidence = event.isTrusted;
+    this.invalidInputTypeEvidence = readSafeInputType(event);
+    this.invalidInputEditorEvidence = this.eventBelongsToEditor(event);
+    this.invalidInputRootEvidence = this.eventBelongsToEditorRoot(event);
+    this.invalidInputComposedEvidence = event.composed;
+    this.invalidInputActivationTaskEvidence = this.activationTaskOpen;
+    this.invalidInputPhaseEvidence = this.readExternalInputRelativePhase();
+    this.invalidInputSequenceEvidence =
+      this.readExternalInputSequenceRelation();
+  }
+
+  private readExternalInputRelativePhase(): AutomaticPasteExternalInputRelativePhase {
+    if (this.ownedCleanupInput !== undefined) {
+      return 'during-owned-cleanup-input';
+    }
+    if (this.internalCleanup) {
+      return this.ownedCleanupInputDispatchFinished
+        ? 'cleanup-after-owned-input'
+        : 'cleanup-before-owned-input';
+    }
+    if (this.state === 'activation') return 'activation';
+    if (this.state === 'pre-cleanup') return 'pre-cleanup';
+    if (this.state === 'post-cleanup') return 'post-cleanup';
+    return 'unknown';
+  }
+
+  private readExternalInputSequenceRelation(): AutomaticPasteExternalInputSequenceRelation {
+    if (!this.ownedCleanupInputDispatchStarted) {
+      return 'before-owned-cleanup-input';
+    }
+    if (this.ownedCleanupInput !== undefined) {
+      return 'during-owned-cleanup-input';
+    }
+    if (this.internalCleanup && this.ownedCleanupInputDispatchFinished) {
+      return 'immediately-after-owned-cleanup-input';
+    }
+    if (this.ownedCleanupInputDispatchFinished) return 'later';
+    return 'unknown';
+  }
+
+  private eventBelongsToEditor(event: Event): boolean {
+    return (
+      this.eventPath(event).includes(this.editor) ||
+      this.editorContains(event.target)
+    );
+  }
+
+  private eventBelongsToEditorRoot(event: Event): boolean {
+    const root = this.editor.getRootNode();
+    const path = this.eventPath(event);
+    if (path.includes(root)) return true;
+    const target = event.target;
+    return target instanceof Node && target.getRootNode() === root;
+  }
+
+  private eventPath(event: Event): readonly EventTarget[] {
+    try {
+      return event.composedPath();
+    } catch {
+      return [];
+    }
+  }
+
+  private currentStateIsValid(): boolean {
+    if (this.state === 'activation') {
+      return this.validateActivation() || this.validatePreCleanup();
+    }
+    if (this.state === 'pre-cleanup') return this.validatePreCleanup();
+    if (this.state === 'post-cleanup') return this.postCleanupIsValid();
+    return false;
+  }
+
+  private postCleanupIsValid(): boolean {
+    const checks = this.validatePostCleanup();
+    this.lastPostCleanupChecks = checks;
+    return checks.every(Boolean);
+  }
+
+  private editorContains(target: EventTarget | null): boolean {
+    if (target === this.editor) return true;
+    if (
+      typeof target !== 'object' ||
+      target === null ||
+      !('nodeType' in target)
+    ) {
+      return false;
+    }
+    try {
+      return this.editor.contains(target as Node);
+    } catch {
+      return false;
+    }
+  }
+
+  private removedEditor(records: readonly MutationRecord[]): boolean {
+    return records.some((record) =>
+      Array.from(record.removedNodes).some(
+        (node) => node === this.editor || node.contains(this.editor),
+      ),
+    );
+  }
+
+  private detach(): void {
+    this.observer?.disconnect();
+    this.lifecycleObserver?.disconnect();
+    this.document.removeEventListener(
+      'selectionchange',
+      this.validateSelection,
+      true,
+    );
+    this.document.removeEventListener(
+      'visibilitychange',
+      this.validateVisibility,
+      true,
+    );
+    this.document.removeEventListener('focusout', this.handleFocusOut, true);
+    this.document.removeEventListener('focusin', this.handleFocusIn, true);
+    this.document.removeEventListener('input', this.handleInput, true);
+    this.document.defaultView?.removeEventListener(
+      'pagehide',
+      this.invalidateOnPageHide,
+    );
+    this.document.defaultView?.removeEventListener(
+      'blur',
+      this.invalidateOnWindowBlur,
+      true,
+    );
+  }
+}
+
+function classifyPostCleanupFailure(
+  state: AutomaticGuardState,
+  firstInvalidationCause: AutomaticPasteInvalidationCause,
+  checks: PostCleanupChecks,
+): PostCleanupFailure {
+  if (state === 'consumed' && Object.values(checks).every(Boolean)) return null;
+  if (!checks.editorConnected) return 'editor-disconnected';
+  if (!checks.sameDocument) return 'document-changed';
+  if (firstInvalidationCause === 'mutation') return 'mutation-invalidated';
+  if (firstInvalidationCause === 'selectionchange') {
+    return 'selection-invalidated';
+  }
+  if (
+    firstInvalidationCause === 'focusout' ||
+    firstInvalidationCause === 'focusin' ||
+    firstInvalidationCause === 'window-blur'
+  ) {
+    return 'focus-invalidated';
+  }
+  if (firstInvalidationCause === 'editor-disconnected') {
+    return 'editor-disconnected';
+  }
+  if (
+    firstInvalidationCause === 'pagehide' ||
+    firstInvalidationCause === 'visibility-hidden' ||
+    firstInvalidationCause === 'lifecycle'
+  ) {
+    return 'lifecycle-invalidated';
+  }
+  if (!checks.composedFocusValid) return 'composed-focus-mismatch';
+  if (!checks.selectionExists) return 'selection-missing';
+  if (!checks.selectionCollapsed) return 'selection-not-collapsed';
+  if (!checks.caretRootMatches) return 'caret-root-mismatch';
+  if (!checks.caretPathMatches) return 'caret-path-mismatch';
+  if (!checks.caretOffsetMatches) return 'caret-offset-mismatch';
+  if (!checks.structureMatches) return 'structure-mismatch';
+  if (!checks.lifecycleValid) return 'lifecycle-invalidated';
+  if (!checks.mutationValid) return 'mutation-invalidated';
+  if (!checks.selectionValid) return 'selection-invalidated';
+  if (!checks.focusValid) return 'focus-invalidated';
+  if (!checks.authorizationStillValid) return 'authorization-invalidated';
+  return state === 'consumed' ? null : 'other';
+}
 
 function isElementNode(value: unknown): value is Element {
   return (
@@ -198,6 +887,30 @@ function isEditorFocused(element: HTMLElement, document: Document): boolean {
   }
   const rootActive = (root as Partial<DocumentOrShadowRoot>).activeElement;
   return rootActive === element || element.contains(rootActive ?? null);
+}
+
+function readFocusTopology(
+  element: HTMLElement,
+  document: Document,
+): AutomaticPasteFocusTopology {
+  const active = document.activeElement;
+  if (active === element || element.contains(active)) return 'direct-editor';
+  const root = element.getRootNode();
+  if (
+    root !== document &&
+    typeof root === 'object' &&
+    root !== null &&
+    (root as Partial<DocumentOrShadowRoot>).activeElement !== null &&
+    ((root as Partial<DocumentOrShadowRoot>).activeElement === element ||
+      element.contains(
+        (root as Partial<DocumentOrShadowRoot>).activeElement ?? null,
+      )) &&
+    active !== null &&
+    active === (root as ShadowRoot).host
+  ) {
+    return 'shadow-host-retargeted';
+  }
+  return 'no-valid-composed-focus';
 }
 
 function readCurrentCaretRange(
@@ -299,26 +1012,101 @@ class TextControlAdapter implements EditorAdapter {
     }
     const start = typedCandidate.start;
     const end = typedCandidate.end;
-    const expected = `${candidate.text} `;
+    const expected = candidate.text;
+    const activationValue = this.element.value;
+    const expectedPostCleanupValue = `${activationValue.slice(0, start)}${activationValue.slice(end)}`;
+    const guard = new EditorAutomaticPasteGuard(
+      this.document,
+      this.element,
+      () =>
+        isEditorFocused(this.element, this.document) &&
+        this.element.selectionStart === end &&
+        this.element.selectionEnd === end &&
+        this.element.value === activationValue,
+      () =>
+        isEditorFocused(this.element, this.document) &&
+        this.element.selectionStart === end &&
+        this.element.selectionEnd === end &&
+        this.element.value === activationValue,
+      () => {
+        const selectionStart = this.element.selectionStart;
+        const selectionEnd = this.element.selectionEnd;
+        return [
+          true,
+          this.element.isConnected,
+          this.element.ownerDocument === this.document,
+          isEditorFocused(this.element, this.document),
+          selectionStart !== null && selectionEnd !== null,
+          selectionStart !== null && selectionStart === selectionEnd,
+          true,
+          true,
+          selectionStart === start && selectionEnd === start,
+          this.element.value === expectedPostCleanupValue,
+          true,
+          true,
+          true,
+          true,
+        ];
+      },
+    );
+    let automaticActive = false;
     let consumed = false;
     return {
+      beginAutomaticPasteAuthorization: () => {
+        automaticActive = true;
+        guard.begin();
+      },
+      ...(import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+        ? {
+            recordAutomaticPasteActivationBeforeInputOutcome: (
+              prevented: boolean,
+            ) => guard.recordActivationBeforeInputOutcome(prevented),
+          }
+        : {}),
+      isAutomaticPasteSafe: () =>
+        automaticActive && guard.isSafeBeforeCleanup(),
       cleanupAfterClipboardSuccess: () => {
         if (consumed) return false;
         consumed = true;
+        const automaticCleanupAuthorized =
+          automaticActive && guard.beginCleanup();
         if (
           !isEditorFocused(this.element, this.document) ||
-          this.element.selectionStart !== end + 1 ||
-          this.element.selectionEnd !== end + 1 ||
-          this.element.value.slice(start, end + 1) !== expected
+          this.element.selectionStart !== end ||
+          this.element.selectionEnd !== end ||
+          this.element.value.slice(start, end) !== expected
         ) {
+          if (automaticActive) guard.finishCleanup(false);
           return false;
         }
         const notification = createInputNotification(this.document);
-        if (notification === undefined) return false;
-        this.element.setRangeText('', start, end + 1, 'start');
-        this.element.dispatchEvent(notification);
-        return true;
+        if (notification === undefined) {
+          if (automaticActive) guard.finishCleanup(false);
+          return false;
+        }
+        this.element.setRangeText('', start, end, 'start');
+        const cleanupStateAccepted =
+          !automaticActive ||
+          (automaticCleanupAuthorized && guard.acceptCleanupState());
+        const notificationDispatched = automaticCleanupAuthorized
+          ? guard.dispatchOwnedCleanupInput(this.element, notification)
+          : this.element.dispatchEvent(notification);
+        if (!automaticActive) return true;
+        return automaticCleanupAuthorized
+          ? (guard.finishCleanup(
+              cleanupStateAccepted && notificationDispatched,
+            ),
+            true)
+          : (guard.invalidate(), true);
       },
+      consumeAutomaticPasteAuthorization: () =>
+        automaticActive && guard.consume(),
+      invalidateAutomaticPasteAuthorization: () => guard.invalidate(),
+      ...(import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+        ? { readAutomaticPasteDiagnostic: () => guard.readDiagnostic() }
+        : {}),
     };
   }
 }
@@ -351,6 +1139,30 @@ interface TextPiece {
   readonly node: Text;
   readonly start: number;
   readonly text: string;
+}
+
+interface EditorBoundarySnapshot {
+  readonly path: readonly number[];
+  readonly offset: number;
+}
+
+function captureEditorBoundary(
+  root: HTMLElement,
+  container: Node,
+  offset: number,
+): EditorBoundarySnapshot | undefined {
+  if (!isNodeWithinEditor(container, root)) return undefined;
+  const path: number[] = [];
+  let current = container;
+  while (current !== root) {
+    const parent = current.parentNode;
+    if (parent === null) return undefined;
+    const index = Array.prototype.indexOf.call(parent.childNodes, current);
+    if (index < 0) return undefined;
+    path.unshift(index);
+    current = parent;
+  }
+  return { path, offset };
 }
 
 function previousAdjacentText(node: Text, root: HTMLElement): Text | undefined {
@@ -532,12 +1344,114 @@ class ContenteditableAdapter implements EditorAdapter {
     const range = typedCandidate.range.cloneRange();
     const startContainer = range.startContainer;
     const startOffset = range.startOffset;
-    const expected = `${candidate.text} `;
+    const expected = candidate.text;
+    let postCleanupBoundary: EditorBoundarySnapshot | undefined;
+    let postCleanupEditor: Node | undefined;
+    const readCleanupState = () => {
+      const currentCaret = readCurrentCaretRange(this.root, this.document);
+      if (
+        !this.root.isConnected ||
+        !startContainer.isConnected ||
+        startContainer.ownerDocument !== this.document ||
+        currentCaret === undefined ||
+        !isEditorFocused(this.root, this.document)
+      ) {
+        return undefined;
+      }
+      const cleanupRange = this.document.createRange();
+      try {
+        cleanupRange.setStart(startContainer, startOffset);
+        cleanupRange.setEnd(
+          currentCaret.range.startContainer,
+          currentCaret.range.startOffset,
+        );
+      } catch {
+        return undefined;
+      }
+      return { currentCaret, cleanupRange };
+    };
+    const guard = new EditorAutomaticPasteGuard(
+      this.document,
+      this.root,
+      () => {
+        const current = readCurrentCaretRange(this.root, this.document)?.range;
+        return (
+          this.root.isConnected &&
+          isEditorFocused(this.root, this.document) &&
+          current !== undefined &&
+          current.startContainer === range.endContainer &&
+          current.startOffset === range.endOffset &&
+          range.toString() === candidate.text
+        );
+      },
+      () => {
+        const state = readCleanupState();
+        if (state === undefined) return false;
+        const actual = state.cleanupRange.toString();
+        return actual === expected;
+      },
+      () => {
+        const selection = this.document.getSelection();
+        const current = readCurrentCaretRange(this.root, this.document)?.range;
+        const currentBoundary =
+          current === undefined
+            ? undefined
+            : captureEditorBoundary(
+                this.root,
+                current.startContainer,
+                current.startOffset,
+              );
+        const caretRootMatches =
+          current !== undefined &&
+          isNodeWithinEditor(current.startContainer, this.root);
+        return [
+          true,
+          this.root.isConnected,
+          this.root.ownerDocument === this.document,
+          isEditorFocused(this.root, this.document),
+          selection !== null && current !== undefined,
+          current?.collapsed === true,
+          caretRootMatches,
+          postCleanupBoundary !== undefined &&
+            currentBoundary !== undefined &&
+            postCleanupBoundary.path.length === currentBoundary.path.length &&
+            postCleanupBoundary.path.every(
+              (part, index) => currentBoundary.path[index] === part,
+            ),
+          postCleanupBoundary !== undefined &&
+            currentBoundary !== undefined &&
+            postCleanupBoundary.offset === currentBoundary.offset,
+          postCleanupEditor !== undefined &&
+            this.root.isEqualNode(postCleanupEditor),
+          true,
+          true,
+          true,
+          true,
+        ];
+      },
+    );
+    let automaticActive = false;
     let consumed = false;
     return {
+      beginAutomaticPasteAuthorization: () => {
+        automaticActive = true;
+        guard.begin();
+      },
+      ...(import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+        ? {
+            recordAutomaticPasteActivationBeforeInputOutcome: (
+              prevented: boolean,
+            ) => guard.recordActivationBeforeInputOutcome(prevented),
+          }
+        : {}),
+      isAutomaticPasteSafe: () =>
+        automaticActive && guard.isSafeBeforeCleanup(),
       cleanupAfterClipboardSuccess: () => {
         if (consumed) return false;
         consumed = true;
+        const automaticCleanupAuthorized =
+          automaticActive && guard.beginCleanup();
         const currentCaret = readCurrentCaretRange(this.root, this.document);
         if (
           !this.root.isConnected ||
@@ -545,6 +1459,7 @@ class ContenteditableAdapter implements EditorAdapter {
           startContainer.ownerDocument !== this.document ||
           currentCaret === undefined
         ) {
+          if (automaticActive) guard.finishCleanup(false);
           return false;
         }
         const { range: caret, selection } = currentCaret;
@@ -552,6 +1467,7 @@ class ContenteditableAdapter implements EditorAdapter {
           !this.root.contains(caret.startContainer) ||
           !isEditorFocused(this.root, this.document)
         ) {
+          if (automaticActive) guard.finishCleanup(false);
           return false;
         }
         const cleanupRange = this.document.createRange();
@@ -559,21 +1475,50 @@ class ContenteditableAdapter implements EditorAdapter {
           cleanupRange.setStart(startContainer, startOffset);
           cleanupRange.setEnd(caret.startContainer, caret.startOffset);
         } catch {
+          if (automaticActive) guard.finishCleanup(false);
           return false;
         }
         const actual = cleanupRange.toString();
-        if (actual !== expected && actual !== `${candidate.text}\u00a0`) {
+        if (actual !== expected) {
+          if (automaticActive) guard.finishCleanup(false);
           return false;
         }
         const notification = createInputNotification(this.document);
-        if (notification === undefined) return false;
+        if (notification === undefined) {
+          if (automaticActive) guard.finishCleanup(false);
+          return false;
+        }
         cleanupRange.deleteContents();
         cleanupRange.collapse(true);
+        postCleanupBoundary = captureEditorBoundary(
+          this.root,
+          cleanupRange.startContainer,
+          cleanupRange.startOffset,
+        );
+        postCleanupEditor = this.root.cloneNode(true);
         selection.removeAllRanges();
         selection.addRange(cleanupRange);
-        this.root.dispatchEvent(notification);
-        return true;
+        const cleanupStateAccepted =
+          !automaticActive ||
+          (automaticCleanupAuthorized && guard.acceptCleanupState());
+        const notificationDispatched = automaticCleanupAuthorized
+          ? guard.dispatchOwnedCleanupInput(this.root, notification)
+          : this.root.dispatchEvent(notification);
+        if (!automaticActive) return true;
+        return automaticCleanupAuthorized
+          ? (guard.finishCleanup(
+              cleanupStateAccepted && notificationDispatched,
+            ),
+            true)
+          : (guard.invalidate(), true);
       },
+      consumeAutomaticPasteAuthorization: () =>
+        automaticActive && guard.consume(),
+      invalidateAutomaticPasteAuthorization: () => guard.invalidate(),
+      ...(import.meta.env.MODE === 'native-dev' ||
+      import.meta.env.MODE === 'test'
+        ? { readAutomaticPasteDiagnostic: () => guard.readDiagnostic() }
+        : {}),
     };
   }
 }

@@ -8,6 +8,7 @@ import { TriggerCatalogService } from '../application/snippet/trigger-catalog';
 import { createDatabase } from '../infrastructure/persistence/database';
 import { DexieSnippetEntryRepository } from '../infrastructure/persistence/dexie-snippet-entry-repository';
 import { DexieSnippetAssetRepository } from '../infrastructure/persistence/dexie-snippet-asset-repository';
+import { DexieSettingsRepository } from '../infrastructure/persistence/dexie-settings-repository';
 import { SnippetDeliveryPlanner } from '../application/snippet/snippet-delivery-planner';
 import { BrowserImagePngPreparer } from '../infrastructure/clipboard/browser-image-png-preparer';
 import {
@@ -28,8 +29,14 @@ import {
 import {
   registerSnippetDeliveryCoordinator,
   SnippetDeliveryCoordinator,
+  type AutomaticPasteTraceDiagnosticSink,
+  type SnippetDeliveryBrowserSafetyApi,
   type SnippetDeliveryRuntime,
 } from './snippet-trigger/delivery-coordinator';
+import {
+  registerAutomaticPasteResultDiagnostic,
+  type DiagnosticSessionStorage,
+} from './snippet-trigger/automatic-paste-result-diagnostic';
 import {
   registerNativeClipboardCapability,
   type NativeClipboardCapabilityRuntime,
@@ -54,17 +61,35 @@ export default defineBackground(() => {
       chrome?: Partial<ClipboardExtensionApi> & {
         permissions?: NativeClipboardExtensionApi['permissions'];
         scripting?: ContentScriptRecoveryChromeApi['scripting'];
-        tabs?: ContentScriptRecoveryChromeApi['tabs'];
+        tabs?: ContentScriptRecoveryChromeApi['tabs'] &
+          SnippetDeliveryBrowserSafetyApi['tabs'];
+        windows?: SnippetDeliveryBrowserSafetyApi['windows'];
         runtime?: TriggerCatalogCoordinatorRuntime &
           SnippetDeliveryRuntime &
           NativeClipboardCapabilityRuntime &
           NativeClipboardExtensionApi['runtime'] &
           LifecycleRecoveryRuntime;
+        storage?: {
+          readonly session?: DiagnosticSessionStorage;
+        };
       };
     }
   ).chrome;
   const runtime = extensionApi?.runtime;
   if (runtime !== undefined) {
+    let reportAutomaticPasteTrace: AutomaticPasteTraceDiagnosticSink = () =>
+      undefined;
+    const diagnosticStorage = extensionApi?.storage?.session;
+    if (
+      import.meta.env.MODE === 'native-dev' &&
+      diagnosticStorage !== undefined
+    ) {
+      const diagnostic = registerAutomaticPasteResultDiagnostic(
+        runtime,
+        diagnosticStorage,
+      );
+      reportAutomaticPasteTrace = diagnostic.reportTrace;
+    }
     const contentScriptFiles = resolveStaticContentScriptFiles(runtime);
     const scripting = extensionApi?.scripting;
     const tabs = extensionApi?.tabs;
@@ -83,8 +108,11 @@ export default defineBackground(() => {
     }
     const database = createDatabase();
     const repository = new DexieSnippetEntryRepository(database);
+    const settingsRepository = new DexieSettingsRepository(database);
     const coordinator = new TriggerCatalogCoordinator(
       new TriggerCatalogService(repository),
+      undefined,
+      settingsRepository,
     );
     registerTriggerCatalogCoordinator(runtime, coordinator);
     if (
@@ -116,6 +144,17 @@ export default defineBackground(() => {
             nativeTransport,
           ),
           coordinator,
+          undefined,
+          nativeTransport,
+          settingsRepository,
+          extensionApi.tabs === undefined || extensionApi.windows === undefined
+            ? undefined
+            : {
+                tabs: extensionApi.tabs,
+                windows: extensionApi.windows,
+              },
+          undefined,
+          (diagnostic) => reportAutomaticPasteTrace(diagnostic),
         ),
       );
     }

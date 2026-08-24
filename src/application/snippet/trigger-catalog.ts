@@ -1,6 +1,9 @@
 import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
 import type { TriggerCatalogEntry } from '../../shared/trigger-catalog-messages';
-import { containsLocalImageBlock } from '../../domain/snippet-content';
+import {
+  containsLocalImageBlock,
+  renderSnippetPlainText,
+} from '../../domain/snippet-content';
 
 export interface TriggerCatalogReader {
   readCatalog(): Promise<readonly TriggerCatalogEntry[]>;
@@ -19,6 +22,9 @@ export class TriggerCatalogService implements TriggerCatalogReader {
               kind: snippet.content.kind === 'image' ? 'image' : 'text',
               trigger: snippet.trigger,
               snippetId: snippet.id,
+              singleLineEligible:
+                snippet.content.kind === 'image' ||
+                !/[\r\n]/.test(renderSnippetPlainText(snippet.content)),
             },
           ],
     );

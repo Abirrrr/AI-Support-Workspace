@@ -5,7 +5,14 @@ import { runPersistenceOperation } from './repository-helpers';
 import { GLOBAL_SETTINGS_ID, type SettingsRecord } from './settings-record';
 
 function toSettings(record: SettingsRecord): Settings {
-  return { defaultModel: record.defaultModel };
+  const snippetPasteMode = record.snippetPasteMode ?? 'clipboard-only';
+  if (
+    snippetPasteMode !== 'clipboard-only' &&
+    snippetPasteMode !== 'automatic'
+  ) {
+    throw new TypeError('Persisted Snippet paste mode is invalid.');
+  }
+  return { defaultModel: record.defaultModel, snippetPasteMode };
 }
 
 export class DexieSettingsRepository implements SettingsRepository {
@@ -23,6 +30,7 @@ export class DexieSettingsRepository implements SettingsRepository {
       const record: SettingsRecord = {
         id: GLOBAL_SETTINGS_ID,
         defaultModel: settings.defaultModel,
+        snippetPasteMode: settings.snippetPasteMode,
       };
 
       await this.database.settings.put(record);

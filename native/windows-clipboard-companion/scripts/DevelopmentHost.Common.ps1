@@ -78,7 +78,7 @@ function Publish-DevelopmentHost {
     )
 
     New-Item -ItemType Directory -Force -Path $script:PublishDirectory | Out-Null
-    & dotnet publish $script:ProjectPath -c Release -r win-x64 --self-contained true "/p:ExpectedExtensionOrigin=$ExpectedOrigin" -o $script:PublishDirectory
+    & dotnet publish $script:ProjectPath -c Release -r win-x64 --self-contained true "/p:ExpectedExtensionOrigin=$ExpectedOrigin" "/p:NativeDiagnostics=true" -o $script:PublishDirectory
     if ($LASTEXITCODE -ne 0) {
         throw 'Development companion publish failed.'
     }

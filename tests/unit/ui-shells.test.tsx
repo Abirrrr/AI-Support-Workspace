@@ -31,8 +31,14 @@ const snippetLibrary: SnippetLibrary = {
 };
 
 const settings: SettingsApplication = {
-  load: async () => ({ defaultModel: null }),
-  save: async () => ({ defaultModel: null }),
+  load: async () => ({
+    defaultModel: null,
+    snippetPasteMode: 'clipboard-only',
+  }),
+  save: async (_defaultModelInput, snippetPasteMode) => ({
+    defaultModel: null,
+    snippetPasteMode,
+  }),
 };
 
 const importExport: ImportExportActions = {

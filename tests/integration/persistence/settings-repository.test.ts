@@ -35,10 +35,20 @@ describe('DexieSettingsRepository', () => {
 
   it('saves and reloads the global singleton across database reopen', async () => {
     await expect(
-      repository.save({ defaultModel: 'qwen2.5:7b' }),
-    ).resolves.toEqual({ defaultModel: 'qwen2.5:7b' });
+      repository.save({
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'automatic',
+      }),
+    ).resolves.toEqual({
+      defaultModel: 'qwen2.5:7b',
+      snippetPasteMode: 'automatic',
+    });
     expect(await database.settings.toArray()).toEqual([
-      { id: GLOBAL_SETTINGS_ID, defaultModel: 'qwen2.5:7b' },
+      {
+        id: GLOBAL_SETTINGS_ID,
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'automatic',
+      },
     ]);
 
     database.close({ disableAutoOpen: true });
@@ -47,17 +57,53 @@ describe('DexieSettingsRepository', () => {
 
     await expect(repository.load()).resolves.toEqual({
       defaultModel: 'qwen2.5:7b',
+      snippetPasteMode: 'automatic',
     });
   });
 
   it('stores null and replaces the singleton rather than deleting it', async () => {
-    await repository.save({ defaultModel: 'first-model' });
-    await repository.save({ defaultModel: null });
+    await repository.save({
+      defaultModel: 'first-model',
+      snippetPasteMode: 'automatic',
+    });
+    await repository.save({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
 
-    await expect(repository.load()).resolves.toEqual({ defaultModel: null });
+    await expect(repository.load()).resolves.toEqual({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
     expect(await database.settings.toArray()).toEqual([
-      { id: GLOBAL_SETTINGS_ID, defaultModel: null },
+      {
+        id: GLOBAL_SETTINGS_ID,
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+      },
     ]);
+  });
+
+  it('defaults an upgraded record without a paste mode to clipboard-only', async () => {
+    await database.settings.put({
+      id: GLOBAL_SETTINGS_ID,
+      defaultModel: null,
+    });
+
+    await expect(repository.load()).resolves.toEqual({
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+    });
+  });
+
+  it('rejects an invalid persisted paste mode through the repository boundary', async () => {
+    await database.settings.put({
+      id: GLOBAL_SETTINGS_ID,
+      defaultModel: null,
+      snippetPasteMode: 'unexpected',
+    });
+
+    await expect(repository.load()).rejects.toBeInstanceOf(PersistenceError);
   });
 
   it('wraps underlying persistence failures without exposing Dexie types', async () => {

@@ -3,9 +3,29 @@ import {
   type FrameCatalogRuntime,
 } from './frame-catalog-client';
 import {
+  type BeforeInputEventLike,
+  type BeforeInputHandlingResult,
   SnippetExpansionController,
+  SNIPPET_DELIVERY_NOTICE_ID,
+  type AutomaticPasteActivationTraceSink,
+  type AutomaticPastePostCleanupTraceSink,
   toBeforeInputEventLike,
 } from './expansion-controller';
+
+interface BeforeInputActivationController {
+  handleBeforeInput(event: BeforeInputEventLike): BeforeInputHandlingResult;
+}
+
+export function handleSnippetBeforeInput(
+  controller: BeforeInputActivationController,
+  event: BeforeInputEventLike,
+): boolean {
+  const result = controller.handleBeforeInput(event);
+  if (result.status === 'ignored') return false;
+  event.preventDefault();
+  result.startDelivery();
+  return true;
+}
 
 export const SNIPPET_CONTENT_RUNTIME_REGISTRY_KEY =
   '__aiSupportWorkspaceSnippetContentRuntimeV1';
@@ -40,6 +60,35 @@ interface RegisteredSnippetContentRuntime {
 
 export type SnippetContentBootstrapResult =
   'started' | 'recovered' | 'restarted';
+
+export function showSnippetDeliveryNotice(
+  document: Document,
+  scope: Pick<RuntimeGlobalScope, 'setTimeout'>,
+  message: string,
+  kind: 'success' | 'error',
+): void {
+  const previous = document.getElementById(SNIPPET_DELIVERY_NOTICE_ID);
+  previous?.remove();
+  const notice = document.createElement('div');
+  notice.id = SNIPPET_DELIVERY_NOTICE_ID;
+  notice.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+  notice.textContent = message;
+  Object.assign(notice.style, {
+    position: 'fixed',
+    right: '16px',
+    bottom: '16px',
+    zIndex: '2147483647',
+    maxWidth: '320px',
+    padding: '10px 12px',
+    borderRadius: '8px',
+    color: '#fff',
+    background: kind === 'error' ? '#b91c1c' : '#166534',
+    font: '13px/1.4 system-ui, sans-serif',
+    boxShadow: '0 4px 16px rgb(0 0 0 / 25%)',
+  });
+  document.documentElement.append(notice);
+  scope.setTimeout(() => notice.remove(), 3_500);
+}
 
 function isRegisteredSnippetContentRuntime(
   value: unknown,
@@ -95,7 +144,7 @@ export class SnippetContentRuntime implements RecoverableSnippetContentRuntime {
     if (!this.client.isConnected) this.client.connect();
     const beforeInputEvent = toBeforeInputEventLike(event);
     if (beforeInputEvent !== undefined) {
-      this.controller.handleBeforeInput(beforeInputEvent);
+      handleSnippetBeforeInput(this.controller, beforeInputEvent);
     }
   };
 
@@ -111,6 +160,10 @@ export class SnippetContentRuntime implements RecoverableSnippetContentRuntime {
     readonly owner: SnippetContentRuntimeApi,
     private readonly document: Document,
     private readonly scope: RuntimeGlobalScope,
+    reportAutomaticPasteActivation: AutomaticPasteActivationTraceSink = () =>
+      undefined,
+    reportAutomaticPastePostCleanup: AutomaticPastePostCleanupTraceSink = () =>
+      undefined,
   ) {
     this.client = new FrameTriggerCatalogClient(owner);
     this.controller = new SnippetExpansionController(
@@ -120,6 +173,9 @@ export class SnippetContentRuntime implements RecoverableSnippetContentRuntime {
       {
         show: (message, kind) => this.showNotice(message, kind),
       },
+      undefined,
+      reportAutomaticPasteActivation,
+      reportAutomaticPastePostCleanup,
     );
   }
 
@@ -159,28 +215,6 @@ export class SnippetContentRuntime implements RecoverableSnippetContentRuntime {
   }
 
   private showNotice(message: string, kind: 'success' | 'error'): void {
-    const previous = this.document.getElementById(
-      'ai-support-workspace-snippet-notice',
-    );
-    previous?.remove();
-    const notice = this.document.createElement('div');
-    notice.id = 'ai-support-workspace-snippet-notice';
-    notice.setAttribute('role', kind === 'error' ? 'alert' : 'status');
-    notice.textContent = message;
-    Object.assign(notice.style, {
-      position: 'fixed',
-      right: '16px',
-      bottom: '16px',
-      zIndex: '2147483647',
-      maxWidth: '320px',
-      padding: '10px 12px',
-      borderRadius: '8px',
-      color: '#fff',
-      background: kind === 'error' ? '#b91c1c' : '#166534',
-      font: '13px/1.4 system-ui, sans-serif',
-      boxShadow: '0 4px 16px rgb(0 0 0 / 25%)',
-    });
-    this.document.documentElement.append(notice);
-    this.scope.setTimeout(() => notice.remove(), 3_500);
+    showSnippetDeliveryNotice(this.document, this.scope, message, kind);
   }
 }

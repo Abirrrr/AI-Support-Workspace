@@ -48,7 +48,10 @@ const catalogMutationPort =
 const knowledgeLibrary = new KnowledgeLibraryService(
   new DexieKnowledgeEntryRepository(database),
 );
-const settings = new SettingsService(new DexieSettingsRepository(database));
+const settings = new SettingsService(
+  new DexieSettingsRepository(database),
+  catalogMutationPort,
+);
 const optionsChrome = (
   globalThis as typeof globalThis & {
     chrome?: {
@@ -80,13 +83,14 @@ const snippetLibrary = new SnippetLibraryService(
   catalogMutationPort,
   snippetAssetRepository,
 );
-if (import.meta.env.MODE === 'native-dev') {
+if (import.meta.env.MODE === 'native-dev' && catalogRuntime !== undefined) {
   void import('./snippet-list-serialization-diagnostic').then(
     ({ registerSnippetListSerializationDiagnostic }) =>
       registerSnippetListSerializationDiagnostic(
         globalThis,
         snippetRepository,
         snippetAssetRepository,
+        catalogRuntime,
       ),
   );
 }

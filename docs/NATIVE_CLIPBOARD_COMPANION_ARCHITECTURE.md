@@ -2,7 +2,7 @@
 
 ## Status
 
-M14-I.2 defines the normative Windows-only, optional Native Clipboard Companion architecture. The decision itself was architecture/documentation only; M14-I.3 through M14-I.4.1 subsequently implemented and corrected the native foundation, Chrome development integration, registration, and Settings capability path, and M14-I.5 completed post-validation cleanup. M14-K.1 now defines a separate optional automatic-paste extension to that companion. No production installer/registration, AutoHotkey integration, keyboard injection, protocol-v2 operation, or automatic paste is implemented.
+M14-I.2 defines the normative Windows-only, optional Native Clipboard Companion architecture. M14-I.3 through M14-I.4.1 implemented the native foundation, Chrome development integration, registration, and Settings capability path, and M14-I.5 completed post-validation cleanup. M14-K.2 implements Decision 45's separate optional automatic-paste extension through strict protocol v2 and fixed guarded Ctrl+V input; M14-K.3 Principal-approved the successful Intercom/Crisp automatic Text/Image evidence and final performance/lifecycle audit. Decision 49 locks no pre-closeout class-C optimization. No production installer/registration/signing/updater, AutoHotkey integration, arbitrary keyboard input, focus stealing, or retry is implemented.
 
 Decision 43 is the permanent decision record. Decision 42 remains authoritative before native transfer. The companion repeats the same applicable limits as defense in depth; it does not redefine them.
 
@@ -76,7 +76,7 @@ Immediately before input, the host samples left/right Ctrl, Shift, Alt, and Wind
 
 Exactly four accepted events yield application outcome `paste-issued`; this means Windows accepted the events, not that a destination inserted them. Zero accepted events yields `input-injection-failed`. A partial return, process disconnect, timeout, or lost response after input may have begun yields `indeterminate`. The requested balanced four-event array is the only approved modifier-state measure: the host issues no speculative key-up or second sequence after an uncertain result, because it cannot safely know what a later input would duplicate or which physical state changed. One activation permits at most one `SendInput` call, and authorization is consumed before it.
 
-The extension-wide delivery guard has no queue. A second activation rejected before its own clipboard preparation keeps its trigger plus ordinary Space and reports retry-later delivery busy without claiming it was copied. The host adds `Local\AI.SupportWorkspace.ClipboardCompanion.Paste.v2` as a separate immediate-fail per-user/session mutex while preserving the existing Image-write mutex and behavior. Typed automatic-paste outcomes are `paste-issued`, `clipboard-only`, `unsafe-focus`, `not-foreground`, `clipboard-changed`, `unsafe-keyboard-state`, `busy`, `native-unavailable`, `input-injection-failed`, and `indeterminate`; protocol details map to these safe categories. `Paste sent` is truthful automatic-success UI. All automatic non-success outcomes after confirmed clipboard preparation use `Snippet copied — press Ctrl+V` or `Image copied — press Ctrl+V`, with `(trigger unchanged)` if cleanup was not authorized. No automatic retry occurs after input may have begun.
+The extension-wide delivery guard has no queue. A second fully validated activation consumes its command Space synchronously; if it is rejected before its own clipboard preparation, it keeps its trigger and reports retry-later delivery busy without claiming it was copied. The host adds `Local\AI.SupportWorkspace.ClipboardCompanion.Paste.v2` as a separate immediate-fail per-user/session mutex while preserving the existing Image-write mutex and behavior. Typed automatic-paste outcomes are `paste-issued`, `clipboard-only`, `unsafe-focus`, `not-foreground`, `clipboard-changed`, `unsafe-keyboard-state`, `busy`, `native-unavailable`, `input-injection-failed`, and `indeterminate`; protocol details map to these safe categories. `Paste sent` is truthful automatic-success UI. All automatic non-success outcomes after confirmed clipboard preparation use `Snippet copied — press Ctrl+V` or `Image copied — press Ctrl+V`, with `(trigger unchanged)` if cleanup was not authorized. No automatic retry occurs after input may have begun.
 
 ### Security, privacy, and platform disposition
 
@@ -111,7 +111,7 @@ Image trigger + Space
 -> manual native Ctrl+V
 ```
 
-Before verified native success, the trigger, activation Space, surrounding text, selection, and page content remain untouched. If page state becomes stale after successful clipboard preparation, cleanup is skipped and the prepared clipboard is retained; user edits are never overwritten.
+Before verified native success, the trigger, surrounding text, selection, and page content remain untouched after the accepted activation Space was consumed synchronously. If page state becomes stale after successful clipboard preparation, cleanup is skipped and the prepared clipboard is retained; user edits are never overwritten.
 
 ## Scope and Non-goals
 
@@ -518,7 +518,7 @@ M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J.2 is real-Cris
 
 ## Cleanup and Handoff
 
-Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J is complete, real-browser validated, and synchronized at `e4e9645`; it changed no native clipboard boundary. M14-K.1 / Decision 45 now defines the separate automatic-paste extension without implementing it. The exact next engineering task after Principal approval is M14-K.2 — Windows Automatic Paste Implementation; M14-K.3 then validates Crisp/Intercom Text/Image and adversarial focus behavior.
+Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J is complete and real-browser validated. M14-K.2 implements Decision 45's separate automatic-paste extension without changing protocol-v1 Image clipboard semantics. M14-K.3 now records Principal PASS evidence for automatic and clipboard-only Text/Image in Crisp and Intercom, unknown-trigger safety, live mode switching, and one successful 4/4/40-byte native trace. The complete M14-K tree awaits Principal closeout review.
 
 Implementation sequence:
 
@@ -537,8 +537,43 @@ M14-I.2 architecture
 -> M14-J lifecycle closeout at e4e9645
 -> M14-K.1 optional automatic-paste architecture and focus safety
 -> Principal approval
--> M14-K.2 Windows implementation
--> M14-K.3 Crisp/Intercom real-world validation
+-> M14-K.2 Windows implementation: IMPLEMENTED / AUTOMATED PASS
+-> M14-K.3 validation/performance audit/closeout preparation: PASS / PRINCIPAL APPROVED
+-> M14-K.4 product decision lockdown: DOCUMENTATION ONLY / CHECKPOINT AUTHORIZATION PENDING
 ```
 
-Backup v5, Dexie v5, Decision 42, metadata-only trigger catalogs, Decision 40, and M15 remain unchanged.
+Backup v5 remains frozen/importable, strict Backup v6 is current, and Dexie v5, Decision 42, metadata-only trigger catalogs, Decision 40, and M15 remain unchanged.
+
+## M14-K.2 Strict Protocol v2 Automatic Paste
+
+Protocol v1 remains byte-contract compatible for `get-capabilities` and `write-image-png`. Protocol v2 adds only `capture-paste-context` and `paste-clipboard` to the same exact-origin host. V2 capability discovery advertises supported protocol versions `[1, 2]` and separately identifies Image clipboard and automatic-paste operations, so a v1-only companion remains valid for Image preparation plus manual paste.
+
+Both v2 request and activation IDs are exactly 32 lowercase hexadecimal characters. Every HWND is exactly 16 lowercase hexadecimal characters, with no prefix, zero prohibited, and a maximum `7fffffffffffffff` for the selected signed `nint`/win-x64 contract. The TypeScript and native parsers reject uppercase, alternate lengths/forms, numeric handles, malformed/overflow values, duplicate/dangerous/unknown fields, invalid unsigned PID or clipboard sequence, and unexpected content. `capture-paste-context` returns only the activation ID, foreground HWND, `GA_ROOT` HWND, owning PID, and nonzero `GetClipboardSequenceNumber()`. It captures no title, application, URL, clipboard data, page/editor data, or Snippet content.
+
+`paste-clipboard` carries only protocol/request/activation identity and the expected foreground/root HWND, PID, and clipboard sequence. The host acquires a separate immediate-fail per-session named paste mutex, re-reads and exactly compares all native context, then checks the high-order `GetAsyncKeyState` bit for left/right Ctrl, Shift, Alt, and Windows keys. Any mismatch or held modifier declines without input. The host never calls `SetForegroundWindow` and never waits, hooks, injects key-ups, queues, or retries.
+
+The sole input surface is one `SendInput` call over an internally constructed fixed array: Ctrl down, V down, V up, Ctrl up. Extension data cannot select virtual keys or events. A returned count of four is `paste-issued` and means only that Windows accepted all events; zero is `input-injection-failed`; one through three is `indeterminate`. Lost IPC after input may have begun is also indeterminate. Authorization is consumed before the call and neither failure nor uncertainty is replayed. UIPI may yield a zero result for higher-integrity targets; the companion does not elevate. Production does not expose Win32 diagnostics. The explicit native-development artifact may return only the bounded attempt evidence described below.
+
+The implementation uses an `IPastePlatform` fake boundary for native tests. Automated tests validate capture failures, canonical handle serialization, all context mismatches, all eight modifier keys, mutex contention, exact one-call/four-event ordering, full/zero/partial return semantics, and no second call without touching the real user desktop. Native stdout remains framed responses only; logging stays content-free and off by default.
+
+## M14-K.2.3.5 Native Input ABI and Diagnostic Boundary
+
+The first real Intercom activation to reach `native-paste-result` returned `input-injection-failed` after browser authorization and every post-cleanup physical predicate passed. The native audit identified a deterministic ABI defect: the managed explicit `INPUT` union declared only `KEYBDINPUT`. On win-x64, that reduced the union to 24 bytes and the containing `INPUT` to 32 bytes. The Windows header defines the union over `MOUSEINPUT`, `KEYBDINPUT`, and `HARDWAREINPUT`; the 32-byte mouse member makes the union 32 bytes and the aligned `INPUT` 40 bytes. Because `SendInput` requires `cbSize == sizeof(INPUT)`, the old call supplied an invalid 32-byte value.
+
+The corrected interop mirrors all three union alternatives. Deterministic win-x64 tests require `sizeof(KEYBDINPUT) == 24`, `sizeof(MOUSEINPUT) == 32`, union size 32, union offset 8, and `sizeof(INPUT) == 40`. `WORD`, `DWORD`, `LONG`, and pointer-sized `ULONG_PTR` fields remain represented as `ushort`, `uint`, `int`, and `nuint`. The P/Invoke remains `UINT SendInput(UINT, INPUT[], int)` with `SetLastError`; the host reads `Marshal.GetLastPInvokeError()` immediately after the sole call. The keyboard strategy is unchanged: virtual keys `VK_CONTROL` and `V`, zero scan code/time/extra info, no scan-code or extended-key flag, and `KEYEVENTF_KEYUP` only for V-up and Ctrl-up.
+
+Only a host published with `NativeDiagnostics=true` includes `nativePasteDiagnostic` in protocol-v2 paste responses. It contains requested and inserted counts, actual struct size, immediate numeric last error, exact foreground/root/PID/clipboard/modifier validation booleans, nullable same-session status, and `same | host-lower | host-higher | unknown` integrity relationship. It contains no title, path, command line, URL, page/editor/clipboard content, or identity data. The native-development extension alone accepts this exact object and merges it into the bounded automatic-paste trace. Normal builds omit it and retain strict rejection of the extra response member.
+
+The registered native-development companion plus one manually focused destination is the controlled live harness: it exercises the same production event builder, P/Invoke, context checks, and one-call path. Automated tests substitute only the final OS call so they never type into the live desktop. There is no generic send-keys command, focus manipulation, retry, alternate strategy, or elevation. AutoHotkey remains outside the product and may be used only as a manually controlled differential comparator.
+
+## M14-K.3 Native Lifecycle and Performance Audit
+
+Chrome Native Messaging remains one process per `sendNativeMessage()` call. The transport caches capability readiness only in service-worker memory. A first automatic Image activation in a fresh worker can therefore contact five one-shot processes: protocol-v1 capability discovery, Image write, protocol-v2 capability discovery, context capture, and paste. Once both capability flags are warm in the same worker, automatic Image still uses three processes: Image write, context capture, and paste. Automatic Text uses three on the first cold activation and two when warm. Worker recreation or relevant transport failure clears the applicable in-memory readiness and may repeat discovery.
+
+A 20-run content-free development capability probe measured 61.8 ms minimum, 67.0 ms median, 69.0 ms mean, and 76.1 ms p95, with one cold 114.5 ms maximum. A controlled Chromium probe measured the direct PNG browser path at approximately 0.2 ms for 64×64 and 2.0 ms for 1440×900. At 1440×900, JPEG and WebP decode plus PNG re-encode measured approximately 1.04–1.06 s. These measurements contain no Snippet, editor, customer, merchant, or clipboard content.
+
+The exact performance verdict is **C — ARCHITECTURAL PERFORMANCE OPPORTUNITY**. A persistent connection or consolidated native operation could reduce process startup, and a future image architecture could revisit non-PNG conversion cost. Neither is justified inside closeout: changing the one-shot trust/lifecycle boundary is architectural, and the current paths are bounded and correct. No production telemetry is added.
+
+The resource audit found request-scoped ownership throughout. Browser Image preparation closes `ImageBitmap`, zero-sizes the `OffscreenCanvas`, uses no object URL or temporary file, and releases local Blob/ArrayBuffer/base64 values after the promise chain. The native host bounds framing/base64/decoded memory, releases WIC COM objects, disposes untransferred `HGLOBAL` handles, transfers successful PNG/CF_DIBV5 ownership to Windows, zeroes the decoded request byte array, and exits. Its mutex, window, thread, protocol document, and diagnostic data are request-scoped. Decision 42's 5 MiB encoded, dimension/pixel, 64 MiB decoded, two-surface/128 MiB working-set, metadata-before-decode, post-decode validation, and animated-WebP rejection limits remain unchanged.
+
+Functional local/development capability is distinct from production distribution. The `.dev` host has reversible HKCU registration for one stable development origin. A production installer, stable production registration/location, code signing/publisher identity, updater/rollback, and version-migration workflow remain future separately approved packaging work. They do not block Principal closeout of the current local/development product.

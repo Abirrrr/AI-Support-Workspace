@@ -5,12 +5,14 @@ import {
   BACKUP_FORMAT_VERSION_3,
   BACKUP_FORMAT_VERSION_4,
   BACKUP_FORMAT_VERSION_5,
+  BACKUP_FORMAT_VERSION_6,
   type BackupFile,
   type BackupFileV1,
   type BackupFileV2,
   type BackupFileV3,
   type BackupFileV4,
   type BackupFileV5,
+  type BackupFileV6,
   type BackupKnowledgeRecordV1,
   type BackupKnowledgeRecordV2,
   type BackupKnowledgeRecordV3,
@@ -26,6 +28,7 @@ import {
   type BackupSettingsV3,
   type BackupSettingsV4,
   type BackupSettingsV5,
+  type BackupSettingsV6,
   type BackupSnippetContentV3,
   type BackupSnippetContentV4,
   type BackupSnippetContentV5,
@@ -796,6 +799,22 @@ function validateSettingsV5(value: unknown): BackupSettingsV5 | undefined {
     : { defaultModel: validated.defaultModel };
 }
 
+function validateSettingsV6(value: unknown): BackupSettingsV6 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, ['defaultModel', 'snippetPasteMode']) ||
+    (value.defaultModel !== null && typeof value.defaultModel !== 'string') ||
+    (value.snippetPasteMode !== 'clipboard-only' &&
+      value.snippetPasteMode !== 'automatic')
+  ) {
+    return undefined;
+  }
+  return {
+    defaultModel: value.defaultModel,
+    snippetPasteMode: value.snippetPasteMode,
+  };
+}
+
 function hasDuplicateIds(records: readonly { id: string }[]): boolean {
   return new Set(records.map(({ id }) => id)).size !== records.length;
 }
@@ -947,6 +966,60 @@ function parseVersion5(parsed: Record<string, unknown>): BackupFileV5 {
   };
 }
 
+function parseVersion6(parsed: Record<string, unknown>): BackupFileV6 {
+  validateEnvelope(parsed, [
+    'knowledge',
+    'snippets',
+    'snippetAssets',
+    'settings',
+  ]);
+  const data = parsed.data as Record<string, unknown>;
+  if (!Array.isArray(data.snippetAssets)) {
+    throw new BackupImportError('invalid');
+  }
+  const knowledge = (data.knowledge as unknown[]).map(validateKnowledgeV5);
+  const snippets = (data.snippets as unknown[]).map(validateSnippetV5);
+  const snippetAssets = data.snippetAssets.map(validateSnippetAssetV5);
+  const settings = validateSettingsV6(data.settings);
+  if (
+    knowledge.some((entry) => entry === undefined) ||
+    snippets.some((entry) => entry === undefined) ||
+    snippetAssets.some((entry) => entry === undefined) ||
+    settings === undefined
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const trustedKnowledge = knowledge as BackupKnowledgeRecordV5[];
+  const trustedSnippets = snippets as BackupSnippetRecordV5[];
+  const trustedAssets = snippetAssets as BackupSnippetAssetRecordV5[];
+  if (
+    hasDuplicateIds(trustedKnowledge) ||
+    hasDuplicateIds(trustedSnippets) ||
+    hasDuplicateTriggers(trustedSnippets)
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  try {
+    validateSnippetAssetGraph(trustedSnippets, trustedAssets);
+  } catch (error) {
+    if (error instanceof SnippetAssetGraphError) {
+      throw new BackupImportError('invalid', error);
+    }
+    throw error;
+  }
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_6,
+    exportedAt: parsed.exportedAt as string,
+    data: {
+      knowledge: trustedKnowledge,
+      snippets: trustedSnippets,
+      snippetAssets: trustedAssets,
+      settings,
+    },
+  };
+}
+
 function parseJson(serialized: string): Record<string, unknown> {
   let parsed: unknown;
   try {
@@ -1043,7 +1116,8 @@ export function parseBackupFile(serialized: string): BackupFile {
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_2 &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_3 &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_4 &&
-    parsed.formatVersion !== BACKUP_FORMAT_VERSION_5
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_5 &&
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_6
   ) {
     throw new BackupImportError('unsupported-version');
   }
@@ -1061,6 +1135,9 @@ export function parseBackupFile(serialized: string): BackupFile {
   }
   if (parsed.formatVersion === BACKUP_FORMAT_VERSION_5) {
     return parseVersion5(parsed);
+  }
+  if (parsed.formatVersion === BACKUP_FORMAT_VERSION_6) {
+    return parseVersion6(parsed);
   }
   throw new BackupImportError('invalid');
 }

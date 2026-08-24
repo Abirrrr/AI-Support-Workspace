@@ -1,5 +1,9 @@
 import type { SettingsRepository } from '../persistence/settings-repository';
-import type { Settings } from '../../domain/settings';
+import type { Settings, SnippetPasteMode } from '../../domain/settings';
+import {
+  runCatalogCoordinatedMutation,
+  type CatalogMutationPort,
+} from '../snippet/catalog-mutation';
 
 export class SettingsLoadError extends Error {
   constructor(cause: unknown) {
@@ -16,7 +20,7 @@ export class SettingsSaveError extends Error {
 }
 
 export function createDefaultSettings(): Settings {
-  return { defaultModel: null };
+  return { defaultModel: null, snippetPasteMode: 'clipboard-only' };
 }
 
 export function normalizeDefaultModel(value: string): string | null {
@@ -26,11 +30,17 @@ export function normalizeDefaultModel(value: string): string | null {
 
 export interface SettingsApplication {
   load(): Promise<Settings>;
-  save(defaultModelInput: string): Promise<Settings>;
+  save(
+    defaultModelInput: string,
+    snippetPasteMode: SnippetPasteMode,
+  ): Promise<Settings>;
 }
 
 export class SettingsService implements SettingsApplication {
-  constructor(private readonly repository: SettingsRepository) {}
+  constructor(
+    private readonly repository: SettingsRepository,
+    private readonly catalogMutationPort?: CatalogMutationPort,
+  ) {}
 
   async load(): Promise<Settings> {
     try {
@@ -40,13 +50,19 @@ export class SettingsService implements SettingsApplication {
     }
   }
 
-  async save(defaultModelInput: string): Promise<Settings> {
+  async save(
+    defaultModelInput: string,
+    snippetPasteMode: SnippetPasteMode,
+  ): Promise<Settings> {
     const settings: Settings = {
       defaultModel: normalizeDefaultModel(defaultModelInput),
+      snippetPasteMode,
     };
 
     try {
-      return await this.repository.save(settings);
+      return await runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
+        this.repository.save(settings),
+      );
     } catch (error) {
       throw new SettingsSaveError(error);
     }

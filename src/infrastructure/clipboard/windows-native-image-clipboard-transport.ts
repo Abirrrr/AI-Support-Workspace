@@ -6,11 +6,26 @@ import {
   type NativeImageClipboardErrorCode,
 } from '../../application/snippet/image-clipboard-transport';
 import {
+  AutomaticPasteUnavailableError,
+  type AutomaticPasteRequest,
+  type AutomaticPasteResult,
+  type AutomaticPasteTransport,
+  type NativePasteAttemptDiagnostic,
+  type NativePasteContext,
+} from '../../application/snippet/automatic-paste-transport';
+import {
+  createCapturePasteContextRequest,
   createGetCapabilitiesRequest,
+  createGetCapabilitiesV2Request,
   createNativeClipboardRequestId,
+  createPasteClipboardRequest,
   createWriteImagePngRequest,
   NativeClipboardResponseValidationError,
+  parseCapturePasteContextResponse,
   parseGetCapabilitiesResponse,
+  parseGetCapabilitiesV2Response,
+  parsePasteClipboardResponse,
+  parsePasteClipboardResponseWithDiagnostic,
   parseWriteImagePngResponse,
   type NativeClipboardHostErrorCode,
 } from './native-clipboard-protocol';
@@ -78,10 +93,15 @@ function mapValidationError(
 }
 
 export class WindowsNativeImageClipboardTransport
-  implements ImageClipboardTransport, NativeClipboardCapability
+  implements
+    ImageClipboardTransport,
+    NativeClipboardCapability,
+    AutomaticPasteTransport
 {
   private capabilitiesReady = false;
+  private automaticPasteCapabilitiesReady = false;
   private imageWriteInFlight = false;
+  private lastPasteAttemptDiagnostic: NativePasteAttemptDiagnostic | undefined;
 
   constructor(
     private readonly chromeApi: NativeClipboardExtensionApi,
@@ -200,6 +220,113 @@ export class WindowsNativeImageClipboardTransport
       }
     } finally {
       this.imageWriteInFlight = false;
+    }
+  }
+
+  async capturePasteContext(activationId: string): Promise<NativePasteContext> {
+    if (!(await this.ensureAutomaticPasteReady())) {
+      throw new AutomaticPasteUnavailableError();
+    }
+    const hostName = this.hostName;
+    if (hostName === undefined) throw new AutomaticPasteUnavailableError();
+    const requestId = this.createRequestId();
+    try {
+      const response = await sendNativeMessage(
+        this.chromeApi.runtime,
+        hostName,
+        createCapturePasteContextRequest(requestId, activationId),
+      );
+      return parseCapturePasteContextResponse(
+        response,
+        requestId,
+        activationId,
+      );
+    } catch {
+      this.automaticPasteCapabilitiesReady = false;
+      throw new AutomaticPasteUnavailableError();
+    }
+  }
+
+  async requestPaste(
+    request: AutomaticPasteRequest,
+  ): Promise<AutomaticPasteResult> {
+    this.lastPasteAttemptDiagnostic = undefined;
+    const hostName = this.hostName;
+    if (hostName === undefined || !this.automaticPasteCapabilitiesReady) {
+      return 'native-unavailable';
+    }
+    const requestId = this.createRequestId();
+    let message;
+    try {
+      message = createPasteClipboardRequest(
+        requestId,
+        request.activationId,
+        request,
+      );
+    } catch {
+      return 'indeterminate';
+    }
+    let response: unknown;
+    try {
+      response = await sendNativeMessage(
+        this.chromeApi.runtime,
+        hostName,
+        message,
+      );
+    } catch {
+      // The host may have issued input before the one-shot IPC response was lost.
+      return 'indeterminate';
+    }
+    try {
+      if (
+        import.meta.env.MODE === 'native-dev' ||
+        import.meta.env.MODE === 'test'
+      ) {
+        const parsed = parsePasteClipboardResponseWithDiagnostic(
+          response,
+          requestId,
+          true,
+        );
+        this.lastPasteAttemptDiagnostic = parsed.diagnostic;
+        return parsed.result;
+      }
+      return parsePasteClipboardResponse(response, requestId);
+    } catch {
+      return 'indeterminate';
+    }
+  }
+
+  takeLastPasteAttemptDiagnostic(): NativePasteAttemptDiagnostic | undefined {
+    const diagnostic = this.lastPasteAttemptDiagnostic;
+    this.lastPasteAttemptDiagnostic = undefined;
+    return diagnostic;
+  }
+
+  private async ensureAutomaticPasteReady(): Promise<boolean> {
+    if (this.automaticPasteCapabilitiesReady) return true;
+    let platform;
+    try {
+      platform = await this.chromeApi.runtime.getPlatformInfo();
+      if (platform.os !== 'win') return false;
+      const permissionGranted = await this.chromeApi.permissions.contains({
+        permissions: ['nativeMessaging'],
+      });
+      if (!permissionGranted || this.hostName === undefined) return false;
+    } catch {
+      return false;
+    }
+    const requestId = this.createRequestId();
+    try {
+      const response = await sendNativeMessage(
+        this.chromeApi.runtime,
+        this.hostName,
+        createGetCapabilitiesV2Request(requestId),
+      );
+      parseGetCapabilitiesV2Response(response, requestId);
+      this.automaticPasteCapabilitiesReady = true;
+      return true;
+    } catch {
+      return false;
     }
   }
 }

@@ -24,11 +24,12 @@ const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
 assert.equal(manifest.manifest_version, 3);
 assert.equal(manifest.name, 'AI Support Workspace');
-assert.deepEqual(manifest.permissions ?? [], [
-  'sidePanel',
-  'activeTab',
-  'scripting',
-]);
+assert.deepEqual(
+  manifest.permissions ?? [],
+  nativeDevelopmentMode
+    ? ['sidePanel', 'activeTab', 'scripting', 'storage']
+    : ['sidePanel', 'activeTab', 'scripting'],
+);
 assert.deepEqual(manifest.optional_permissions ?? [], [
   'clipboardWrite',
   'offscreen',
@@ -72,7 +73,7 @@ assert.equal(
 );
 assert.equal('devtools_page' in manifest, false);
 assert.equal(manifest.permissions.includes('tabs'), false);
-assert.equal(manifest.permissions.includes('storage'), false);
+assert.equal(manifest.permissions.includes('storage'), nativeDevelopmentMode);
 assert.equal(manifest.permissions.includes('clipboardRead'), false);
 assert.equal(manifest.permissions.includes('nativeMessaging'), false);
 assert.equal(manifest.permissions.includes('debugger'), false);
@@ -226,9 +227,93 @@ const generatedJavaScript = (
 if (nativeDevelopmentMode) {
   assert.match(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.match(generatedJavaScript, /diagnoseSnippetListSerialization/);
+  assert.match(generatedJavaScript, /getAutomaticPasteResult/);
+  assert.match(generatedJavaScript, /getAutomaticPasteTrace/);
+  assert.match(
+    generatedJavaScript,
+    /native-dev-automatic-paste-result-diagnostic/,
+  );
+  assert.match(generatedJavaScript, /native-dev-automatic-paste-trace/);
+  assert.match(
+    generatedJavaScript,
+    /native-dev-automatic-paste-activation-trace/,
+  );
+  assert.match(
+    generatedJavaScript,
+    /native-dev-automatic-paste-post-cleanup-trace/,
+  );
+  assert.match(generatedJavaScript, /postCleanupFailure/);
+  assert.match(generatedJavaScript, /noticePhase/);
+  assert.match(generatedJavaScript, /cleanupInputProvenance/);
+  assert.match(generatedJavaScript, /firstInvalidatingInputPhase/);
+  assert.match(generatedJavaScript, /activationBeforeInputPrevented/);
+  assert.match(generatedJavaScript, /activationInputObserved/);
+  assert.match(generatedJavaScript, /externalInputTrusted/);
+  assert.match(generatedJavaScript, /externalInputType/);
+  assert.match(generatedJavaScript, /externalInputSameEditor/);
+  assert.match(generatedJavaScript, /externalInputSameRoot/);
+  assert.match(generatedJavaScript, /externalInputComposed/);
+  assert.match(generatedJavaScript, /externalInputSameActivationTask/);
+  assert.match(generatedJavaScript, /externalInputRelativePhase/);
+  assert.match(generatedJavaScript, /externalInputSequenceRelation/);
+  assert.match(generatedJavaScript, /nativePasteDiagnostic/);
+  assert.match(generatedJavaScript, /sendInputRequestedCount/);
+  assert.match(generatedJavaScript, /sendInputInsertedCount/);
+  assert.match(generatedJavaScript, /sendInputStructSize/);
+  assert.match(generatedJavaScript, /sendInputLastError/);
+  assert.match(generatedJavaScript, /foregroundValidationPassed/);
+  assert.match(generatedJavaScript, /rootWindowValidationPassed/);
+  assert.match(generatedJavaScript, /pidValidationPassed/);
+  assert.match(generatedJavaScript, /clipboardSequenceValidationPassed/);
+  assert.match(generatedJavaScript, /modifierValidationPassed/);
+  assert.match(generatedJavaScript, /hostSessionMatchesTarget/);
+  assert.match(generatedJavaScript, /hostIntegrityRelation/);
 } else {
   assert.doesNotMatch(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.doesNotMatch(generatedJavaScript, /diagnoseSnippetListSerialization/);
+  assert.doesNotMatch(generatedJavaScript, /getAutomaticPasteResult/);
+  assert.doesNotMatch(generatedJavaScript, /getAutomaticPasteTrace/);
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /native-dev-automatic-paste-result-diagnostic/,
+  );
+  assert.doesNotMatch(generatedJavaScript, /native-dev-automatic-paste-trace/);
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /native-dev-automatic-paste-activation-trace/,
+  );
+  assert.doesNotMatch(
+    generatedJavaScript,
+    /native-dev-automatic-paste-post-cleanup-trace/,
+  );
+  assert.doesNotMatch(generatedJavaScript, /postCleanupFailure/);
+  assert.doesNotMatch(generatedJavaScript, /postCleanupChecks/);
+  assert.doesNotMatch(generatedJavaScript, /firstInvalidationCause/);
+  assert.doesNotMatch(generatedJavaScript, /noticePhase/);
+  assert.doesNotMatch(generatedJavaScript, /cleanupInputProvenance/);
+  assert.doesNotMatch(generatedJavaScript, /firstInvalidatingInputPhase/);
+  assert.doesNotMatch(generatedJavaScript, /activationBeforeInputPrevented/);
+  assert.doesNotMatch(generatedJavaScript, /activationInputObserved/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputTrusted/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputType/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputSameEditor/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputSameRoot/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputComposed/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputSameActivationTask/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputRelativePhase/);
+  assert.doesNotMatch(generatedJavaScript, /externalInputSequenceRelation/);
+  assert.doesNotMatch(generatedJavaScript, /nativePasteDiagnostic/);
+  assert.doesNotMatch(generatedJavaScript, /sendInputRequestedCount/);
+  assert.doesNotMatch(generatedJavaScript, /sendInputInsertedCount/);
+  assert.doesNotMatch(generatedJavaScript, /sendInputStructSize/);
+  assert.doesNotMatch(generatedJavaScript, /sendInputLastError/);
+  assert.doesNotMatch(generatedJavaScript, /foregroundValidationPassed/);
+  assert.doesNotMatch(generatedJavaScript, /rootWindowValidationPassed/);
+  assert.doesNotMatch(generatedJavaScript, /pidValidationPassed/);
+  assert.doesNotMatch(generatedJavaScript, /clipboardSequenceValidationPassed/);
+  assert.doesNotMatch(generatedJavaScript, /modifierValidationPassed/);
+  assert.doesNotMatch(generatedJavaScript, /hostSessionMatchesTarget/);
+  assert.doesNotMatch(generatedJavaScript, /hostIntegrityRelation/);
 }
 const packagedRuntimeSource = [
   serviceWorkerSource,

@@ -199,10 +199,78 @@ describe('real Snippet list serialization diagnostic', () => {
       prompt(message: string): string | null;
       [SNIPPET_LIST_DIAGNOSTIC_GLOBAL]?: SnippetListDiagnosticApi;
     };
+    const runtime = {
+      sendMessage: vi.fn(async (message: unknown) =>
+        (message as { type?: unknown }).type ===
+        'native-dev-automatic-paste-trace'
+          ? {
+              persistedPasteMode: 'automatic',
+              workerPasteMode: 'automatic',
+              activationPasteMode: 'automatic',
+              selectedBranch: 'automatic',
+              firstAutomaticPhase: 'automatic-precheck-started',
+              lastPhase: 'native-paste-result',
+              result: 'input-injection-failed',
+              requestId: 'request-1',
+              serviceWorkerLifecycle: 'same-worker',
+              postCleanupFailure: 'composed-focus-mismatch',
+              postCleanupChecks: {
+                authorizationStillValid: false,
+                editorConnected: true,
+                sameDocument: true,
+                composedFocusValid: false,
+                selectionExists: true,
+                selectionCollapsed: true,
+                caretRootMatches: true,
+                caretPathMatches: true,
+                caretOffsetMatches: true,
+                structureMatches: true,
+                lifecycleValid: true,
+                mutationValid: true,
+                selectionValid: true,
+                focusValid: true,
+              },
+              firstInvalidationCause: 'predicate-failed',
+              focusTopology: 'no-valid-composed-focus',
+              noticePhase: 'fallback-mounted-after-post-cleanup-failure',
+              noticeExistedBeforePostCleanupCheck: false,
+              noticeExistsAfterPostCleanupFailure: true,
+              fallbackNoticeMountedAfterAutomaticResult: true,
+              fallbackNoticeSuppressed: false,
+              noticeCallsFocus: false,
+              noticeHasAutofocus: false,
+              activeElementChangedByNoticeMount: false,
+              selectionchangeDuringNoticeMount: false,
+              noticeMutationWithinAuthorizationObserverScope: true,
+              noticeMountedInsideEditor: false,
+              cleanupInputProvenance: 'external-input',
+              firstInvalidatingInputPhase:
+                'outside-authorized-cleanup-dispatch',
+              activationBeforeInputPrevented: false,
+              activationInputObserved: false,
+              externalInputTrusted: true,
+              externalInputType: 'insertText',
+              externalInputSameEditor: true,
+              externalInputSameRoot: true,
+              externalInputComposed: true,
+              externalInputSameActivationTask: false,
+              externalInputRelativePhase: 'pre-cleanup',
+              externalInputSequenceRelation: 'before-owned-cleanup-input',
+              nativePasteDiagnostic: null,
+            }
+          : {
+              kind: 'text',
+              phase: 'native-paste-request',
+              requestId: 'request-1',
+              result: 'input-injection-failed',
+            },
+      ),
+    };
     registerSnippetListSerializationDiagnostic(
       globalScope,
       snippetRepository,
       assetRepository,
+      runtime,
     );
 
     const result =
@@ -214,6 +282,30 @@ describe('real Snippet list serialization diagnostic', () => {
     expect(result).toMatchObject({
       record: { id: entry.id, trigger: entry.trigger },
       delivery: { matchesSerializer: { html: true, plainText: true } },
+    });
+    await expect(
+      globalScope[SNIPPET_LIST_DIAGNOSTIC_GLOBAL]?.getAutomaticPasteResult(),
+    ).resolves.toMatchObject({
+      kind: 'text',
+      phase: 'native-paste-request',
+      requestId: 'request-1',
+      result: 'input-injection-failed',
+    });
+    await expect(
+      globalScope[SNIPPET_LIST_DIAGNOSTIC_GLOBAL]?.getAutomaticPasteTrace(),
+    ).resolves.toMatchObject({
+      persistedPasteMode: 'automatic',
+      workerPasteMode: 'automatic',
+      activationPasteMode: 'automatic',
+      selectedBranch: 'automatic',
+      firstAutomaticPhase: 'automatic-precheck-started',
+      lastPhase: 'native-paste-result',
+      result: 'input-injection-failed',
+      requestId: 'request-1',
+      serviceWorkerLifecycle: 'same-worker',
+      postCleanupFailure: 'composed-focus-mismatch',
+      focusTopology: 'no-valid-composed-focus',
+      noticePhase: 'fallback-mounted-after-post-cleanup-failure',
     });
   });
 

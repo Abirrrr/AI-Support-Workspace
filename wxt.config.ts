@@ -22,7 +22,12 @@ export default defineConfig({
     description: 'Chrome extension runtime shell for AI Support Workspace.',
     host_permissions: ['http://*/*', 'https://*/*'],
     name: 'AI Support Workspace',
-    permissions: ['sidePanel', 'activeTab', 'scripting'],
+    permissions: [
+      'sidePanel',
+      'activeTab',
+      'scripting',
+      ...(mode === 'native-dev' ? ['storage' as const] : []),
+    ],
     optional_permissions: ['clipboardWrite', 'offscreen', 'nativeMessaging'],
     ...(mode === 'native-dev' ? { key: nativeDevelopment.manifestKey } : {}),
   }),

@@ -76,7 +76,10 @@ const restoredData: BackupRestoreData = {
     },
   ],
   snippetAssets: [],
-  settings: { defaultModel: 'qwen2.5:7b' },
+  settings: {
+    defaultModel: 'qwen2.5:7b',
+    snippetPasteMode: 'automatic',
+  },
 };
 
 function requireValue<T>(value: T | undefined, description: string): T {
@@ -139,12 +142,16 @@ describe('Dexie backup snapshot and atomic restore', () => {
       knowledge: [originalKnowledge],
       snippets: [originalSnippet],
       snippetAssets: [],
-      settings: { defaultModel: 'original-model' },
+      settings: {
+        defaultModel: 'original-model',
+        snippetPasteMode: 'clipboard-only',
+      },
     });
 
     await database.settings.clear();
     expect((await reader.readSnapshot()).settings).toEqual({
       defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
     });
   });
 
@@ -192,7 +199,10 @@ describe('Dexie backup snapshot and atomic restore', () => {
         'trigger',
       ].sort(),
     );
-    expect(Object.keys(snapshot.settings)).toEqual(['defaultModel']);
+    expect(Object.keys(snapshot.settings).sort()).toEqual([
+      'defaultModel',
+      'snippetPasteMode',
+    ]);
     expect(JSON.stringify(snapshot)).not.toContain('futureKnowledgeField');
     expect(JSON.stringify(snapshot)).not.toContain('usageCount');
     expect(snapshot.snippets[0]?.trigger).toBe(';future');
@@ -209,7 +219,11 @@ describe('Dexie backup snapshot and atomic restore', () => {
       await new DexieBackupSnapshotReader(database).readSnapshot(),
     ).toEqual(restoredData);
     expect(await database.settings.toArray()).toEqual([
-      { id: GLOBAL_SETTINGS_ID, defaultModel: 'qwen2.5:7b' },
+      {
+        id: GLOBAL_SETTINGS_ID,
+        defaultModel: 'qwen2.5:7b',
+        snippetPasteMode: 'automatic',
+      },
     ]);
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map(({ name }) => name).sort()).toEqual([
@@ -259,7 +273,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
           createdAt: '2026-08-09T00:00:01.000Z',
         },
       ],
-      settings: { defaultModel: null },
+      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
     };
 
     await new DexieTransactionalBackupRestorePort(database).replaceAll(data);
@@ -333,13 +347,17 @@ describe('Dexie backup snapshot and atomic restore', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
-      settings: { defaultModel: null },
+      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
     });
 
     expect(await database.knowledgeEntries.count()).toBe(0);
     expect(await database.snippetEntries.count()).toBe(0);
     expect(await database.settings.toArray()).toEqual([
-      { id: GLOBAL_SETTINGS_ID, defaultModel: null },
+      {
+        id: GLOBAL_SETTINGS_ID,
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+      },
     ]);
   });
 
@@ -400,7 +418,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
       ].sort(),
     );
     expect(Object.keys(persistedSettings[0] ?? {}).sort()).toEqual(
-      ['id', 'defaultModel'].sort(),
+      ['id', 'defaultModel', 'snippetPasteMode'].sort(),
     );
     expect(JSON.stringify(persistedKnowledge)).not.toContain(
       'futureKnowledgeField',
@@ -492,7 +510,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
             createdAt: '2026-08-09T00:00:00.000Z',
           },
         ],
-        settings: { defaultModel: null },
+        settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
       }),
     ).rejects.toThrow('Failed to restore backup.');
     await expectOriginalState();
@@ -506,7 +524,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
-      settings: { defaultModel: null },
+      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
     });
     await new DexieTransactionalBackupRestorePort(database).replaceAll(
       exported,

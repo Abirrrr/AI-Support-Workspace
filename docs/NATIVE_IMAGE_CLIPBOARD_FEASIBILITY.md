@@ -119,7 +119,7 @@ The architecture resolves:
 
 ## Automatic Native-Paste Separation
 
-Decision 45 now defines a future optional Windows-level `Ctrl+V` input capability, separate from native image clipboard writing. Clipboard preparation still comes first. M14-K.1 approves the layered focus/race-safety architecture and existing C# companion direction while rejecting permanent AutoHotkey; it implements no `SendInput` or protocol-v2 operation. Manual `Ctrl+V` remains permanently supported and is the fallback.
+Decision 45 defines the optional Windows-level `Ctrl+V` input capability separately from native image clipboard writing. M14-K.2 implements it through strict protocol v2 only after authoritative clipboard success, while protocol-v1 Image preparation remains unchanged. The companion accepts no content in `paste-clipboard`, issues at most one fixed Ctrl+V sequence, and never retries. Manual `Ctrl+V` remains permanently supported and is the fallback.
 
 ## Current Native Implementation Status
 
@@ -131,7 +131,7 @@ Settings companion readiness: REAL-CHROME PASS
 Native Image end-to-end: REAL-CHROME PASS
 Production installer/registration: NOT IMPLEMENTED
 AutoHotkey: NOT IMPLEMENTED
-automatic paste: NOT IMPLEMENTED
+automatic paste: IMPLEMENTED / AUTOMATED PASS / INTERCOM + CRISP REAL-BROWSER PASS
 ```
 
 ## Probe Disposition
@@ -141,9 +141,9 @@ The developer-only M14-I.1.5 probe served its feasibility purpose. M14-I.5 remov
 ## Preserved Boundaries
 
 - Text delivery remains real-Chrome validated and unchanged, including clipboard preparation, trigger cleanup, copied notice, bold, italic, links, bullet lists, and numbered lists.
-- Manual `Ctrl+V` remains accepted; automatic paste is not introduced.
+- Manual `Ctrl+V` remains accepted permanently; optional automatic paste is additive and leaves the clipboard populated.
 - Decision 42 remains unchanged: 5 MiB encoded maximum; 8192 width/height; 16,777,216 pixels; 64 MiB decoded RGBA; two-surface/128 MiB conceptual working set; metadata-before-decode; post-decode validation; animated WebP rejection; genuine JPEG/WebP-to-PNG conversion; and no silent resizing/downsampling.
-- Backup v5 and Dexie v5 remain current.
+- Backup v5 remains frozen/importable, strict Backup v6 is current, and Dexie physical version 5 remains current.
 - Text/Image domains, `SnippetAsset`, metadata-only `{ kind, trigger, snippetId }` catalogs, authoritative service-worker planning, freshness checks, compare-and-swap cleanup, M13-B.1 publication barrier, Decisions 38/41/42, and M15 separation remain unchanged by Decision 43.
 - M14-I is complete at committed/pushed checkpoint `ebe915f`; its post-cleanup smoke test passed. M14-J.2 is real-Crisp Text PASS, M14-J.3 generic pre-delivery Shadow DOM editor/range resolution plus ordinary rich Text are real-Intercom PASS, and M14-J.4 preserves canonical list serialization plus the generic hard-break correction. M14-J.5 proves the initial list result used an invalid two-item fixture; the corrected three-item record passes persistence, serializer, delivery-payload equality, and normal Intercom paste. Crisp and Intercom Image destination paste pass through the existing Windows native path. Intercom bullet triggering after Shift+Enter remains a known low-priority compatibility limitation. No historical browser Image transport is reopened.
 - Decision 40 remains separate future Workspace Shell work. M15 Context Images remain separate future AI input work with no Image Snippet bridge.

@@ -499,8 +499,12 @@ describe('options-page restore refresh', () => {
     const settings: SettingsApplication = {
       load: vi.fn(async () => ({
         defaultModel: restored ? 'restored-model' : 'before-model',
+        snippetPasteMode: 'clipboard-only' as const,
       })),
-      save: vi.fn(async () => ({ defaultModel: null })),
+      save: vi.fn(async (_defaultModelInput, snippetPasteMode) => ({
+        defaultModel: null,
+        snippetPasteMode,
+      })),
     };
     const importExport = createActions({
       restoreBackup: vi.fn(async () => {

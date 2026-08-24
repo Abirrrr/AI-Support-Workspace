@@ -42,7 +42,7 @@ class EventHub<Listener extends (...args: never[]) => void> {
 }
 
 describe('typed trigger catalog privacy boundary', () => {
-  it('publishes Plain, Rich text, and Image as kind/trigger/Snippet ID only', async () => {
+  it('publishes only activation metadata, including single-line eligibility', async () => {
     const rich: SnippetEntry = {
       ...base,
       id: 'snippet-2',
@@ -84,9 +84,24 @@ describe('typed trigger catalog privacy boundary', () => {
       repositoryFor([base, rich, image]),
     ).readCatalog();
     expect(catalog).toEqual([
-      { kind: 'text', trigger: ';plain', snippetId: 'snippet-1' },
-      { kind: 'text', trigger: ';rich', snippetId: 'snippet-2' },
-      { kind: 'image', trigger: ';image', snippetId: 'snippet-3' },
+      {
+        kind: 'text',
+        trigger: ';plain',
+        snippetId: 'snippet-1',
+        singleLineEligible: true,
+      },
+      {
+        kind: 'text',
+        trigger: ';rich',
+        snippetId: 'snippet-2',
+        singleLineEligible: false,
+      },
+      {
+        kind: 'image',
+        trigger: ';image',
+        snippetId: 'snippet-3',
+        singleLineEligible: true,
+      },
     ]);
     const serialized = JSON.stringify(catalog);
     for (const secret of [

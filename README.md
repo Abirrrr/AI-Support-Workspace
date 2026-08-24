@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–13 and M14-J are complete. M14-J validates Text, list, Image, Shadow-DOM, and no-refresh lifecycle behavior in Crisp and Intercom. M14-K is active: Decision 45 defines optional focus-safe Windows automatic paste through the existing C#/.NET 10 companion, while production automatic paste remains absent and manual `Ctrl+V` remains permanently supported.
+Milestones 9–13 and M14-J are complete. M14-J validates Text, list, Image, Shadow-DOM, and no-refresh lifecycle behavior in Crisp and Intercom. M14-K.3 is Principal-approved: Decision 45's optional focus-safe Windows automatic paste passes Text and Image delivery in both destinations. M14-K.4 is the active documentation-only product-decision/AI-handoff task. M14-K implementation is validated and approved, but its checkpoint still requires final Principal review/Git authorization and M14-K is not closed.
 
 ## Technology Stack
 
@@ -32,4 +32,4 @@ The documentation in the docs directory is the only authoritative source of trut
 
 ## Next Step
 
-M14-K.1 architecture is defined for Principal review. Automatic mode is additive and default-off, uses the same authoritative Text/Image clipboard preparation, and falls back to the preserved clipboard-only/manual `Ctrl+V` workflow whenever focus or native safety is unavailable. The existing C# companion is selected; permanent AutoHotkey and arbitrary send-keys are rejected. M14-K.2 Windows implementation is exact next after approval, followed by M14-K.3 Crisp/Intercom validation. No Settings toggle, protocol-v2 operation, `SendInput`, or automatic-paste runtime exists yet. See [the compatibility record](docs/DESTINATION_COMPATIBILITY.md), [the native companion architecture](docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md), and [Decision 45](docs/DECISIONS.md).
+Decisions 46–49 lock the future handoff without changing runtime behavior: Text Snippets become the sole active user-managed AI reference library; Image Snippets remain delivery-only; Knowledge retires from the future active workflow/UI but its current domain/data/backups remain intact pending separate migration approval; optional Guidance / Gist, compact Context/attachments/model/output UI, periodic canonical automatic backup, generated Text Snippet tags, and best-effort usage statistics are future-approved. Current Dexie v5, Backup v6, permissions, dependencies, M6/M7/M9 implementation, and the complete dirty M14-K source/test tree remain unchanged. The class-C Image/native opportunity and production native packaging remain deferred. Exact next is final Principal review of M14-K.4 and authorization of the combined checkpoint/closeout; do not stage, commit, push, or mark M14-K closed before approval. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).

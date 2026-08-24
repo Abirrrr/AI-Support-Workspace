@@ -8,7 +8,7 @@ This document is intentionally implementation-independent and should be read alo
 
 ## 2. Primary Navigation
 
-The product is organized around a small set of top-level areas:
+The current implemented product is organized around a small set of top-level areas:
 
 - Support
 - Knowledge Library
@@ -16,7 +16,7 @@ The product is organized around a small set of top-level areas:
 - Settings
 - Import / Export
 
-These areas represent the primary navigation for the application.
+These areas represent the current primary navigation. Decision 46 approves a future active-product navigation that removes Knowledge Library from the normal AI workflow/UI and uses Text Snippets as the sole user-managed AI reference Library. Until that implementation and a separately approved compatibility cleanup, the current Knowledge surface and data remain available.
 
 Future functionality may be introduced later, but any additional navigation areas should be treated as future workflows rather than part of the current documented experience.
 
@@ -41,11 +41,11 @@ Paste Images (optional)
 
 ↓
 
-Gist / Guidance (optional)
+Guidance / Gist (optional)
 
 ↓
 
-Retrieve Local Knowledge
+Retrieve Relevant Text Snippets
 
 ↓
 
@@ -58,14 +58,6 @@ Editable Output
 ↓
 
 Copy Reply
-
-↓
-
-Save as Knowledge (optional)
-
-↓
-
-Save as Snippet (optional)
 ```
 
 ### Workflow Notes
@@ -75,17 +67,41 @@ Save as Snippet (optional)
 - Images and guidance may be added when useful, but they remain optional.
 - The approved future Multimodal Context direction allows one or more screenshots or images to be pasted directly from the clipboard into the current Context alongside text. Attachments should be visible, previewable where appropriate, and removable before generation; reordering remains unresolved.
 - Future Context images are transient by default and flow to AI generation only through a provider-independent capability boundary. Unsupported images must not be silently discarded.
-- The system should help the user retrieve local knowledge before generating a reply.
+- The future active AI workflow retrieves relevant Text Snippets as reference material; it does not require the user to maintain separate Knowledge records.
 - The generated response should be editable before it is used or shared.
-- The user may save valuable content as knowledge or as a snippet for future reuse.
+- Reusable reference/delivery material is managed in the Snippet Library. No direct “Save as Snippet” action from Generated Output is approved by Decision 47. Knowledge remains current compatibility data until separate removal/migration work is approved.
 - Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
 - Current implementation: the popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries opens the options page in a normal browser tab, where Knowledge and Snippet CRUD remain.
-- Approved future target: clicking the extension toolbar action opens or shows the existing global Workspace Side Panel directly, with no intermediate popup. A Library action in the panel opens the existing full options/Library page in a normal browser tab; full Knowledge, Snippets, Settings, Import / Export, and future management stay in options.
+- Approved future target: clicking the extension toolbar action opens or shows the existing global Workspace Side Panel directly, with no intermediate popup. A Library action in the panel opens the full options/Library page in a normal browser tab; Snippets, Settings, Import / Export, and future management stay in options. Current Knowledge remains there only until its separately implemented future UI retirement.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
-## 4. Knowledge Library Workflow
+### Approved Future Compact Side Panel
 
-The Knowledge Library is the place where reusable support knowledge is created, maintained, and reused.
+```text
+Merchant Context
+[compact auto-growing multiline input]
+[removable request-scoped Context Image attachments]
+
+Guidance / Gist
+[compact auto-growing text input]
+
+[ Model dropdown ]   [ Generate ]
+
+Generated Output                         [Copy]
+[ editable generated response                 ]
+```
+
+- Context and Guidance / Gist start approximately one visual line high, grow to a sensible maximum, and then scroll internally. “One line” describes initial height, not a content restriction.
+- Generate is enabled for Context-only, Gist-only, or both and disabled only when both are empty. Context-only implies a sensible grounded reply; minimal Gist may refer to the pending/latest Context subject; Gist-only may directly specify the message.
+- Context Images are compact, removable, request-scoped multimodal AI input. They are not Image Snippets, Knowledge records, or permanent Library assets. Any mounted-workspace continuity remains separate from reusable Snippet ownership.
+- The Model control is a provider-independent dropdown supplied through application/provider boundaries, not Ollama-specific discovery inside the Workspace.
+- Generated Output stays editable while Context/Gist change and generation repeats. Generation clears neither input. Copy remains on the output header; no direct Insert/Paste action is approved.
+- Redundant product headings, intro prose, “Local support drafting,” and persistent Ollama installation/helper copy do not occupy the future primary drafting surface.
+- This is approved future behavior. The current M9/M11 Side Panel, free-text model input, text-only Context, and current Prompt Builder remain implemented until future M15 work changes them.
+
+## 4. Current Knowledge Compatibility Workflow
+
+The Knowledge Library remains implemented today for existing records, Backup compatibility, and current workflow reconstruction. Decision 46 retires it from the future active AI workflow/UI; it does not delete or migrate the current data or implementation.
 
 ```text
 Open Knowledge Library
@@ -117,13 +133,13 @@ Reuse in Support Workflow
 - Knowledge should be editable so the user can refine it over time.
 - Knowledge should be searchable so the user can quickly find relevant material during support work.
 - Knowledge is stored locally and remains available without a backend.
-- Knowledge is intended to support the support experience rather than replace it.
+- Future users should not be required to maintain Knowledge separately from Text Snippets. Permanent removal/migration is a separate future task.
 
 ## 5. Snippet Workflow
 
 The Snippet workflow is focused on reusable short-form content such as canned replies, message fragments, or other response building blocks.
 
-This workflow remains distinct from the Knowledge Library workflow. Snippets are compact, reusable response building blocks, while knowledge is broader contextual material intended to support troubleshooting and retrieval over time.
+Today this workflow remains distinct from the implemented Knowledge compatibility workflow. In the future active product, Text Snippets become the sole user-managed AI reference library as well as reusable delivery content; Image Snippets remain delivery-only assets.
 
 ```text
 Open Snippets
@@ -152,7 +168,7 @@ Expand Snippet into Response
 ### Workflow Notes
 
 - Snippets are intended for reusable short content.
-- Knowledge and snippets are related but distinct: knowledge is broader and more contextual, while snippets are compact and reusable.
+- Current implementation preserves separate Knowledge and Snippet domains. Future active AI reference uses Text Snippets only; no destructive migration is implied.
 - Users should be able to create, edit, organize, and reuse snippets.
 - M13 defines one optional canonical trigger per Snippet. Existing Snippets without triggers remain valid and editable.
 - Trigger guidance shows that values begin with `;`, are 2–32 characters including that semicolon, and use letters, numbers, and single hyphens. Uppercase is stored lowercase; whitespace and unsupported punctuation are rejected.
@@ -193,7 +209,7 @@ After Confirmed Copy, Remove Only the Unchanged Trigger + Space
 
 Clipboard-only mode: show Copied — press Ctrl+V
 
-or, in future automatic mode:
+or, in automatic mode:
 
 Revalidate focus and request exactly one Windows paste
 ```
@@ -202,7 +218,7 @@ Revalidate focus and request exactly one Windows paste
 
 - Trigger activation runs only in an actively focused supported `textarea`, free-form absent/text/search input, or generic `contenteditable` editor on a normal HTTP or HTTPS website. Chrome-protected, extension, file, and other non-HTTP(S) pages remain unavailable. M14-I prepares deterministic plain plus safe rich Text representations or a portable Image representation, and the user performs native paste.
 - The caret must be collapsed. The trigger must end immediately before it and begin at the editor start or after whitespace. Selected text, partial triggers, missing triggers, composition, paste, programmatic changes, and matches elsewhere do not expand.
-- A known deliverable match starts asynchronous clipboard preparation without preventing the activation Space. Only confirmed clipboard success permits exact compare-and-swap removal of the unchanged trigger plus that Space; the caret then collapses at the removed range start.
+- A fully validated deliverable match synchronously prevents the activation Space, then starts asynchronous clipboard preparation. Only confirmed clipboard success permits exact compare-and-swap removal of the unchanged trigger; the caret then collapses at the removed range start.
 - `textarea`, supported text/search input, and generic contenteditable share destination-independent clipboard preparation. Their native paste behavior chooses the plain or rich representation; the extension does not reconstruct saved formatting through destination DOM mutation.
 - Text and Image delivery use the same typed planner and native-paste workflow. Stored HTML is never parsed and reference URLs are never fetched.
 - A miss, unsupported editor, unavailable cache, or runtime failure does not cancel or synthesize the key: normal Space behavior continues without user-facing interruption.
@@ -212,7 +228,7 @@ Revalidate focus and request exactly one Windows paste
 - The generic content-script boundary is structurally validated across isolated worlds and iframe realms; it does not require page-world and extension-world browser-event or DOM constructor identity.
 - Trigger recognition reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Clipboard delivery is explicitly enabled in Settings.
 - For Rich text, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, renders unordered/ordered items with `- ` or one-based numeric prefixes, and preserves legacy image-reference projection. Image Snippets are excluded from text consumers rather than represented by a placeholder.
-- Decision 45 adds a future user-selectable `Clipboard only` / `Automatic` behavior. `Clipboard only` is the default and permanent supported workflow. Automatic mode remains additive: it uses the same clipboard preparation and exact cleanup, then attempts one focus-guarded Windows paste. Any declined, failed, unavailable, or indeterminate attempt leaves the clipboard available and returns to `Copied — press Ctrl+V`.
+- Decision 45 provides the user-selectable `Copy to clipboard` / `Paste automatically` behavior. Clipboard-only is the default and permanent supported workflow. Automatic mode remains additive: it uses the same clipboard preparation and exact cleanup, then attempts one focus-guarded Windows paste. Any declined, failed, unavailable, or indeterminate attempt leaves the clipboard available and returns to `Copied — press Ctrl+V`.
 
 ### Unified Clipboard Delivery Workflow
 
@@ -236,10 +252,10 @@ Image Trigger + Space
 ```
 
 - Clipboard-only assistance is real copy plus user native paste. Decision 45 automatic mode may issue one guarded Windows Ctrl+V input sequence, never a synthetic DOM paste event; neither mode claims insertion merely from clipboard or input success.
-- The product owner accepts the one-extra-keystroke manual `Ctrl+V` workflow as a permanent supported mode and fallback. M14-K.1 defines—but does not implement—an optional Windows automatic mode after the same clipboard-success boundary.
+- The product owner accepts the one-extra-keystroke manual `Ctrl+V` workflow as a permanent supported mode and fallback. M14-K.2 implements the optional Windows automatic mode after the same clipboard-success boundary.
 - Existing browser Text clipboard capability is enabled through an explanatory Settings/options action that requests optional `clipboardWrite` and `offscreen`. The independent Windows Image Snippets section requests optional `nativeMessaging` only from its own Enable button. It reports Not enabled, Companion not found, Companion incompatible, Ready, or unsupported platform without exposing host internals. Permission denial, revocation, helper absence/mismatch, conversion failure, or write failure preserves normal typing and the trigger. Trigger input never silently requests permission, and `clipboardRead` is never requested.
 - Decision 42 screens PNG IHDR, JPEG SOF, and WebP VP8X/VP8/VP8L dimensions before decoding. Width/height are capped at 8,192, pixels at 16,777,216, decoded RGBA at 64 MiB, and the planned two-surface raster working set at 128 MiB. Animated WebP and oversized images are rejected, not resized.
-- Because the write is asynchronous, ordinary Space proceeds. Cleanup occurs only after confirmed copy and exact editor/range/catalog/request revalidation. Image cleanup removes the trigger and activation U+0020, leaves no placeholder or trailing space, and collapses the caret at the removed range start. Changed state leaves user text untouched while reporting copy accurately.
+- The accepted activation Space is consumed synchronously before the asynchronous write begins. Cleanup occurs only after confirmed copy and exact editor/range/catalog/request revalidation. Image cleanup removes only the trigger from that no-Space state, leaves no placeholder or trailing space, and collapses the caret at the removed range start. Changed state leaves user text untouched while reporting copy accurately.
 - Text `text/plain` uses deterministic projection. Safe Rich `text/html` contains only validated paragraphs, text, bold/italic, links, and lists. Image delivery is a separate image-only PNG clipboard item; it never attempts ordered text-plus-image placement.
 - Blob/base64/asset IDs are not placed in frame catalog snapshots. The service worker retrieves the requested Image Snippet asset from Dexie only after activation, revalidates ownership, applies Decision 42 PNG preparation, rechecks catalog freshness, and then invokes the Windows native transport.
 - Current Crisp evidence is limited but actionable: ordinary direct Plain insertion fails in the tested Crisp editor, the same Snippet succeeds in another Rich editor, the speculative generic patch was removed, and manual native paste works. No Crisp-specific runtime is implemented or promised by M14-D.
@@ -261,9 +277,9 @@ Image trigger + Space
 -> user performs native Ctrl+V
 ```
 
-Missing permission/helper, incompatible version, busy clipboard, native failure, disconnect, or stale response leaves the trigger and page content unchanged and shows no false copied notice. If native preparation succeeded but the response is lost or page state became stale, the clipboard may remain prepared while cleanup is safely skipped. Text clipboard preparation remains independent and browser-only; only future automatic mode may launch the helper after Text clipboard success.
+Missing permission/helper, incompatible version, busy clipboard, native failure, disconnect, or stale response leaves the trigger and page content unchanged and shows no false copied notice. If native preparation succeeded but the response is lost or page state became stale, the clipboard may remain prepared while cleanup is safely skipped. Text clipboard preparation remains independent and browser-only; automatic mode launches the helper only after Text clipboard success.
 
-Planned M14-K automatic-mode flow for both Text and Image:
+Implemented M14-K automatic-mode flow for both Text and Image:
 
 ```text
 clipboard preparation succeeds
@@ -276,7 +292,7 @@ clipboard preparation succeeds
 → show "Paste sent"
 ```
 
-`Paste sent` means Windows accepted the full input sequence; it does not prove that the destination inserted content. After clipboard success, unsafe or changed editor focus, tab switch, browser-window switch, application switch, changed clipboard, held modifier, native paste busy, paste-capability loss, input failure, or uncertain result shows `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V`. An automatic-only precheck failure does not suppress the normal exact cleanup attempt after clipboard success; if cleanup itself was not authorized, the existing `(trigger unchanged)` suffix remains. A second activation rejected before its own clipboard preparation instead retains its trigger plus ordinary Space and shows retry-later delivery busy without claiming copied. If the whole companion is missing before Image preparation, the existing Image delivery failure remains because no clipboard-success prerequisite exists; Text preparation remains browser-only. No automatic retry occurs after input may have begun, and the extension never clears the clipboard. A user who presses `Ctrl+V` after `Paste sent` will naturally paste the clipboard again.
+`Paste sent` means Windows accepted the full input sequence; it does not prove that the destination inserted content. After clipboard success, unsafe or changed editor focus, tab switch, browser-window switch, application switch, changed clipboard, held modifier, native paste busy, paste-capability loss, input failure, or uncertain result shows `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V`. An automatic-only precheck failure does not suppress the normal exact cleanup attempt after clipboard success; if cleanup itself was not authorized, the existing `(trigger unchanged)` suffix remains. A second fully validated activation consumes its command Space, retains its trigger if rejected before its own clipboard preparation, and shows retry-later delivery busy without claiming copied. If the whole companion is missing before Image preparation, the existing Image delivery failure remains because no clipboard-success prerequisite exists; Text preparation remains browser-only. No automatic retry occurs after input may have begun, and the extension never clears the clipboard. A user who presses `Ctrl+V` after `Paste sent` will naturally paste the clipboard again.
 
 ## 7. Keyboard Shortcut Workflow
 
@@ -437,8 +453,9 @@ Transient Model Field Starts with Saved Default
 - The implemented controls retain a visible associated label, descriptive help, native keyboard operation, natural focus order, accessible loading state, live success/error announcements, and narrow-width-safe navigation and form layout.
 - Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
 - Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
-- M14-K.2 will extend the same Settings aggregate and explicit Save workflow with a `Snippet paste behavior` choice: `Clipboard only` (default) or `Automatic (Windows companion)`. Selecting Automatic must explain that clipboard preparation still happens first, the companion attempts one paste only when focus checks pass, manual `Ctrl+V` remains available, and unsupported/unavailable platforms fall back safely. It must not silently request native permission from trigger typing. M14-K.1 adds no control or persistence behavior.
-- The future preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It uses the existing singleton Settings record with no new store/index or Dexie version. Backup v5 remains frozen; M14-K.2 introduces strict Backup v6 for new exports and maps valid v1-v5 imports to `clipboard-only`.
+- M14-K.2 extends the same Settings aggregate and explicit Save workflow with `Paste behavior`: `Copy to clipboard` (default, manual Ctrl+V) or `Paste automatically`. The automatic choice explains that one paste is sent after copying, manual Ctrl+V remains available, and safe fallback applies when automatic paste cannot run. Trigger typing never silently requests native permission.
+- The implemented preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It uses the existing singleton Settings record with no new store/index or Dexie version. Backup v5 remains frozen; strict Backup v6 is current for new exports and valid v1-v5 imports map to `clipboard-only`.
+- M14-K.2.3 preserves this UI exactly. The first real Intercom automatic Text attempt reached the automatic branch but fell back after `post-cleanup-check`; later corrections and M14-K.3 Principal evidence validate the complete automatic path in Intercom and Crisp. `Paste sent` remains limited to full native input acceptance and does not claim destination insertion. `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V` remains the truthful populated-clipboard fallback, and manual `Ctrl+V` remains permanently supported.
 
 ## 10. Import / Export Workflow
 
@@ -519,7 +536,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Authoring and Delivery:** M14-J is complete, real-browser validated, and synchronized at `e4e9645`. Crisp Text/Image/no-refresh and Intercom Shadow-DOM Text/normal list/Image/no-refresh pass; repeated reload is duplicate-safe. Intercom bullet triggering after Shift+Enter remains a known low-priority limitation, and perceived Image latency is a non-blocking performance follow-up. M14-K is active: M14-K.1 / Decision 45 defines optional additive Windows automatic paste, manual `Ctrl+V` remains current and permanently supported, and M14-K.2 is exact next after approval.
+- **M14 — Snippet Authoring and Delivery:** M14-J is complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. M14-K.4 decision lockdown is active; the combined checkpoint awaits final Principal review/Git authorization and M14-K is not closed.
 
 The lifecycle availability flow is:
 
@@ -553,7 +570,7 @@ Open existing full options/Library page in a normal browser tab
 
 This future workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest and retire the default popup without competing toolbar behaviors. It is not assigned to M14-G, M14-H, M14-I, or M14-J and does not interrupt the Snippet roadmap.
 
-M14-I.2 defines architecture for an optional Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through a stable `native-dev` extension build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. Decision 45 defines the separate optional automatic-paste architecture through the same C# companion, rejects permanent AutoHotkey, and requires stale focus to decline. M14-K.1 has no `SendInput` implementation and manual `Ctrl+V` remains the fallback.
+M14-I.2 defines the Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through the stable `native-dev` build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. M14-K.2 implements Decision 45's separate optional automatic-paste protocol through the same companion; stale focus declines, no result is retried, and manual `Ctrl+V` remains the fallback.
 
 Context images provide transient visual information to generation. Image Snippets are durable, reusable, one-image output shortcuts copied for destination-native paste. Their domain ownership, lifecycle, and privacy rules remain separate; no "Use as Context" bridge is approved.
 

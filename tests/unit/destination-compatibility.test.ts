@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FrameTriggerCatalogCache } from '../../src/extension/snippet-trigger/frame-catalog-cache';
+import { handleSnippetBeforeInput } from '../../src/extension/snippet-trigger/content-runtime';
 import { createEditorAdapter } from '../../src/extension/snippet-trigger/editor-adapters';
 import {
   type BeforeInputEventLike,
@@ -16,7 +17,6 @@ interface ControlledFixture {
   readonly target: EventTarget;
   readonly expectedAfterCleanup: string;
   readonly expectedCaretOffset: number;
-  insertActivationSpace(): void;
   readContent(): string;
   readCaretOffset(): number | undefined;
 }
@@ -95,8 +95,6 @@ function createTextControlFixture(
     target: editor,
     expectedAfterCleanup,
     expectedCaretOffset: initial.indexOf(';hello'),
-    insertActivationSpace: () =>
-      editor.setRangeText(' ', triggerEnd, triggerEnd, 'end'),
     readContent: () => editor.value,
     readCaretOffset: () => editor.selectionStart ?? undefined,
   };
@@ -138,10 +136,6 @@ function createContenteditableFixture(
     target: editor,
     expectedAfterCleanup: initial.replace(';hello', ''),
     expectedCaretOffset: text.data.indexOf(';hello'),
-    insertActivationSpace: () => {
-      text.insertData(triggerEnd, ' ');
-      placeCaret(text, triggerEnd + 1);
-    },
     readContent: () => editor.textContent ?? '',
     readCaretOffset: () => readContenteditableCaretOffset(editor),
   };
@@ -162,10 +156,6 @@ function createBrBoundaryFixture(): ControlledFixture {
     target: editor,
     expectedAfterCleanup: 'hello|br=1|',
     expectedCaretOffset: prefix.length,
-    insertActivationSpace: () => {
-      trigger.appendData(' ');
-      placeCaret(trigger, trigger.length);
-    },
     readContent: () =>
       `${prefix.data}|br=${editor.querySelectorAll('br').length}|${trigger.data}`,
     readCaretOffset: () => readContenteditableCaretOffset(editor),
@@ -189,10 +179,6 @@ function createBlockBoundaryFixture(blockName: 'div' | 'p'): ControlledFixture {
     target: triggerBlock,
     expectedAfterCleanup: `hello||${blockName}=2`,
     expectedCaretOffset: 'hello'.length,
-    insertActivationSpace: () => {
-      trigger.appendData(' ');
-      placeCaret(trigger, trigger.length);
-    },
     readContent: () =>
       `${firstBlock.textContent ?? ''}|${triggerBlock.textContent ?? ''}|${blockName}=${editor.querySelectorAll(blockName).length}`,
     readCaretOffset: () => readContenteditableCaretOffset(editor),
@@ -220,10 +206,6 @@ function createNestedBlockBoundaryFixture(): ControlledFixture {
     target: triggerFormatting,
     expectedAfterCleanup: 'hello||strong=1|em=1|div=2',
     expectedCaretOffset: 'hello'.length,
-    insertActivationSpace: () => {
-      trigger.appendData(' ');
-      placeCaret(trigger, trigger.length);
-    },
     readContent: () =>
       `${firstBlock.textContent ?? ''}|${triggerBlock.textContent ?? ''}|strong=${editor.querySelectorAll('strong').length}|em=${editor.querySelectorAll('em').length}|div=${editor.querySelectorAll(':scope > div').length}`,
     readCaretOffset: () => readContenteditableCaretOffset(editor),
@@ -236,17 +218,7 @@ interface ShadowEditorFixture {
   readonly editor: HTMLDivElement;
   readonly trigger: Text;
   readonly expectedAfterCleanup: string;
-  insertActivationSpace(): void;
   readContent(): string;
-}
-
-function exposeComposedCaret(node: Text) {
-  const selection = document.getSelection();
-  if (selection === null) throw new Error('Expected a Selection.');
-  Object.defineProperty(selection, 'getComposedRanges', {
-    configurable: true,
-    value: vi.fn(() => [targetRange(node, node.length)]),
-  });
 }
 
 function readShadowCaretOffset(root: HTMLElement) {
@@ -259,6 +231,15 @@ function readShadowCaretOffset(root: HTMLElement) {
   prefix.selectNodeContents(root);
   prefix.setEnd(composed.startContainer, composed.startOffset);
   return prefix.toString().length;
+}
+
+function exposeComposedCaret(node: Text) {
+  const selection = document.getSelection();
+  if (selection === null) throw new Error('Expected a Selection.');
+  Object.defineProperty(selection, 'getComposedRanges', {
+    configurable: true,
+    value: vi.fn(() => [targetRange(node, node.length)]),
+  });
 }
 
 function createShadowEditorFixture(
@@ -297,17 +278,13 @@ function createShadowEditorFixture(
   shadow.append(editor);
   editor.focus();
   placeCaret(trigger, trigger.length);
+  exposeComposedCaret(trigger);
   return {
     host,
     shadow,
     editor,
     trigger,
     expectedAfterCleanup: shape === 'block-start' ? 'hello|' : '',
-    insertActivationSpace: () => {
-      trigger.appendData(' ');
-      placeCaret(trigger, trigger.length);
-      exposeComposedCaret(trigger);
-    },
     readContent: () =>
       Array.from(editor.querySelectorAll('p'))
         .map((paragraph) => paragraph.textContent ?? '')
@@ -370,10 +347,6 @@ function createStructuredRichEditorFixture(): ControlledFixture {
     target: triggerEnd,
     expectedAfterCleanup: 'Before  After|Second paragraph',
     expectedCaretOffset: 'Before '.length,
-    insertActivationSpace: () => {
-      triggerEndText.appendData(' ');
-      placeCaret(triggerEndText, triggerEndText.length);
-    },
     readContent: () =>
       `${firstParagraph.textContent ?? ''}|${secondParagraph.textContent ?? ''}`,
     readCaretOffset: () => readContenteditableCaretOffset(editor),
@@ -417,10 +390,9 @@ describe('M14-J controlled destination compatibility fixtures', () => {
       const event = beforeInput(fixture.target);
       const { controller, delivery, feedback, requester } = createHarness();
 
-      expect(controller.handleBeforeInput(event)).toBe(true);
-      expect(event.preventDefault).not.toHaveBeenCalled();
+      expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+      expect(event.preventDefault).toHaveBeenCalledOnce();
       expect(requester.requestDelivery).toHaveBeenCalledOnce();
-      fixture.insertActivationSpace();
       delivery.resolve({
         type: 'snippet-trigger-activation-result',
         requestId: 'request-1',
@@ -455,9 +427,8 @@ describe('M14-J controlled destination compatibility fixtures', () => {
       const event = beforeInput(fixture.target);
       const { controller, delivery, feedback } = createHarness('image');
 
-      expect(controller.handleBeforeInput(event)).toBe(true);
-      fixture.insertActivationSpace();
-      const contentAfterNormalSpace = fixture.readContent();
+      expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+      const contentAfterActivation = fixture.readContent();
       delivery.resolve({
         type: 'snippet-trigger-activation-result',
         requestId: 'request-1',
@@ -468,9 +439,9 @@ describe('M14-J controlled destination compatibility fixtures', () => {
       });
       await flushDelivery();
 
-      expect(fixture.readContent()).toBe(contentAfterNormalSpace);
+      expect(fixture.readContent()).toBe(contentAfterActivation);
       expect(document.activeElement).toBe(fixture.editor);
-      expect(event.preventDefault).not.toHaveBeenCalled();
+      expect(event.preventDefault).toHaveBeenCalledOnce();
       expect(feedback.show).toHaveBeenCalledWith(
         "Windows Image Snippets aren't ready. Check Settings. [host-unavailable]",
         'error',
@@ -492,7 +463,7 @@ describe('M14-J controlled destination compatibility fixtures', () => {
     const event = beforeInput(formatting);
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(editor.textContent).toBe('hello;hello');
@@ -504,9 +475,8 @@ describe('M14-J controlled destination compatibility fixtures', () => {
     const event = beforeInput(fixture.target);
     const { controller, delivery, feedback } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    fixture.insertActivationSpace();
-    const contentAfterNormalSpace = fixture.readContent();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+    const contentAfterActivation = fixture.readContent();
     const selection = document.getSelection();
     selection?.collapse(fixture.editor, 0);
     delivery.resolve({
@@ -517,7 +487,7 @@ describe('M14-J controlled destination compatibility fixtures', () => {
     });
     await flushDelivery();
 
-    expect(fixture.readContent()).toBe(contentAfterNormalSpace);
+    expect(fixture.readContent()).toBe(contentAfterActivation);
     expect(document.activeElement).toBe(fixture.editor);
     expect(feedback.show).toHaveBeenCalledWith(
       'Snippet copied — press Ctrl+V (trigger unchanged)',
@@ -553,9 +523,9 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
       const adapter = createEditorAdapter(event, document);
       expect(adapter?.kind).toBe('contenteditable');
       expect(adapter?.readTriggerCandidate(32)?.text).toBe(';hello');
-      expect(controller.handleBeforeInput(event)).toBe(true);
+      expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+      expect(event.preventDefault).toHaveBeenCalledOnce();
       expect(requester.requestDelivery).toHaveBeenCalledOnce();
-      fixture.insertActivationSpace();
       delivery.resolve({
         type: 'snippet-trigger-activation-result',
         requestId: 'request-1',
@@ -583,8 +553,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const fixture = createShadowEditorFixture('editor-start');
     const event = shadowBeforeInput(fixture);
     const { controller, delivery } = createHarness();
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    fixture.insertActivationSpace();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
 
     const selection = document.getSelection();
     if (selection === null) throw new Error('Expected a Selection.');
@@ -622,8 +591,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture);
     const { controller, delivery } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    fixture.insertActivationSpace();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -641,7 +609,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture);
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(fixture.readContent()).toBe('hello;hello');
@@ -653,9 +621,8 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture);
     const { controller, delivery, feedback } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    fixture.insertActivationSpace();
-    const contentAfterNormalSpace = fixture.readContent();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
+    const contentAfterActivation = fixture.readContent();
     delivery.resolve({
       type: 'snippet-trigger-activation-result',
       requestId: 'request-1',
@@ -666,7 +633,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     });
     await flushDelivery();
 
-    expect(fixture.readContent()).toBe(contentAfterNormalSpace);
+    expect(fixture.readContent()).toBe(contentAfterActivation);
     expect(fixture.host.textContent).toBe('');
     expect(document.activeElement).toBe(fixture.host);
     expect(fixture.shadow.activeElement).toBe(fixture.editor);
@@ -681,8 +648,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture);
     const { controller, delivery, feedback } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(true);
-    fixture.insertActivationSpace();
+    expect(handleSnippetBeforeInput(controller, event)).toBe(true);
     fixture.trigger.appendData('edited');
     placeCaret(fixture.trigger, fixture.trigger.length);
     delivery.resolve({
@@ -693,7 +659,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     });
     await flushDelivery();
 
-    expect(fixture.readContent()).toBe(';hello edited');
+    expect(fixture.readContent()).toBe(';helloedited');
     expect(fixture.host.textContent).toBe('');
     expect(feedback.show).toHaveBeenCalledWith(
       'Snippet copied — press Ctrl+V (trigger unchanged)',
@@ -712,7 +678,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture, ranges);
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(fixture.readContent()).toBe(';hello');
@@ -766,7 +732,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture, ranges, createPath?.(fixture));
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(fixture.readContent()).toBe(';hello');
@@ -782,7 +748,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     );
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
@@ -793,7 +759,7 @@ describe('M14-J.3 retargeted Shadow DOM editor resolution', () => {
     const event = shadowBeforeInput(fixture);
     const { controller, requester } = createHarness();
 
-    expect(controller.handleBeforeInput(event)).toBe(false);
+    expect(handleSnippetBeforeInput(controller, event)).toBe(false);
     expect(requester.requestDelivery).not.toHaveBeenCalled();
     expect(event.preventDefault).not.toHaveBeenCalled();
   });

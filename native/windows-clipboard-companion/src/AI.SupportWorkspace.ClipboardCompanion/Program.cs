@@ -13,6 +13,20 @@ internal static class Program
             .Single(attribute => attribute.Key == "ExpectedExtensionOrigin")
             .Value ?? string.Empty;
 
-        return HostProcess.Run(args, stdin, stdout, expectedOrigin);
+        return HostProcess.Run(
+            args,
+            stdin,
+            stdout,
+            expectedOrigin,
+            includePasteDiagnostics: NativeDiagnosticMode.Enabled);
     }
+}
+
+internal static class NativeDiagnosticMode
+{
+#if NATIVE_DIAGNOSTICS
+    internal const bool Enabled = true;
+#else
+    internal const bool Enabled = false;
+#endif
 }

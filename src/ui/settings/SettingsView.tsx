@@ -7,6 +7,7 @@ import {
 import type { ClipboardDeliveryPermission } from '../../extension/snippet-trigger/clipboard-permission';
 import type { WindowsImageClipboardCapability } from '../../extension/snippet-trigger/native-clipboard-capability';
 import type { NativeClipboardCapabilityStatus } from '../../application/snippet/image-clipboard-transport';
+import type { SnippetPasteMode } from '../../domain/settings';
 
 const LOAD_FAILURE_MESSAGE = "Couldn't load settings. Reload and try again.";
 const SAVE_FAILURE_MESSAGE = "Couldn't save settings. Try again.";
@@ -35,6 +36,10 @@ export function SettingsView({
   const [loadedDefaultModel, setLoadedDefaultModel] = useState<string | null>(
     null,
   );
+  const [snippetPasteMode, setSnippetPasteMode] =
+    useState<SnippetPasteMode>('clipboard-only');
+  const [loadedSnippetPasteMode, setLoadedSnippetPasteMode] =
+    useState<SnippetPasteMode>('clipboard-only');
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [clipboardState, setClipboardState] = useState<
@@ -55,6 +60,8 @@ export function SettingsView({
         if (!active) return;
         setLoadedDefaultModel(loaded.defaultModel);
         setDefaultModelInput(loaded.defaultModel ?? '');
+        setSnippetPasteMode(loaded.snippetPasteMode);
+        setLoadedSnippetPasteMode(loaded.snippetPasteMode);
         setLoadState('ready');
       },
       () => {
@@ -147,7 +154,9 @@ export function SettingsView({
   }
 
   const normalizedInput = normalizeDefaultModel(defaultModelInput);
-  const dirty = normalizedInput !== loadedDefaultModel;
+  const dirty =
+    normalizedInput !== loadedDefaultModel ||
+    snippetPasteMode !== loadedSnippetPasteMode;
   const formDisabled = loadState !== 'ready' || saving;
   const saveDisabled = formDisabled || !dirty;
 
@@ -159,9 +168,11 @@ export function SettingsView({
     setFeedback(null);
 
     try {
-      const saved = await settings.save(defaultModelInput);
+      const saved = await settings.save(defaultModelInput, snippetPasteMode);
       setLoadedDefaultModel(saved.defaultModel);
       setDefaultModelInput(saved.defaultModel ?? '');
+      setSnippetPasteMode(saved.snippetPasteMode);
+      setLoadedSnippetPasteMode(saved.snippetPasteMode);
       setFeedback({ kind: 'success', message: SAVE_SUCCESS_MESSAGE });
     } catch {
       setFeedback({ kind: 'error', message: SAVE_FAILURE_MESSAGE });
@@ -216,6 +227,58 @@ export function SettingsView({
             it temporarily inside Workspace.
           </p>
         </div>
+
+        <fieldset disabled={formDisabled}>
+          <legend className="text-sm font-medium text-slate-700">
+            Paste behavior
+          </legend>
+          <div className="mt-3 space-y-3">
+            <label className="flex items-start gap-3">
+              <input
+                checked={snippetPasteMode === 'clipboard-only'}
+                className="mt-1"
+                name="snippet-paste-mode"
+                onChange={() => {
+                  setSnippetPasteMode('clipboard-only');
+                  setFeedback(null);
+                }}
+                type="radio"
+                value="clipboard-only"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  Copy to clipboard
+                </span>
+                <span className="block text-xs leading-5 text-slate-500">
+                  Use Ctrl+V to paste manually.
+                </span>
+              </span>
+            </label>
+            <label className="flex items-start gap-3">
+              <input
+                checked={snippetPasteMode === 'automatic'}
+                className="mt-1"
+                name="snippet-paste-mode"
+                onChange={() => {
+                  setSnippetPasteMode('automatic');
+                  setFeedback(null);
+                }}
+                type="radio"
+                value="automatic"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  Paste automatically
+                </span>
+                <span className="block text-xs leading-5 text-slate-500">
+                  On Windows, sends one paste after a Snippet is copied when the
+                  companion and focus checks are ready. Manual Ctrl+V remains
+                  available whenever automatic paste cannot run.
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
 
         <button
           className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"

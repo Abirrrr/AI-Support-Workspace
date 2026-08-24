@@ -23,9 +23,9 @@ M14-J distinguishes deterministic extension behavior from operating-system clipb
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Standard single-line text input | Activation and exact cleanup PASS | Native paste interpretation not tested; visible images are not required from a plain-text control | Preserved: YES; active element remains the input | Preserved: YES; collapsed at removed-range start | Automated fixture | PASS for controlled activation/cleanup | Surrounding content remains intact; no trigger fragment or activation Space remains after correlated success. Plain-text paste fidelity remains a real-browser concern. |
 | Standard textarea | Activation and exact cleanup PASS | Native paste interpretation not tested | Preserved: YES; active element remains the textarea | Preserved: YES; collapsed at removed-range start | Automated fixture | PASS for controlled activation/cleanup | Multiline surrounding content remains intact. Destination paste formatting is intentionally plain-text. |
-| Generic contenteditable | Activation and exact cleanup PASS | Native failure preservation PASS; native paste interpretation pending | Preserved: YES; active element remains the editing root | Preserved: YES; collapsed at removed-range start | Automated fixture | PASS for controlled activation/cleanup | Success removes only the trigger plus activation Space. Native Image failure leaves the trigger, normal Space, and page content unchanged. |
+| Generic contenteditable | Activation and exact cleanup PASS | Native failure preservation PASS; native paste interpretation pending | Preserved: YES; active element remains the editing root | Preserved: YES; collapsed at removed-range start | Automated fixture | PASS for controlled activation/cleanup | Accepted Space is synchronously consumed; success removes only the trigger. Native Image failure leaves the trigger and page content unchanged. |
 | Structured nested rich-editor approximation | Activation across nested inline nodes and exact cleanup PASS | Native failure preservation PASS; native paste interpretation pending | Preserved: YES; active element remains the editing root | Preserved: YES; collapsed at removed-range start | Automated fixture | PASS for controlled activation/cleanup | Nested inline markup and a separate paragraph remain intact. No third-party editor dependency or destination-name branch was added. |
-| Contenteditable after `<br>` | Structural trigger activation and exact cleanup PASS | Not tested | Preserved: YES | Preserved: YES | Automated fixture | PASS for controlled correction | The `<br>` remains; only the trigger plus activation Space is removed. |
+| Contenteditable after `<br>` | Structural trigger activation and exact cleanup PASS | Not tested | Preserved: YES | Preserved: YES | Automated fixture | PASS for controlled correction | The accepted Space is consumed, the `<br>` remains, and only the trigger is removed. |
 | Contenteditable at new sibling `<div>` | Structural trigger activation and exact cleanup PASS | Native failure preservation PASS | Preserved: YES | Preserved: YES | Automated fixture | PASS for controlled correction | The preceding block, both block containers, and surrounding content remain intact. |
 | Contenteditable at new sibling `<p>` | Structural trigger activation and exact cleanup PASS | Not tested | Preserved: YES | Preserved: YES | Automated fixture | PASS for controlled correction | The preceding paragraph and both paragraph containers remain intact. |
 | Nested inline content at new block | Structural trigger activation and exact cleanup PASS | Not tested | Preserved: YES | Preserved: YES | Automated fixture | PASS for controlled correction | Existing `<strong>`, `<em>`, and block wrappers remain intact. |
@@ -266,8 +266,9 @@ Controlled successful-delivery results for all four fixture classes:
 
 ```text
 trigger activation: PASS
-activation Space prevented: NO (ordinary Space proceeds during preparation)
-exact trigger + activation Space cleanup: PASS
+activation Space prevented: YES (only after full synchronous acceptance)
+browser activation input observed: NO
+exact trigger-only cleanup: PASS
 surrounding content preserved: YES
 focus preserved: YES
 active element after delivery: original editor
@@ -280,7 +281,7 @@ Controlled native-failure results for generic and structured contenteditable fix
 
 ```text
 trigger remains: YES
-ordinary Space remains: YES
+accepted activation Space remains: NO (consumed as the command)
 page content otherwise unchanged: YES
 copied-success notice: NO
 focus preserved: YES
@@ -337,9 +338,13 @@ REPEATED-RELOAD / IDEMPOTENCY: PASS
 M14-J: COMPLETE / REAL-BROWSER VALIDATED
 ```
 
-## M14-K Focus Prerequisite
+## M14-K.3 Principal-Approved Automatic-Paste Compatibility Result
 
-The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. Both destinations now also validate no-refresh lifecycle recovery and repeated-reload duplicate safety. M14-K is active, and M14-K.1 / Decision 45 selects the C# companion for an optional focus-guarded OS paste after clipboard success while rejecting permanent AutoHotkey. No `SendInput`, protocol-v2 operation, Settings toggle, or automatic-paste runtime is implemented. M14-K.3 must repeat the Text/Image destination matrix with adversarial editor/tab/window/application focus changes; any wrong-editor result blocks automatic-mode release.
+The controlled fixtures and real-destination results provide positive evidence across ordinary, structural, and retargeted Shadow DOM contenteditable boundaries. Crisp confirms the non-Shadow structural path; Intercom confirms the M14-J.3 Shadow-DOM path plus ordinary rich Text, normal bullet lists, and Image paste. Both destinations also validate no-refresh lifecycle recovery and repeated-reload duplicate safety. M14-K.2 implements Decision 45's focus-guarded Windows paste through the existing C# companion, with generic Shadow-DOM authorization, strict protocol v2, and no destination branches.
+
+Principal M14-K.3 evidence passes automatic Text and automatic Image in both Intercom and Crisp. For Text, the trigger disappeared, exactly one insertion occurred, `Paste sent` appeared, no manual fallback notice appeared, and composer focus remained. Images automatically pasted successfully in both destinations. Clipboard-only Text and Image pass the permanent manual workflow: trigger cleanup, no automatic insertion, truthful copied/manual notice, one deliberate successful `Ctrl+V`, and preserved focus. Unknown trigger behavior passes with ordinary Space, no Snippet or notice, and preserved focus. Saving clipboard-only → automatic without reloading an already-open Intercom tab takes effect on the next activation and inserts exactly once.
+
+The authoritative successful Intercom Text trace records automatic mode in persisted/worker/frame/branch state; accepted-Space prevention with no activation input; no post-cleanup failure; valid authorization and all focus/caret/selection/structure/lifecycle predicates; no invalidation cause; extension-owned cleanup input; and final `paste-issued`. The native diagnostic records every validation true, same integrity/session, 4 requested and inserted events, last error 0, and struct size 40. These are manual destination results; deterministic automation remains authoritative for the broader stale editor/tab/window/application, modifier, clipboard-sequence, concurrency, unavailable-companion, and no-retry matrix.
 
 ## Completed M14-J.6 Reliability Item
 
@@ -352,8 +357,8 @@ M14-J.6 — Content Script Lifecycle Recovery & Always-On Availability is implem
 - No browser Image fallback or direct-DOM Snippet insertion was reintroduced.
 - The frame catalog remains metadata-only: kind, trigger, and Snippet ID.
 - Decision 44 changes host access to exact persistent `http://*/*` and `https://*/*`; ordinary and optional permission sets otherwise remain unchanged, with no `tabs` or `clipboardRead`.
-- Native companion source and protocol remain unchanged.
-- No AutoHotkey, `SendInput`, keyboard simulation, synthetic paste, or destination-specific API/adapter exists.
-- Production native installation remains unimplemented.
+- Protocol-v1 Image behavior and clipboard semantics remain unchanged; strict protocol v2 adds only Decision 45 context capture and one guarded native paste attempt.
+- Direct Win32 `SendInput` is implemented only for the fixed guarded Ctrl+V sequence. No AutoHotkey dependency, arbitrary keyboard simulation, synthetic DOM paste, focus stealing, retry, or destination-specific API/adapter exists.
+- Production native installer/registration, signing, updater, and version-migration workflow remain unimplemented future distribution work; this does not block current local/development closeout.
 - Crisp Text (inline, Enter, and Shift+Enter) and Crisp Image are real-destination PASS. Intercom normal Text, normal bullet list, and Image are real-destination PASS. Intercom bullet-list triggering immediately after Shift+Enter is a known low-priority compatibility limitation and is not a blocker for the normal list, serializer, delivery planner, Image, or Shadow-DOM results.
-- The Principal reports that Image Snippets feel somewhat slower than Text Snippets. Crisp and Intercom Image behavior remains functionally PASS; perceived latency is a non-blocking future performance investigation and does not reopen M14-J or block M14-K.
+- Image performance is classified **C — ARCHITECTURAL PERFORMANCE OPPORTUNITY**. Direct PNG preparation measured approximately 0.2 ms for 64×64 and 2.0 ms for 1440×900, while controlled 1440×900 JPEG/WebP-to-PNG conversion measured approximately 1.04–1.06 s and content-free one-shot host startup measured 67.0 ms median / 76.1 ms p95. This is a non-blocking future architecture item and does not reopen M14-J or justify a speculative M14-K closeout change.
