@@ -7,35 +7,39 @@
 
 ## Current Milestone
 
-- Milestone 14 — Snippet Authoring and Delivery
-- Status: M14-J — Destination Compatibility Validation / Reliability remains COMPLETE and REAL-BROWSER VALIDATED. M14-K.3 is PRINCIPAL-APPROVED. M14-K.4 — Product Decision Lockdown & AI Handoff is active and documentation-only. M14-K implementation is real-browser validated and Principal-approved; its checkpoint still requires final Principal review and Git authorization. M14-K is not committed or closed. M15 is NOT STARTED.
+- Milestone 14 — Snippet Authoring and Delivery: COMPLETE
+- Status: M14-K Automatic Paste is CLOSED / COMPLETE at implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`). Principal real-browser validation passed. The next planned engineering gate is Post-M14 Snippet Hardening, whose task ID remains intentionally unassigned. Snippet hardening and M15 AI drafting implementation are NOT STARTED.
 
 ## Task State
 
-### M14-K.4 — Product Decision Lockdown & AI Handoff
+### M14-K.5 — Milestone Closeout & Checkpoint Recording
 
 ```text
-Active task: M14-K.4 — Product Decision Lockdown & AI Handoff
-Starting checkpoint: 5066476 — docs: define automatic paste architecture
-Starting tree: complete unstaged M14-K implementation/corrections preserved
+Active task: M14-K.5 — Milestone Closeout & Checkpoint Recording
+Implementation checkpoint: e34cd76 — feat: add automatic snippet paste delivery
+Starting tree: clean; local master one commit ahead of origin/master
 
 M14-K.3: PRINCIPAL APPROVED
+M14-K.4: COMPLETE / DECISIONS 46–49 RECORDED
 M14-K implementation: REAL-BROWSER VALIDATED / PRINCIPAL APPROVED
-M14-K checkpoint: PENDING FINAL PRINCIPAL REVIEW AND GIT AUTHORIZATION
-M14-K closed: NO
+M14-K checkpoint: e34cd76
+M14-K closed: YES / COMPLETE
 
-M14-K.4 implementation changes: NONE
+M14-K.5 implementation changes: NONE
 Knowledge deletion/migration: NONE
 Class-C optimization: DEFERRED
 AI drafting implementation: NOT STARTED
-Staging/commit/push: NONE
+Snippet-hardening implementation: NOT STARTED
+M14-K.5 staging/commit/push: NONE
 ```
+
+The final Principal validation passes automatic Text and Image in Intercom and Crisp, clipboard-only Text and Image, unknown-trigger ordinary Space, live clipboard-only-to-automatic switching without destination reload, focus preservation, exactly-once insertion, and preserved fallback behavior. The successful native trace records accepted activation-Space suppression, no activation input, no post-cleanup failure, valid authorization, `paste-issued`, 4 requested and 4 inserted `SendInput` events, 40-byte `INPUT`, last error 0, passed foreground/root/PID/clipboard/modifier checks, matching host session, and same integrity.
 
 Decisions 46–49 lock the future product direction while preserving current implementation truth. Text Snippets become the sole active user-managed AI reference library in the future drafting workflow; Image Snippets remain excluded. The Knowledge Library retires from that future active workflow/UI, but its current domain, Dexie records/store, repository interfaces, Backup v1-v6 compatibility, and tests remain implemented and untouched until a separately approved migration/cleanup task.
 
 Guidance becomes user-facing **Guidance / Gist**, remains optional, and controls the current requested action/presentation without authorizing unsupported facts. Merchant Context and Gist have the exact three-valid/one-disabled empty-state matrix. The future compact Workspace, request-scoped Context Images, provider-independent model dropdown, persistent editable output, periodic canonical automatic backup, generated Text Snippet tags, and best-effort usage statistics are approved requirements only. Current Dexie physical version 5, Backup v6, manifest permissions, dependencies, runtime source, and tests are unchanged by M14-K.4.
 
-### M14-K.3 — Automatic Paste Validation, Performance Audit & Closeout Preparation
+### Prior M14-K.3 — Automatic Paste Validation, Performance Audit & Closeout Preparation
 
 ```text
 Current milestone: M14-K — Automatic Paste
@@ -46,7 +50,8 @@ Working tree: complete unstaged M14-K implementation/corrections preserved
 
 Implementation and automated validation: PASS
 Principal real-browser validation: PASS
-Closeout status: PRINCIPAL APPROVED / CHECKPOINT AUTHORIZATION PENDING / NOT COMMITTED / NOT CLOSED
+M14-K.3 task result: PRINCIPAL APPROVED
+Final M14-K status: CLOSED / COMPLETE AT e34cd76
 
 Automatic Text: INTERCOM PASS / CRISP PASS
 Automatic Image: INTERCOM PASS / CRISP PASS
@@ -64,7 +69,7 @@ Production native distribution: FUTURE SEPARATE PACKAGING WORK
 M15: NOT STARTED
 ```
 
-Decision 45 remains authoritative. The Principal evidence proves the accepted activation Space is suppressed, exact cleanup remains extension-owned, authorization survives every post-cleanup predicate, and the native path reaches `paste-issued` exactly once without a fallback notice. Clipboard-only behavior, unknown-trigger ordinary typing, focus preservation, and live Settings propagation also pass. Direct PNG preparation is efficient; measured JPEG/WebP conversion and repeated one-shot native processes justify a class-C future architecture opportunity but no speculative closeout change. Installer/production registration, signing, updater, and version migration remain distribution work and do not block the current local/development product. M14-K must not be called committed or closed until Principal review authorizes that transition.
+Decision 45 remains authoritative. The Principal evidence proves the accepted activation Space is suppressed, exact cleanup remains extension-owned, authorization survives every post-cleanup predicate, and the native path reaches `paste-issued` exactly once without a fallback notice. Clipboard-only behavior, unknown-trigger ordinary typing, focus preservation, and live Settings propagation also pass. Direct PNG preparation is efficient; measured JPEG/WebP conversion and repeated one-shot native processes justify a class-C future architecture opportunity but no speculative closeout change. Installer/production registration, signing, updater, and version migration remain distribution work and did not block the completed local/development milestone.
 
 M14-K.3 changed no AI runtime: current Prompt Builder v1 still treats Guidance as highest dynamic instruction, Context as the current case, Knowledge as reference, Text Snippets as wording/examples, and Image Snippets as excluded. Decision 46 now supersedes that arrangement only for future product direction: future active AI reference uses Text Snippets alone while current Knowledge compatibility remains untouched. No generation-provider or M15 implementation begins in M14-K.4.
 
@@ -606,7 +611,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is current. M14-J is COMPLETE and REAL-BROWSER VALIDATED. Intercom/Crisp no-refresh recovery and repeated-reload idempotency pass. M14-K.3 is Principal-approved. M14-K.4 product decisions and AI handoff are documentation-complete pending final review; M14-K implementation is validated/approved, its checkpoint is not yet authorized, and M14-K is not closed.
+- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is the next planned engineering gate and remains unstarted with its task ID intentionally unassigned.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -615,13 +620,13 @@ Image trigger + Space
 
 ## Approved Future Product Directions
 
-- **M14 — Snippet Authoring and Delivery:** The existing `SnippetEntry` aggregate remains authoritative. M14-J is complete. M14-K.3 is Principal-approved, and M14-K.4 locks Decisions 46–49 without runtime changes. The combined checkpoint still requires final Principal review/Git authorization; M14-K is not closed.
+- **M14 — Snippet Authoring and Delivery:** COMPLETE. The existing `SnippetEntry` aggregate remains authoritative. M14-J is complete. M14-K.3 is Principal-approved, M14-K.4 locks Decisions 46–49 without runtime changes, and the approved implementation is checkpointed at `e34cd76`. M14-K is closed.
 - **M14-I.3 — Windows Native Clipboard Companion Foundation:** IMPLEMENTED / PRINCIPAL ENGINEER APPROVED / COMMITTED IN `ebe915f`. M14-I.4 consumes this foundation without changing its framing or clipboard guarantees.
 - **M14-I.3.1 — Native Host Framing and Partial-Failure Safety Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / COMMITTED IN `ebe915f`. Production processing no longer inspects stdin after the declared frame, and deterministic fault-injection coverage records best-effort partial clearing, ownership, no retry, and close-error precedence. Decision 42 and Decision 43 architecture remain unchanged.
 - **M14-I.4 — Chrome Native Messaging Integration and Development Registration:** IMPLEMENTED / AUTOMATED-VALIDATED / DEVELOPMENT HOST REGISTERED UNDER HKCU / REAL-CHROME IMAGE VALIDATED / COMMITTED IN `ebe915f`. `nativeMessaging` is optional and requested only from the Settings action; Text remains browser-only. Normal Windows Image delivery uses the `.dev` native host with no browser fallback.
 - **M14-I.4.1 — Native Companion Capability Status Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / REAL-CHROME SETTINGS READINESS PASS / COMMITTED IN `ebe915f`. Callback-aligned Native Messaging and stable service-worker `sendResponse` handling map compatible success to Ready while keeping unavailable, incompatible, and invalid responses distinct.
 - **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED IN `ebe915f`. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
-- **M14-K Optional Automatic Native Paste:** Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
+- **M14-K Optional Automatic Native Paste:** COMPLETE AT `e34cd76`. Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
 - **Post-M14 Snippet Hardening — Task ID Unassigned:** after M14 closes and before M15, implement periodic canonical local backup, generated Text Snippet retrieval tags, and best-effort usage metadata through separately approved schema/permission/application tasks. Existing M15/M16 IDs remain preserved.
 - **Workspace Shell Action UX — Unassigned:** The current toolbar action still opens the popup. A future shell task will make the toolbar action open the existing global Workspace Side Panel directly and add a panel Library action that opens the options Library page in a normal browser tab. Snippets, Settings, Import / Export, and future management stay in options; current Knowledge remains until separately retired.
 - **M15 — AI Drafting Workflow Refinement and Multimodal Context:** implement Decision 46/47 compact UI, Guidance / Gist, Text-Snippet active reference retrieval, provider-independent model selection, editable output, and request-scoped Context Images. Knowledge compatibility remains non-destructively dormant; unsupported images never disappear silently. Detailed architecture remains deferred.
@@ -841,7 +846,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews the complete unstaged M14-K tree plus M14-K.4 Decisions 46–49, current-vs-future separation, Knowledge-retirement boundary, roadmap placement, and documentation validation. If satisfied, Principal authorizes the single M14-K checkpoint/closeout Git action. No staging, commit, or push has been performed.
+- Principal reviews this M14-K.5 documentation-only closeout and authorizes the closeout-documentation checkpoint and push when satisfied. The next engineering gate after repository synchronization is the intentionally unassigned Post-M14 Snippet Hardening architecture/planning phase: periodic canonical automatic backup, generated Text Snippet retrieval tags, and best-effort `usageCount`/`lastUsedAt`. Do not begin implementation before that gate is assigned and approved.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -860,6 +865,7 @@ Image trigger + Space
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
 - M14-I implementation is committed and pushed at `ebe915f` (`feat: add clipboard delivery for text and image snippets`); immediately after that checkpoint, local `master` matched `origin/master` and the working tree was clean.
 - M14-I closeout documentation is committed and pushed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed and pushed at `797a68a` (`feat: validate destination compatibility`); and completed M14-J lifecycle recovery/closeout is synchronized at `e4e9645` (`feat: add always-on snippet lifecycle recovery`).
+- M14-K Automatic Paste is Principal-approved, real-browser validated, complete, and closed at local implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`). That checkpoint has not yet been pushed; local `master` is one commit ahead of `origin/master` before the M14-K.5 documentation diff.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and remain unchanged. Rich Snippet Templates is assigned to M14, Multimodal Screenshot Context to M15, OpenAI Provider Expansion to M16, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
@@ -867,7 +873,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed milestone task: M14-J — Destination Compatibility Validation / Reliability. It remains COMPLETE and REAL-BROWSER VALIDATED. M14-K Automatic Paste is active; M14-K.2.3.4 is CONTROLLED CORRECTION PASS and requires one real-Intercom automatic retest.
+- Last completed milestone task: M14-K — Automatic Paste. It is CLOSED / COMPLETE and REAL-BROWSER VALIDATED at `e34cd76`. M14-K.5 is the active documentation-only closeout-recording task. Post-M14 Snippet Hardening is next, unassigned, and not started.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -876,14 +882,14 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal reviews the complete M14-K tree and M14-K.4 decision lockdown/handoff, then authorizes or rejects the checkpoint/closeout. Do not stage, commit, push, or mark M14-K closed before that authorization.
+- Exact next action: Principal reviews the M14-K.5 closeout diff, then authorizes or rejects its documentation checkpoint and the pending push of local `master`. Do not begin Snippet hardening or M15 before the unassigned hardening gate is explicitly planned and approved.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
 
 - Browser-specific behaviors require automated and manual validation. M14-J.3 JSDOM event-shaped composed-path/target-range fixtures prove controlled logic, and real Intercom validates that correction plus ordinary rich Text. M14-J.4 JSDOM parsing proves standards-valid list topology and hard-break output. M14-J.5 confirms the corrected live record through persistence, serialization, delivery-payload equality, and normal Intercom paste. Intercom bullet-list triggering immediately after Shift+Enter remains a known low-priority compatibility limitation. Crisp validates the M14-J.2 structural path and Image paste; Intercom Image paste also passes.
 - Image Snippets are perceived as somewhat slower than Text Snippets. Crisp and Intercom Image delivery remain functionally PASS; latency is a non-blocking future performance investigation and is not a prerequisite for M14-K.
-- Windows validates foreground/root-window/process and clipboard identity immediately before `SendInput` but cannot atomically identify a DOM editor at that instant. Automated M14-K.2 guards minimize the interval; M14-K.3 must stress rapid same-window editor changes, and any observed wrong-editor paste blocks release.
+- Windows validates foreground/root-window/process and clipboard identity immediately before `SendInput` but cannot atomically identify a DOM editor at that instant. Automated M14-K.2 guards minimize the interval, and M14-K.3 real-browser evidence accepted the residual same-window race within the documented layered safety model. Any future evidence of wrong-editor paste reopens that safety assessment.
 - Chrome may retain webpage keyboard routing when an already-visible Side Panel receives an internal Guidance focus/caret request. The user may need to click Guidance until Chrome exposes a supported panel-activation API; no M10 workaround is authorized.
 - Cross-world preload mismatch and unused generated preload warnings are currently classified as non-blocking WXT/Vite/Chrome generated-output observations with no functional impact. Revisit only with functional or performance evidence.
 - Broad normal-site access is intentional for M13 trigger expansion: generated output must match exactly `http://*/*` and `https://*/*` with frame-local `all_frames: true`. Chrome-protected and non-HTTP(S) pages remain unavailable. This increases permission exposure, so bounded candidate reading, password/specialized-input exclusion, no logging or transmission, no persistent catalog, and fail-closed unsupported-editor behavior remain mandatory.
@@ -906,5 +912,5 @@ Image trigger + Space
 - M14-D architecture checkpoint: `64504df` (`docs: define rich snippet delivery and local image architecture`).
 - M14-D.2 architecture clarification checkpoint: `f9b5097` (`docs: define pre-delivery local image trigger safety`).
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
-- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; and M14-K.1 / Decision 45 is committed at `5066476`. M14-K.2 is the current unstaged implementation diff. No M14-K.2 checkpoint has been created.
+- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; and the complete approved M14-K implementation is committed locally at `e34cd76` (`feat: add automatic snippet paste delivery`). The implementation checkpoint is not yet pushed.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

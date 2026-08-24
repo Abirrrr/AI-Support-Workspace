@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-K.5 — Milestone Closeout & Checkpoint Recording
+
+- Recorded the Principal-approved M14-K implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`) and marked M14-K CLOSED / COMPLETE. The checkpoint is local and has not yet been pushed.
+- Preserved the authoritative Intercom/Crisp automatic Text/Image, clipboard-only/manual, unknown-trigger, live-mode-switching, focus, exactly-once, fallback, and 4/4/40-byte native validation results.
+- Preserved Decisions 46–49, the Class-C performance deferral, permanent manual `Ctrl+V`, Windows-only automatic-paste boundary, and future production-packaging boundary. Post-M14 Snippet Hardening remains the next unassigned engineering gate and is not started.
+- This closeout changes documentation only: no runtime source, tests, schema, permissions, dependencies, optimization, Snippet-hardening implementation, AI implementation, staging, commit, or push.
+- Status: **M14-K CLOSED / COMPLETE AT `e34cd76` / REAL-BROWSER PASS / PRINCIPAL APPROVED**.
+
 ### M14-K.4 — Product Decision Lockdown & AI Handoff
 
 - Recorded Principal approval of M14-K.3. M14-K implementation is real-browser validated and Principal-approved; the combined checkpoint still requires final Principal review/Git authorization, and M14-K is not closed.

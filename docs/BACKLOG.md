@@ -43,9 +43,10 @@
 - **COMPLETE / AUTOMATED PASS / REAL-CHROME PASS — M14-J.6:** Content Script Lifecycle Recovery & Always-On Availability preserves static injection, recovers eligible already-open HTTP/HTTPS frames after install/update/reload/startup, reconnects after ordinary worker termination, and prevents duplicate runtimes. Intercom/Crisp no-refresh recovery and repeated-reload idempotency pass. Decision 44 selects exact persistent HTTP/HTTPS host access; no `tabs`, polling, alarms, keepalive, page inspection, or automatic paste is introduced.
 - **COMPLETE / SYNCHRONIZED AT `e4e9645` — M14-J.7:** final M14-J documentation and lifecycle implementation are checkpointed locally and remotely.
 - **COMPLETE AT `5066476` — M14-K.1 Automatic Paste Architecture + Focus Safety:** Decision 45 defines the additive, opt-in, focus-safe architecture and permanent manual fallback.
-- **IMPLEMENTED / AUTOMATED PASS / REAL-BROWSER PASS — M14-K.2 Windows Automatic Paste Implementation:** Settings/Backup v6 evolution, shared boundary, one-use browser authorization, strict protocol v2, direct Win32 input, typed fallback UX, and deterministic browser/native safety coverage are implemented without changing protocol v1 or Decisions 42/43.
+- **COMPLETE AT `e34cd76` / AUTOMATED PASS / REAL-BROWSER PASS — M14-K.2 Windows Automatic Paste Implementation:** Settings/Backup v6 evolution, shared boundary, one-use browser authorization, strict protocol v2, direct Win32 input, typed fallback UX, and deterministic browser/native safety coverage are implemented without changing protocol v1 or Decisions 42/43.
 - **PRINCIPAL APPROVED — M14-K.3:** automatic and clipboard-only Text/Image pass in Intercom and Crisp; unknown-trigger safety and live Settings propagation pass; the successful native trace records 4/4 input, last error 0, and struct size 40.
-- **ACTIVE / DOCUMENTATION ONLY — M14-K.4:** lock Decisions 46–49 and the AI handoff. M14-K implementation is real-browser validated/Principal-approved, but the checkpoint remains pending final Principal review and Git authorization; M14-K is not closed.
+- **COMPLETE IN `e34cd76` / DOCUMENTATION ONLY — M14-K.4:** Decisions 46–49 and the AI handoff are locked without runtime, schema, permission, or dependency changes.
+- **CLOSED / COMPLETE AT `e34cd76` — M14-K:** automatic paste is real-browser validated and Principal-approved. M14-K.5 records the checkpoint and final status without implementation changes.
 - **FUTURE ARCHITECTURAL PERFORMANCE OPPORTUNITY (C):** consider reducing JPEG/WebP-to-PNG conversion latency and consolidating repeated one-shot native-host contacts only in a separately approved architecture task. Controlled 1440×900 conversions measured about 1.04–1.06 s; content-free host startup measured 67.0 ms median / 76.1 ms p95. Direct PNG preparation is already fast. Do not replace one-shot Native Messaging inside M14-K closeout.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
@@ -93,7 +94,7 @@
 - Automatic mode is optional and defaults off. Clipboard-only/manual `Ctrl+V` remains a permanent supported workflow and fallback, and clipboard content remains available after automatic success.
 - M14-K.2 implements one direct four-event `SendInput` call and strict protocol v2. Arbitrary send-keys, AutoHotkey, focus stealing, retries after possible input, stale request queues, and non-Windows native hosts remain prohibited.
 - M14-K.3 incorporates successful live automatic delivery plus deterministic stale editor/tab/window/application focus coverage. The known residual same-window last-instant race remains documented and is not permission to weaken focus safety.
-- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J. Decision 45 supplies its independent focus/race-safety architecture; the complete M14-K tree now awaits Principal closeout review.
+- This separable capability is not part of the M14-I.2 clipboard-writing requirement or M14-J. Decision 45 supplies its independent focus/race-safety architecture; M14-K is complete at `e34cd76`.
 
 ### Production Native Companion Packaging
 
@@ -106,4 +107,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete and real-browser validated, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. The Intercom Shift+Enter bullet edge and measured class-C Image performance opportunity are non-blocking follow-ups. M14-K.3 is Principal-approved; M14-K.4 decision lockdown is active. The M14-K checkpoint awaits final Principal review/Git authorization and M14-K is not closed. Post-M14 Snippet hardening precedes M15, whose implementation is not started.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete and real-browser validated, including Crisp/Intercom no-refresh recovery and repeated-reload duplicate safety. M14-K is closed and complete at `e34cd76`. The Intercom Shift+Enter bullet edge and measured class-C Image performance opportunity are non-blocking follow-ups. Post-M14 Snippet hardening is the next planned gate, remains intentionally unassigned, and precedes M15; neither implementation has started.

@@ -344,6 +344,8 @@ The controlled fixtures and real-destination results provide positive evidence a
 
 Principal M14-K.3 evidence passes automatic Text and automatic Image in both Intercom and Crisp. For Text, the trigger disappeared, exactly one insertion occurred, `Paste sent` appeared, no manual fallback notice appeared, and composer focus remained. Images automatically pasted successfully in both destinations. Clipboard-only Text and Image pass the permanent manual workflow: trigger cleanup, no automatic insertion, truthful copied/manual notice, one deliberate successful `Ctrl+V`, and preserved focus. Unknown trigger behavior passes with ordinary Space, no Snippet or notice, and preserved focus. Saving clipboard-only → automatic without reloading an already-open Intercom tab takes effect on the next activation and inserts exactly once.
 
+M14-K is Principal-approved, complete, and closed at implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`).
+
 The authoritative successful Intercom Text trace records automatic mode in persisted/worker/frame/branch state; accepted-Space prevention with no activation input; no post-cleanup failure; valid authorization and all focus/caret/selection/structure/lifecycle predicates; no invalidation cause; extension-owned cleanup input; and final `paste-issued`. The native diagnostic records every validation true, same integrity/session, 4 requested and inserted events, last error 0, and struct size 40. These are manual destination results; deterministic automation remains authoritative for the broader stale editor/tab/window/application, modifier, clipboard-sequence, concurrency, unavailable-companion, and no-retry matrix.
 
 ## Completed M14-J.6 Reliability Item

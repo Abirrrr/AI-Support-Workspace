@@ -536,7 +536,7 @@ Local persistence
 
 ### Assigned Future Capability Workflows
 
-- **M14 — Snippet Authoring and Delivery:** M14-J is complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. M14-K.4 decision lockdown is active; the combined checkpoint awaits final Principal review/Git authorization and M14-K is not closed.
+- **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
 
 The lifecycle availability flow is:
 

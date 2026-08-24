@@ -518,7 +518,7 @@ M14-I is complete at committed/pushed checkpoint `ebe915f`. M14-J.2 is real-Cris
 
 ## Cleanup and Handoff
 
-Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J is complete and real-browser validated. M14-K.2 implements Decision 45's separate automatic-paste extension without changing protocol-v1 Image clipboard semantics. M14-K.3 now records Principal PASS evidence for automatic and clipboard-only Text/Image in Crisp and Intercom, unknown-trigger safety, live mode switching, and one successful 4/4/40-byte native trace. The complete M14-K tree awaits Principal closeout review.
+Real-Chrome Image validation passed before cleanup. M14-I.5 removed the failed browser Image paths while preserving the Text path and feasibility history. M14-J is complete and real-browser validated. M14-K.2 implements Decision 45's separate automatic-paste extension without changing protocol-v1 Image clipboard semantics. M14-K.3 records Principal PASS evidence for automatic and clipboard-only Text/Image in Crisp and Intercom, unknown-trigger safety, live mode switching, and one successful 4/4/40-byte native trace. M14-K is complete and closed at implementation checkpoint `e34cd76`.
 
 Implementation sequence:
 
@@ -539,7 +539,8 @@ M14-I.2 architecture
 -> Principal approval
 -> M14-K.2 Windows implementation: IMPLEMENTED / AUTOMATED PASS
 -> M14-K.3 validation/performance audit/closeout preparation: PASS / PRINCIPAL APPROVED
--> M14-K.4 product decision lockdown: DOCUMENTATION ONLY / CHECKPOINT AUTHORIZATION PENDING
+-> M14-K.4 product decision lockdown: COMPLETE IN e34cd76 / DOCUMENTATION ONLY
+-> M14-K.5 milestone closeout and checkpoint recording: DOCUMENTATION ONLY / M14-K CLOSED
 ```
 
 Backup v5 remains frozen/importable, strict Backup v6 is current, and Dexie v5, Decision 42, metadata-only trigger catalogs, Decision 40, and M15 remain unchanged.
@@ -576,4 +577,4 @@ The exact performance verdict is **C — ARCHITECTURAL PERFORMANCE OPPORTUNITY**
 
 The resource audit found request-scoped ownership throughout. Browser Image preparation closes `ImageBitmap`, zero-sizes the `OffscreenCanvas`, uses no object URL or temporary file, and releases local Blob/ArrayBuffer/base64 values after the promise chain. The native host bounds framing/base64/decoded memory, releases WIC COM objects, disposes untransferred `HGLOBAL` handles, transfers successful PNG/CF_DIBV5 ownership to Windows, zeroes the decoded request byte array, and exits. Its mutex, window, thread, protocol document, and diagnostic data are request-scoped. Decision 42's 5 MiB encoded, dimension/pixel, 64 MiB decoded, two-surface/128 MiB working-set, metadata-before-decode, post-decode validation, and animated-WebP rejection limits remain unchanged.
 
-Functional local/development capability is distinct from production distribution. The `.dev` host has reversible HKCU registration for one stable development origin. A production installer, stable production registration/location, code signing/publisher identity, updater/rollback, and version-migration workflow remain future separately approved packaging work. They do not block Principal closeout of the current local/development product.
+Functional local/development capability is distinct from production distribution. The `.dev` host has reversible HKCU registration for one stable development origin. A production installer, stable production registration/location, code signing/publisher identity, updater/rollback, and version-migration workflow remain future separately approved packaging work. They did not block M14-K closeout of the local/development product.

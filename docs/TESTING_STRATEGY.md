@@ -391,7 +391,7 @@ M14-K.2.3 controlled correction acceptance:
 - Native tests substitute the final `SendInput` call only at the platform boundary, set a known last-error value, and prove the same production method reports requested count, inserted count, actual `cbSize`, and the immediately captured last error with exactly one attempt. Full/zero/partial mapping remains 4/0/1–3 with no retry.
 - Native-development protocol tests require the exact privacy-safe diagnostic object and reject unknown/content-bearing members. Host tests prove the diagnostic is included only when explicitly enabled and absent from normal protocol-v2 responses. Extension tests prove only native-development/test parsing accepts it, one attempt diagnostic is consumed once, and the bounded automatic-paste trace retains it without changing delivery results.
 
-Status: **IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REAL-BROWSER PASS / PRINCIPAL APPROVED**. The combined M14-K checkpoint remains pending final Principal review and Git authorization. Real automatic behavior is supported by the separate authoritative Principal evidence below, not inferred from controlled automation.
+Status: **COMPLETE AT `e34cd76` / AUTOMATED PASS / PRINCIPAL REAL-BROWSER PASS / PRINCIPAL APPROVED / M14-K CLOSED**. Real automatic behavior is supported by the separate authoritative Principal evidence below, not inferred from controlled automation.
 
 M14-K.3 Principal real-Chrome matrix:
 
