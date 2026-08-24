@@ -50,16 +50,19 @@
 - **FUTURE ARCHITECTURAL PERFORMANCE OPPORTUNITY (C):** consider reducing JPEG/WebP-to-PNG conversion latency and consolidating repeated one-shot native-host contacts only in a separately approved architecture task. Controlled 1440×900 conversions measured about 1.04–1.06 s; content-free host startup measured 67.0 ms median / 76.1 ms p95. Direct PNG preparation is already fast. Do not replace one-shot Native Messaging inside M14-K closeout.
 - Keep variables, arbitrary HTML/CSS, non-image attachments, provider work, M15 Context images, analytics, alternate triggers, cloud hosting, destination-upload integration, sync, and collaboration out of M14.
 
-### Approved Post-M14 Snippet Hardening (Task ID Pending)
+### M14-L–M14-P — Approved Snippet Hardening
 
-- Add periodic local automatic backup by reusing the canonical Backup/Export format. Cadence is `Off | Daily | Weekly`, weekly recommended/default; manual Export remains; failure never blocks Snippet use; retention is bounded. Determine location, retention count, Chrome capabilities, and permissions during implementation architecture review.
-- Add provider-independent generated Text Snippet tags as non-authoritative retrieval hints. Preserve current caller-authored ordered tags, never overwrite content, never make generated tags the sole eligibility condition, and explicitly design generated/authored coexistence plus any schema/Backup evolution.
-- Add best-effort mutable usage metadata conceptually containing `snippetId`, `usageCount`, and `lastUsedAt`. Count after clipboard success plus exact trigger cleanup in either paste mode, do not observe physical `Ctrl+V`, and never block delivery. Prefer separation from authored Snippet content subject to schema review.
-- Keep textual relevance primary, generated tags supporting, and usage/recency weak tie-breakers. Popularity must not dominate relevance.
-- This gate occurs after M14 closes and before M15 implementation. Its task ID remains intentionally unassigned because M15/M16 already have established meanings.
+- **M14-L/M14-L.1 — Architecture & Reconciliation:** Principal-approved Decisions 50–53 define coordinated portable evolution and independent failure boundaries; Decision 54 preserves the locked future toolbar-to-Side-Panel/Settings-gear navigation. Documentation only; current runtime remains unchanged.
+- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** before any permanent migration, prove in real Chrome through scratch persistence that explicit Options selection, handle clone/recovery, permission states, already-granted background use, exact test-file lifecycle/removal, unrelated-file isolation, and revoked/unavailable failures work without `alarms` or `downloads`. FAIL blocks M14-M.1 and returns to Principal review.
+- **M14-M/M14-M.1 — Usage Statistics + Shared Data Foundation:** after M14-M.0 PASS, add strict Backup v7 and one Dexie v6 migration with the gate-proven local automatic-state design, then a separate Text/Image usage sidecar, one-use cleanup receipt, best-effort atomic increment, deletion/restore integrity, and minimal `<count> uses` UI. Retrieval/view/edit/export never count; failed writes never change delivery.
+- **M14-N — Periodic Automatic Backup:** use user-gesture `showDirectoryPicker({mode:'readwrite'})`, an IndexedDB-persisted handle, per-run permission query, one `alarms` schedule, canonical v7 construction, verified selected-folder output, and local ownership manifest. Daily keeps the latest seven and Weekly the latest four successful managed backups only after the new file is reverified. Unrelated/unverifiable files are never deleted. No `downloads` fallback or permission.
+- **M14-O — Generated Text Tags + Retrieval:** keep authored tags unchanged; store Text-only generated tags with source fingerprint; invalidate on material edit; generate after Save through injected `GenerationProvider` and configured-model resolver; accept only exact bounded JSON arrays; backfill only through edit or an explicit 20-record/concurrency-one batch. Generated tags score 1 after title 5/authored tags 3/content 1; usage/recency stay out of retrieval.
+- **M14-P — Validation & Closeout:** validate migration, Backup v1-v7 compatibility, atomic restore, receipt idempotency, delivery failure isolation, provider/model failures, ranking, real-Chrome folder-handle restart/revocation/unavailability, missed-alarm coalescing, exact weekly retention ownership, permissions, privacy, and M14-K regressions before M15.
+- **Retention approved:** Daily latest seven and Weekly latest four successful managed backups, with success/reverification before ownership-proven pruning and safe extras on uncertainty.
 
 ### M15 — AI Drafting Workflow Refinement and Multimodal Context
 
+- Carry Decision 54 first: replace the popup-backed toolbar action with native global Side Panel open/toggle behavior and add the compact Settings gear-to-Options path without a new permission.
 - Make Text Snippets the sole active user-managed AI reference library; retire Knowledge from the active AI workflow/UI without deleting the compatibility domain/store/backups until a separate cleanup task.
 - Implement optional Guidance / Gist, Context/Gist empty-state rules, factual grounding, application defaults, and Text-Snippet reference precedence from Decision 46.
 - Implement the compact Decision 47 Workspace order, bounded auto-growing inputs, provider-independent Model dropdown, editable preserved output, Copy, and reduced primary-workflow explanatory copy.
@@ -81,12 +84,12 @@
 - Activate/focus an already-visible Chrome Side Panel after shortcut capture when Chrome exposes a supported API.
 - This capability is unassigned, has no milestone, and does not authorize M10 retries, delays, polling, panel close/reopen, toggle behavior, broader permissions, persistence, notifications, or alternate tab or window workarounds.
 
-### Workspace Shell Action UX
+### M15 Workspace Shell Action UX
 
-- Replace the current toolbar-action-to-popup-to-Workspace path with direct opening/showing of the existing global AI Support Workspace Side Panel through Chrome's supported toolbar-action Side Panel behavior.
-- Add a Library action inside the Side Panel that opens the existing full options/Library page in a normal browser tab. Keep Knowledge, Snippets, Settings, Import / Export, and future management in options; do not duplicate the full Library shell in the panel.
-- Inspect WXT's generated manifest/action configuration and retire the default popup cleanly so direct Side Panel opening and `action.default_popup` do not compete. Preserve the existing keyboard shortcut, global Side Panel behavior, and least-privilege permissions; no new permission is expected solely for this change.
-- This capability is unassigned, has no milestone, is not M14-G through M14-J, and must not interrupt the approved Snippet sequence.
+- Replace the current toolbar-action-to-popup-to-Workspace path with `chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:true})`, a popup-free toolbar action, and native global Side Panel open/toggle behavior.
+- Add one compact icon-only Settings gear in the Side Panel title row. It uses `chrome.runtime.openOptionsPage()`, accessible name `Open Settings and Libraries`, visible focus, native keyboard activation, and safe failure feedback. Do not add a full-width **Open Libraries** row or Settings dropdown/menu. Keep Knowledge compatibility, Text/Image Snippets, Settings, Import / Export, automatic backup, paste behavior, model/provider controls, and future management in Options.
+- Inspect WXT's generated manifest/action configuration; retire the popup entry point and `action.default_popup`; preserve `side_panel.default_path`, `options_ui`, the existing keyboard shortcut, global Side Panel behavior, and least-privilege permissions. Replace popup tests and validate the locked flow in real Chrome.
+- Decision 54 assigns this capability to M15. It is not implemented in M14-L and must not interrupt M14-M through M14-P.
 
 ### Optional Windows Automatic Native Paste
 

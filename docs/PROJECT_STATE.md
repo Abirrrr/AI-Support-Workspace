@@ -7,12 +7,39 @@
 
 ## Current Milestone
 
-- Milestone 14 — Snippet Authoring and Delivery: COMPLETE
-- Status: M14-K Automatic Paste is CLOSED / COMPLETE at implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`). Principal real-browser validation passed. The next planned engineering gate is Post-M14 Snippet Hardening, whose task ID remains intentionally unassigned. Snippet hardening and M15 AI drafting implementation are NOT STARTED.
+- M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
+- Status: M14-K remains CLOSED / COMPLETE at implementation checkpoint `e34cd76` and closeout checkpoint `3e5d545`. M14-L Decisions 50–53 are Principal-approved in substance, Decision 54 remains intact, and M14-L.1 is the active documentation-only correction. M14-M.0 through M14-P are assigned but NOT STARTED. M15 AI drafting implementation is NOT STARTED.
 
 ## Task State
 
-### M14-K.5 — Milestone Closeout & Checkpoint Recording
+### M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
+
+```text
+Active task: M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
+Starting checkpoint: 3e5d545 — docs: close out automatic snippet paste milestone
+Underlying M14-L starting tree: clean; master synchronized with origin/master
+M14-L.1 input tree: existing 11-file documentation-only M14-L worktree preserved; no source/test/config change; HEAD still synchronized with origin/master
+
+M14-K: CLOSED / COMPLETE / REAL-BROWSER VALIDATED
+M14-L: PRINCIPAL-APPROVED IN SUBSTANCE / DOCUMENTATION ONLY
+M14-L.1: ACTIVE / CONTINUITY AND FEASIBILITY-ORDER RECONCILIATION
+M14-M.0/M14-M.1/M14-M/M14-N/M14-O/M14-P: ASSIGNED / NOT STARTED
+M15 AI drafting: NOT STARTED
+
+Current physical Dexie: 5
+Current canonical Backup: 6
+Current manifest/permissions/dependencies: UNCHANGED
+Runtime/test/schema migration: NONE
+Knowledge deletion/migration: NONE
+M14-K Class-C optimization: DEFERRED
+Staging/commit/push: NONE
+```
+
+Principal-approved Decisions 50–53 define a future coordinated Dexie v6/Backup v7 foundation, a separate Text/Image usage sidecar and one-use cleanup receipt, user-selected File System Access backup location plus eventual `chrome.alarms`, Daily latest-seven and Weekly latest-four managed retention, and fingerprinted provider-independent generated Text tags with deterministic lexical retrieval. Decision 54 remains intact and locks the toolbar-to-Side-Panel/Settings-gear navigation model. Current code and data remain unchanged.
+
+Persistent selected-folder reuse remains conditional until **M14-M.0 — Selected-Folder Backup Feasibility Gate** passes in real Chrome. M14-M.0 uses scratch persistence and one exact self-owned test file to prove picker activation, handle cloning/recovery, permission truth, later background-context reuse without prompting, exact file verification/removal, unrelated-file isolation, and safe revocation/unavailability. FAIL stops before M14-M.1 and returns to Principal review. Daily latest seven and Weekly latest four are now final approved retention values.
+
+### Prior M14-K.5 — Milestone Closeout & Checkpoint Recording
 
 ```text
 Active task: M14-K.5 — Milestone Closeout & Checkpoint Recording
@@ -627,8 +654,13 @@ Image trigger + Space
 - **M14-I.4.1 — Native Companion Capability Status Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / REAL-CHROME SETTINGS READINESS PASS / COMMITTED IN `ebe915f`. Callback-aligned Native Messaging and stable service-worker `sendResponse` handling map compatible success to Ready while keeping unavailable, incompatible, and invalid responses distinct.
 - **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED IN `ebe915f`. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
 - **M14-K Optional Automatic Native Paste:** COMPLETE AT `e34cd76`. Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
-- **Post-M14 Snippet Hardening — Task ID Unassigned:** after M14 closes and before M15, implement periodic canonical local backup, generated Text Snippet retrieval tags, and best-effort usage metadata through separately approved schema/permission/application tasks. Existing M15/M16 IDs remain preserved.
-- **Workspace Shell Action UX — Unassigned:** The current toolbar action still opens the popup. A future shell task will make the toolbar action open the existing global Workspace Side Panel directly and add a panel Library action that opens the options Library page in a normal browser tab. Snippets, Settings, Import / Export, and future management stay in options; current Knowledge remains until separately retired.
+- **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** ACTIVE / DOCUMENTATION ONLY. Decisions 50–53 are Principal-approved in substance; Decision 54 remains intact. M14-L.1 corrects feasibility order, approved retention, and restored-cadence activation semantics without implementation.
+- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** NOT STARTED. Mandatory scratch/real-Chrome proof before any permanent Dexie v6/Backup v7 or selected-folder state commitment. FAIL returns to Principal review and blocks M14-M.1.
+- **M14-M — Snippet Usage Statistics:** NOT STARTED. After M14-M.0 PASS, M14-M.1 owns the shared Dexie v6/Backup v7 foundation; usage receipt/sidecar/UI follows.
+- **M14-N — Periodic Automatic Backup:** NOT STARTED. File System Access + `alarms`, selected-folder production revalidation, exact Daily latest-seven and Weekly latest-four retention, and manual fallback.
+- **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
+- **M14-P — Snippet Hardening Validation & Closeout:** NOT STARTED. Complete automated/real-Chrome hardening evidence and preserve M14-K delivery before M15.
+- **M15 Workspace Shell Action UX — ASSIGNED / NOT STARTED:** The current toolbar action still opens the popup. Decision 54 requires M15 to retire the popup/default popup, use native toolbar-action global Side Panel open/toggle behavior, and add a compact accessible Side Panel Settings gear that opens the existing Options / Libraries page. Text/Image Snippets, backup/export, automatic backup, paste behavior, model/provider settings, other settings, and current Knowledge compatibility remain in Options.
 - **M15 — AI Drafting Workflow Refinement and Multimodal Context:** implement Decision 46/47 compact UI, Guidance / Gist, Text-Snippet active reference retrieval, provider-independent model selection, editable output, and request-scoped Context Images. Knowledge compatibility remains non-destructively dormant; unsupported images never disappear silently. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
@@ -846,7 +878,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews this M14-K.5 documentation-only closeout and authorizes the closeout-documentation checkpoint and push when satisfied. The next engineering gate after repository synchronization is the intentionally unassigned Post-M14 Snippet Hardening architecture/planning phase: periodic canonical automatic backup, generated Text Snippet retrieval tags, and best-effort `usageCount`/`lastUsedAt`. Do not begin implementation before that gate is assigned and approved.
+- Principal reviews the M14-L.1 reconciliation and, if correct, authorizes its documentation checkpoint and **M14-M.0 only**. Decisions 50–53 and Daily-seven/Weekly-four retention are already approved in substance; Decision 54 remains intact. M14-M.1 may begin only after recorded M14-M.0 real-Chrome PASS. Do not start M14-M.1/M14-M/N/O/P or M15 before their gates.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -865,7 +897,7 @@ Image trigger + Space
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
 - M14-I implementation is committed and pushed at `ebe915f` (`feat: add clipboard delivery for text and image snippets`); immediately after that checkpoint, local `master` matched `origin/master` and the working tree was clean.
 - M14-I closeout documentation is committed and pushed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed and pushed at `797a68a` (`feat: validate destination compatibility`); and completed M14-J lifecycle recovery/closeout is synchronized at `e4e9645` (`feat: add always-on snippet lifecycle recovery`).
-- M14-K Automatic Paste is Principal-approved, real-browser validated, complete, and closed at local implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`). That checkpoint has not yet been pushed; local `master` is one commit ahead of `origin/master` before the M14-K.5 documentation diff.
+- M14-K Automatic Paste is Principal-approved, real-browser validated, complete, and closed at implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`) and synchronized closeout checkpoint `3e5d545` (`docs: close out automatic snippet paste milestone`). M14-L preflight confirmed clean synchronized `master`.
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and remain unchanged. Rich Snippet Templates is assigned to M14, Multimodal Screenshot Context to M15, OpenAI Provider Expansion to M16, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
@@ -873,7 +905,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed milestone task: M14-K — Automatic Paste. It is CLOSED / COMPLETE and REAL-BROWSER VALIDATED at `e34cd76`. M14-K.5 is the active documentation-only closeout-recording task. Post-M14 Snippet Hardening is next, unassigned, and not started.
+- Last completed milestone task: M14-K — Automatic Paste, CLOSED / COMPLETE and REAL-BROWSER VALIDATED at `e34cd76`, with closeout synchronized at `3e5d545`. M14-L.1 is the active documentation-only reconciliation task. M14-M.0 through M14-P are assigned and not started.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -882,7 +914,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal reviews the M14-K.5 closeout diff, then authorizes or rejects its documentation checkpoint and the pending push of local `master`. Do not begin Snippet hardening or M15 before the unassigned hardening gate is explicitly planned and approved.
+- Exact next action: Principal approves or corrects the M14-L.1 reconciliation, authorizes its documentation checkpoint, then authorizes M14-M.0 as the only next engineering task. M14-M.0 PASS is required before M14-M.1; M14-M/N/O/P and M15 remain unstarted.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -912,5 +944,5 @@ Image trigger + Space
 - M14-D architecture checkpoint: `64504df` (`docs: define rich snippet delivery and local image architecture`).
 - M14-D.2 architecture clarification checkpoint: `f9b5097` (`docs: define pre-delivery local image trigger safety`).
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
-- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; and the complete approved M14-K implementation is committed locally at `e34cd76` (`feat: add automatic snippet paste delivery`). The implementation checkpoint is not yet pushed.
+- M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; the complete approved M14-K implementation is synchronized at `e34cd76`; and M14-K.5 closeout is synchronized at `3e5d545`.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

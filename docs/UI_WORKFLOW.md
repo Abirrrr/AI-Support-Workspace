@@ -72,7 +72,7 @@ Copy Reply
 - Reusable reference/delivery material is managed in the Snippet Library. No direct “Save as Snippet” action from Generated Output is approved by Decision 47. Knowledge remains current compatibility data until separate removal/migration work is approved.
 - Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
 - Current implementation: the popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries opens the options page in a normal browser tab, where Knowledge and Snippet CRUD remain.
-- Approved future target: clicking the extension toolbar action opens or shows the existing global Workspace Side Panel directly, with no intermediate popup. A Library action in the panel opens the full options/Library page in a normal browser tab; Snippets, Settings, Import / Export, and future management stay in options. Current Knowledge remains there only until its separately implemented future UI retirement.
+- Approved future target: clicking the extension toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the panel header opens the full Options / Libraries page; Snippets, Settings, Import / Export, automatic backup, paste behavior, model/provider configuration, and future management stay in Options. Current Knowledge remains there only until its separately implemented future UI retirement.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
 ### Approved Future Compact Side Panel
@@ -414,7 +414,7 @@ Copy
 
 ## 9. Settings Workflow
 
-Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. In the current implementation, the popup's Open Workspace action opens the global Side Panel and Open Libraries opens the existing options page, where local navigation can reach Settings. The approved future toolbar action opens the Side Panel directly; its Library action will retain this options-page ownership rather than moving Settings into the panel.
+Settings is the third top-level section inside the existing options-page shell beside Knowledge and Snippets. In the current implementation, the popup's Open Workspace action opens the global Side Panel and Open Libraries opens the existing options page, where local navigation can reach Settings. The approved future toolbar action opens/toggles the Side Panel directly; its compact header gear opens the existing Options / Libraries surface rather than moving Settings into the panel.
 
 ```text
 Open Options Page
@@ -456,6 +456,32 @@ Transient Model Field Starts with Saved Default
 - M14-K.2 extends the same Settings aggregate and explicit Save workflow with `Paste behavior`: `Copy to clipboard` (default, manual Ctrl+V) or `Paste automatically`. The automatic choice explains that one paste is sent after copying, manual Ctrl+V remains available, and safe fallback applies when automatic paste cannot run. Trigger typing never silently requests native permission.
 - The implemented preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It uses the existing singleton Settings record with no new store/index or Dexie version. Backup v5 remains frozen; strict Backup v6 is current for new exports and valid v1-v5 imports map to `clipboard-only`.
 - M14-K.2.3 preserves this UI exactly. The first real Intercom automatic Text attempt reached the automatic branch but fell back after `post-cleanup-check`; later corrections and M14-K.3 Principal evidence validate the complete automatic path in Intercom and Crisp. `Paste sent` remains limited to full native input acceptance and does not claim destination insertion. `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V` remains the truthful populated-clipboard fallback, and manual `Ctrl+V` remains permanently supported.
+
+### Approved Future M14-N Automatic Backup Settings
+
+```text
+Automatic Backup
+[ Weekly ▼ ]
+
+Backup Location
+[ Choose folder... ]
+[folder name or Backup location needs attention]
+
+[last successful backup/status when available]
+```
+
+- Cadence values are exactly Off, Daily, and Weekly; Weekly is recommended/default. Daily retains the latest seven and Weekly the latest four successful managed backups. Off clears scheduling but retains the selected location for later reuse until the user explicitly forgets it.
+- Choose folder is the only picker/permission gesture. It opens `showDirectoryPicker({ mode: 'readwrite' })`; the UI displays only safe folder/status information, not an invented arbitrary path field.
+- Scheduled backup never opens a Save dialog or permission prompt. Revoked, moved, deleted, unsupported, or unavailable locations show `Backup location needs attention`; Snippet use continues and manual Export remains available.
+- Daily keeps the latest seven and Weekly the latest four successfully written and verified managed backups. The UI does not imply ownership of unrelated files; a retention-proof warning may leave safe extras.
+- Restored cadence is a preference, not filesystem authority. Restored Daily/Weekly with no usable local folder remains inactive and shows `Backup location needs attention`; it never opens a background prompt or rapid failure loop. Manual Export stays available, and explicit Choose folder/reauthorization activates the restored cadence. Restored Off remains inactive without requiring that warning.
+- M14-N does not add a silent Downloads fallback. Configuration/help stays in Settings/Import & Export rather than the primary drafting Workspace.
+
+### Approved Future M14-M/M14-O Library Metadata
+
+- A Text or Image Snippet may show exactly `<count> uses`; absent statistics render as zero. No charts, dashboard, usage history, or telemetry are added.
+- Authored tags remain the existing editable field. Generated Text retrieval tags are separate non-authoritative metadata and must not silently appear as authored values or become editable through the authored-tag control.
+- Snippet Save completes before tag generation. Missing model/provider or generation failure may show safe non-blocking status without changing the saved Snippet.
 
 ## 10. Import / Export Workflow
 
@@ -537,6 +563,7 @@ Local persistence
 ### Assigned Future Capability Workflows
 
 - **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
+- **M14-L/M14-L.1 — Snippet Hardening Architecture:** current documentation-only reconciliation. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact. M14-M.0 selected-folder feasibility must pass before M14-M.1; M14-M usage, M14-N backup, M14-O generated Text tags/retrieval, and M14-P validation remain unimplemented. No current UI changes; Decision 54 carries toolbar/Settings navigation into M15.
 
 The lifecycle availability flow is:
 
@@ -556,19 +583,21 @@ Normal navigation continues to use static content-script injection. The user sho
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
-### Unassigned Future Workspace Shell Workflow
+### Approved Future M15 Workspace Entry and Settings Navigation
 
 ```text
 Click extension toolbar action
 ↓
-Open or show global AI Support Workspace Side Panel directly
+Chrome opens/toggles global AI Support Workspace Side Panel directly
 ↓
-Use daily Workspace, or choose Library
+AI Support Workspace                         [Settings gear]
 ↓
-Open existing full options/Library page in a normal browser tab
+Gear opens existing Options / Libraries page
 ```
 
-This future workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest and retire the default popup without competing toolbar behaviors. It is not assigned to M14-G, M14-H, M14-I, or M14-J and does not interrupt the Snippet roadmap.
+The gear is an icon-only native button in the title row with accessible name `Open Settings and Libraries`, visible keyboard focus, native Enter/Space activation, and a sufficient pointer target. It invokes `chrome.runtime.openOptionsPage()` and provides safe non-blocking failure announcement. It does not consume a content row, display a large **Open Libraries** button, or open a dropdown/menu.
+
+This future M15 workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest, retire the popup/default popup without competing toolbar behaviors, and preserve a popup-free action plus `side_panel.default_path` and `options_ui`.
 
 M14-I.2 defines the Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through the stable `native-dev` build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. M14-K.2 implements Decision 45's separate optional automatic-paste protocol through the same companion; stale focus declines, no result is retried, and manual `Ctrl+V` remains the fallback.
 

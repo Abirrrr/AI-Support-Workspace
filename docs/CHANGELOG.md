@@ -1,5 +1,24 @@
 # Changelog
 
+### M14-L.1 — Hardening Architecture Continuity & Feasibility-Gate Reconciliation
+
+- Preserved unique contiguous Decisions 1–54 and Decision 54's toolbar → Workspace Side Panel → Settings gear → Options / Libraries contract. Recorded Principal approval of Decisions 50–53 in substance without redesign.
+- Locked Daily retention to the latest seven and Weekly to the latest four successful managed backups. Both create and reverify the replacement before ownership-proven pruning; uncertainty fails safe with possible extras and never authorizes unrelated-file deletion.
+- Inserted mandatory M14-M.0 real-Chrome selected-folder feasibility before M14-M.1. The gate uses scratch persistence and one exact self-owned test file, adds no production migration or permission, and blocks permanent Dexie v6/Backup v7/local-state commitment on any required failure.
+- Clarified `automaticBackupCadence` as portable preference and local folder authority/operational state as nonportable. Restore never authorizes filesystem writes or prompts; Daily/Weekly without a granted local folder stays inactive with location-attention status and manual Export until explicit reauthorization.
+- Status: **DOCUMENTATION ONLY / M14-M.0 NOT STARTED / NO SOURCE, TEST-SOURCE, SCHEMA, PERMISSION, DEPENDENCY, STAGING, COMMIT, OR PUSH**.
+
+### M14-L — Snippet Hardening Architecture & Roadmap Definition
+
+- Added Decisions 50–54 and assigned M14-L through M14-P without implementation. M14-M.1 owns one future Dexie v6/Backup v7 foundation; current Dexie v5, Backup v6, runtime, tests, permissions, dependencies, and closed M14-K remain unchanged.
+- Defined deterministic Text/Image usage counting after clipboard success plus exact cleanup through a one-use receipt and non-blocking sidecar write. AI retrieval, viewing/editing, backup, failed activation/copy/cleanup, and physical `Ctrl+V` do not affect the counter.
+- Selected the File System Access API for a user-authorized reusable backup folder and `chrome.alarms` for scheduling. Scheduled runs never prompt; revoked/missing/unavailable destinations fail safely to attention-required status and manual Export. `chrome.downloads` is not an arbitrary-folder fallback and is not approved as a new permission.
+- Locked Weekly retention to the latest four successful managed backups only after close/reopen/digest/v7 verification and exact manifest-backed ownership proof. Unrelated/unverifiable files are never deleted. Proposed latest seven for Daily; M14-L.1 records the Principal's later approval of that value.
+- Defined Text-only fingerprinted generated metadata, post-save `GenerationProvider` use with configured-model resolution, exact 4 KiB/eight-tag/1–40-code-point JSON-array validation, edit invalidation, bounded explicit backfill, and deterministic retrieval weights 5/3/1/1 with usage excluded.
+- Locked M15 primary navigation to toolbar action → native global Workspace Side Panel and compact accessible Side Panel Settings gear → existing Options / Libraries. Audited current WXT `action.default_popup`, popup source/tests, `side_panel.default_path`, Side Panel header, and Options ownership; no implementation or configuration changed.
+- Preserved Knowledge persistence/retrieval and Prompt Builder v1 until M15, permanent manual `Ctrl+V`, M14-K Class-C deferral, local-only/no-telemetry boundaries, and all future Decisions 46–49.
+- Status: **ARCHITECTURE/DOCUMENTATION ONLY / PRINCIPAL REVIEW REQUIRED / NO IMPLEMENTATION / NO STAGING, COMMIT, OR PUSH**.
+
 ### M14-K.5 — Milestone Closeout & Checkpoint Recording
 
 - Recorded the Principal-approved M14-K implementation checkpoint `e34cd76` (`feat: add automatic snippet paste delivery`) and marked M14-K CLOSED / COMPLETE. The checkpoint is local and has not yet been pushed.
