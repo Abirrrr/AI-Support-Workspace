@@ -11,7 +11,7 @@ import {
 import { parseBackupFile } from '../../src/application/backup/backup-validator';
 import {
   BACKUP_FORMAT,
-  BACKUP_FORMAT_VERSION_6,
+  BACKUP_FORMAT_VERSION_7,
   type BackupFile,
 } from '../../src/domain/backup-file';
 
@@ -55,7 +55,13 @@ describe('Backup v6 paste-mode evolution', () => {
             knowledge: [],
             snippets: [],
             snippetAssets: [],
-            settings: { defaultModel: null, snippetPasteMode },
+            settings: {
+              defaultModel: null,
+              snippetPasteMode,
+              automaticBackupCadence: 'weekly',
+            },
+            snippetUsageStats: [],
+            snippetGeneratedMetadata: [],
           }),
         },
         { download },
@@ -64,14 +70,16 @@ describe('Backup v6 paste-mode evolution', () => {
       const serialized = download.mock.calls[0]?.[0];
       if (serialized === undefined) throw new Error('Missing backup.');
       const parsed = parseBackupFile(serialized);
-      expect(parsed.formatVersion).toBe(BACKUP_FORMAT_VERSION_6);
+      expect(parsed.formatVersion).toBe(BACKUP_FORMAT_VERSION_7);
       expect(parsed.data.settings).toEqual({
         defaultModel: null,
         snippetPasteMode,
+        automaticBackupCadence: 'weekly',
       });
       await expect(restoreSettings(parsed)).resolves.toEqual({
         defaultModel: null,
         snippetPasteMode,
+        automaticBackupCadence: 'weekly',
       });
     },
   );
@@ -92,6 +100,7 @@ describe('Backup v6 paste-mode evolution', () => {
       await expect(restoreSettings(parsed)).resolves.toEqual({
         defaultModel: null,
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       });
     },
   );

@@ -5,12 +5,14 @@ export const BACKUP_FORMAT_VERSION_3 = 3 as const;
 export const BACKUP_FORMAT_VERSION_4 = 4 as const;
 export const BACKUP_FORMAT_VERSION_5 = 5 as const;
 export const BACKUP_FORMAT_VERSION_6 = 6 as const;
-export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_6;
+export const BACKUP_FORMAT_VERSION_7 = 7 as const;
+export const BACKUP_FORMAT_VERSION = BACKUP_FORMAT_VERSION_7;
 export const MAX_LEGACY_BACKUP_BYTES = 26_214_400;
 export const MAX_BACKUP_V4_BYTES = 100_663_296;
 export const MAX_BACKUP_V5_BYTES = 100_663_296;
 export const MAX_BACKUP_V6_BYTES = 100_663_296;
-export const MAX_BACKUP_BYTES = MAX_BACKUP_V6_BYTES;
+export const MAX_BACKUP_V7_BYTES = 100_663_296;
+export const MAX_BACKUP_BYTES = MAX_BACKUP_V7_BYTES;
 
 export interface BackupKnowledgeRecordV1 {
   readonly id: string;
@@ -417,17 +419,62 @@ export interface BackupFileV6 {
   readonly data: BackupDataV6;
 }
 
+// Backup v7 intentionally reuses the frozen v6 authored-data DTOs. New
+// operational and generated data remains in exact version-owned sidecars.
+export type BackupKnowledgeRecordV7 = BackupKnowledgeRecordV6;
+export type BackupSnippetRecordV7 = BackupSnippetRecordV6;
+export type BackupSnippetAssetRecordV7 = BackupSnippetAssetRecordV6;
+
+export interface BackupSnippetUsageStatsRecordV7 {
+  readonly snippetId: string;
+  readonly usageCount: number;
+  readonly lastUsedAt: string;
+}
+
+export interface BackupSnippetGeneratedMetadataRecordV7 {
+  readonly snippetId: string;
+  readonly generatedTags: readonly string[];
+  readonly sourceFingerprint: string;
+  readonly generatedAt: string;
+}
+
+export interface BackupSettingsV7 {
+  readonly defaultModel: string | null;
+  readonly snippetPasteMode: 'clipboard-only' | 'automatic';
+  readonly automaticBackupCadence: 'off' | 'daily' | 'weekly';
+}
+
+export interface BackupDataV7 {
+  readonly knowledge: readonly BackupKnowledgeRecordV7[];
+  readonly snippets: readonly BackupSnippetRecordV7[];
+  readonly snippetAssets: readonly BackupSnippetAssetRecordV7[];
+  readonly snippetUsageStats: readonly BackupSnippetUsageStatsRecordV7[];
+  readonly snippetGeneratedMetadata: readonly BackupSnippetGeneratedMetadataRecordV7[];
+  readonly settings: BackupSettingsV7;
+}
+
+export interface BackupFileV7 {
+  readonly format: typeof BACKUP_FORMAT;
+  readonly formatVersion: typeof BACKUP_FORMAT_VERSION_7;
+  readonly exportedAt: string;
+  readonly backupId: string;
+  readonly creationMode: 'manual' | 'automatic';
+  readonly backupSetId?: string;
+  readonly data: BackupDataV7;
+}
+
 export type BackupFile =
   | BackupFileV1
   | BackupFileV2
   | BackupFileV3
   | BackupFileV4
   | BackupFileV5
-  | BackupFileV6;
+  | BackupFileV6
+  | BackupFileV7;
 
 export interface BackupImportPreview {
   readonly filename: string;
-  readonly formatVersion: 1 | 2 | 3 | 4 | 5 | 6;
+  readonly formatVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   readonly exportedAt: string;
   readonly knowledgeCount: number;
   readonly snippetCount: number;

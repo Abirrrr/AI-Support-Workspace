@@ -10,6 +10,7 @@ import { DexieSnippetEntryRepository } from '../../../src/infrastructure/persist
 import { DexieSnippetAssetRepository } from '../../../src/infrastructure/persistence/dexie-snippet-asset-repository';
 import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import { MAX_SNIPPET_ASSET_BYTES } from '../../../src/domain/snippet-asset';
+import { createSnippetSourceFingerprint } from '../../../src/domain/snippet-generated-metadata';
 import {
   createIsolatedDatabase,
   deleteIsolatedDatabase,
@@ -211,7 +212,7 @@ describe('DexieSnippetEntryRepository', () => {
       ],
     });
 
-    expect(database.verno).toBe(5);
+    expect(database.verno).toBe(6);
     expect(await repository.get(list.id)).toEqual(list);
     expect(await repository.get(image.id)).toEqual(image);
     expect((await database.snippetAssets.get(assetId))?.snippetId).toBe(
@@ -645,11 +646,80 @@ describe('DexieSnippetEntryRepository', () => {
         throw new Error('forced asset delete failure');
       },
     });
+    await database.snippetUsageStats.add({
+      snippetId: created.id,
+      usageCount: 2,
+      lastUsedAt: '2026-08-09T00:00:02.000Z',
+    });
+    await database.snippetGeneratedMetadata.add({
+      snippetId: created.id,
+      generatedTags: ['rollback'],
+      sourceFingerprint: await createSnippetSourceFingerprint(created),
+      generatedAt: '2026-08-09T00:00:02.000Z',
+    });
 
     await expect(failingRepository.delete(created.id)).rejects.toThrow(
       'Failed to delete snippet entry.',
     );
     expect(await repository.get(created.id)).toEqual(created);
     expect(await database.snippetAssets.get(assetId)).toBeDefined();
+    expect(await database.snippetUsageStats.get(created.id)).toBeDefined();
+    expect(
+      await database.snippetGeneratedMetadata.get(created.id),
+    ).toBeDefined();
+  });
+
+  it('cascades both sidecars on delete and invalidates generated metadata on material edit', async () => {
+    const created = await repository.create({
+      title: 'Sidecar owner',
+      content: createPlainSnippetContent('Original'),
+      tags: ['authored'],
+      trigger: ';sidecar',
+    });
+    await database.snippetUsageStats.add({
+      snippetId: created.id,
+      usageCount: 1,
+      lastUsedAt: '2026-08-09T00:00:02.000Z',
+    });
+    await database.snippetGeneratedMetadata.add({
+      snippetId: created.id,
+      generatedTags: ['original'],
+      sourceFingerprint: await createSnippetSourceFingerprint(created),
+      generatedAt: '2026-08-09T00:00:02.000Z',
+    });
+
+    await repository.update(created.id, {
+      title: created.title,
+      content: created.content,
+      tags: created.tags,
+      trigger: ';renamed-trigger',
+    });
+    expect(
+      await database.snippetGeneratedMetadata.get(created.id),
+    ).toBeDefined();
+
+    const updated = await repository.update(created.id, {
+      title: 'Changed source',
+      content: created.content,
+      tags: created.tags,
+      trigger: ';renamed-trigger',
+    });
+    expect(updated.title).toBe('Changed source');
+    expect(
+      await database.snippetGeneratedMetadata.get(created.id),
+    ).toBeUndefined();
+    expect(await database.snippetUsageStats.get(created.id)).toBeDefined();
+
+    await database.snippetGeneratedMetadata.add({
+      snippetId: created.id,
+      generatedTags: ['changed'],
+      sourceFingerprint: await createSnippetSourceFingerprint(updated),
+      generatedAt: '2026-08-09T00:00:03.000Z',
+    });
+    await expect(repository.delete(created.id)).resolves.toBe(true);
+    expect(await database.snippetUsageStats.get(created.id)).toBeUndefined();
+    expect(
+      await database.snippetGeneratedMetadata.get(created.id),
+    ).toBeUndefined();
   });
 });

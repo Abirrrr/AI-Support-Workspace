@@ -3,6 +3,7 @@ import type { Settings } from '../../domain/settings';
 import type { AiSupportWorkspaceDatabase } from './database';
 import { runPersistenceOperation } from './repository-helpers';
 import { GLOBAL_SETTINGS_ID, type SettingsRecord } from './settings-record';
+import { isAutomaticBackupCadence } from '../../domain/automatic-backup';
 
 function toSettings(record: SettingsRecord): Settings {
   const snippetPasteMode = record.snippetPasteMode ?? 'clipboard-only';
@@ -12,7 +13,15 @@ function toSettings(record: SettingsRecord): Settings {
   ) {
     throw new TypeError('Persisted Snippet paste mode is invalid.');
   }
-  return { defaultModel: record.defaultModel, snippetPasteMode };
+  const automaticBackupCadence = record.automaticBackupCadence ?? 'weekly';
+  if (!isAutomaticBackupCadence(automaticBackupCadence)) {
+    throw new TypeError('Persisted automatic-backup cadence is invalid.');
+  }
+  return {
+    defaultModel: record.defaultModel,
+    snippetPasteMode,
+    automaticBackupCadence,
+  };
 }
 
 export class DexieSettingsRepository implements SettingsRepository {
@@ -31,6 +40,7 @@ export class DexieSettingsRepository implements SettingsRepository {
         id: GLOBAL_SETTINGS_ID,
         defaultModel: settings.defaultModel,
         snippetPasteMode: settings.snippetPasteMode,
+        automaticBackupCadence: settings.automaticBackupCadence,
       };
 
       await this.database.settings.put(record);

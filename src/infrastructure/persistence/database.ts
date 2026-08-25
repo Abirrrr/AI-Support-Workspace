@@ -5,9 +5,13 @@ import type { SettingsRecord } from './settings-record';
 import { createPlainSnippetContent } from '../../domain/snippet-content';
 import type { SnippetEntryRecord } from './snippet-entry-record';
 import type { SnippetAssetRecord } from './snippet-asset-record';
+import type { SnippetUsageStatsRecord } from './snippet-usage-stats-record';
+import type { SnippetGeneratedMetadataRecord } from './snippet-generated-metadata-record';
+import type { AutomaticBackupStateRecord } from './automatic-backup-state-record';
+import { GLOBAL_SETTINGS_ID } from './settings-record';
 
 export const DATABASE_NAME = 'ai-support-workspace';
-export const DATABASE_VERSION = 5;
+export const DATABASE_VERSION = 6;
 
 export interface DatabaseConstructionOptions {
   databaseName?: string;
@@ -42,6 +46,12 @@ export class AiSupportWorkspaceDatabase extends Dexie {
   readonly settings!: Table<SettingsRecord, string>;
   readonly snippetEntries!: Table<SnippetEntryRecord, string>;
   readonly snippetAssets!: Table<SnippetAssetRecord, string>;
+  readonly snippetUsageStats!: Table<SnippetUsageStatsRecord, string>;
+  readonly snippetGeneratedMetadata!: Table<
+    SnippetGeneratedMetadataRecord,
+    string
+  >;
+  readonly automaticBackupState!: Table<AutomaticBackupStateRecord, string>;
 
   constructor(options: DatabaseConstructionOptions = {}) {
     super(options.databaseName ?? DATABASE_NAME, getDexieOptions(options));
@@ -79,17 +89,43 @@ export class AiSupportWorkspaceDatabase extends Dexie {
             record.content = createPlainSnippetContent(record.content);
           });
       });
-    this.version(DATABASE_VERSION).stores({
+    this.version(5).stores({
       knowledgeEntries: 'id, createdAt',
       settings: 'id',
       snippetEntries: 'id, createdAt, &trigger',
       snippetAssets: 'id, snippetId, createdAt',
     });
+    this.version(DATABASE_VERSION)
+      .stores({
+        knowledgeEntries: 'id, createdAt',
+        settings: 'id',
+        snippetEntries: 'id, createdAt, &trigger',
+        snippetAssets: 'id, snippetId, createdAt',
+        snippetUsageStats: 'snippetId, lastUsedAt',
+        snippetGeneratedMetadata: 'snippetId, generatedAt',
+        automaticBackupState: 'id',
+      })
+      .upgrade(async (transaction) => {
+        const settings = transaction.table<SettingsRecord, string>('settings');
+        const record = await settings.get(GLOBAL_SETTINGS_ID);
+        if (
+          record !== undefined &&
+          record.automaticBackupCadence === undefined
+        ) {
+          await settings.put({
+            ...record,
+            automaticBackupCadence: 'weekly',
+          });
+        }
+      });
 
     this.knowledgeEntries = this.table('knowledgeEntries');
     this.settings = this.table('settings');
     this.snippetEntries = this.table('snippetEntries');
     this.snippetAssets = this.table('snippetAssets');
+    this.snippetUsageStats = this.table('snippetUsageStats');
+    this.snippetGeneratedMetadata = this.table('snippetGeneratedMetadata');
+    this.automaticBackupState = this.table('automaticBackupState');
   }
 }
 

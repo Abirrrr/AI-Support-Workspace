@@ -61,7 +61,13 @@ function createSnapshot(): BackupSnapshot {
       },
     ],
     snippetAssets: [createAsset()],
-    settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+    settings: {
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
+    },
+    snippetUsageStats: [],
+    snippetGeneratedMetadata: [],
   };
 }
 
@@ -216,7 +222,13 @@ describe('Backup v4 local image assets', () => {
           createdAt: '2026-08-09T00:00:01.000Z',
         }),
       ],
-      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
+      },
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
     };
     const serialized = await exportV4(snapshot);
     const parsed = parseBackupFile(serialized);

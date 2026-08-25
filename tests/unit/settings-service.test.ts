@@ -25,6 +25,7 @@ describe('SettingsService', () => {
     await expect(service.load()).resolves.toEqual({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
   });
 
@@ -34,6 +35,7 @@ describe('SettingsService', () => {
         load: vi.fn(async () => ({
           defaultModel: 'qwen2.5:7b',
           snippetPasteMode: 'automatic' as const,
+          automaticBackupCadence: 'daily' as const,
         })),
       }),
     );
@@ -41,6 +43,7 @@ describe('SettingsService', () => {
     await expect(service.load()).resolves.toEqual({
       defaultModel: 'qwen2.5:7b',
       snippetPasteMode: 'automatic',
+      automaticBackupCadence: 'daily',
     });
   });
 
@@ -53,10 +56,12 @@ describe('SettingsService', () => {
     ).resolves.toEqual({
       defaultModel: 'registry/model:tag@sha256:value',
       snippetPasteMode: 'automatic',
+      automaticBackupCadence: 'weekly',
     });
     expect(repository.save).toHaveBeenCalledWith({
       defaultModel: 'registry/model:tag@sha256:value',
       snippetPasteMode: 'automatic',
+      automaticBackupCadence: 'weekly',
     });
   });
 
@@ -71,6 +76,7 @@ describe('SettingsService', () => {
     expect(repository.save).toHaveBeenCalledWith({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
   });
 

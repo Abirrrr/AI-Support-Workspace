@@ -500,10 +500,12 @@ describe('options-page restore refresh', () => {
       load: vi.fn(async () => ({
         defaultModel: restored ? 'restored-model' : 'before-model',
         snippetPasteMode: 'clipboard-only' as const,
+        automaticBackupCadence: 'weekly' as const,
       })),
       save: vi.fn(async (_defaultModelInput, snippetPasteMode) => ({
         defaultModel: null,
         snippetPasteMode,
+        automaticBackupCadence: 'weekly' as const,
       })),
     };
     const importExport = createActions({

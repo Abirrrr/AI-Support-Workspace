@@ -30,10 +30,12 @@ function createSettings(
     load: vi.fn(async () => ({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only' as const,
+      automaticBackupCadence: 'weekly' as const,
     })),
     save: vi.fn(async (defaultModelInput, snippetPasteMode) => ({
       defaultModel: defaultModelInput.trim() || null,
       snippetPasteMode,
+      automaticBackupCadence: 'weekly' as const,
     })),
     ...overrides,
   };
@@ -73,6 +75,7 @@ describe('SettingsView', () => {
     deferred.resolve({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
     await waitFor(() => expect(input).toHaveProperty('disabled', false));
   });
@@ -96,6 +99,7 @@ describe('SettingsView', () => {
       load: vi.fn(async () => ({
         defaultModel: 'qwen2.5:7b',
         snippetPasteMode: 'clipboard-only' as const,
+        automaticBackupCadence: 'weekly' as const,
       })),
     });
     render(<SettingsView settings={settings} />);
@@ -153,6 +157,7 @@ describe('SettingsView', () => {
     deferred.resolve({
       defaultModel: 'llama3.2:latest',
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
     expect(await screen.findByText('Settings saved.')).toBeTruthy();
   });
@@ -161,11 +166,13 @@ describe('SettingsView', () => {
     const save = vi.fn(async () => ({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only' as const,
+      automaticBackupCadence: 'weekly' as const,
     }));
     const settings = createSettings({
       load: vi.fn(async () => ({
         defaultModel: 'qwen2.5:7b',
         snippetPasteMode: 'clipboard-only' as const,
+        automaticBackupCadence: 'weekly' as const,
       })),
       save,
     });
@@ -216,6 +223,7 @@ describe('SettingsView', () => {
       .mockResolvedValueOnce({
         defaultModel: 'retry-model',
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       });
     render(<SettingsView settings={createSettings({ save })} />);
     const input = await screen.findByLabelText('Default Ollama model');

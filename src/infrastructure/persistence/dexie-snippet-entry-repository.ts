@@ -24,6 +24,7 @@ import {
 } from './repository-helpers';
 import { toSnippetEntry, toSnippetEntryRecord } from './snippet-entry-record';
 import { toSnippetAsset, toSnippetAssetRecord } from './snippet-asset-record';
+import { hasSameGeneratedMetadataSource } from '../../domain/snippet-generated-metadata';
 
 function isConstraintError(error: unknown): boolean {
   return (
@@ -145,6 +146,7 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
         'rw',
         this.database.snippetEntries,
         this.database.snippetAssets,
+        this.database.snippetGeneratedMetadata,
         async () => {
           const existing = await this.database.snippetEntries.get(id);
 
@@ -192,6 +194,11 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
               toSnippetEntryRecord(updated),
             );
             await this.testHooks.afterSnippetUpdateWrite?.();
+            if (
+              !hasSameGeneratedMetadataSource(toSnippetEntry(existing), updated)
+            ) {
+              await this.database.snippetGeneratedMetadata.delete(id);
+            }
             await this.database.snippetAssets
               .where('snippetId')
               .equals(id)
@@ -219,6 +226,8 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
         'rw',
         this.database.snippetEntries,
         this.database.snippetAssets,
+        this.database.snippetUsageStats,
+        this.database.snippetGeneratedMetadata,
         async () => {
           const deletedCount = await this.database.snippetEntries
             .where(':id')
@@ -230,6 +239,8 @@ export class DexieSnippetEntryRepository implements SnippetEntryRepository {
               .where('snippetId')
               .equals(id)
               .delete();
+            await this.database.snippetUsageStats.delete(id);
+            await this.database.snippetGeneratedMetadata.delete(id);
           }
           return deletedCount > 0;
         },

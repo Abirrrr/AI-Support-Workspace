@@ -7,10 +7,57 @@
 
 ## Current Milestone
 
-- M14-M.0 — Selected-Folder Backup Feasibility Gate
-- Status: **PASS / REAL-CHROME VALIDATED**. M14-K remains CLOSED / COMPLETE. The approved M14-L checkpoint at `5450cff` is preserved. M14-M.1 is unblocked for Principal review/authorization but remains NOT STARTED; M14-M through M14-P and M15 AI drafting remain NOT STARTED.
+- M14-M.1.1 — Backup Cadence & Local Authority Ownership Correction
+- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. This focused correction preserves the unstaged M14-M.1 Dexie v6/Backup v7 foundation and aligns it with the authoritative `off | daily | weekly` cadence plus machine-local authorization ownership. M14-M.0 remains PASS / REAL-CHROME VALIDATED, and the approved M14-L architecture at `5450cff` is preserved. M14-M usage delivery behavior, M14-N scheduling/output/retention, M14-O generation/retrieval, M14-P closeout, and M15 remain NOT STARTED.
 
 ## Task State
+
+### M14-M.1.1 — Backup Cadence & Local Authority Ownership Correction
+
+```text
+Active task: M14-M.1.1 — focused correction to the unstaged M14-M.1 foundation
+Starting checkpoint: a4619ec — test: validate selected-folder backup feasibility
+Input worktree: existing unstaged M14-M.1 implementation preserved
+
+Cadence contract: off | daily | weekly
+Default for new/historical/v1-v6: weekly
+Portable restore ownership: Knowledge, Snippets/assets, Settings, usage, generated metadata
+Machine-local automaticBackupState: PRESERVED INDEPENDENTLY
+Dexie physical version: 6
+Canonical Backup version: 7
+Permissions/dependencies: UNCHANGED
+Staging/commit/push: NONE
+```
+
+M14-M.1.1 corrects two ownership details without redesigning the foundation. `automaticBackupCadence` explicitly supports `off`, `daily`, and `weekly`, with `weekly` still the default for new profiles, historical Settings lacking the field, and Backup v1-v6 imports. `off` is a portable preference and is never inferred from missing local authorization.
+
+Portable restore remains atomic across Knowledge, Snippets, assets, Settings, usage statistics, and generated metadata. It does not include, clear, replace, or create the machine/profile-local `automaticBackupState`. Existing selected-folder authorization survives imports independently; imported `off` disables future writing without deleting that authorization, while imported `daily`/`weekly` with no local authorization fabricates none. Backup v7 exact-key validation rejects attempted local-authority fields.
+
+### M14-M.1 — Coordinated Dexie v6 / Backup v7 Data Foundation
+
+```text
+Active task: M14-M.1 — Coordinated Dexie v6 / Backup v7 Data Foundation
+Starting checkpoint: a4619ec — test: validate selected-folder backup feasibility
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+M14-M.0: PASS / REAL-CHROME VALIDATED
+M14-L architecture: PRESERVED
+M14-M.1 implementation: COMPLETE / AUTOMATED PASS / PRINCIPAL REVIEW PENDING
+M14-M/M14-N/M14-O/M14-P: NOT STARTED
+M15 AI drafting: NOT STARTED
+
+Current physical Dexie: 6
+Current canonical Backup: 7
+Manifest permission addition: NONE
+Alarms/downloads: NONE
+Staging/commit/push: NONE
+```
+
+M14-M.1 implements the coordinated additive foundation: Dexie v6 adds empty `snippetUsageStats`, `snippetGeneratedMetadata`, and singleton `automaticBackupState` stores; historical Settings migrate to preferred cadence `weekly`; new and absent Settings also resolve to `weekly`; authored Knowledge, Snippets, timestamps, tags, triggers, assets, and existing Settings survive unchanged. Focused repositories keep Dexie out of future M14-M/M14-N/M14-O application logic. Snippet deletion atomically cascades both sidecars with existing asset ownership, and material Text source edits invalidate generated metadata while trigger-only edits preserve it.
+
+Canonical Backup v7 retains every v6 recovery domain and the 96 MiB guard, adds strict manual/automatic backup identity metadata, portable cadence, usage, and generated metadata with deterministic sidecar ordering, and keeps v1-v6 frozen/importable. As corrected by M14-M.1.1, restore validates all new data before one transaction across Knowledge, Snippets, assets, Settings, usage, and generated metadata while preserving the independently owned local automatic-backup singleton. A restored cadence cannot restore or grant filesystem authority.
+
+This task adds no delivery receipt or usage increment, no usage UI, no folder picker product UI, no scheduler/alarm/file output/retention, no generated-tag provider call, no retrieval scoring change, no Knowledge deletion, and no M15 Workspace work. The M14-M.0 native-dev diagnostic remains production-excluded, and different-folder identity remains unproven/deferred to M14-N.
 
 ### M14-M.0 — Selected-Folder Backup Feasibility Gate
 
@@ -88,9 +135,9 @@ M14-K Class-C optimization: DEFERRED
 Staging/commit/push: NONE
 ```
 
-Principal-approved Decisions 50–53 define a future coordinated Dexie v6/Backup v7 foundation, a separate Text/Image usage sidecar and one-use cleanup receipt, user-selected File System Access backup location plus eventual `chrome.alarms`, Daily latest-seven and Weekly latest-four managed retention, and fingerprinted provider-independent generated Text tags with deterministic lexical retrieval. Decision 54 remains intact and locks the toolbar-to-Side-Panel/Settings-gear navigation model. Current code and data remain unchanged.
+At the M14-L.1 checkpoint, Principal-approved Decisions 50–53 defined a future coordinated Dexie v6/Backup v7 foundation, a separate Text/Image usage sidecar and one-use cleanup receipt, user-selected File System Access backup location plus eventual `chrome.alarms`, Daily latest-seven and Weekly latest-four managed retention, and fingerprinted provider-independent generated Text tags with deterministic lexical retrieval. Decision 54 remained intact and locked the toolbar-to-Side-Panel/Settings-gear navigation model; that documentation-only task changed no code or data.
 
-Persistent selected-folder reuse is proven by **M14-M.0 — Selected-Folder Backup Feasibility Gate** real-Chrome PASS. M14-M.1 may now be considered for separate Principal authorization; no production persistence or automatic-backup behavior exists yet. Daily latest seven and Weekly latest four remain final approved retention values, with different-folder identity proof deferred to M14-N before retention may rely on it.
+Persistent selected-folder reuse was subsequently proven by **M14-M.0 — Selected-Folder Backup Feasibility Gate** real-Chrome PASS. At the M14-L.1 checkpoint, M14-M.1 still required separate Principal authorization and no production hardening persistence or automatic-backup behavior existed. Daily latest seven and Weekly latest four remain final approved retention values, with different-folder identity proof deferred to M14-N before retention may rely on it.
 
 ### Prior M14-K.5 — Milestone Closeout & Checkpoint Recording
 
@@ -707,9 +754,10 @@ Image trigger + Space
 - **M14-I.4.1 — Native Companion Capability Status Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / REAL-CHROME SETTINGS READINESS PASS / COMMITTED IN `ebe915f`. Callback-aligned Native Messaging and stable service-worker `sendResponse` handling map compatible success to Ready while keeping unavailable, incompatible, and invalid responses distinct.
 - **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED IN `ebe915f`. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
 - **M14-K Optional Automatic Native Paste:** COMPLETE AT `e34cd76`. Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
-- **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** ACTIVE / DOCUMENTATION ONLY. Decisions 50–53 are Principal-approved in substance; Decision 54 remains intact. M14-L.1 corrects feasibility order, approved retention, and restored-cadence activation semantics without implementation.
+- **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** COMPLETE / DOCUMENTATION ONLY. Decisions 50–53 remain authoritative and Decision 54 remains intact.
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** PASS / REAL-CHROME VALIDATED. The File System Access selected-folder model, restart recovery, service-worker reuse, exact owned-file lifecycle, and unavailable-location safety are proven. Different-folder distinction remains an M14-N non-blocking verification before retention reliance.
-- **M14-M — Snippet Usage Statistics:** NOT STARTED. After M14-M.0 PASS, M14-M.1 owns the shared Dexie v6/Backup v7 foundation; usage receipt/sidecar/UI follows.
+- **M14-M.1 — Coordinated Data Foundation:** IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REVIEW PENDING. Dexie v6, Backup v7, sidecar repositories, cadence persistence, local state boundary, deletion/invalidation, v1-v6 compatibility, and atomic restore are complete.
+- **M14-M — Snippet Usage Statistics Behavior:** NOT STARTED. Usage receipt/increment/UI follows over the implemented sidecar.
 - **M14-N — Periodic Automatic Backup:** NOT STARTED. File System Access + `alarms`, selected-folder production revalidation, exact Daily latest-seven and Weekly latest-four retention, and manual fallback.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
 - **M14-P — Snippet Hardening Validation & Closeout:** NOT STARTED. Complete automated/real-Chrome hardening evidence and preserve M14-K delivery before M15.
@@ -931,7 +979,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews this recorded M14-M.0 PASS and separately authorizes or defers M14-M.1. Do not implement M14-M.1, M14-M/N/O/P, or M15 without their explicit authorization/gates.
+- Principal reviews the completed M14-M.1 implementation plus M14-M.1.1 correction, automated validation, documentation impact, and unstaged diff. Do not start M14-M usage delivery/UI, M14-N, M14-O, M14-P, or M15 without separate authorization.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -944,7 +992,7 @@ Image trigger + Space
 - The approved platform may not be substituted without an explicit architecture review.
 - Package management, build-tool configuration, quality tooling, testing configuration, production manifest validation, an infrastructure-only Playwright discovery test, and continuous integration are configured.
 - Milestone 9 implementation checkpoint `7b88b94` is committed and synchronized locally and remotely. It generates the approved `sidepanel.html`, opens it through the popup, and satisfies the frozen M9 manifest and workflow contracts.
-- The implemented Dexie-backed persistence foundation is at schema version 5. M14-E adds only `snippetAssets: 'id, snippetId, createdAt'`; historical v1-v4 declarations remain unchanged.
+- The implemented Dexie-backed persistence foundation is at schema version 6. Historical v1-v5 declarations remain unchanged; v6 adds `snippetUsageStats`, `snippetGeneratedMetadata`, and local singleton `automaticBackupState`. Canonical export is Backup v7 and v1-v6 remain importable.
 - The Knowledge and Snippet libraries share the options-page Library surface with lightweight local tab navigation, popup navigation, and locally persisted create, list, edit, and confirmation-protected delete workflows.
 - The M10 implementation checkpoint is `6093361` (`feat: add selected-text capture shortcut`), and the M11 implementation checkpoint is `d40e031` (`feat: add default Ollama model settings`).
 - M12-C architecture is committed and pushed at `7ebe874` (`docs: define import and export architecture`). The corrected and approved M12-D/M12-D.1 implementation is committed and pushed at final implementation checkpoint `d304f90` (`feat: add import and export backup workflow`); the working tree was clean after that checkpoint and local `master` matched `origin/master`.
@@ -958,7 +1006,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 is the next planned gate, unblocked for Principal review but not authorized or started.
+- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 plus its focused M14-M.1.1 cadence/authority correction are implemented with automated validation passing and await Principal review/checkpoint authorization.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -967,7 +1015,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal reviews the recorded M14-M.0 PASS and explicitly authorizes or defers M14-M.1. M14-M.1, M14-M/N/O/P, and M15 remain unstarted.
+- Exact next action: Principal reviews the unstaged M14-M.1 implementation with the M14-M.1.1 correction and validation evidence. If approved, explicitly authorize their combined Git checkpoint; do not begin M14-M behavior or later milestones in this task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks

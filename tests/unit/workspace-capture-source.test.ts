@@ -43,6 +43,7 @@ describe('ChromeWorkspaceCaptureSource', () => {
     const deferred = createDeferred<{
       defaultModel: string | null;
       snippetPasteMode: 'clipboard-only';
+      automaticBackupCadence: 'weekly';
     }>();
     const settings = { load: vi.fn(async () => deferred.promise) };
     const { listeners, runtime, sendMessage } = createRuntime();
@@ -55,6 +56,7 @@ describe('ChromeWorkspaceCaptureSource', () => {
     deferred.resolve({
       defaultModel: 'saved-model:latest',
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
     const bootstrap = await bootstrapPromise;
     const source = new ChromeWorkspaceCaptureSource(runtime);

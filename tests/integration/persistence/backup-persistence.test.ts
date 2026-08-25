@@ -8,9 +8,15 @@ import {
   BACKUP_FORMAT_VERSION_1,
   BACKUP_FORMAT_VERSION_2,
   BACKUP_FORMAT_VERSION_3,
+  BACKUP_FORMAT_VERSION_4,
+  BACKUP_FORMAT_VERSION_5,
+  BACKUP_FORMAT_VERSION_6,
+  BACKUP_FORMAT_VERSION_7,
   type BackupFile,
   type BackupFileV3,
+  type BackupFileV7,
 } from '../../../src/domain/backup-file';
+import type { AutomaticBackupCadence } from '../../../src/domain/automatic-backup';
 import { createPlainSnippetContent } from '../../../src/domain/snippet-content';
 import type { KnowledgeEntry } from '../../../src/domain/knowledge-entry';
 import type { SnippetEntry } from '../../../src/domain/snippet-entry';
@@ -79,12 +85,104 @@ const restoredData: BackupRestoreData = {
   settings: {
     defaultModel: 'qwen2.5:7b',
     snippetPasteMode: 'automatic',
+    automaticBackupCadence: 'weekly',
   },
+  snippetUsageStats: [
+    {
+      snippetId: '423e4567-e89b-42d3-a456-426614174000',
+      usageCount: 5,
+      lastUsedAt: '2026-08-02T09:00:00.000Z',
+    },
+  ],
+  snippetGeneratedMetadata: [
+    {
+      snippetId: '423e4567-e89b-42d3-a456-426614174000',
+      generatedTags: ['restored'],
+      sourceFingerprint: '0'.repeat(64),
+      generatedAt: '2026-08-02T09:00:00.000Z',
+    },
+  ],
 };
 
 function requireValue<T>(value: T | undefined, description: string): T {
   if (value === undefined) throw new Error(`Missing ${description} fixture.`);
   return value;
+}
+
+const localAutomaticBackupState = {
+  id: 'global' as const,
+  directoryHandle: { kind: 'directory' as const, name: 'Local only' },
+  backupSetId: '123e4567-e89b-42d3-a456-426614174000',
+};
+
+function createHistoricalEmptyBackup(
+  formatVersion: 1 | 2 | 3 | 4 | 5 | 6,
+): BackupFile {
+  const envelope = {
+    format: BACKUP_FORMAT,
+    formatVersion,
+    exportedAt: '2026-08-09T00:00:00.000Z',
+  };
+  if (formatVersion <= BACKUP_FORMAT_VERSION_3) {
+    return {
+      ...envelope,
+      data: {
+        knowledge: [],
+        snippets: [],
+        settings: { defaultModel: null },
+      },
+    } as BackupFile;
+  }
+  if (
+    formatVersion === BACKUP_FORMAT_VERSION_4 ||
+    formatVersion === BACKUP_FORMAT_VERSION_5
+  ) {
+    return {
+      ...envelope,
+      data: {
+        knowledge: [],
+        snippets: [],
+        snippetAssets: [],
+        settings: { defaultModel: null },
+      },
+    } as BackupFile;
+  }
+  return {
+    ...envelope,
+    data: {
+      knowledge: [],
+      snippets: [],
+      snippetAssets: [],
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+      },
+    },
+  } as BackupFile;
+}
+
+function createEmptyV7Backup(
+  automaticBackupCadence: AutomaticBackupCadence,
+): BackupFileV7 {
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_7,
+    exportedAt: '2026-08-09T00:00:00.000Z',
+    backupId: '223e4567-e89b-42d3-a456-426614174000',
+    creationMode: 'manual',
+    data: {
+      knowledge: [],
+      snippets: [],
+      snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence,
+      },
+    },
+  };
 }
 
 describe('Dexie backup snapshot and atomic restore', () => {
@@ -142,9 +240,12 @@ describe('Dexie backup snapshot and atomic restore', () => {
       knowledge: [originalKnowledge],
       snippets: [originalSnippet],
       snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
       settings: {
         defaultModel: 'original-model',
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       },
     });
 
@@ -152,6 +253,7 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect((await reader.readSnapshot()).settings).toEqual({
       defaultModel: null,
       snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
     });
   });
 
@@ -199,10 +301,9 @@ describe('Dexie backup snapshot and atomic restore', () => {
         'trigger',
       ].sort(),
     );
-    expect(Object.keys(snapshot.settings).sort()).toEqual([
-      'defaultModel',
-      'snippetPasteMode',
-    ]);
+    expect(Object.keys(snapshot.settings).sort()).toEqual(
+      ['defaultModel', 'snippetPasteMode', 'automaticBackupCadence'].sort(),
+    );
     expect(JSON.stringify(snapshot)).not.toContain('futureKnowledgeField');
     expect(JSON.stringify(snapshot)).not.toContain('usageCount');
     expect(snapshot.snippets[0]?.trigger).toBe(';future');
@@ -223,14 +324,18 @@ describe('Dexie backup snapshot and atomic restore', () => {
         id: GLOBAL_SETTINGS_ID,
         defaultModel: 'qwen2.5:7b',
         snippetPasteMode: 'automatic',
+        automaticBackupCadence: 'weekly',
       },
     ]);
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map(({ name }) => name).sort()).toEqual([
+      'automaticBackupState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
       'snippetEntries',
+      'snippetGeneratedMetadata',
+      'snippetUsageStats',
     ]);
 
     database.close();
@@ -273,7 +378,13 @@ describe('Dexie backup snapshot and atomic restore', () => {
           createdAt: '2026-08-09T00:00:01.000Z',
         },
       ],
-      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
+      },
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
     };
 
     await new DexieTransactionalBackupRestorePort(database).replaceAll(data);
@@ -342,24 +453,71 @@ describe('Dexie backup snapshot and atomic restore', () => {
     },
   );
 
-  it('restores a valid empty backup and persists the null Settings singleton', async () => {
-    await new DexieTransactionalBackupRestorePort(database).replaceAll({
-      knowledge: [],
-      snippets: [],
-      snippetAssets: [],
-      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
-    });
+  it.each(['off', 'daily', 'weekly'] as const)(
+    'restores v7 cadence %s while preserving existing local authorization',
+    async (cadence) => {
+      await database.automaticBackupState.add(localAutomaticBackupState);
+      await new BackupRestoreService(
+        new DexieTransactionalBackupRestorePort(database),
+      ).restoreBackup(createEmptyV7Backup(cadence));
 
-    expect(await database.knowledgeEntries.count()).toBe(0);
-    expect(await database.snippetEntries.count()).toBe(0);
-    expect(await database.settings.toArray()).toEqual([
-      {
+      expect(await database.knowledgeEntries.count()).toBe(0);
+      expect(await database.snippetEntries.count()).toBe(0);
+      expect(await database.automaticBackupState.toArray()).toEqual([
+        localAutomaticBackupState,
+      ]);
+      expect(await database.settings.toArray()).toEqual([
+        {
+          id: GLOBAL_SETTINGS_ID,
+          defaultModel: null,
+          snippetPasteMode: 'clipboard-only',
+          automaticBackupCadence: cadence,
+        },
+      ]);
+    },
+  );
+
+  it.each([
+    BACKUP_FORMAT_VERSION_1,
+    BACKUP_FORMAT_VERSION_2,
+    BACKUP_FORMAT_VERSION_3,
+    BACKUP_FORMAT_VERSION_4,
+    BACKUP_FORMAT_VERSION_5,
+    BACKUP_FORMAT_VERSION_6,
+  ] as const)(
+    'preserves local authorization and defaults cadence to weekly for Backup v%i',
+    async (formatVersion) => {
+      await database.automaticBackupState.add(localAutomaticBackupState);
+      await new BackupRestoreService(
+        new DexieTransactionalBackupRestorePort(database),
+      ).restoreBackup(createHistoricalEmptyBackup(formatVersion));
+
+      expect(await database.automaticBackupState.toArray()).toEqual([
+        localAutomaticBackupState,
+      ]);
+      expect(await database.settings.get(GLOBAL_SETTINGS_ID)).toEqual({
         id: GLOBAL_SETTINGS_ID,
         defaultModel: null,
         snippetPasteMode: 'clipboard-only',
-      },
-    ]);
-  });
+        automaticBackupCadence: 'weekly',
+      });
+    },
+  );
+
+  it.each(['daily', 'weekly'] as const)(
+    'restores v7 cadence %s without fabricating local authorization',
+    async (cadence) => {
+      await new BackupRestoreService(
+        new DexieTransactionalBackupRestorePort(database),
+      ).restoreBackup(createEmptyV7Backup(cadence));
+
+      expect(await database.automaticBackupState.count()).toBe(0);
+      expect(
+        (await database.settings.get(GLOBAL_SETTINGS_ID))
+          ?.automaticBackupCadence,
+      ).toBe(cadence);
+    },
+  );
 
   it('excludes simulated future DTO fields from persisted records', async () => {
     const knowledge = Object.assign(
@@ -418,7 +576,12 @@ describe('Dexie backup snapshot and atomic restore', () => {
       ].sort(),
     );
     expect(Object.keys(persistedSettings[0] ?? {}).sort()).toEqual(
-      ['id', 'defaultModel', 'snippetPasteMode'].sort(),
+      [
+        'id',
+        'defaultModel',
+        'snippetPasteMode',
+        'automaticBackupCadence',
+      ].sort(),
     );
     expect(JSON.stringify(persistedKnowledge)).not.toContain(
       'futureKnowledgeField',
@@ -454,10 +617,14 @@ describe('Dexie backup snapshot and atomic restore', () => {
     'snippets-cleared',
     'snippet-assets-cleared',
     'settings-cleared',
+    'snippet-usage-stats-cleared',
+    'snippet-generated-metadata-cleared',
     'knowledge-written',
     'snippets-written',
     'snippet-assets-written',
     'settings-written',
+    'snippet-usage-stats-written',
+    'snippet-generated-metadata-written',
   ])('rolls back all stores when %s fails', async (failedStage) => {
     const restore = new DexieTransactionalBackupRestorePort(database, {
       afterStage: (stage) => {
@@ -469,6 +636,25 @@ describe('Dexie backup snapshot and atomic restore', () => {
       `Failed to restore backup.`,
     );
     await expectOriginalState();
+  });
+
+  it('preserves portable profile data and local authorization when restore fails', async () => {
+    await database.automaticBackupState.add(localAutomaticBackupState);
+    const restore = new DexieTransactionalBackupRestorePort(database, {
+      afterStage: (stage) => {
+        if (stage === 'settings-written') {
+          throw new Error('forced portable restore failure');
+        }
+      },
+    });
+
+    await expect(restore.replaceAll(restoredData)).rejects.toThrow(
+      'Failed to restore backup.',
+    );
+    await expectOriginalState();
+    expect(await database.automaticBackupState.toArray()).toEqual([
+      localAutomaticBackupState,
+    ]);
   });
 
   it('rolls back all four stores when a non-empty asset restore fails', async () => {
@@ -510,7 +696,13 @@ describe('Dexie backup snapshot and atomic restore', () => {
             createdAt: '2026-08-09T00:00:00.000Z',
           },
         ],
-        settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+        settings: {
+          defaultModel: null,
+          snippetPasteMode: 'clipboard-only',
+          automaticBackupCadence: 'weekly',
+        },
+        snippetUsageStats: [],
+        snippetGeneratedMetadata: [],
       }),
     ).rejects.toThrow('Failed to restore backup.');
     await expectOriginalState();
@@ -524,7 +716,13 @@ describe('Dexie backup snapshot and atomic restore', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
-      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
+      },
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
     });
     await new DexieTransactionalBackupRestorePort(database).replaceAll(
       exported,

@@ -1,5 +1,20 @@
 # Changelog
 
+### M14-M.1.1 — Backup Cadence & Local Authority Ownership Correction
+
+- Confirmed the authoritative portable cadence contract as exact `off | daily | weekly`, retaining `weekly` for new profiles, historical Settings without the field, and Backup v1-v6 imports. Added explicit persistence and v7 round-trip coverage for all three values plus invalid-cadence rejection.
+- Corrected restore ownership so the atomic portable transaction replaces only Knowledge, Snippets, assets, Settings, usage statistics, and generated metadata. Machine/profile-local `automaticBackupState` is no longer included, cleared, replaced, or created by restore; imported `off` preserves existing folder authorization while disabling future automatic writing.
+- Added v1-v6 and v7 local-state preservation tests, no-authority fabrication tests for restored Daily/Weekly, failed-restore consistency coverage, and strict exact-key rejection of attempted directory-handle/local-state injection. Dexie remains v6 and Backup remains v7; no scheduler, retention, permission, dependency, usage behavior, or generated-tag AI behavior was added.
+
+### M14-M.1 — Coordinated Dexie v6 / Backup v7 Data Foundation
+
+- Implemented one additive Dexie v6 declaration with `snippetUsageStats`, `snippetGeneratedMetadata`, and singleton `automaticBackupState`; the v5→v6 migration preserves authored Knowledge/Snippets/assets/timestamps/tags/triggers and migrates present historical cadence to `weekly` without synthesizing sidecar rows.
+- Added focused typed repositories for usage, generated Text metadata, and local automatic-backup state. Usage validates positive safe integers and UTC timestamps; generated metadata validates Text ownership, bounded normalized tags, lowercase SHA-256 fingerprints, and UTC timestamps. Material source edits invalidate generated metadata; trigger-only edits preserve it; Snippet deletion cascades both sidecars atomically with assets and rolls back on failure.
+- Advanced canonical export to strict Backup v7 while freezing/importing v1-v6. V7 preserves Knowledge, Text/Image Snippets, assets, authored tags, model and paste Settings, and the 96 MiB guard; it adds random canonical backup identity/creation metadata, deterministic usage/generated arrays, and portable `automaticBackupCadence`.
+- V7 import fails closed on malformed/duplicate/unsafe sidecars, invalid cadence/timestamps/tags/fingerprints/references/discriminants/unknown fields, automatic/manual backup-set violations, and fingerprint mismatch. M14-M.1.1 corrects restore ownership: the all-or-nothing transaction covers every portable store while the local nonportable selected-directory singleton remains independently preserved; restored cadence cannot grant filesystem authority.
+- Added migration, repository, ownership, deletion/invalidation rollback, v7 round-trip/validation/default/determinism, nonportable exclusion, and atomic restore coverage. Full automated regression validation passes 756 tests with one existing opt-in skip before final build/tooling validation.
+- Preserved M14-M.0 PASS and its production-excluded native-dev diagnostic. Added no usage delivery receipt/increment/UI, folder picker product UI, alarm/scheduler/file output/retention, provider call/generated-tag retrieval scoring, Knowledge deletion, M15 UI, permission, dependency, commit, or push. Different-folder identity remains deferred to M14-N.
+
 ### M14-M.0 — Selected-Folder Backup Feasibility Gate
 
 - Principal real-Chrome validation is complete: explicit-gesture picker, scratch IndexedDB handle storage, Options reload, browser restart, permission query, independent service-worker recovery/reuse, exact owned-file creation/read verification/deletion, no remaining artifact, same-folder recognition, unrelated-file isolation, and unavailable/deleted-location fail-safe behavior all pass without new filesystem, `alarms`, or `downloads` permission.

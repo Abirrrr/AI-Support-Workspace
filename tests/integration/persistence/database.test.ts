@@ -32,15 +32,18 @@ describe('local database foundation', () => {
     await deleteIsolatedDatabase(databaseName);
   });
 
-  it('opens version 5 with only the approved tables and indexes', async () => {
+  it('opens version 6 with only the approved tables and indexes', async () => {
     await database.open();
 
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
+      'automaticBackupState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
       'snippetEntries',
+      'snippetGeneratedMetadata',
+      'snippetUsageStats',
     ]);
 
     expect(database.knowledgeEntries.schema.primKey).toMatchObject({
@@ -81,6 +84,13 @@ describe('local database foundation', () => {
         expect.objectContaining({ name: 'createdAt', unique: false }),
       ]),
     );
+    expect(database.snippetUsageStats.schema.indexes).toEqual([
+      expect.objectContaining({ name: 'lastUsedAt', unique: false }),
+    ]);
+    expect(database.snippetGeneratedMetadata.schema.indexes).toEqual([
+      expect.objectContaining({ name: 'generatedAt', unique: false }),
+    ]);
+    expect(database.automaticBackupState.schema.indexes).toHaveLength(0);
   });
 
   it('upgrades version 1 while preserving metadata and wrapping Snippet content', async () => {
@@ -113,17 +123,20 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(5);
+    expect(database.verno).toBe(6);
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
     expect(await database.snippetEntries.toArray()).toEqual([
       { ...snippet, content: createPlainSnippetContent(snippet.content) },
     ]);
     expect(await database.settings.count()).toBe(0);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
+      'automaticBackupState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
       'snippetEntries',
+      'snippetGeneratedMetadata',
+      'snippetUsageStats',
     ]);
   });
 
@@ -163,14 +176,66 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(5);
+    expect(database.verno).toBe(6);
     expect(await database.snippetEntries.toArray()).toEqual([structured]);
     expect(await database.snippetAssets.count()).toBe(0);
+    expect(await database.snippetUsageStats.count()).toBe(0);
+    expect(await database.snippetGeneratedMetadata.count()).toBe(0);
 
     database.close();
     database = createIsolatedDatabase(databaseName);
     expect(await database.snippetEntries.toArray()).toEqual([structured]);
     expect(await database.snippetAssets.count()).toBe(0);
+  });
+
+  it('upgrades schema-equivalent v5 to v6 without rewriting authored data', async () => {
+    const snippet = {
+      id: '123e4567-e89b-42d3-a456-426614174000',
+      title: 'Preserved v5 Snippet',
+      content: createPlainSnippetContent('Exact authored content'),
+      tags: ['authored'],
+      trigger: ';preserved',
+      createdAt: '2026-08-24T00:00:00.000Z',
+      updatedAt: '2026-08-24T00:00:01.000Z',
+    };
+    const versionFive = new Dexie(databaseName, { indexedDB, IDBKeyRange });
+    versionFive.version(5).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
+      snippetAssets: 'id, snippetId, createdAt',
+    });
+    await versionFive.open();
+    await versionFive.table('snippetEntries').add(snippet);
+    await versionFive.table('settings').add({
+      id: 'global',
+      defaultModel: 'preserved-model',
+      snippetPasteMode: 'automatic',
+    });
+    versionFive.close();
+
+    await database.open();
+
+    expect(database.verno).toBe(6);
+    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.settings.toArray()).toEqual([
+      {
+        id: 'global',
+        defaultModel: 'preserved-model',
+        snippetPasteMode: 'automatic',
+        automaticBackupCadence: 'weekly',
+      },
+    ]);
+    expect(await database.snippetUsageStats.count()).toBe(0);
+    expect(await database.snippetGeneratedMetadata.count()).toBe(0);
+    expect(await database.automaticBackupState.count()).toBe(0);
+
+    database.close();
+    database = createIsolatedDatabase(databaseName);
+    await database.open();
+    expect(database.verno).toBe(6);
+    expect(await database.snippetEntries.toArray()).toEqual([snippet]);
+    expect(await database.snippetUsageStats.count()).toBe(0);
   });
 
   it('upgrades version 2 while preserving metadata and wrapping Snippet content', async () => {
@@ -219,7 +284,11 @@ describe('local database foundation', () => {
     };
     expect(await database.snippetEntries.toArray()).toEqual([migratedSnippet]);
     expect(await database.settings.toArray()).toEqual([
-      { id: 'global', defaultModel: 'preserved-model' },
+      {
+        id: 'global',
+        defaultModel: 'preserved-model',
+        automaticBackupCadence: 'weekly',
+      },
     ]);
     database.close();
     database = createIsolatedDatabase(databaseName);

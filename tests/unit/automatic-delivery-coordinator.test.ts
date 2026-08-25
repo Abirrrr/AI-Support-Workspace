@@ -82,6 +82,7 @@ function createSubject(
     load: vi.fn(async () => ({
       defaultModel: null,
       snippetPasteMode: options.mode ?? 'automatic',
+      automaticBackupCadence: 'weekly' as const,
     })),
     save: vi.fn(async (value) => value),
   };

@@ -13,9 +13,9 @@ import {
 import { parseBackupFile } from '../../src/application/backup/backup-validator';
 import { encodeBase64 } from '../../src/application/backup/base64';
 import {
-  BACKUP_FORMAT_VERSION_6,
-  MAX_BACKUP_V6_BYTES,
-  type BackupFileV6,
+  BACKUP_FORMAT_VERSION_7,
+  MAX_BACKUP_V7_BYTES,
+  type BackupFileV7,
 } from '../../src/domain/backup-file';
 import type {
   SnippetAsset,
@@ -126,7 +126,13 @@ function createSnapshot(
       },
     ],
     snippetAssets: [createAsset(mimeType)],
-    settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+    settings: {
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only',
+      automaticBackupCadence: 'weekly',
+    },
+    snippetUsageStats: [],
+    snippetGeneratedMetadata: [],
   };
 }
 
@@ -136,6 +142,7 @@ async function exportV6(snapshot = createSnapshot()): Promise<string> {
     { readSnapshot: async () => snapshot },
     { download },
     () => new Date(CREATED_AT),
+    () => '423e4567-e89b-42d3-a456-426614174000',
   ).exportBackup();
   const serialized = download.mock.calls[0]?.[0];
   if (serialized === undefined) throw new Error('Missing backup download.');
@@ -148,11 +155,19 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
-      settings: { defaultModel: null, snippetPasteMode: 'clipboard-only' },
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
+      },
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
     });
-    const backup = JSON.parse(serialized) as BackupFileV6;
-    expect(backup.formatVersion).toBe(BACKUP_FORMAT_VERSION_6);
+    const backup = JSON.parse(serialized) as BackupFileV7;
+    expect(backup.formatVersion).toBe(BACKUP_FORMAT_VERSION_7);
     expect(Object.keys(backup).sort()).toEqual([
+      'backupId',
+      'creationMode',
       'data',
       'exportedAt',
       'format',
@@ -162,9 +177,12 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
       settings: {
         defaultModel: null,
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       },
     });
   });
@@ -177,7 +195,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
       const second = await exportV6(snapshot);
       expect(second).toBe(first);
       const parsed = parseBackupFile(first);
-      expect(parsed.formatVersion).toBe(6);
+      expect(parsed.formatVersion).toBe(7);
       const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
         async () => undefined,
       );
@@ -197,7 +215,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
   it.each([
     [
       'unknown list key',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const rich = backup.data.snippets[0];
         if (rich?.content.kind !== 'rich') throw new Error('Missing Rich.');
         Object.assign(rich.content.blocks[1] as object, { nested: [] });
@@ -205,7 +223,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'invalid list type',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const rich = backup.data.snippets[0];
         if (rich?.content.kind !== 'rich') throw new Error('Missing Rich.');
         Object.assign(rich.content.blocks[1] as object, { listType: 'task' });
@@ -213,7 +231,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'malformed Image Snippet',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const image = backup.data.snippets[1];
         if (image === undefined) throw new Error('Missing Image.');
         Object.assign(image.content as object, { text: '[Image]' });
@@ -221,13 +239,13 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'missing Image Snippet asset',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         (backup.data.snippetAssets as unknown[]).splice(0, 1);
       },
     ],
     [
       'foreign Image Snippet asset',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const asset = backup.data.snippetAssets[0];
         if (asset === undefined) throw new Error('Missing asset.');
         (asset as { snippetId: string }).snippetId = RICH_ID;
@@ -235,7 +253,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'additional owned asset',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const asset = backup.data.snippetAssets[0];
         if (asset === undefined) throw new Error('Missing asset.');
         (backup.data.snippetAssets as unknown[]).push({
@@ -246,7 +264,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'duplicate asset',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const asset = backup.data.snippetAssets[0];
         if (asset === undefined) throw new Error('Missing asset.');
         (backup.data.snippetAssets as unknown[]).push({ ...asset });
@@ -254,7 +272,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
     ],
     [
       'invalid binary signature',
-      (backup: BackupFileV6) => {
+      (backup: BackupFileV7) => {
         const asset = backup.data.snippetAssets[0];
         if (asset === undefined) throw new Error('Missing asset.');
         (asset as { data: string }).data = encodeBase64(
@@ -264,7 +282,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
       },
     ],
   ] as const)('rejects %s atomically', async (_name, mutate) => {
-    const backup = JSON.parse(await exportV6()) as BackupFileV6;
+    const backup = JSON.parse(await exportV6()) as BackupFileV7;
     mutate(backup);
     expect(() => parseBackupFile(JSON.stringify(backup))).toThrowError(
       expect.objectContaining({ code: 'invalid' }),
@@ -272,7 +290,7 @@ describe('Backup v6 lists, Image Snippets, and paste mode', () => {
   });
 
   it('retains the documented 96 MiB guard and surfaces restore failure', async () => {
-    expect(MAX_BACKUP_V6_BYTES).toBe(100_663_296);
+    expect(MAX_BACKUP_V7_BYTES).toBe(100_663_296);
     expect(() => assertBackupFitsByteLimit('1234', 3)).toThrowError(
       expect.objectContaining({ code: 'too-large' }),
     );

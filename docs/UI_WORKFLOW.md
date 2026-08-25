@@ -454,7 +454,7 @@ Transient Model Field Starts with Saved Default
 - Real Chrome validation passed the blank first-run state, save and reload using `qwen2.5:7b`, new-session initialization, temporary Workspace override and reopen restoration, real local generation, clear-to-null, Knowledge and Snippet preservation, M10 capture with state preservation and no automatic Generate, popup navigation, and unchanged permissions. Persistence load/save fault feedback was validated through automation; manual database fault injection was not performed.
 - Milestone 11 is complete. Import and export remain owned by Milestone 12 and are not introduced or defined by this workflow closeout.
 - M14-K.2 extends the same Settings aggregate and explicit Save workflow with `Paste behavior`: `Copy to clipboard` (default, manual Ctrl+V) or `Paste automatically`. The automatic choice explains that one paste is sent after copying, manual Ctrl+V remains available, and safe fallback applies when automatic paste cannot run. Trigger typing never silently requests native permission.
-- The implemented preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It uses the existing singleton Settings record with no new store/index or Dexie version. Backup v5 remains frozen; strict Backup v6 is current for new exports and valid v1-v5 imports map to `clipboard-only`.
+- The M14-K.2 preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It used the existing singleton Settings record without adding a store/index or Dexie version at that checkpoint. Backup v5 remains frozen; M14-K.2 introduced strict Backup v6 and valid v1-v5 imports map to `clipboard-only`. M14-M.1 subsequently adds only the coordinated Dexie v6/Backup v7 data foundation.
 - M14-K.2.3 preserves this UI exactly. The first real Intercom automatic Text attempt reached the automatic branch but fell back after `post-cleanup-check`; later corrections and M14-K.3 Principal evidence validate the complete automatic path in Intercom and Crisp. `Paste sent` remains limited to full native input acceptance and does not claim destination insertion. `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V` remains the truthful populated-clipboard fallback, and manual `Ctrl+V` remains permanently supported.
 
 ### Approved Future M14-N Automatic Backup Settings
@@ -474,7 +474,7 @@ Backup Location
 - Choose folder is the only picker/permission gesture. It opens `showDirectoryPicker({ mode: 'readwrite' })`; the UI displays only safe folder/status information, not an invented arbitrary path field.
 - Scheduled backup never opens a Save dialog or permission prompt. Revoked, moved, deleted, unsupported, or unavailable locations show `Backup location needs attention`; Snippet use continues and manual Export remains available.
 - Daily keeps the latest seven and Weekly the latest four successfully written and verified managed backups. The UI does not imply ownership of unrelated files; a retention-proof warning may leave safe extras.
-- Restored cadence is a preference, not filesystem authority. Restored Daily/Weekly with no usable local folder remains inactive and shows `Backup location needs attention`; it never opens a background prompt or rapid failure loop. Manual Export stays available, and explicit Choose folder/reauthorization activates the restored cadence. Restored Off remains inactive without requiring that warning.
+- Restored cadence is a preference, not filesystem authority. Profile restore preserves any independently held local selected-folder authorization. Restored Daily/Weekly with no usable local folder fabricates none, remains inactive, and shows `Backup location needs attention`; it never opens a background prompt or rapid failure loop. Manual Export stays available, and explicit Choose folder/reauthorization activates the restored cadence. Restored Off remains inactive without requiring that warning and retains an existing selected folder for later reuse.
 - M14-N does not add a silent Downloads fallback. Configuration/help stays in Settings/Import & Export rather than the primary drafting Workspace.
 
 ### Approved Future M14-M/M14-O Library Metadata
@@ -494,7 +494,7 @@ Import / Export
 ↓
 Export backup
 ↓
-Browser downloads current version 5 JSON file
+Browser downloads current version 7 JSON file
 ```
 
 ```text
@@ -508,13 +508,13 @@ Read replacement warning and check acknowledgement
 ↓
 Restore backup
 ↓
-Atomically replace Knowledge, Snippets, SnippetAssets, and Settings
+Atomically replace Knowledge, Snippets, SnippetAssets, Settings, usage, and generated metadata; clear local backup authority
 ```
 
 ### Workflow Notes
 
 - Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
-- New exports use strict Backup Format v5 and include Knowledge, Plain/Rich/Image Snippets, SnippetAssets, and Settings through explicit version-owned DTOs. Versions 1–4 remain importable; v1 restores Snippets without triggers, and v4 legacy Rich local-image records remain Rich without automatic conversion. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
+- New exports use strict Backup Format v7 and include Knowledge, Plain/Rich/Image Snippets, SnippetAssets, authored Settings, portable automatic-backup cadence, usage statistics, and separate generated Text metadata through explicit version-owned DTOs. Versions 1–6 remain frozen/importable with empty sidecars and `weekly` cadence defaults; v1 restores Snippets without triggers, and v4 legacy Rich local-image records remain Rich without automatic conversion. Local directory handles/authority never appear in the file. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
 - The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
 - Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Backup v4/v5 use the documented 96 MiB serialized UTF-8 guard; v1-v3 retain their historical 25 MiB guard.
 - Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.
@@ -564,7 +564,7 @@ Local persistence
 
 - **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
 - **M14-L/M14-L.1 — Snippet Hardening Architecture:** checkpointed documentation architecture. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact.
-- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. Ordinary production Options still has no diagnostic or automatic-backup product UI; M14-M.1 remains unimplemented.
+- **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. M14-M.1 implements only the Dexie v6/Backup v7 persistence boundary; ordinary production Options still has no automatic-backup product UI or scheduled output.
 
 The lifecycle availability flow is:
 

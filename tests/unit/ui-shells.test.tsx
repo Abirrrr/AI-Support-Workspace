@@ -34,10 +34,12 @@ const settings: SettingsApplication = {
   load: async () => ({
     defaultModel: null,
     snippetPasteMode: 'clipboard-only',
+    automaticBackupCadence: 'weekly',
   }),
   save: async (_defaultModelInput, snippetPasteMode) => ({
     defaultModel: null,
     snippetPasteMode,
+    automaticBackupCadence: 'weekly',
   }),
 };
 

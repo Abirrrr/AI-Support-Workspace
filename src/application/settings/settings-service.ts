@@ -1,5 +1,6 @@
 import type { SettingsRepository } from '../persistence/settings-repository';
 import type { Settings, SnippetPasteMode } from '../../domain/settings';
+import type { AutomaticBackupCadence } from '../../domain/automatic-backup';
 import {
   runCatalogCoordinatedMutation,
   type CatalogMutationPort,
@@ -20,7 +21,11 @@ export class SettingsSaveError extends Error {
 }
 
 export function createDefaultSettings(): Settings {
-  return { defaultModel: null, snippetPasteMode: 'clipboard-only' };
+  return {
+    defaultModel: null,
+    snippetPasteMode: 'clipboard-only',
+    automaticBackupCadence: 'weekly',
+  };
 }
 
 export function normalizeDefaultModel(value: string): string | null {
@@ -33,6 +38,7 @@ export interface SettingsApplication {
   save(
     defaultModelInput: string,
     snippetPasteMode: SnippetPasteMode,
+    automaticBackupCadence?: AutomaticBackupCadence,
   ): Promise<Settings>;
 }
 
@@ -53,13 +59,21 @@ export class SettingsService implements SettingsApplication {
   async save(
     defaultModelInput: string,
     snippetPasteMode: SnippetPasteMode,
+    automaticBackupCadence?: AutomaticBackupCadence,
   ): Promise<Settings> {
-    const settings: Settings = {
-      defaultModel: normalizeDefaultModel(defaultModelInput),
-      snippetPasteMode,
-    };
-
     try {
+      const existing =
+        automaticBackupCadence === undefined
+          ? await this.repository.load()
+          : undefined;
+      const settings: Settings = {
+        defaultModel: normalizeDefaultModel(defaultModelInput),
+        snippetPasteMode,
+        automaticBackupCadence:
+          automaticBackupCadence ??
+          existing?.automaticBackupCadence ??
+          'weekly',
+      };
       return await runCatalogCoordinatedMutation(this.catalogMutationPort, () =>
         this.repository.save(settings),
       );

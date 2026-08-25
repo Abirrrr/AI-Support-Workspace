@@ -7,13 +7,15 @@ import {
   BACKUP_FORMAT_VERSION_4,
   BACKUP_FORMAT_VERSION_5,
   BACKUP_FORMAT_VERSION_6,
+  BACKUP_FORMAT_VERSION_7,
   MAX_BACKUP_V4_BYTES,
   MAX_BACKUP_V5_BYTES,
   MAX_BACKUP_V6_BYTES,
+  MAX_BACKUP_V7_BYTES,
   MAX_LEGACY_BACKUP_BYTES,
   MAX_BACKUP_BYTES,
   type BackupFile,
-  type BackupFileV6,
+  type BackupFileV7,
   type BackupImportPreview,
   type BackupKnowledgeRecordV3,
   type BackupKnowledgeRecordV5,
@@ -32,6 +34,8 @@ import {
   type BackupSnippetRecordV3,
   type BackupSnippetRecordV4,
   type BackupSnippetRecordV5,
+  type BackupSnippetUsageStatsRecordV7,
+  type BackupSnippetGeneratedMetadataRecordV7,
 } from '../../domain/backup-file';
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
@@ -65,6 +69,15 @@ import {
   runCatalogCoordinatedMutation,
   type CatalogMutationPort,
 } from '../snippet/catalog-mutation';
+import {
+  createSnippetSourceFingerprint,
+  validateSnippetGeneratedMetadata,
+  type SnippetGeneratedMetadata,
+} from '../../domain/snippet-generated-metadata';
+import {
+  validateSnippetUsageStats,
+  type SnippetUsageStats,
+} from '../../domain/snippet-usage-stats';
 
 export const VERSION_1_TRIGGER_WARNING =
   'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.';
@@ -194,6 +207,56 @@ async function toBackupSnippetAssetRecordV5(
     encoding: 'base64',
     data: await encodeBlobBase64(asset.blob),
   };
+}
+
+function toBackupSnippetUsageStatsRecordV7(
+  stats: SnippetUsageStats,
+): BackupSnippetUsageStatsRecordV7 {
+  return validateSnippetUsageStats(stats);
+}
+
+function toBackupSnippetGeneratedMetadataRecordV7(
+  metadata: SnippetGeneratedMetadata,
+): BackupSnippetGeneratedMetadataRecordV7 {
+  return validateSnippetGeneratedMetadata(metadata);
+}
+
+async function validateGeneratedMetadataFingerprints(
+  snippets: readonly SnippetEntry[],
+  metadata: readonly SnippetGeneratedMetadata[],
+): Promise<void> {
+  const snippetById = new Map(snippets.map((snippet) => [snippet.id, snippet]));
+  if (
+    new Set(metadata.map(({ snippetId }) => snippetId)).size !== metadata.length
+  ) {
+    throw new TypeError('Generated Snippet metadata ownership is invalid.');
+  }
+  for (const record of metadata) {
+    validateSnippetGeneratedMetadata(record);
+    const snippet = snippetById.get(record.snippetId);
+    if (
+      snippet === undefined ||
+      snippet.content.kind === 'image' ||
+      (await createSnippetSourceFingerprint(snippet)) !==
+        record.sourceFingerprint
+    ) {
+      throw new TypeError('Generated Snippet metadata fingerprint is invalid.');
+    }
+  }
+}
+
+function validateUsageOwnership(
+  snippets: readonly SnippetEntry[],
+  usage: readonly SnippetUsageStats[],
+): void {
+  const snippetIds = new Set(snippets.map(({ id }) => id));
+  const usageIds = usage.map(({ snippetId }) => snippetId);
+  if (
+    new Set(usageIds).size !== usageIds.length ||
+    usageIds.some((snippetId) => !snippetIds.has(snippetId))
+  ) {
+    throw new TypeError('Snippet usage ownership is invalid.');
+  }
 }
 
 function toRestoreKnowledgeEntry(
@@ -458,7 +521,7 @@ export function measureUtf8Bytes(value: string): number {
 
 export function assertBackupFitsByteLimit(
   serialized: string,
-  maxBytes: number = MAX_BACKUP_V6_BYTES,
+  maxBytes: number = MAX_BACKUP_V7_BYTES,
 ): void {
   if (measureUtf8Bytes(serialized) > maxBytes) {
     throw new BackupExportError('too-large');
@@ -470,6 +533,7 @@ export class BackupExportService implements BackupExportApplication {
     private readonly snapshotReader: BackupSnapshotReader,
     private readonly downloadPort: BackupDownloadPort,
     private readonly now: () => Date = () => new Date(),
+    private readonly createId: () => string = () => crypto.randomUUID(),
   ) {}
 
   async exportBackup(): Promise<void> {
@@ -479,11 +543,18 @@ export class BackupExportService implements BackupExportApplication {
       const snapshotAssets = snapshot.snippetAssets;
       await Promise.all(snapshotAssets.map(validateSnippetAsset));
       validateSnippetAssetGraph(snapshot.snippets, snapshotAssets);
+      validateUsageOwnership(snapshot.snippets, snapshot.snippetUsageStats);
       const sortedAssets = [...snapshotAssets].sort(compareByCreatedAtAndId);
-      const backup: BackupFileV6 = {
+      await validateGeneratedMetadataFingerprints(
+        snapshot.snippets,
+        snapshot.snippetGeneratedMetadata,
+      );
+      const backup: BackupFileV7 = {
         format: BACKUP_FORMAT,
         formatVersion: BACKUP_FORMAT_VERSION,
         exportedAt,
+        backupId: this.createId(),
+        creationMode: 'manual',
         data: {
           knowledge: [...snapshot.knowledge]
             .sort(compareByCreatedAtAndId)
@@ -494,9 +565,20 @@ export class BackupExportService implements BackupExportApplication {
           snippetAssets: await Promise.all(
             sortedAssets.map(toBackupSnippetAssetRecordV5),
           ),
+          snippetUsageStats: [...snapshot.snippetUsageStats]
+            .sort((left, right) =>
+              left.snippetId.localeCompare(right.snippetId),
+            )
+            .map(toBackupSnippetUsageStatsRecordV7),
+          snippetGeneratedMetadata: [...snapshot.snippetGeneratedMetadata]
+            .sort((left, right) =>
+              left.snippetId.localeCompare(right.snippetId),
+            )
+            .map(toBackupSnippetGeneratedMetadataRecordV7),
           settings: {
             defaultModel: snapshot.settings.defaultModel,
             snippetPasteMode: snapshot.settings.snippetPasteMode,
+            automaticBackupCadence: snapshot.settings.automaticBackupCadence,
           },
         },
       };
@@ -532,15 +614,29 @@ export class BackupImportService implements BackupImportApplication {
     const versionLimit =
       backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
       backup.formatVersion === BACKUP_FORMAT_VERSION_5 ||
-      backup.formatVersion === BACKUP_FORMAT_VERSION_6
-        ? backup.formatVersion === BACKUP_FORMAT_VERSION_6
-          ? MAX_BACKUP_V6_BYTES
-          : backup.formatVersion === BACKUP_FORMAT_VERSION_5
-            ? MAX_BACKUP_V5_BYTES
-            : MAX_BACKUP_V4_BYTES
+      backup.formatVersion === BACKUP_FORMAT_VERSION_6 ||
+      backup.formatVersion === BACKUP_FORMAT_VERSION_7
+        ? backup.formatVersion === BACKUP_FORMAT_VERSION_7
+          ? MAX_BACKUP_V7_BYTES
+          : backup.formatVersion === BACKUP_FORMAT_VERSION_6
+            ? MAX_BACKUP_V6_BYTES
+            : backup.formatVersion === BACKUP_FORMAT_VERSION_5
+              ? MAX_BACKUP_V5_BYTES
+              : MAX_BACKUP_V4_BYTES
         : MAX_LEGACY_BACKUP_BYTES;
     if (measureUtf8Bytes(serialized) > versionLimit) {
       throw new BackupImportError('too-large');
+    }
+    if (backup.formatVersion === BACKUP_FORMAT_VERSION_7) {
+      const snippets = backup.data.snippets.map(toRestoreSnippetEntryV5);
+      try {
+        await validateGeneratedMetadataFingerprints(
+          snippets,
+          backup.data.snippetGeneratedMetadata,
+        );
+      } catch (error) {
+        throw new BackupImportError('invalid', error);
+      }
     }
     return {
       backup,
@@ -553,7 +649,8 @@ export class BackupImportService implements BackupImportApplication {
         assetCount:
           backup.formatVersion === BACKUP_FORMAT_VERSION_4 ||
           backup.formatVersion === BACKUP_FORMAT_VERSION_5 ||
-          backup.formatVersion === BACKUP_FORMAT_VERSION_6
+          backup.formatVersion === BACKUP_FORMAT_VERSION_6 ||
+          backup.formatVersion === BACKUP_FORMAT_VERSION_7
             ? backup.data.snippetAssets.length
             : 0,
         defaultModel: backup.data.settings.defaultModel,
@@ -574,6 +671,17 @@ export class BackupRestoreService implements BackupRestoreApplication {
 
   async restoreBackup(backup: BackupFile): Promise<void> {
     try {
+      if (backup.formatVersion === BACKUP_FORMAT_VERSION_7) {
+        const snippets = backup.data.snippets.map(toRestoreSnippetEntryV5);
+        const usage = backup.data.snippetUsageStats.map(
+          validateSnippetUsageStats,
+        );
+        validateUsageOwnership(snippets, usage);
+        await validateGeneratedMetadataFingerprints(
+          snippets,
+          backup.data.snippetGeneratedMetadata,
+        );
+      }
       const restoreData: BackupRestoreData = {
         knowledge: backup.data.knowledge.map(toRestoreKnowledgeEntry),
         snippets:
@@ -593,14 +701,32 @@ export class BackupRestoreService implements BackupRestoreApplication {
               ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
               : backup.formatVersion === BACKUP_FORMAT_VERSION_6
                 ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
-                : [],
+                : backup.formatVersion === BACKUP_FORMAT_VERSION_7
+                  ? backup.data.snippetAssets.map(toRestoreSnippetAssetV5)
+                  : [],
         settings: {
           defaultModel: backup.data.settings.defaultModel,
           snippetPasteMode:
             backup.formatVersion === BACKUP_FORMAT_VERSION_6
               ? backup.data.settings.snippetPasteMode
-              : 'clipboard-only',
+              : backup.formatVersion === BACKUP_FORMAT_VERSION_7
+                ? backup.data.settings.snippetPasteMode
+                : 'clipboard-only',
+          automaticBackupCadence:
+            backup.formatVersion === BACKUP_FORMAT_VERSION_7
+              ? backup.data.settings.automaticBackupCadence
+              : 'weekly',
         },
+        snippetUsageStats:
+          backup.formatVersion === BACKUP_FORMAT_VERSION_7
+            ? backup.data.snippetUsageStats.map(validateSnippetUsageStats)
+            : [],
+        snippetGeneratedMetadata:
+          backup.formatVersion === BACKUP_FORMAT_VERSION_7
+            ? backup.data.snippetGeneratedMetadata.map(
+                validateSnippetGeneratedMetadata,
+              )
+            : [],
       };
 
       await runCatalogCoordinatedMutation(this.catalogMutationPort, () =>

@@ -6,6 +6,7 @@ import {
   BACKUP_FORMAT_VERSION_4,
   BACKUP_FORMAT_VERSION_5,
   BACKUP_FORMAT_VERSION_6,
+  BACKUP_FORMAT_VERSION_7,
   type BackupFile,
   type BackupFileV1,
   type BackupFileV2,
@@ -13,6 +14,7 @@ import {
   type BackupFileV4,
   type BackupFileV5,
   type BackupFileV6,
+  type BackupFileV7,
   type BackupKnowledgeRecordV1,
   type BackupKnowledgeRecordV2,
   type BackupKnowledgeRecordV3,
@@ -29,6 +31,9 @@ import {
   type BackupSettingsV4,
   type BackupSettingsV5,
   type BackupSettingsV6,
+  type BackupSettingsV7,
+  type BackupSnippetUsageStatsRecordV7,
+  type BackupSnippetGeneratedMetadataRecordV7,
   type BackupSnippetContentV3,
   type BackupSnippetContentV4,
   type BackupSnippetContentV5,
@@ -40,6 +45,9 @@ import {
   type BackupSnippetRecordV4,
   type BackupSnippetRecordV5,
 } from '../../domain/backup-file';
+import { isAutomaticBackupCadence } from '../../domain/automatic-backup';
+import { validateSnippetUsageStats } from '../../domain/snippet-usage-stats';
+import { validateSnippetGeneratedMetadata } from '../../domain/snippet-generated-metadata';
 import {
   isSafeSnippetImageUrl,
   isSafeSnippetLinkUrl,
@@ -815,6 +823,81 @@ function validateSettingsV6(value: unknown): BackupSettingsV6 | undefined {
   };
 }
 
+function validateSettingsV7(value: unknown): BackupSettingsV7 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'defaultModel',
+      'snippetPasteMode',
+      'automaticBackupCadence',
+    ]) ||
+    (value.defaultModel !== null && typeof value.defaultModel !== 'string') ||
+    (value.snippetPasteMode !== 'clipboard-only' &&
+      value.snippetPasteMode !== 'automatic') ||
+    !isAutomaticBackupCadence(value.automaticBackupCadence)
+  ) {
+    return undefined;
+  }
+  return {
+    defaultModel: value.defaultModel,
+    snippetPasteMode: value.snippetPasteMode,
+    automaticBackupCadence: value.automaticBackupCadence,
+  };
+}
+
+function validateSnippetUsageStatsV7(
+  value: unknown,
+): BackupSnippetUsageStatsRecordV7 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, ['snippetId', 'usageCount', 'lastUsedAt']) ||
+    !isCanonicalUuid(value.snippetId) ||
+    typeof value.usageCount !== 'number' ||
+    typeof value.lastUsedAt !== 'string'
+  ) {
+    return undefined;
+  }
+  try {
+    return validateSnippetUsageStats({
+      snippetId: value.snippetId,
+      usageCount: value.usageCount,
+      lastUsedAt: value.lastUsedAt,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function validateSnippetGeneratedMetadataV7(
+  value: unknown,
+): BackupSnippetGeneratedMetadataRecordV7 | undefined {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'snippetId',
+      'generatedTags',
+      'sourceFingerprint',
+      'generatedAt',
+    ]) ||
+    !isCanonicalUuid(value.snippetId) ||
+    !isStringArray(value.generatedTags) ||
+    typeof value.sourceFingerprint !== 'string' ||
+    typeof value.generatedAt !== 'string'
+  ) {
+    return undefined;
+  }
+  try {
+    return validateSnippetGeneratedMetadata({
+      snippetId: value.snippetId,
+      generatedTags: value.generatedTags,
+      sourceFingerprint: value.sourceFingerprint,
+      generatedAt: value.generatedAt,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
 function hasDuplicateIds(records: readonly { id: string }[]): boolean {
   return new Set(records.map(({ id }) => id)).size !== records.length;
 }
@@ -1020,6 +1103,131 @@ function parseVersion6(parsed: Record<string, unknown>): BackupFileV6 {
   };
 }
 
+function parseVersion7(parsed: Record<string, unknown>): BackupFileV7 {
+  const creationMode = parsed.creationMode;
+  const envelopeKeys =
+    creationMode === 'automatic'
+      ? [
+          'format',
+          'formatVersion',
+          'exportedAt',
+          'backupId',
+          'creationMode',
+          'backupSetId',
+          'data',
+        ]
+      : [
+          'format',
+          'formatVersion',
+          'exportedAt',
+          'backupId',
+          'creationMode',
+          'data',
+        ];
+  if (
+    !hasExactKeys(parsed, envelopeKeys) ||
+    parsed.format !== BACKUP_FORMAT ||
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_7 ||
+    !isUtcIsoTimestamp(parsed.exportedAt) ||
+    !isCanonicalUuid(parsed.backupId) ||
+    (creationMode !== 'manual' && creationMode !== 'automatic') ||
+    (creationMode === 'automatic' && !isCanonicalUuid(parsed.backupSetId)) ||
+    !isRecord(parsed.data) ||
+    !hasExactKeys(parsed.data, [
+      'knowledge',
+      'snippets',
+      'snippetAssets',
+      'snippetUsageStats',
+      'snippetGeneratedMetadata',
+      'settings',
+    ])
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const data = parsed.data;
+  if (
+    !Array.isArray(data.knowledge) ||
+    !Array.isArray(data.snippets) ||
+    !Array.isArray(data.snippetAssets) ||
+    !Array.isArray(data.snippetUsageStats) ||
+    !Array.isArray(data.snippetGeneratedMetadata)
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const knowledge = data.knowledge.map(validateKnowledgeV5);
+  const snippets = data.snippets.map(validateSnippetV5);
+  const snippetAssets = data.snippetAssets.map(validateSnippetAssetV5);
+  const snippetUsageStats = data.snippetUsageStats.map(
+    validateSnippetUsageStatsV7,
+  );
+  const snippetGeneratedMetadata = data.snippetGeneratedMetadata.map(
+    validateSnippetGeneratedMetadataV7,
+  );
+  const settings = validateSettingsV7(data.settings);
+  if (
+    knowledge.some((entry) => entry === undefined) ||
+    snippets.some((entry) => entry === undefined) ||
+    snippetAssets.some((entry) => entry === undefined) ||
+    snippetUsageStats.some((entry) => entry === undefined) ||
+    snippetGeneratedMetadata.some((entry) => entry === undefined) ||
+    settings === undefined
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  const trustedKnowledge = knowledge as BackupKnowledgeRecordV5[];
+  const trustedSnippets = snippets as BackupSnippetRecordV5[];
+  const trustedAssets = snippetAssets as BackupSnippetAssetRecordV5[];
+  const trustedUsage = snippetUsageStats as BackupSnippetUsageStatsRecordV7[];
+  const trustedGenerated =
+    snippetGeneratedMetadata as BackupSnippetGeneratedMetadataRecordV7[];
+  const snippetById = new Map(
+    trustedSnippets.map((snippet) => [snippet.id, snippet]),
+  );
+  if (
+    hasDuplicateIds(trustedKnowledge) ||
+    hasDuplicateIds(trustedSnippets) ||
+    hasDuplicateTriggers(trustedSnippets) ||
+    new Set(trustedUsage.map(({ snippetId }) => snippetId)).size !==
+      trustedUsage.length ||
+    new Set(trustedGenerated.map(({ snippetId }) => snippetId)).size !==
+      trustedGenerated.length ||
+    trustedUsage.some(({ snippetId }) => !snippetById.has(snippetId)) ||
+    trustedGenerated.some(
+      ({ snippetId }) =>
+        snippetById.get(snippetId)?.content.kind === 'image' ||
+        !snippetById.has(snippetId),
+    )
+  ) {
+    throw new BackupImportError('invalid');
+  }
+  try {
+    validateSnippetAssetGraph(trustedSnippets, trustedAssets);
+  } catch (error) {
+    if (error instanceof SnippetAssetGraphError) {
+      throw new BackupImportError('invalid', error);
+    }
+    throw error;
+  }
+  return {
+    format: BACKUP_FORMAT,
+    formatVersion: BACKUP_FORMAT_VERSION_7,
+    exportedAt: parsed.exportedAt,
+    backupId: parsed.backupId,
+    creationMode,
+    ...(creationMode === 'automatic'
+      ? { backupSetId: parsed.backupSetId as string }
+      : {}),
+    data: {
+      knowledge: trustedKnowledge,
+      snippets: trustedSnippets,
+      snippetAssets: trustedAssets,
+      snippetUsageStats: trustedUsage,
+      snippetGeneratedMetadata: trustedGenerated,
+      settings,
+    },
+  };
+}
+
 function parseJson(serialized: string): Record<string, unknown> {
   let parsed: unknown;
   try {
@@ -1117,7 +1325,8 @@ export function parseBackupFile(serialized: string): BackupFile {
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_3 &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_4 &&
     parsed.formatVersion !== BACKUP_FORMAT_VERSION_5 &&
-    parsed.formatVersion !== BACKUP_FORMAT_VERSION_6
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_6 &&
+    parsed.formatVersion !== BACKUP_FORMAT_VERSION_7
   ) {
     throw new BackupImportError('unsupported-version');
   }
@@ -1138,6 +1347,9 @@ export function parseBackupFile(serialized: string): BackupFile {
   }
   if (parsed.formatVersion === BACKUP_FORMAT_VERSION_6) {
     return parseVersion6(parsed);
+  }
+  if (parsed.formatVersion === BACKUP_FORMAT_VERSION_7) {
+    return parseVersion7(parsed);
   }
   throw new BackupImportError('invalid');
 }

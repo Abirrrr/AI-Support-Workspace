@@ -12,6 +12,7 @@ describe('Side Panel Settings bootstrap', () => {
       load: vi.fn(async () => ({
         defaultModel: 'qwen2.5:7b',
         snippetPasteMode: 'clipboard-only' as const,
+        automaticBackupCadence: 'weekly' as const,
       })),
     };
 
@@ -23,8 +24,16 @@ describe('Side Panel Settings bootstrap', () => {
   });
 
   it.each([
-    { defaultModel: null, snippetPasteMode: 'clipboard-only' as const },
-    { defaultModel: '', snippetPasteMode: 'clipboard-only' as const },
+    {
+      defaultModel: null,
+      snippetPasteMode: 'clipboard-only' as const,
+      automaticBackupCadence: 'weekly' as const,
+    },
+    {
+      defaultModel: '',
+      snippetPasteMode: 'clipboard-only' as const,
+      automaticBackupCadence: 'weekly' as const,
+    },
   ])('initializes blank for $defaultModel', async (loaded) => {
     await expect(
       loadWorkspaceSettings({ load: vi.fn(async () => loaded) }),

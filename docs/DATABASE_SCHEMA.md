@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the version 2 singleton Settings store, M13 implemented version 3 with an optional unique Snippet-trigger index, M14-B implemented version 4 structured Snippet content, and M14-E implements version 5 local image assets without rewriting historical declarations.
+This document defines the local data model and implemented physical persistence schema. Milestone 3 introduced version 1 for Knowledge and Snippets, Milestone 11 added the version 2 singleton Settings store, M13 implemented version 3 with an optional unique Snippet-trigger index, M14-B implemented version 4 structured Snippet content, M14-E implemented version 5 local image assets, and M14-M.1 implements the additive version 6 hardening sidecars/local-state boundary without rewriting historical declarations.
 
 ## Planned Domain Schema
 
@@ -58,7 +58,7 @@ interface RichSnippetLocalImageBlock {
 }
 ```
 
-The block records document placement while a separately owned `SnippetAsset` stores the image bytes. The runtime database is Dexie v5 with `snippetAssets`, and current backup export is Format v4. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
+The block records document placement while a separately owned `SnippetAsset` stores the image bytes. M14-E introduced `snippetAssets` in Dexie v5 and Backup Format v4; the current coordinated foundation is Dexie v6 and Backup v7. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
 
 Decision 39 makes the local-image Rich block a legacy compatibility shape and approves the future target union:
 
@@ -79,8 +79,9 @@ Fields:
 
 - defaultModel: string | null
 - snippetPasteMode: 'clipboard-only' | 'automatic'
+- automaticBackupCadence: 'off' | 'daily' | 'weekly'
 
-`defaultModel` is an opaque Ollama model identifier after leading and trailing whitespace are trimmed. `null` means that no default is saved and a new Workspace Side Panel session starts with a blank transient model field. `snippetPasteMode` is the M14-K.2 opt-in delivery preference and defaults to `clipboard-only`; automatic mode is never inferred from companion installation. No provider, provider-base-URL, theme, shortcut, credential, or arbitrary key/value setting is added.
+`defaultModel` is an opaque Ollama model identifier after leading and trailing whitespace are trimmed. `null` means that no default is saved and a new Workspace Side Panel session starts with a blank transient model field. `snippetPasteMode` is the M14-K.2 opt-in delivery preference and defaults to `clipboard-only`; automatic mode is never inferred from companion installation. `automaticBackupCadence` is the portable M14-M.1 preference and defaults to `weekly` for new, absent, historical, and Backup v1-v6 state. It is not filesystem authorization and cannot make automatic writing operational by itself. No provider, provider-base-URL, theme, shortcut, credential, or arbitrary key/value setting is added.
 
 The application-owned aggregate does not expose persistence identity. Milestone 11 implemented the physical singleton record and typed Settings persistence contract described below in database version 2.
 
@@ -245,6 +246,24 @@ Snippet Save uses one read-write transaction over `snippetEntries` and `snippetA
 
 Decision 39 reuses this exact physical store for Image Snippets. Adding the `kind: 'image'` content discriminant and Rich list blocks changes only validated JSON stored inside the existing unindexed `content` field. No primary key, secondary index, compound index, or store shape changes, so Dexie remains version 5 and no v6 migration is approved. Existing legacy Rich local-image records remain unchanged. Application graph validation must distinguish the new exactly-one Image Snippet invariant from preservation of legacy Rich records.
 
+## Implemented M14-M.1 Dexie Version 6 Evolution
+
+M14-M.1 implements Dexie physical version 6. Historical v1-v5 declarations remain unchanged. Version 6 retains every v5 store/index and adds exactly:
+
+```text
+snippetUsageStats: 'snippetId, lastUsedAt'
+snippetGeneratedMetadata: 'snippetId, generatedAt'
+automaticBackupState: 'id'
+```
+
+`snippetUsageStats` is keyed by `snippetId` and stores exact `{ snippetId, usageCount, lastUsedAt }` records. Persisted counts are safe integers at least one; `lastUsedAt` is canonical UTC ISO 8601. No row means zero uses and no timestamp. The v5-to-v6 migration creates no zero rows and does not scan/rewrite Snippets.
+
+`snippetGeneratedMetadata` is keyed by `snippetId` and stores exact `{ snippetId, generatedTags, sourceFingerprint, generatedAt }` records. Generated tags are Text-only, normalized, unique, at most eight, and 1–40 Unicode code points; `sourceFingerprint` is lowercase SHA-256 hex over the version-1 canonical title/rendered-Text/authored-tags serialization; `generatedAt` is canonical UTC ISO 8601. No historical record receives metadata. Authored `SnippetEntry.tags` remain separate. Material title/content/authored-tag updates remove metadata in the authored transaction; trigger-only updates preserve it.
+
+`automaticBackupState` is the local singleton keyed by physical `id: 'global'`. The M14-M.1 foundation persists only the structured-clone directory handle and canonical random `backupSetId`, matching the smallest M14-M.0-proven authorization boundary. It is machine/profile-local, excluded from Backup v7, and preserved independently across canonical profile restore. M14-N owns scheduling/status/lease/manifest fields and behavior; no alarm, picker product UI, output, or retention behavior exists in M14-M.1.
+
+The v5-to-v6 migration preserves every Knowledge, Snippet, asset, authored timestamp/tag/trigger, and existing Settings value. A present historical Settings singleton missing `automaticBackupCadence` receives `weekly`; an absent singleton remains absent and the application default resolves to `weekly`. Snippet deletion covers Snippets, owned assets, usage, and generated metadata in one transaction. Restore covers Knowledge, Snippets, assets, Settings, and both sidecars in one portable transaction with rollback; local automatic-backup state is outside that transaction and remains unchanged.
+
 ## Record Identity
 
 - Record IDs are UUID strings generated with the browser-native `crypto.randomUUID()` API.
@@ -307,15 +326,36 @@ interface SnippetEntryRepository {
 interface Settings {
   defaultModel: string | null;
   snippetPasteMode: 'clipboard-only' | 'automatic';
+  automaticBackupCadence: 'off' | 'daily' | 'weekly';
 }
 
 interface SettingsRepository {
   load(): Promise<Settings | undefined>;
   save(settings: Settings): Promise<Settings>;
 }
+
+interface SnippetUsageStatsRepository {
+  get(snippetId: string): Promise<SnippetUsageStats | undefined>;
+  list(): Promise<readonly SnippetUsageStats[]>;
+  save(stats: SnippetUsageStats): Promise<SnippetUsageStats>;
+  delete(snippetId: string): Promise<boolean>;
+}
+
+interface SnippetGeneratedMetadataRepository {
+  get(snippetId: string): Promise<SnippetGeneratedMetadata | undefined>;
+  list(): Promise<readonly SnippetGeneratedMetadata[]>;
+  save(metadata: SnippetGeneratedMetadata): Promise<SnippetGeneratedMetadata>;
+  delete(snippetId: string): Promise<boolean>;
+}
+
+interface AutomaticBackupStateRepository {
+  load(): Promise<AutomaticBackupState | undefined>;
+  save(state: AutomaticBackupState): Promise<AutomaticBackupState>;
+  clear(): Promise<void>;
+}
 ```
 
-`SettingsRepository.load()` returns `undefined` when the physical singleton record is absent. A focused application load service resolves that normal result to `{ defaultModel: null, snippetPasteMode: 'clipboard-only' }`. `save()` upserts the one global record and returns the saved application aggregate. The save service normalizes the model field and persists only one of the two exact paste modes. No Settings list, create, update-by-ID, delete, search, or generic CRUD operation is approved.
+`SettingsRepository.load()` returns `undefined` when the physical singleton record is absent. A focused application load service resolves that normal result to `{ defaultModel: null, snippetPasteMode: 'clipboard-only', automaticBackupCadence: 'weekly' }`. `save()` upserts the one global record and returns the saved application aggregate. Existing Settings UI saves preserve the current cadence until M14-N adds its configuration UI. No Settings list, create, update-by-ID, delete, search, or generic CRUD operation is approved.
 
 The Knowledge repository retains its existing operations. M13 adds only canonical `findByTrigger` lookup to the Snippet repository:
 
@@ -460,30 +500,36 @@ M14-G implements the list model, minimal Image Snippet discriminant, and Backup 
 
 Backup v5 remains frozen and importable. New exports use strict Backup v6, retaining the v5 Knowledge, Snippet, and asset DTO shapes and exact four-store atomic restore while evolving only Settings to the exact keys `defaultModel` and `snippetPasteMode`. The paste mode accepts only `clipboard-only` or `automatic`; missing, unknown, or malformed v6 values reject the whole import. Valid v1-v5 imports contain no paste mode and restore it as `clipboard-only`. The serialized limit remains 96 MiB. This backup evolution and the unindexed Settings property do not change Dexie physical version 5, store declarations, indexes, or migration code.
 
+## Implemented M14-M.1 Backup Format v7
+
+Backup v6 remains frozen and importable. New exports use strict Backup v7 with required canonical `backupId`, `creationMode`, and automatic-only `backupSetId`; all IDs are lowercase UUIDs. V7 retains exact v6 Knowledge, Text/Image Snippet, asset, authored-tag, model, and paste-mode recovery data. It adds deterministically `snippetId`-ordered usage and generated-metadata arrays plus exact `automaticBackupCadence` Settings. Manual exports omit `backupSetId`; automatic-mode files require it. The serialized limit remains 96 MiB.
+
+V7 rejects unknown envelope/data/record keys—including attempted directory-handle, local-authorization, or operational-state fields—unknown creation modes, invalid cadence, malformed/duplicate/unsafe usage, malformed/duplicate generated metadata, invalid tags/timestamps/SHA-256 fingerprints, missing usage owners, non-Text generated owners, mismatching recomputed source fingerprints, and all existing invalid identities/triggers/assets/ownership graphs. Valid v1-v6 imports map both sidecars to empty and cadence to `weekly`. Restore atomically replaces Knowledge, Snippets, assets, Settings, usage, and generated metadata while preserving local `automaticBackupState`; a backup never contains, replaces, or grants directory authority.
+
 ## Future Capability Guidance
 
 ### Knowledge Compatibility
 
 Decision 46 retires Knowledge from the future active AI workflow/UI but does not remove current persistence. `knowledgeEntries`, `KnowledgeEntry`, repository contracts, Backup v1-v6 data, and restore compatibility remain current and unchanged. Permanent removal, migration into Text Snippets, Backup evolution, or store cleanup requires a separately approved schema/migration task; no future structure or deletion is implied here.
 
-### M14-L Approved Future Hardening Data Evolution
+### Implemented M14-M.1 Hardening Data Evolution
 
 M14 extends the M13 Snippet and trigger foundation with Decision 36 structured text, Decision 37/M14-E local assets, Decision 39's Text/Image split, and Decision 41's unified authoring. M14-G/G.2 implements lists, the image discriminant, Backup v5, constrained Text WYSIWYG, and Image authoring without changing Dexie v5 stores or indexes. M14-H is absorbed.
 
-Principal-approved Decisions 50–53 select one future physical Dexie version 6 migration and strict Backup v7 evolution. This section describes the approved target, not current physical data. M14-M.0 is PASS / REAL-CHROME VALIDATED using scratch persistence; M14-M.1 owns the eventual coordinated implementation only after separate Principal authorization.
+Principal-approved Decisions 50–53 selected one physical Dexie version 6 migration and strict Backup v7 evolution. M14-M.0 remains PASS / REAL-CHROME VALIDATED, and M14-M.1 now implements the coordinated data foundation described here.
 
-| Future owner | Exact logical shape | Absence/default | Backup v7 | Delete/restore behavior |
+| Owner | Exact logical shape | Absence/default | Backup v7 | Delete/restore behavior |
 | --- | --- | --- | --- | --- |
 | `snippetUsageStats` sidecar | `snippetId`, safe-integer `usageCount >= 1`, canonical UTC ISO `lastUsedAt` | No row = `0` uses / no timestamp | Required sorted array; v1-v6 map to empty | Snippet delete cascades in one transaction; restore reference must resolve to Text or Image Snippet |
 | `snippetGeneratedMetadata` sidecar | `snippetId`, `generatedTags`, versioned SHA-256 `sourceFingerprint`, UTC ISO `generatedAt` | No row = no usable generated tags | Required sorted array; v1-v6 map to empty | Text-only; delete or source-changing authored save removes it; restore reference/fingerprint must match |
 | Settings singleton | existing `defaultModel`, `snippetPasteMode`, plus preferred `automaticBackupCadence` | Historical absence maps to `weekly` | Required exact v7 Settings field | Restored atomically; non-`off` preference is inactive and reports location attention until separate local authority exists |
-| Intended `automaticBackupState` singleton | gate-proven structured-clone directory handle, random destination/backup-set ID, `nextDueAt`, last attempt/success/failure, expiring lease, bounded successful-file manifest | No row = no authorized location / no operational scheduled output | Excluded as nonportable environmental state | Physical declaration remains M14-M.1 work; restore clears it; Forget location clears it without deleting external files |
+| `automaticBackupState` singleton foundation | gate-proven structured-clone directory handle and random backup-set ID | No row = no authorized location / no operational scheduled output | Excluded as nonportable environmental state | Preserved independently across restore; M14-N later extends operational scheduling/status/manifest behavior |
 
 The managed-file manifest record is local operational metadata containing exact `backupId`, backup-set/destination identity, `createdAt`, filename, cadence, canonical Backup version, byte length, SHA-256 digest, and successful-completion status. Only successful records participate in retention. The directory handle itself is never represented as a string path, JSON, or backup field.
 
 Backup v7 keeps the exact `ai-support-workspace-backup` identifier and all v6 recovery data. It adds required top-level `backupId`, `creationMode`, and conditional `backupSetId`, plus usage/generated arrays and automatic-backup cadence. Manual and automatic exports use this one shape. Knowledge remains required compatibility data. Restore validates all fields before one transaction across Knowledge, Snippets, assets, Settings, usage, and generated metadata. V1-v6 remain frozen/importable with deterministic defaults; there is no migration of or deletion from historical files.
 
-M14-M.0 has passed. If separately authorized, the future M14-M.1 Dexie v6 declaration adds three stores without rewriting authored Snippet records or indexes: `snippetUsageStats: 'snippetId, lastUsedAt'`, `snippetGeneratedMetadata: 'snippetId, generatedAt'`, and the feasibility-proven `automaticBackupState: 'id'` design. Different-folder identity remains subject to M14-N production-adapter proof before retention reliance. `SnippetEntry.tags` remains the authored ordered array. Usage/generated writes never touch `SnippetEntry.updatedAt` or publish the trigger catalog. Snippet create/update/delete and restore must coordinate sidecar invalidation/cascade atomically where integrity requires it.
+M14-M.1 implements all three stores without rewriting authored Snippet records or indexes: `snippetUsageStats: 'snippetId, lastUsedAt'`, `snippetGeneratedMetadata: 'snippetId, generatedAt'`, and feasibility-proven `automaticBackupState: 'id'`. Different-folder identity remains subject to M14-N production-adapter proof before retention reliance. `SnippetEntry.tags` remains the authored ordered array. Sidecar writes do not touch `SnippetEntry.updatedAt` or publish the trigger catalog. M14-M.1 wires source-change invalidation, deletion cascade, and restore atomically but does not wire delivery usage increments or generated-tag creation/retrieval.
 
 ### Prompt Templates
 
@@ -495,4 +541,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 14 are complete. M14-G/G.2 remains the frozen Backup v5 foundation. M14-K.2 adds only the Settings paste-mode value and strict Backup v6 described above. M14-M.0 proves feasibility through isolated scratch persistence only: generated tags, usage statistics, automatic-backup cadence/location/retention, Context Images, and compact Workspace state are not currently persisted in production. No directory handle, schedule, or managed-file manifest is currently persisted or backed up by the product. Dexie physical version 5 and Backup v6 remain current; Dexie v6 and Backup v7 remain unimplemented M14-M.1 targets.
+Milestones 3 through 14 are complete. M14-M.0 remains the real-Chrome feasibility PASS, and M14-M.1 implements Dexie physical version 6 plus canonical Backup v7. The sidecars, portable cadence, and smallest local selected-directory state boundary now exist. No delivery usage count, usage UI, automatic schedule/file output/retention, generated-tag provider call/retrieval scoring, Context Image, or compact Workspace behavior is implemented. The local directory handle is never backed up; M14-N must still prove the final production adapter and different-folder identity before retention relies on it.

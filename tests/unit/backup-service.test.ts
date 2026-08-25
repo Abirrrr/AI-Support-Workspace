@@ -69,7 +69,10 @@ function createData(): BackupSnapshot {
     settings: {
       defaultModel: 'qwen2.5:7b',
       snippetPasteMode: 'automatic',
+      automaticBackupCadence: 'weekly',
     },
+    snippetUsageStats: [],
+    snippetGeneratedMetadata: [],
   };
 }
 
@@ -536,7 +539,7 @@ describe('Backup Format v2 and v3 parser and validator', () => {
   it('rejects unsupported future versions explicitly', () => {
     expect(() =>
       parseBackupFile(
-        JSON.stringify({ ...createCurrentBackup(), formatVersion: 7 }),
+        JSON.stringify({ ...createCurrentBackup(), formatVersion: 8 }),
       ),
     ).toThrowError(expect.objectContaining({ code: 'unsupported-version' }));
   });
@@ -590,12 +593,14 @@ describe('backup application services', () => {
 
     await new BackupRestoreService({ replaceAll }).restoreBackup(parsed);
 
-    expect(parsed.formatVersion).toBe(6);
+    expect(parsed.formatVersion).toBe(7);
     expect(replaceAll).toHaveBeenCalledWith({
       knowledge: data.knowledge,
       snippets: [{ ...snippet, content: richContent }],
       snippetAssets: [],
       settings: data.settings,
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
     });
     expect(
       requireValue(replaceAll.mock.calls[0], 'restore call')[0].snippets[0]
@@ -661,7 +666,7 @@ describe('backup application services', () => {
     );
     const parsed = JSON.parse(serialized) as BackupFileV5;
     expect(parsed.format).toBe(BACKUP_FORMAT);
-    expect(parsed.formatVersion).toBe(6);
+    expect(parsed.formatVersion).toBe(7);
     expect(parsed.exportedAt).toBe(EXPORTED_AT);
     expect(parsed.data.knowledge.map(({ id }) => id)).toEqual([
       earlierKnowledge.id,
@@ -691,7 +696,10 @@ describe('backup application services', () => {
           settings: {
             defaultModel: null,
             snippetPasteMode: 'clipboard-only',
+            automaticBackupCadence: 'weekly',
           },
+          snippetUsageStats: [],
+          snippetGeneratedMetadata: [],
         }),
       },
       { download },
@@ -704,9 +712,12 @@ describe('backup application services', () => {
       knowledge: [],
       snippets: [],
       snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
       settings: {
         defaultModel: null,
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       },
     });
   });
@@ -740,7 +751,7 @@ describe('backup application services', () => {
       ...original,
       snippetAssets: [],
     });
-    expect(prepared.backup.formatVersion).toBe(6);
+    expect(prepared.backup.formatVersion).toBe(7);
   });
 
   it('excludes simulated future live-domain fields from serialized format v2', async () => {
@@ -757,6 +768,7 @@ describe('backup application services', () => {
       {
         defaultModel: data.settings.defaultModel,
         snippetPasteMode: data.settings.snippetPasteMode,
+        automaticBackupCadence: data.settings.automaticBackupCadence,
       },
       { futureSettingsField: true },
     );
@@ -770,6 +782,8 @@ describe('backup application services', () => {
           knowledge: [knowledge],
           snippets: [snippet],
           snippetAssets: [],
+          snippetUsageStats: [],
+          snippetGeneratedMetadata: [],
           settings,
         }),
       },
@@ -804,10 +818,9 @@ describe('backup application services', () => {
         'trigger',
       ].sort(),
     );
-    expect(Object.keys(parsed.data.settings).sort()).toEqual([
-      'defaultModel',
-      'snippetPasteMode',
-    ]);
+    expect(Object.keys(parsed.data.settings).sort()).toEqual(
+      ['defaultModel', 'snippetPasteMode', 'automaticBackupCadence'].sort(),
+    );
     expect(serialized).not.toContain('futureKnowledgeField');
     expect(serialized).not.toContain('usageCount');
     expect(serialized).not.toContain('futureSnippetField');
@@ -905,9 +918,12 @@ describe('backup application services', () => {
       knowledge: backup.data.knowledge,
       snippets: backup.data.snippets,
       snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
       settings: {
         defaultModel: backup.data.settings.defaultModel,
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       },
     });
   });
@@ -927,9 +943,12 @@ describe('backup application services', () => {
         trigger: null,
       })),
       snippetAssets: [],
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
       settings: {
         defaultModel: backup.data.settings.defaultModel,
         snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
       },
     });
 
