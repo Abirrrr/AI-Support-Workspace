@@ -7,10 +7,34 @@
 
 ## Current Milestone
 
-- M14-M.3 — Snippet Usage Statistics Behavior
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION IN PROGRESS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `f4d9ab0` is synchronized; M14-M.0 remains PASS / REAL-CHROME VALIDATED; Dexie remains v6 and Backup remains v7. Deterministic non-blocking Text/Image usage receipts, atomic sidecar increments, and lightweight Library counts are implemented without automatic backup, generated tags, F1/F2, or M15 behavior.
+- M14-M.4 — Git Metadata Environment Documentation
+- Status: **COMPLETE / DOCUMENTATION ONLY / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `2475f8b` is synchronized. The working tree remains in the synchronized Google Drive project directory, while Git metadata now resides in a separate local non-synchronized directory referenced by the project-root `.git` pointer file. M14-M.3/M14-M.3.1 remains the preceding product checkpoint; M14-N Automatic Backup remains the next product implementation milestone and is not started.
 
 ## Task State
+
+### M14-M.4 — Git Metadata Environment Documentation
+
+```text
+Active task: M14-M.4 — Git Metadata Environment Documentation
+Starting checkpoint: 2475f8b — feat: add snippet usage statistics
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+Separate Git metadata relocation: COMPLETE
+Project-root .git: POINTER FILE
+Canonical Git-directory discovery: git rev-parse --absolute-git-dir
+Working tree: SYNCHRONIZED GOOGLE DRIVE PROJECT DIRECTORY
+Git metadata: SEPARATE LOCAL NON-SYNCHRONIZED DIRECTORY
+M14-M.3/M14-M.3.1: PRECEDING PRODUCT CHECKPOINT
+M14-N Automatic Backup: NEXT PRODUCT IMPLEMENTATION / NOT STARTED
+Source/tests/schema/permissions/dependencies/build configuration: UNCHANGED
+Staging/commit/push: NONE
+```
+
+The repository now permanently uses Git's separate-git-dir mechanism. The project-root `.git` is a pointer file, not a Git metadata directory; `git rev-parse --absolute-git-dir` is the canonical discovery command. The working tree may remain synchronized by Google Drive, but the resolved Git directory is local operational state outside that synchronized tree and is not a portable project artifact.
+
+The relocation mitigates the former sync-provider contamination path. Under the previous layout, Google Drive repeatedly created `desktop.ini` files within Git refs and object metadata, producing failures including `badRefContent`, `invalid sha1 pointer`, and `bad sha1 file`. Routine recursive `.git/**/desktop.ini` sweeping is retired: agents must not assume `.git` is a directory or delete/recreate the pointer as cleanup. Repository integrity validation uses `git fsck --full`; direct metadata inspection first resolves the actual directory and requires deliberate Principal authorization.
+
+GitHub remains the authoritative remote Git history and supports normal clone/recovery. Google Drive may synchronize working-tree project files, repository documentation remains the project continuity source of truth, and the external Git metadata directory is not expected to be synchronized. Repository-local `maintenance.auto = false` and `gc.auto = 0` remain unchanged operational settings retained from the former Google Drive metadata issue. They are not product-architecture requirements; changing them requires deliberate engineering review.
 
 ### M14-M.3 — Snippet Usage Statistics Behavior
 
@@ -785,7 +809,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is active: M14-M.0 passed, M14-M.1/M14-M.1.1 are checkpointed at `20b509c`, M14-M.2 is checkpointed at `f4d9ab0`, and M14-M.3 usage behavior is implemented awaiting review.
+- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is active: M14-M.0 passed, M14-M.1/M14-M.1.1 are checkpointed at `20b509c`, M14-M.2 is checkpointed at `f4d9ab0`, M14-M.3/M14-M.3.1 is checkpointed at `2475f8b`, and the documentation-only M14-M.4 Git environment record is complete awaiting Principal review. M14-N remains the next product implementation milestone and is not started.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -805,7 +829,7 @@ Image trigger + Space
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** PASS / REAL-CHROME VALIDATED. The File System Access selected-folder model, restart recovery, service-worker reuse, exact owned-file lifecycle, and unavailable-location safety are proven. Different-folder distinction remains an M14-N non-blocking verification before retention reliance.
 - **M14-M.1/M14-M.1.1 — Coordinated Data Foundation:** COMPLETE / CHECKPOINTED AND SYNCHRONIZED AT `20b509c`. Dexie v6, Backup v7, sidecar repositories, cadence persistence, local state boundary, deletion/invalidation, v1-v6 compatibility, and atomic restore are complete.
 - **M14-M.2 — Real-World Snippet Feedback & Completion Gate:** DOCUMENTATION ONLY / COMPLETE / PRINCIPAL REVIEW PENDING. F1 link presentation and F2 edit navigation/focus are required before M14-P closes; F3 Save as Snippet is assigned to M15. No feedback behavior is implemented.
-- **M14-M.3/M14-M.3.1 — Snippet Usage Statistics Behavior and Display Simplification:** IMPLEMENTED / AUTOMATED VALIDATION IN PROGRESS / PRINCIPAL REVIEW PENDING. The 30-second transient one-use receipt, exact cleanup acknowledgement, atomic saturating sidecar update, failure isolation, Text/Image and mode parity, and numeric-only accessible Library projection are implemented.
+- **M14-M.3/M14-M.3.1 — Snippet Usage Statistics Behavior and Display Simplification:** COMPLETE / CHECKPOINTED AND SYNCHRONIZED AT `2475f8b`. The 30-second transient one-use receipt, exact cleanup acknowledgement, atomic saturating sidecar update, failure isolation, Text/Image and mode parity, and numeric-only accessible Library projection are implemented.
 - **M14-N — Periodic Automatic Backup:** NOT STARTED. File System Access + `alarms`, selected-folder production revalidation, exact Daily latest-seven and Weekly latest-four retention, and manual fallback.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
 - **M14-P — Snippet Hardening Validation & Closeout:** NOT STARTED. Complete automated/real-Chrome hardening evidence and preserve M14-K delivery before M15.
@@ -1027,7 +1051,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews the complete unstaged M14-M.3 implementation, tests, documentation, and validation evidence. Do not start M14-N, M14-O, M14-P, F1/F2 implementation, performance optimization, or M15 in this task.
+- Principal reviews the M14-M.4 documentation-only diff and validation evidence, then explicitly authorizes its documentation checkpoint if accepted. M14-N Automatic Backup remains the next separately gated product implementation milestone and must not start within M14-M.4.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -1035,6 +1059,7 @@ Image trigger + Space
 
 ## Repository Status
 
+- The working tree remains in the synchronized Google Drive project directory. Its root `.git` is a pointer file to a separate local non-synchronized Git metadata directory; discover the real location with `git rev-parse --absolute-git-dir`. GitHub remains the authoritative remote history and normal clone/recovery source.
 - The repository contains the completed Milestone 1 development foundation and completed Milestone 2 extension shell.
 - A fresh-thread reconstruction validation successfully recovered the frozen architecture, repository status, and correct current milestone using repository documentation alone.
 - The approved platform may not be substituted without an explicit architecture review.
@@ -1054,7 +1079,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 plus M14-M.1.1 are committed and synchronized at `20b509c`; M14-M.2 is committed and synchronized at `f4d9ab0`; M14-M.3 usage behavior is implemented and awaiting Principal review.
+- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 plus M14-M.1.1 are committed and synchronized at `20b509c`; M14-M.2 is committed and synchronized at `f4d9ab0`; M14-M.3/M14-M.3.1 is committed and synchronized at `2475f8b`; and M14-M.4 records the completed separate Git metadata relocation without changing product architecture.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1063,7 +1088,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal reviews the unstaged M14-M.3 implementation and complete validation evidence, then decides whether to authorize its checkpoint. M14-N remains separately gated and must not start in this task.
+- Exact next action: Principal reviews the unstaged M14-M.4 documentation and validation evidence, then decides whether to authorize its documentation checkpoint. M14-N remains the next separately gated product implementation milestone and must not start in this task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -1094,4 +1119,5 @@ Image trigger + Space
 - M14-D.2 architecture clarification checkpoint: `f9b5097` (`docs: define pre-delivery local image trigger safety`).
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
 - M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; the complete approved M14-K implementation is synchronized at `e34cd76`; and M14-K.5 closeout is synchronized at `3e5d545`.
+- M14-M.3/M14-M.3.1 usage-statistics implementation is committed and synchronized at `2475f8b` (`feat: add snippet usage statistics`). M14-M.4 begins from that clean synchronized checkpoint and creates no commit or push.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

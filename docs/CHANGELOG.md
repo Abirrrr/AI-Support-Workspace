@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-M.4 — Git Metadata Environment Documentation
+
+- Recorded the completed separate-Git-directory relocation: the working tree remains in the synchronized Google Drive project directory, while Git metadata is local and non-synchronized; the project-root `.git` is a pointer file and `git rev-parse --absolute-git-dir` is the canonical discovery mechanism. No developer-specific absolute path is stored in shared documentation.
+- Recorded the historical Google Drive `desktop.ini` contamination of Git refs/object metadata and its `badRefContent`, `invalid sha1 pointer`, and `bad sha1 file` failures. Retired routine recursive `.git/**/desktop.ini` sweeping and established `git fsck --full` as the integrity check; direct metadata work requires resolving the actual directory and deliberate Principal authorization.
+- Clarified that GitHub remains the authoritative remote Git history and normal clone/recovery source, Google Drive may synchronize working-tree files, repository documentation remains continuity authority, and the external metadata directory is local operational state rather than a portable project artifact.
+- Recorded unchanged repository-local `maintenance.auto = false` and `gc.auto = 0` as retained operational settings, not permanent product-architecture requirements. Added coding-agent prohibitions against assuming `.git` is a directory, rewriting its pointer, or casually running `git gc`, `git prune`, `git reset --hard`, or destructive history/object cleanup.
+- Updated project continuity: separate Git metadata relocation is complete and the former `.git/**/desktop.ini` corruption path is mitigated; M14-M.3/M14-M.3.1 remains the preceding product checkpoint at `2475f8b`, and M14-N Automatic Backup remains the next product implementation milestone and is not started. Documentation only; no product architecture, source, tests, schema, permissions, dependencies, build configuration, staging, commit, or push changed.
+
 ### M14-M.3 — Snippet Usage Statistics Behavior
 
 - Implemented a transient 30-second service-worker-owned one-use receipt created only after authoritative clipboard success and bound to request ID, Snippet ID, Text/Image kind, exact sender document/frame/tab/window identity, and catalog epoch/revision. The content frame acknowledges it only after exact trigger cleanup; duplicates, expiry, mismatches, unknown receipts, and worker recreation count zero.

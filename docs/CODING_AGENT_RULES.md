@@ -172,11 +172,22 @@ Use this checklist for every implementation milestone:
 ## Repository Synchronization
 
 - Git is the implementation history.
-- GitHub is the canonical remote repository and backup.
+- GitHub is the authoritative remote Git history and recovery source.
+- Google Drive may synchronize working-tree project files, but the repository's separate external Git metadata directory is local operational state and is not a portable or synchronized project artifact.
+- Repository documentation remains the project continuity source of truth, and normal clone/recovery from GitHub remains supported.
 - Every approved milestone must end with an authorized Git checkpoint followed by a GitHub push.
 - Confirm that the local checkpoint exists on the remote and that the working tree is clean before beginning the next milestone.
 - Local and remote repositories should remain synchronized at milestone boundaries.
 - Never store repository URLs, credentials, access tokens, or other secrets in workflow documentation.
+
+## Git Metadata Safety
+
+- This repository uses Git's separate-git-dir mechanism. The project-root `.git` is a pointer file, not a Git metadata directory.
+- Before any direct Git metadata inspection or operation, resolve the actual directory with `git rev-parse --absolute-git-dir`. Never assume project-root `.git` is a directory.
+- Never delete, recreate, rewrite, or recursively modify the `.git` pointer file as routine cleanup.
+- Use `git fsck --full` for Git integrity validation. The former recursive `.git/**/desktop.ini` sweep is obsolete and must not appear in routine preflight or final-validation guidance.
+- Direct operations on the resolved Git metadata directory require deliberate Principal authorization. Do not run destructive history or object cleanup, including `git gc`, `git prune`, or similar cleanup commands, unless intentionally authorized.
+- Never run `git reset --hard` unless the Principal explicitly authorizes that exact destructive operation.
 
 ## Change Discipline
 
