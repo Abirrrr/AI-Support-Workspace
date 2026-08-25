@@ -5,6 +5,8 @@ import type {
 import type { SnippetEntry } from '../../domain/snippet-entry';
 import type { SnippetAsset } from '../../domain/snippet-asset';
 import type { SnippetAssetRepository } from '../persistence/snippet-asset-repository';
+import type { SnippetUsageStatsRepository } from '../persistence/snippet-usage-stats-repository';
+import type { SnippetUsageStats } from '../../domain/snippet-usage-stats';
 import { validateSnippetContent } from '../../domain/snippet-content';
 import {
   DuplicateSnippetTriggerError,
@@ -17,6 +19,7 @@ import {
 
 export interface SnippetLibrary {
   load(): Promise<readonly SnippetEntry[]>;
+  loadUsageStats?(): Promise<readonly SnippetUsageStats[]>;
   loadAsset?(id: string): Promise<SnippetAsset | undefined>;
   create(input: SnippetEntryInput): Promise<SnippetEntry>;
   update(id: string, input: SnippetEntryInput): Promise<SnippetEntry>;
@@ -28,10 +31,15 @@ export class SnippetLibraryService implements SnippetLibrary {
     private readonly repository: SnippetEntryRepository,
     private readonly catalogMutationPort?: CatalogMutationPort,
     private readonly assetRepository?: SnippetAssetRepository,
+    private readonly usageStatsRepository?: SnippetUsageStatsRepository,
   ) {}
 
   load(): Promise<readonly SnippetEntry[]> {
     return this.repository.list();
+  }
+
+  loadUsageStats(): Promise<readonly SnippetUsageStats[]> {
+    return this.usageStatsRepository?.list() ?? Promise.resolve([]);
   }
 
   loadAsset(id: string): Promise<SnippetAsset | undefined> {

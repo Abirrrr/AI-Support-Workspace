@@ -2,6 +2,7 @@ import { SNIPPET_TRIGGER_MAX_LENGTH } from '../../application/snippet/snippet-tr
 import type {
   AutomaticPasteFinalizeMessage,
   AutomaticPasteFinalizeResponse,
+  SnippetUsageReceiptAcknowledgementMessage,
   TriggerActivationRequestMessage,
   TriggerActivationResponseMessage,
 } from '../../shared/snippet-delivery-messages';
@@ -32,7 +33,10 @@ export interface BeforeInputEventLike extends EditorActivationEventLike {
 
 export interface SnippetDeliveryRequester {
   requestDelivery(
-    message: TriggerActivationRequestMessage | AutomaticPasteFinalizeMessage,
+    message:
+      | TriggerActivationRequestMessage
+      | AutomaticPasteFinalizeMessage
+      | SnippetUsageReceiptAcknowledgementMessage,
   ): Promise<unknown>;
 }
 
@@ -120,13 +124,23 @@ function isActivationResponse(
     return false;
   }
   if (candidate.outcome === 'copied') {
-    return candidate.kind === 'text' || candidate.kind === 'image';
+    const usageReceiptId = (candidate as { readonly usageReceiptId?: unknown })
+      .usageReceiptId;
+    return (
+      (candidate.kind === 'text' || candidate.kind === 'image') &&
+      (usageReceiptId === undefined ||
+        (typeof usageReceiptId === 'string' && usageReceiptId.length > 0))
+    );
   }
   if (candidate.outcome === 'automatic-ready') {
+    const usageReceiptId = (candidate as { readonly usageReceiptId?: unknown })
+      .usageReceiptId;
     return (
       (candidate.kind === 'text' || candidate.kind === 'image') &&
       typeof candidate.authorizationId === 'string' &&
-      /^[0-9a-f]{32}$/.test(candidate.authorizationId)
+      /^[0-9a-f]{32}$/.test(candidate.authorizationId) &&
+      (usageReceiptId === undefined ||
+        (typeof usageReceiptId === 'string' && usageReceiptId.length > 0))
     );
   }
   return (
@@ -256,6 +270,9 @@ export class SnippetExpansionController {
       currentIdentity?.epoch === request.epoch &&
       currentIdentity.revision === request.revision &&
       snapshot.cleanupAfterClipboardSuccess();
+    if (cleaned) {
+      this.acknowledgeUsage(request, response.usageReceiptId);
+    }
     const label = response.kind === 'image' ? 'Image' : 'Snippet';
     this.feedback.show(
       cleaned
@@ -284,6 +301,9 @@ export class SnippetExpansionController {
       currentIdentity?.epoch === request.epoch &&
       currentIdentity.revision === request.revision &&
       snapshot.cleanupAfterClipboardSuccess();
+    if (cleaned) {
+      this.acknowledgeUsage(request, response.usageReceiptId);
+    }
     const editorReady =
       safeBeforeCleanup &&
       cleaned &&
@@ -383,6 +403,28 @@ export class SnippetExpansionController {
       this.reportAutomaticPastePostCleanup(diagnostic);
     } catch {
       // Native-development diagnostics must never change delivery behavior.
+    }
+  }
+
+  private acknowledgeUsage(
+    request: TriggerActivationRequestMessage,
+    receiptId: string | undefined,
+  ): void {
+    if (receiptId === undefined) return;
+    try {
+      void this.requester
+        .requestDelivery({
+          type: 'snippet-usage-receipt-acknowledgement',
+          receiptId,
+          requestId: request.requestId,
+          snippetId: request.snippetId,
+          kind: request.kind,
+          epoch: request.epoch,
+          revision: request.revision,
+        })
+        .catch(() => undefined);
+    } catch {
+      // Usage acknowledgement is best effort and cannot change delivery.
     }
   }
 }

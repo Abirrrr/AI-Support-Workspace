@@ -231,6 +231,7 @@ Revalidate focus and request exactly one Windows paste
 - Trigger recognition reads only bounded text immediately before the caret, logs no editor content, sends nothing to an AI provider, and never interprets Snippet content as HTML. Clipboard delivery is explicitly enabled in Settings.
 - For Rich text, the universal plain projection preserves block order, separates blocks with exactly `\n\n`, keeps readable emphasis text without markers, renders a labelled link as `label (url)` unless label equals URL, renders unordered/ordered items with `- ` or one-based numeric prefixes, and preserves legacy image-reference projection. Image Snippets are excluded from text consumers rather than represented by a placeholder.
 - Decision 45 provides the user-selectable `Copy to clipboard` / `Paste automatically` behavior. Clipboard-only is the default and permanent supported workflow. Automatic mode remains additive: it uses the same clipboard preparation and exact cleanup, then attempts one focus-guarded Windows paste. Any declined, failed, unavailable, or indeterminate attempt leaves the clipboard available and returns to `Copied — press Ctrl+V`.
+- M14-M.3 counts one Text or Image use only after clipboard preparation succeeds, exact trigger cleanup succeeds, and the service worker consumes the matching 30-second one-use receipt. Clipboard-only and automatic modes use the same count point. A later automatic-paste success, decline, or failure does not change that one use, and manual `Ctrl+V` is not observed. Clipboard or cleanup failure counts zero; usage persistence failure never changes delivery or schedules a retry.
 
 ### Unified Clipboard Delivery Workflow
 
@@ -481,7 +482,7 @@ Backup Location
 
 ### Approved Future M14-M/M14-O Library Metadata
 
-- A Text or Image Snippet may show exactly `<count> uses`; absent statistics render as zero. No charts, dashboard, usage history, or telemetry are added.
+- A Text or Image Snippet shows only its numeric usage count; absent statistics render as `0`. The numeric element has an accessible `Usage count: <count>` label. No charts, dashboard, usage history, or telemetry are added.
 - Authored tags remain the existing editable field. Generated Text retrieval tags are separate non-authoritative metadata and must not silently appear as authored values or become editable through the authored-tag control.
 - Snippet Save completes before tag generation. Missing model/provider or generation failure may show safe non-blocking status without changing the saved Snippet.
 
@@ -567,7 +568,7 @@ Local persistence
 - **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
 - **M14-L/M14-L.1 — Snippet Hardening Architecture:** checkpointed documentation architecture. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact.
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. M14-M.1 implements only the Dexie v6/Backup v7 persistence boundary; ordinary production Options still has no automatic-backup product UI or scheduled output.
-- **M14-M.1/M14-M.1.1:** complete and synchronized at `20b509c`; Dexie v6 and Backup v7 are implemented. **M14-M.2** records F1/F2 as required pre-M14-P Snippet UX work and F3 Save as Snippet as M15 work; none is implemented by the documentation task. M14-M usage behavior is next.
+- **M14-M.1/M14-M.1.1:** complete and synchronized at `20b509c`; Dexie v6 and Backup v7 are implemented. **M14-M.2** is synchronized at `f4d9ab0` and records F1/F2 as required pre-M14-P Snippet UX work and F3 Save as Snippet as M15 work. **M14-M.3** implements deterministic non-blocking usage behavior, and M14-M.3.1 displays only the numeric count in the Library, with absence as `0`; neither implements F1/F2/F3, automatic backup, or generated tags.
 
 The lifecycle availability flow is:
 

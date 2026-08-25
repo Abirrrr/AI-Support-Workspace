@@ -146,6 +146,36 @@ afterEach(() => {
 });
 
 describe('unified Snippet Library', () => {
+  it('shows zero-by-absence and persisted usage for Text and Image without reordering', async () => {
+    const service = library([plain, rich, imageEntry]);
+    service.loadUsageStats = vi.fn(async () => [
+      {
+        snippetId: rich.id,
+        usageCount: 1,
+        lastUsedAt: CREATED,
+      },
+      {
+        snippetId: imageEntry.id,
+        usageCount: 7,
+        lastUsedAt: CREATED,
+      },
+    ]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+
+    expect(await screen.findByText('Welcome response')).toBeTruthy();
+    expect(screen.getByLabelText('Usage count: 0').textContent).toBe('0');
+    expect(screen.getByLabelText('Usage count: 1').textContent).toBe('1');
+    expect(screen.getByLabelText('Usage count: 7').textContent).toBe('7');
+    expect(screen.queryByText(/^\d+ uses$/)).toBeNull();
+    const text = document.body.textContent ?? '';
+    expect(text.indexOf('Welcome response')).toBeLessThan(
+      text.indexOf('Widget setup'),
+    );
+    expect(text.indexOf('Widget setup')).toBeLessThan(
+      text.indexOf('Limitation screenshot'),
+    );
+  });
+
   it('shows Plain and Rich as Text, Image as Image, and supports search and filters', async () => {
     render(
       <SnippetLibraryView

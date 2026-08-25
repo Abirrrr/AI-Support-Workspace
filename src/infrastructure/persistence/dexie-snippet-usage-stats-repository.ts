@@ -51,6 +51,40 @@ export class DexieSnippetUsageStatsRepository implements SnippetUsageStatsReposi
     );
   }
 
+  recordUse(snippetId: string, usedAt: string): Promise<SnippetUsageStats> {
+    return runPersistenceOperation('record Snippet usage', async () =>
+      this.database.transaction(
+        'rw',
+        this.database.snippetEntries,
+        this.database.snippetUsageStats,
+        async () => {
+          const owner = await this.database.snippetEntries.get(snippetId);
+          if (owner === undefined) {
+            throw new TypeError(
+              'Snippet usage statistics require a Snippet owner.',
+            );
+          }
+          const existingRecord =
+            await this.database.snippetUsageStats.get(snippetId);
+          const existing =
+            existingRecord === undefined
+              ? undefined
+              : toSnippetUsageStats(existingRecord);
+          const record = toSnippetUsageStatsRecord({
+            snippetId,
+            usageCount:
+              existing === undefined
+                ? 1
+                : Math.min(Number.MAX_SAFE_INTEGER, existing.usageCount + 1),
+            lastUsedAt: usedAt,
+          });
+          await this.database.snippetUsageStats.put(record);
+          return toSnippetUsageStats(record);
+        },
+      ),
+    );
+  }
+
   delete(snippetId: string): Promise<boolean> {
     return runPersistenceOperation(
       'delete Snippet usage statistics',

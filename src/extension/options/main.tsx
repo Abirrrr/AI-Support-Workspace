@@ -21,6 +21,7 @@ import { DexieKnowledgeEntryRepository } from '../../infrastructure/persistence/
 import { DexieSettingsRepository } from '../../infrastructure/persistence/dexie-settings-repository';
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
 import { DexieSnippetAssetRepository } from '../../infrastructure/persistence/dexie-snippet-asset-repository';
+import { DexieSnippetUsageStatsRepository } from '../../infrastructure/persistence/dexie-snippet-usage-stats-repository';
 import { RuntimeCatalogMutationPort } from '../../infrastructure/snippet-trigger/runtime-catalog-mutation-port';
 import { ChromeClipboardDeliveryPermission } from '../snippet-trigger/clipboard-permission';
 import { ChromeWindowsImageClipboardCapability } from '../snippet-trigger/native-clipboard-capability';
@@ -82,6 +83,7 @@ const snippetLibrary = new SnippetLibraryService(
   snippetRepository,
   catalogMutationPort,
   snippetAssetRepository,
+  new DexieSnippetUsageStatsRepository(database),
 );
 if (import.meta.env.MODE === 'native-dev' && catalogRuntime !== undefined) {
   void import('./selected-folder-feasibility-diagnostic').then(

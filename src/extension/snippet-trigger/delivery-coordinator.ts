@@ -11,10 +11,13 @@ import {
 } from '../../application/snippet/snippet-delivery-planner';
 import {
   isAutomaticPasteFinalizeMessage,
+  isSnippetUsageReceiptAcknowledgementMessage,
   isTriggerActivationRequestMessage,
   type AutomaticPasteFinalizeMessage,
   type AutomaticPasteFinalizeResponse,
   type SnippetDeliveryFailureCode,
+  type SnippetUsageReceiptAcknowledgementMessage,
+  type SnippetUsageReceiptAcknowledgementResponse,
   type TriggerActivationRequestMessage,
   type TriggerActivationResponseMessage,
 } from '../../shared/snippet-delivery-messages';
@@ -27,6 +30,9 @@ import type {
 import type { SettingsRepository } from '../../application/persistence/settings-repository';
 import type { SnippetPasteMode } from '../../domain/settings';
 import { createNativeClipboardRequestId } from '../../infrastructure/clipboard/native-clipboard-protocol';
+import type { SnippetUsageStatsRepository } from '../../application/persistence/snippet-usage-stats-repository';
+
+export const SNIPPET_USAGE_RECEIPT_LIFETIME_MS = 30_000;
 
 export interface SnippetDeliveryMessageSender {
   readonly documentId?: string;
@@ -81,6 +87,16 @@ interface PendingAutomaticPaste {
   readonly sender: TrustedSenderIdentity;
   readonly context: NativePasteContext;
   readonly timeout: ReturnType<typeof setTimeout>;
+}
+
+interface PendingUsageReceipt {
+  readonly requestId: string;
+  readonly snippetId: string;
+  readonly kind: 'text' | 'image';
+  readonly epoch: string;
+  readonly revision: number;
+  readonly sender: TrustedSenderIdentity;
+  readonly expiresAt: number;
 }
 
 export interface CatalogActivationIdentity {
@@ -219,6 +235,10 @@ function transportDiagnosticStage(
 export class SnippetDeliveryCoordinator {
   private automaticDeliveryInProgress = false;
   private pendingAutomaticPaste: PendingAutomaticPaste | undefined;
+  private readonly pendingUsageReceipts = new Map<
+    string,
+    PendingUsageReceipt
+  >();
 
   constructor(
     private readonly planner: SnippetDeliveryPlanner,
@@ -240,17 +260,24 @@ export class SnippetDeliveryCoordinator {
       createNativeClipboardRequestId(),
     private readonly reportTiming: SnippetDeliveryTimingSink = () => undefined,
     private readonly now: () => number = () => performance.now(),
+    private readonly usageStatsRepository?: SnippetUsageStatsRepository,
+    private readonly usageClock: () => Date = () => new Date(),
+    private readonly createUsageReceiptId: () => string = () =>
+      crypto.randomUUID(),
   ) {}
 
   handleMessage(
     message: unknown,
     sender: SnippetDeliveryMessageSender = {},
-  ): Promise<unknown> | undefined {
+  ): Promise<unknown> | SnippetUsageReceiptAcknowledgementResponse | undefined {
     if (isTriggerActivationRequestMessage(message)) {
       return this.handleActivation(message, sender);
     }
     if (isAutomaticPasteFinalizeMessage(message)) {
       return this.handleAutomaticFinalize(message, sender);
+    }
+    if (isSnippetUsageReceiptAcknowledgementMessage(message)) {
+      return this.handleUsageReceiptAcknowledgement(message, sender);
     }
     return undefined;
   }
@@ -366,6 +393,13 @@ export class SnippetDeliveryCoordinator {
         clipboardWriteStartedAt,
         'success',
       );
+      const usageReceiptId = this.createUsageReceipt(
+        message,
+        sender,
+        plan.kind,
+      );
+      const usageReceipt =
+        usageReceiptId === undefined ? {} : { usageReceiptId };
       if (automaticMode) {
         this.recordAutomaticPasteTrace({
           kind: plan.kind,
@@ -393,6 +427,7 @@ export class SnippetDeliveryCoordinator {
             requestId: message.requestId,
             outcome: 'copied',
             kind: plan.kind,
+            ...usageReceipt,
           };
         }
         if (!(await this.isBrowserContextSafe(identity))) {
@@ -414,6 +449,7 @@ export class SnippetDeliveryCoordinator {
             requestId: message.requestId,
             outcome: 'copied',
             kind: plan.kind,
+            ...usageReceipt,
           };
         }
         if (this.automaticPasteTransport === undefined) {
@@ -436,6 +472,7 @@ export class SnippetDeliveryCoordinator {
             requestId: message.requestId,
             outcome: 'copied',
             kind: plan.kind,
+            ...usageReceipt,
           };
         }
         const authorizationId = this.createAuthorizationId();
@@ -469,6 +506,7 @@ export class SnippetDeliveryCoordinator {
             requestId: message.requestId,
             outcome: 'copied',
             kind: plan.kind,
+            ...usageReceipt,
           };
         }
         this.recordAutomaticPasteTrace({
@@ -507,6 +545,7 @@ export class SnippetDeliveryCoordinator {
           outcome: 'automatic-ready',
           kind: plan.kind,
           authorizationId,
+          ...usageReceipt,
         };
       }
       this.recordAutomaticPasteTrace({
@@ -519,6 +558,7 @@ export class SnippetDeliveryCoordinator {
         requestId: message.requestId,
         outcome: 'copied',
         kind: plan.kind,
+        ...usageReceipt,
       } satisfies TriggerActivationResponseMessage;
     } catch (error) {
       if (automaticMode) this.releaseAutomaticDelivery();
@@ -737,6 +777,97 @@ export class SnippetDeliveryCoordinator {
       kind: pending.kind,
       result,
     };
+  }
+
+  private createUsageReceipt(
+    message: TriggerActivationRequestMessage,
+    sender: SnippetDeliveryMessageSender,
+    kind: 'text' | 'image',
+  ): string | undefined {
+    const identity = this.toTrustedSenderIdentity(sender);
+    if (identity === undefined) return undefined;
+    try {
+      const createdAt = this.usageClock().getTime();
+      if (!Number.isFinite(createdAt)) return undefined;
+      this.pruneExpiredUsageReceipts(createdAt);
+      const receiptId = this.createUsageReceiptId();
+      if (receiptId.length === 0 || this.pendingUsageReceipts.has(receiptId)) {
+        return undefined;
+      }
+      this.pendingUsageReceipts.set(receiptId, {
+        requestId: message.requestId,
+        snippetId: message.snippetId,
+        kind,
+        epoch: message.epoch,
+        revision: message.revision,
+        sender: identity,
+        expiresAt: createdAt + SNIPPET_USAGE_RECEIPT_LIFETIME_MS,
+      });
+      return receiptId;
+    } catch {
+      // Receipt creation is best effort and cannot change clipboard delivery.
+      return undefined;
+    }
+  }
+
+  private handleUsageReceiptAcknowledgement(
+    message: SnippetUsageReceiptAcknowledgementMessage,
+    sender: SnippetDeliveryMessageSender,
+  ): SnippetUsageReceiptAcknowledgementResponse {
+    const rejected = {
+      type: 'snippet-usage-receipt-acknowledgement-result',
+      requestId: message.requestId,
+      accepted: false,
+    } satisfies SnippetUsageReceiptAcknowledgementResponse;
+    const receipt = this.pendingUsageReceipts.get(message.receiptId);
+    if (
+      receipt === undefined ||
+      receipt.requestId !== message.requestId ||
+      receipt.snippetId !== message.snippetId ||
+      receipt.kind !== message.kind ||
+      receipt.epoch !== message.epoch ||
+      receipt.revision !== message.revision ||
+      !this.senderMatches(receipt.sender, sender)
+    ) {
+      return rejected;
+    }
+
+    let acknowledgedAt: Date;
+    try {
+      acknowledgedAt = this.usageClock();
+    } catch {
+      this.pendingUsageReceipts.delete(message.receiptId);
+      return rejected;
+    }
+    const acknowledgedAtMs = acknowledgedAt.getTime();
+    if (
+      !Number.isFinite(acknowledgedAtMs) ||
+      acknowledgedAtMs >= receipt.expiresAt
+    ) {
+      this.pendingUsageReceipts.delete(message.receiptId);
+      return rejected;
+    }
+
+    this.pendingUsageReceipts.delete(message.receiptId);
+    const usedAt = acknowledgedAt.toISOString();
+    if (this.usageStatsRepository !== undefined) {
+      void this.usageStatsRepository
+        .recordUse(receipt.snippetId, usedAt)
+        .catch(() => undefined);
+    }
+    return {
+      type: 'snippet-usage-receipt-acknowledgement-result',
+      requestId: message.requestId,
+      accepted: true,
+    };
+  }
+
+  private pruneExpiredUsageReceipts(now: number): void {
+    for (const [receiptId, receipt] of this.pendingUsageReceipts) {
+      if (receipt.expiresAt <= now) {
+        this.pendingUsageReceipts.delete(receiptId);
+      }
+    }
   }
 
   private toTrustedSenderIdentity(

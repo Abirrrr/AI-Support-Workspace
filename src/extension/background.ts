@@ -9,6 +9,7 @@ import { createDatabase } from '../infrastructure/persistence/database';
 import { DexieSnippetEntryRepository } from '../infrastructure/persistence/dexie-snippet-entry-repository';
 import { DexieSnippetAssetRepository } from '../infrastructure/persistence/dexie-snippet-asset-repository';
 import { DexieSettingsRepository } from '../infrastructure/persistence/dexie-settings-repository';
+import { DexieSnippetUsageStatsRepository } from '../infrastructure/persistence/dexie-snippet-usage-stats-repository';
 import { SnippetDeliveryPlanner } from '../application/snippet/snippet-delivery-planner';
 import { BrowserImagePngPreparer } from '../infrastructure/clipboard/browser-image-png-preparer';
 import {
@@ -118,6 +119,7 @@ export default defineBackground(() => {
     }
     const database = createDatabase();
     const repository = new DexieSnippetEntryRepository(database);
+    const usageStatsRepository = new DexieSnippetUsageStatsRepository(database);
     const settingsRepository = new DexieSettingsRepository(database);
     const coordinator = new TriggerCatalogCoordinator(
       new TriggerCatalogService(repository),
@@ -165,6 +167,10 @@ export default defineBackground(() => {
               },
           undefined,
           (diagnostic) => reportAutomaticPasteTrace(diagnostic),
+          undefined,
+          undefined,
+          undefined,
+          usageStatsRepository,
         ),
       );
     }

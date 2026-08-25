@@ -67,6 +67,65 @@ describe('M14-M.1 hardening repositories', () => {
     await expect(repository.delete(snippet.id)).resolves.toBe(false);
   });
 
+  it('atomically creates, concurrently increments, saturates, and isolates usage sidecars', async () => {
+    const snippetRepository = new DexieSnippetEntryRepository(database);
+    const snippet = await createTextSnippet();
+    const usageRepository = new DexieSnippetUsageStatsRepository(database);
+    const metadataRepository = new DexieSnippetGeneratedMetadataRepository(
+      database,
+    );
+    const metadata = {
+      snippetId: snippet.id,
+      generatedTags: ['refund'],
+      sourceFingerprint: await createSnippetSourceFingerprint(snippet),
+      generatedAt: USED_AT,
+    };
+    await metadataRepository.save(metadata);
+
+    await expect(
+      usageRepository.recordUse(snippet.id, USED_AT),
+    ).resolves.toEqual({
+      snippetId: snippet.id,
+      usageCount: 1,
+      lastUsedAt: USED_AT,
+    });
+    await Promise.all(
+      Array.from({ length: 12 }, () =>
+        usageRepository.recordUse(snippet.id, USED_AT),
+      ),
+    );
+    await expect(usageRepository.get(snippet.id)).resolves.toEqual({
+      snippetId: snippet.id,
+      usageCount: 13,
+      lastUsedAt: USED_AT,
+    });
+
+    const saturatedAt = '2026-08-25T02:00:00.000Z';
+    await usageRepository.save({
+      snippetId: snippet.id,
+      usageCount: Number.MAX_SAFE_INTEGER,
+      lastUsedAt: USED_AT,
+    });
+    await expect(
+      usageRepository.recordUse(snippet.id, saturatedAt),
+    ).resolves.toEqual({
+      snippetId: snippet.id,
+      usageCount: Number.MAX_SAFE_INTEGER,
+      lastUsedAt: saturatedAt,
+    });
+
+    await expect(
+      usageRepository.recordUse(snippet.id, 'page-provided-invalid-time'),
+    ).rejects.toThrow('Failed to record Snippet usage.');
+    await expect(usageRepository.get(snippet.id)).resolves.toEqual({
+      snippetId: snippet.id,
+      usageCount: Number.MAX_SAFE_INTEGER,
+      lastUsedAt: saturatedAt,
+    });
+    await expect(snippetRepository.get(snippet.id)).resolves.toEqual(snippet);
+    await expect(metadataRepository.get(snippet.id)).resolves.toEqual(metadata);
+  });
+
   it('persists bounded generated metadata for Text owners only', async () => {
     const snippet = await createTextSnippet();
     const repository = new DexieSnippetGeneratedMetadataRepository(database);

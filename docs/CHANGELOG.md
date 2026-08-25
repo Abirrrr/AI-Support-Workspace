@@ -1,5 +1,11 @@
 # Changelog
 
+### M14-M.3 — Snippet Usage Statistics Behavior
+
+- Implemented a transient 30-second service-worker-owned one-use receipt created only after authoritative clipboard success and bound to request ID, Snippet ID, Text/Image kind, exact sender document/frame/tab/window identity, and catalog epoch/revision. The content frame acknowledges it only after exact trigger cleanup; duplicates, expiry, mismatches, unknown receipts, and worker recreation count zero.
+- Added atomic `recordUse` sidecar behavior with concurrent-safe create/increment, service-worker UTC `lastUsedAt`, `Number.MAX_SAFE_INTEGER` saturation, and best-effort failure isolation. Persistence is not awaited by delivery, is never replayed, and cannot change clipboard/cleanup/automatic-paste success or fallback. Authored Snippet fields/timestamps, assets, generated metadata, catalog publication, and retrieval remain unchanged.
+- Added Text/Image and clipboard-only/automatic parity coverage, later automatic-paste success/failure/decline behavior, cleanup-failure exclusion, deterministic expiry/identity/replay/worker-loss tests, Dexie concurrency/saturation/rollback tests, and lightweight Library usage-count display without reordering. M14-M.3.1 simplifies the visible display to numeric-only `0`, `1`, or N with an accessible count label. Dexie remains v6 and Backup remains v7; no automatic backup, generated-tag, F1/F2, M15, permission, or dependency behavior was added.
+
 ### M14-M.2 — Real-World Snippet Feedback & Completion-Gate Recording
 
 - Recorded F1 as conventional blue/underlined presentation for text carrying the existing safe-link mark in the Snippet editor, without arbitrary color/underline/typography controls or persisted Rich Text changes. Recorded F2 as accessible deterministic Edit-to-editor view/focus without timing hacks, route redesign, or data-behavior changes. Both are future daily-use UX corrections required before M14-P closes.

@@ -129,10 +129,20 @@ describe('automatic expansion finalization', () => {
         outcome: 'automatic-ready',
         kind,
         authorizationId,
+        usageReceiptId: 'usage-receipt-1',
       });
       await flushDelivery();
       expect(editor.value).toBe('');
-      expect(harness.requester.requestDelivery).toHaveBeenCalledTimes(2);
+      expect(harness.requester.requestDelivery).toHaveBeenCalledTimes(3);
+      expect(harness.requester.requestDelivery).toHaveBeenNthCalledWith(2, {
+        type: 'snippet-usage-receipt-acknowledgement',
+        receiptId: 'usage-receipt-1',
+        requestId: 'request-1',
+        snippetId: 'snippet-1',
+        kind,
+        epoch: 'epoch-1',
+        revision: 1,
+      });
       expect(harness.requester.requestDelivery).toHaveBeenLastCalledWith({
         type: 'snippet-automatic-paste-finalize',
         requestId: 'request-1',
@@ -169,6 +179,7 @@ describe('automatic expansion finalization', () => {
       outcome: 'automatic-ready',
       kind: 'text',
       authorizationId,
+      usageReceiptId: 'usage-receipt-1',
     });
     await flushDelivery();
     expect(editor.value).toBe('');
@@ -212,6 +223,11 @@ describe('automatic expansion finalization', () => {
     expect(editor.value).toBe(';hello changed');
     expect(harness.requester.requestDelivery).toHaveBeenLastCalledWith(
       expect.objectContaining({ editorState: 'cleanup-failed' }),
+    );
+    expect(harness.requester.requestDelivery).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'snippet-usage-receipt-acknowledgement',
+      }),
     );
   });
 

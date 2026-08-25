@@ -57,6 +57,19 @@ function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
   );
 }
 
+async function readSnippetLibraryData(snippetLibrary: SnippetLibrary) {
+  const [entries, usageStats] = await Promise.all([
+    snippetLibrary.load(),
+    snippetLibrary.loadUsageStats?.() ?? Promise.resolve([]),
+  ]);
+  return {
+    entries,
+    usageCounts: new Map(
+      usageStats.map((stats) => [stats.snippetId, stats.usageCount]),
+    ),
+  };
+}
+
 function draftFromEntry(entry: SnippetEntry): SnippetDraft {
   if (entry.content.kind === 'image') throw new InvalidSnippetContentError();
   return {
@@ -109,6 +122,9 @@ export function SnippetLibraryView({
   confirmDelete = defaultDeleteConfirmation,
 }: SnippetLibraryViewProps) {
   const [entries, setEntries] = useState<readonly SnippetEntry[]>([]);
+  const [usageCounts, setUsageCounts] = useState<ReadonlyMap<string, number>>(
+    new Map(),
+  );
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'failed'>(
     'loading',
   );
@@ -130,7 +146,9 @@ export function SnippetLibraryView({
     setLoadState('loading');
     setErrorMessage(undefined);
     try {
-      setEntries(await snippetLibrary.load());
+      const loaded = await readSnippetLibraryData(snippetLibrary);
+      setEntries(loaded.entries);
+      setUsageCounts(loaded.usageCounts);
       setLoadState('ready');
     } catch {
       setLoadState('failed');
@@ -142,10 +160,11 @@ export function SnippetLibraryView({
 
   useEffect(() => {
     let active = true;
-    void snippetLibrary.load().then(
+    void readSnippetLibraryData(snippetLibrary).then(
       (loaded) => {
         if (!active) return;
-        setEntries(loaded);
+        setEntries(loaded.entries);
+        setUsageCounts(loaded.usageCounts);
         setLoadState('ready');
       },
       () => {
@@ -596,53 +615,63 @@ export function SnippetLibraryView({
             </p>
           ) : (
             <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-              {visibleEntries.map((entry) => (
-                <li className="p-4" key={entry.id}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-slate-950">
-                        {entry.title}
-                      </h3>
-                      {entry.trigger ? (
-                        <p className="mt-1 font-mono text-sm text-blue-700">
-                          {entry.trigger}
+              {visibleEntries.map((entry) => {
+                const usageCount = usageCounts.get(entry.id) ?? 0;
+
+                return (
+                  <li className="p-4" key={entry.id}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-slate-950">
+                          {entry.title}
+                        </h3>
+                        {entry.trigger ? (
+                          <p className="mt-1 font-mono text-sm text-blue-700">
+                            {entry.trigger}
+                          </p>
+                        ) : null}
+                        <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          {entry.content.kind === 'image' ? 'Image' : 'Text'}
+                        </span>
+                        <p
+                          aria-label={`Usage count: ${usageCount}`}
+                          className="mt-2 text-xs text-slate-500"
+                        >
+                          {usageCount}
                         </p>
-                      ) : null}
-                      <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                        {entry.content.kind === 'image' ? 'Image' : 'Text'}
-                      </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                          disabled={isBusy}
+                          onClick={() => void beginEditing(entry)}
+                          type="button"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700"
+                          disabled={isBusy}
+                          onClick={() => void deleteEntry(entry)}
+                          type="button"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                        disabled={isBusy}
-                        onClick={() => void beginEditing(entry)}
-                        type="button"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700"
-                        disabled={isBusy}
-                        onClick={() => void deleteEntry(entry)}
-                        type="button"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                  {entry.content.kind === 'image' ? (
-                    <ImageThumbnail
-                      assetId={entry.content.assetId}
-                      snippetLibrary={snippetLibrary}
-                    />
-                  ) : (
-                    <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
-                      {renderSnippetPlainText(entry.content)}
-                    </p>
-                  )}
-                </li>
-              ))}
+                    {entry.content.kind === 'image' ? (
+                      <ImageThumbnail
+                        assetId={entry.content.assetId}
+                        snippetLibrary={snippetLibrary}
+                      />
+                    ) : (
+                      <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
+                        {renderSnippetPlainText(entry.content)}
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

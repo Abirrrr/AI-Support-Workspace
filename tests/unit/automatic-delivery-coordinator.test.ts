@@ -171,6 +171,7 @@ describe('automatic/manual delivery orchestration', () => {
         outcome: 'automatic-ready',
         kind,
         authorizationId,
+        usageReceiptId: expect.any(String),
       });
       expect(
         vi.mocked(subject.clipboard.write).mock.invocationCallOrder[0],

@@ -51,6 +51,7 @@ export type TriggerActivationResponseMessage =
       readonly requestId: string;
       readonly outcome: 'copied';
       readonly kind: TriggerCatalogEntryKind;
+      readonly usageReceiptId?: string;
     }
   | {
       readonly type: 'snippet-trigger-activation-result';
@@ -58,6 +59,7 @@ export type TriggerActivationResponseMessage =
       readonly outcome: 'automatic-ready';
       readonly kind: TriggerCatalogEntryKind;
       readonly authorizationId: string;
+      readonly usageReceiptId?: string;
     }
   | {
       readonly type: 'snippet-trigger-activation-result';
@@ -66,6 +68,22 @@ export type TriggerActivationResponseMessage =
       readonly code: SnippetDeliveryFailureCode;
       readonly message: string;
     };
+
+export interface SnippetUsageReceiptAcknowledgementMessage {
+  readonly type: 'snippet-usage-receipt-acknowledgement';
+  readonly receiptId: string;
+  readonly requestId: string;
+  readonly snippetId: string;
+  readonly kind: TriggerCatalogEntryKind;
+  readonly epoch: string;
+  readonly revision: number;
+}
+
+export interface SnippetUsageReceiptAcknowledgementResponse {
+  readonly type: 'snippet-usage-receipt-acknowledgement-result';
+  readonly requestId: string;
+  readonly accepted: boolean;
+}
 
 export interface AutomaticPasteFinalizeMessage {
   readonly type: 'snippet-automatic-paste-finalize';
@@ -234,6 +252,35 @@ export function isAutomaticPasteFinalizeMessage(
     (value.editorState === 'ready' ||
       value.editorState === 'unsafe-focus' ||
       value.editorState === 'cleanup-failed')
+  );
+}
+
+export function isSnippetUsageReceiptAcknowledgementMessage(
+  value: unknown,
+): value is SnippetUsageReceiptAcknowledgementMessage {
+  return (
+    isRecord(value) &&
+    exactKeys(value, [
+      'type',
+      'receiptId',
+      'requestId',
+      'snippetId',
+      'kind',
+      'epoch',
+      'revision',
+    ]) &&
+    value.type === 'snippet-usage-receipt-acknowledgement' &&
+    typeof value.receiptId === 'string' &&
+    value.receiptId.length > 0 &&
+    typeof value.requestId === 'string' &&
+    value.requestId.length > 0 &&
+    typeof value.snippetId === 'string' &&
+    value.snippetId.length > 0 &&
+    (value.kind === 'text' || value.kind === 'image') &&
+    typeof value.epoch === 'string' &&
+    value.epoch.length > 0 &&
+    Number.isInteger(value.revision) &&
+    (value.revision as number) >= 0
   );
 }
 

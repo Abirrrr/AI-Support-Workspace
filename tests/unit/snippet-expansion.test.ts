@@ -147,6 +147,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       requestId: 'request-1',
       outcome: 'copied',
       kind: 'text',
+      usageReceiptId: 'usage-receipt-1',
     });
     await flush();
 
@@ -164,6 +165,15 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       'Snippet copied — press Ctrl+V',
       'success',
     );
+    expect(requester.requestDelivery).toHaveBeenLastCalledWith({
+      type: 'snippet-usage-receipt-acknowledgement',
+      receiptId: 'usage-receipt-1',
+      requestId: 'request-1',
+      snippetId: 'snippet-1',
+      kind: 'text',
+      epoch: 'epoch-1',
+      revision: 1,
+    });
   });
 
   it.each([null, 'text', 'search'])(
@@ -265,7 +275,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     document.body.append(textarea);
     textarea.focus();
     textarea.setSelectionRange(6, 6);
-    const { controller, delivery, feedback } = harness('image');
+    const { controller, delivery, requester, feedback } = harness('image');
     handleSnippetBeforeInput(controller, beforeInput(textarea));
     textarea.value = ';hello edited';
     textarea.setSelectionRange(textarea.value.length, textarea.value.length);
@@ -274,12 +284,18 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       requestId: 'request-1',
       outcome: 'copied',
       kind: 'image',
+      usageReceiptId: 'usage-receipt-1',
     });
     await flush();
     expect(textarea.value).toBe(';hello edited');
     expect(feedback.show).toHaveBeenCalledWith(
       'Image copied — press Ctrl+V (trigger unchanged)',
       'success',
+    );
+    expect(requester.requestDelivery).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'snippet-usage-receipt-acknowledgement',
+      }),
     );
   });
 
@@ -353,7 +369,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     selection?.addRange(caret);
     const input = vi.fn();
     editor.addEventListener('input', input);
-    const { controller, delivery, feedback } = harness('image');
+    const { controller, delivery, requester, feedback } = harness('image');
     expect(handleSnippetBeforeInput(controller, beforeInput(editor))).toBe(
       true,
     );
@@ -363,6 +379,7 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
       requestId: 'request-1',
       outcome: 'copied',
       kind: 'image',
+      usageReceiptId: 'usage-receipt-1',
     });
     await flush();
     expect(editor.textContent).toBe('Before ');
@@ -370,6 +387,13 @@ describe('asynchronous clipboard activation and compare-and-swap cleanup', () =>
     expect(feedback.show).toHaveBeenCalledWith(
       'Image copied — press Ctrl+V',
       'success',
+    );
+    expect(requester.requestDelivery).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        type: 'snippet-usage-receipt-acknowledgement',
+        receiptId: 'usage-receipt-1',
+        kind: 'image',
+      }),
     );
   });
 
