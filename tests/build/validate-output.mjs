@@ -221,6 +221,14 @@ const optionsScriptSource = await readFile(
   resolve(outputDirectory, optionsScriptPath),
   'utf8',
 );
+assert.match(optionsScriptSource, /Automatic Backup/);
+assert.match(optionsScriptSource, /No backup location selected/);
+assert.match(optionsScriptSource, /Backup location needs attention/);
+assert.match(optionsScriptSource, /Choose Folder/);
+assert.match(optionsScriptSource, /Change Folder/);
+assert.match(optionsScriptSource, /Reauthorize/);
+assert.match(optionsScriptSource, /showDirectoryPicker/);
+assert.match(optionsScriptSource, /requestPermission/);
 const generatedJavaScriptPaths = (
   await readdir(outputDirectory, { recursive: true })
 )

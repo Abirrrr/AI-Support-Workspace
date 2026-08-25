@@ -5,6 +5,7 @@ import type { SettingsApplication } from '../../application/settings/settings-se
 import type { SnippetLibrary } from '../../application/snippet/snippet-library';
 import type { ClipboardDeliveryPermission } from '../../extension/snippet-trigger/clipboard-permission';
 import type { WindowsImageClipboardCapability } from '../../extension/snippet-trigger/native-clipboard-capability';
+import type { AutomaticBackupOptionsApplication } from '../../application/automatic-backup/automatic-backup-options';
 import {
   ImportExportView,
   type ImportExportActions,
@@ -16,6 +17,7 @@ import { SnippetLibraryView } from '../snippet/SnippetLibraryView';
 interface OptionsShellProps {
   knowledgeLibrary: KnowledgeLibrary;
   settings: SettingsApplication;
+  automaticBackup?: AutomaticBackupOptionsApplication | undefined;
   snippetLibrary: SnippetLibrary;
   importExport: ImportExportActions;
   clipboardDelivery?: ClipboardDeliveryPermission | undefined;
@@ -25,6 +27,7 @@ interface OptionsShellProps {
 export function OptionsShell({
   knowledgeLibrary,
   settings,
+  automaticBackup,
   snippetLibrary,
   importExport,
   clipboardDelivery,
@@ -154,6 +157,7 @@ export function OptionsShell({
           role="tabpanel"
         >
           <SettingsView
+            automaticBackup={automaticBackup}
             clipboardDelivery={clipboardDelivery}
             key={`settings-${dataRevision}`}
             settings={settings}

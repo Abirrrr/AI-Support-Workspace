@@ -7,10 +7,34 @@
 
 ## Current Milestone
 
-- M14-N.1 — Automatic Backup Runtime Core
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `9b0862c` is synchronized. The provider-independent runtime core, production selected-directory adapter, one-shot alarm lifecycle, canonical Backup v7 output, verified local manifest, ownership-proven retention, and concurrency protections are implemented. Dexie remains v6 and Backup remains v7. M14-N.2 still owns the final user-facing Options picker/reauthorization/status UI and real-Chrome production-path revalidation; M14-O, M14-P, F1/F2, and M15 remain unstarted.
+- M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
+- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `dcfda47` is synchronized. The Settings cadence control, explicit Choose/Change Folder and Reauthorize gestures, typed safe status model, and Options-to-M14-N.1 runtime wiring are implemented. Dexie remains v6 and Backup remains v7. M14-N.3 owns final real-Chrome production-path validation and M14-N closeout; M14-O, M14-P, F1/F2, and M15 remain unstarted.
 
 ## Task State
+
+### M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
+
+```text
+Active task: M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
+Starting checkpoint: dcfda47 — feat: add automatic backup runtime core
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+Cadence UI: Off | Daily | Weekly (Weekly default)
+Folder gestures: explicit Choose Folder | Change Folder | Reauthorize
+Status UI: Off | Ready | Backup location needs attention | No backup location selected
+Runtime boundary: typed Options application facade → M14-N.1 adoption/reconciliation
+Dexie physical version: 6 (UNCHANGED)
+Canonical Backup version: 7 (UNCHANGED)
+Permissions: alarms retained; downloads/fileSystem absent
+M14-N.3 real-Chrome production validation / M14-N closeout: DEFERRED
+Staging/commit/push: NONE
+```
+
+The Options page now exposes the approved small Automatic Backup workflow. Picker and permission requests occur only inside explicit button commands; initial load, render, cadence changes, and scheduled code remain query-only and never prompt. The UI receives no directory handle, backup-set/backup ID, alarm, lease, schedule, or manifest detail. Off preserves the configured folder through the M14-N.1 boundary, active cadence without a folder remains inactive, granted authority reports Ready, and prompt/denied/unavailable authority reports attention with explicit Reauthorize.
+
+Cadence saves preserve the rest of the Settings aggregate and delegate all timing changes to `AutomaticBackupRuntimeCore.reconcileCadenceChange()`. Folder selection delegates identity/set/manifest decisions to `adoptDirectory()` and creates no immediate backup for a newly adopted location. Reauthorization delegates recovery to `reconcileStartup()`. Cancellation, denial, and facade failures are contained with safe copy, while Snippet workflows and independent Manual Export remain available.
+
+M14-N.2 is automated-test only. M14-N.3 must validate the final production path in real Chrome: lifecycle permission persistence, same/different-folder identity, scheduled alarm execution, actual managed-file creation, real 7/4 retention, deleted/unavailable-folder recovery, and final M14-N closeout.
 
 ### M14-N.1 — Automatic Backup Runtime Core
 
@@ -27,13 +51,14 @@ Execution safety: in-memory guard + atomic persisted 30-minute lease
 Output: canonical automatic Backup v7 + exact readback/length/SHA-256 validation
 Retention: bounded local manifest + exact ownership re-proof; no scanning
 Permissions: alarms added; downloads/fileSystem absent
-M14-N.2 Options UI / real-Chrome revalidation: NOT IMPLEMENTED
+M14-N.2 Options UI/runtime wiring: IMPLEMENTED / AUTOMATED PASS
+M14-N.3 real-Chrome revalidation / closeout: NOT STARTED
 Staging/commit/push: NONE
 ```
 
 The background runtime reconciles persisted anchor-based timing on service-worker startup and on its single named alarm. Activation and cadence changes schedule the first run one full interval later. Overdue intervals coalesce into at most one catch-up, then advance to the next future anchor boundary without a repeating alarm, polling, keepalive, queue, or rapid retry. Off and unavailable permission states clear active timing while retaining local authorization/ownership state; scheduled code calls only `queryPermission({ mode: 'readwrite' })` and never requests authority.
 
-Automatic and manual output now share `BackupV7CreationService`. A run binds its directory, backup set, schedule, and owned lease; creates one automatic v7 identity and one Windows-safe UUID/timestamp filename; and fails safely on collision without overwrite, alternate identity/name generation, retention, or immediate retry. Successful creation closes, reopens, and verifies exact byte length, SHA-256, strict v7 identity, creation mode, and backup set before recording success. Retention starts only afterward, considers exact manifest candidates only, re-proves current directory identity and every ownership field, and stops with safe overflow on uncertainty. Same-directory adoption preserves set/manifest/schedule; different or uncertain identity creates a new set and leaves old-location files untouched. M14-N.2 must still expose the explicit user-gesture UI and repeat the production adapter path in real Chrome.
+Automatic and manual output now share `BackupV7CreationService`. A run binds its directory, backup set, schedule, and owned lease; creates one automatic v7 identity and one Windows-safe UUID/timestamp filename; and fails safely on collision without overwrite, alternate identity/name generation, retention, or immediate retry. Successful creation closes, reopens, and verifies exact byte length, SHA-256, strict v7 identity, creation mode, and backup set before recording success. Retention starts only afterward, considers exact manifest candidates only, re-proves current directory identity and every ownership field, and stops with safe overflow on uncertainty. Same-directory adoption preserves set/manifest/schedule; different or uncertain identity creates a new set and leaves old-location files untouched. M14-N.2 now exposes the explicit user-gesture UI; M14-N.3 must repeat the production adapter path in real Chrome.
 
 ### M14-M.4 — Git Metadata Environment Documentation
 
@@ -832,7 +857,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is active: M14-M.0 passed, M14-M.1/M14-M.1.1 are checkpointed at `20b509c`, M14-M.2 is checkpointed at `f4d9ab0`, M14-M.3/M14-M.3.1 is checkpointed at `2475f8b`, and M14-M.4 records the separate Git metadata environment. M14-N.1 is implemented with automated validation and awaits Principal review; M14-N.2 UI activation and production real-Chrome validation remain next.
+- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is active: M14-M.0 passed, M14-M.1/M14-M.1.1 are checkpointed at `20b509c`, M14-M.2 is checkpointed at `f4d9ab0`, M14-M.3/M14-M.3.1 is checkpointed at `2475f8b`, and M14-M.4 records the separate Git metadata environment. M14-N.1 runtime and M14-N.2 Options wiring are implemented with automated validation; M14-N.3 production real-Chrome validation and M14-N closeout remain next.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -854,7 +879,8 @@ Image trigger + Space
 - **M14-M.2 — Real-World Snippet Feedback & Completion Gate:** DOCUMENTATION ONLY / COMPLETE / PRINCIPAL REVIEW PENDING. F1 link presentation and F2 edit navigation/focus are required before M14-P closes; F3 Save as Snippet is assigned to M15. No feedback behavior is implemented.
 - **M14-M.3/M14-M.3.1 — Snippet Usage Statistics Behavior and Display Simplification:** COMPLETE / CHECKPOINTED AND SYNCHRONIZED AT `2475f8b`. The 30-second transient one-use receipt, exact cleanup acknowledgement, atomic saturating sidecar update, failure isolation, Text/Image and mode parity, and numeric-only accessible Library projection are implemented.
 - **M14-N.1 — Automatic Backup Runtime Core:** IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REVIEW PENDING. File System Access production adapter, one-shot `alarms`, exact Daily latest-seven and Weekly latest-four retention, canonical v7 output, verification, manifest, and concurrency controls are present.
-- **M14-N.2 — Options Activation & Production Validation:** NOT STARTED. Explicit folder selection/reauthorization/status UI and final real-Chrome production-path evidence remain required; manual Export remains the fallback.
+- **M14-N.2 — Options Activation & Runtime Wiring:** IMPLEMENTED / AUTOMATED PASS. Explicit folder selection/change/reauthorization, cadence, safe status, and M14-N.1 wiring are present; manual Export remains independent.
+- **M14-N.3 — Real-Chrome Validation & Automatic Backup Closeout:** NOT STARTED. Final production lifecycle, identity, execution, file, retention, recovery, and closeout evidence remains required.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
 - **M14-P — Snippet Hardening Validation & Closeout:** NOT STARTED. Complete automated/real-Chrome hardening evidence and preserve M14-K delivery before M15.
 - **M15 Workspace Shell Action UX — ASSIGNED / NOT STARTED:** The current toolbar action still opens the popup. Decision 54 requires M15 to retire the popup/default popup, use native toolbar-action global Side Panel open/toggle behavior, and add a compact accessible Side Panel Settings gear that opens the existing Options / Libraries page. Text/Image Snippets, backup/export, automatic backup, paste behavior, model/provider settings, other settings, and current Knowledge compatibility remain in Options.
@@ -1112,7 +1138,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: complete the M14-N.1 validation/report handoff for Principal review. If accepted, M14-N.2 is the next separately gated task for explicit Options activation and production real-Chrome evidence. Do not begin M14-O, M14-P, F1/F2, or M15 from this task.
+- Exact next action: complete the M14-N.2 validation/report handoff for Principal review. If accepted, M14-N.3 is the next separately gated task for production real-Chrome evidence and Automatic Backup closeout. Do not begin M14-O, M14-P, F1/F2, or M15 from this task.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks

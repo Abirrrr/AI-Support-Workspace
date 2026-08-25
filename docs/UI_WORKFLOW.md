@@ -460,26 +460,26 @@ Transient Model Field Starts with Saved Default
 - The M14-K.2 preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It used the existing singleton Settings record without adding a store/index or Dexie version at that checkpoint. Backup v5 remains frozen; M14-K.2 introduced strict Backup v6 and valid v1-v5 imports map to `clipboard-only`. M14-M.1 subsequently adds only the coordinated Dexie v6/Backup v7 data foundation.
 - M14-K.2.3 preserves this UI exactly. The first real Intercom automatic Text attempt reached the automatic branch but fell back after `post-cleanup-check`; later corrections and M14-K.3 Principal evidence validate the complete automatic path in Intercom and Crisp. `Paste sent` remains limited to full native input acceptance and does not claim destination insertion. `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V` remains the truthful populated-clipboard fallback, and manual `Ctrl+V` remains permanently supported.
 
-### M14-N Automatic Backup Settings (M14-N.1 Runtime Implemented; M14-N.2 UI Pending)
+### M14-N Automatic Backup Settings (M14-N.2 UI Implemented; M14-N.3 Validation Pending)
 
 ```text
 Automatic Backup
 [ Weekly ▼ ]
 
 Backup Location
-[ Choose folder... ]
-[folder name or Backup location needs attention]
-
-[last successful backup/status when available]
+[ Choose Folder ]
+[ No backup location selected | Ready | Backup location needs attention | Off ]
+[ Change Folder ]
+[ Reauthorize ] (attention only)
 ```
 
 - Cadence values are exactly Off, Daily, and Weekly; Weekly is recommended/default. Daily retains the latest seven and Weekly the latest four successful managed backups. Off clears scheduling but retains the selected location for later reuse until the user explicitly forgets it.
-- Choose folder is the only picker/permission gesture. It opens `showDirectoryPicker({ mode: 'readwrite' })`; the UI displays only safe folder/status information, not an invented arbitrary path field.
+- Choose Folder and Change Folder are the only picker gestures. They open `showDirectoryPicker({ mode: 'readwrite' })`; explicit Reauthorize calls `requestPermission({ mode: 'readwrite' })` when attention is required. The UI displays only safe status information, not a path, handle, or internal identity.
 - Scheduled backup never opens a Save dialog or permission prompt. Revoked, moved, deleted, unsupported, or unavailable locations show `Backup location needs attention`; Snippet use continues and manual Export remains available.
 - Daily keeps the latest seven and Weekly the latest four successfully written and verified managed backups. The UI does not imply ownership of unrelated files; a retention-proof warning may leave safe extras.
 - Restored cadence is a preference, not filesystem authority. Profile restore preserves any independently held local selected-folder authorization. Restored Daily/Weekly with no usable local folder fabricates none, remains inactive, and shows `Backup location needs attention`; it never opens a background prompt or rapid failure loop. Manual Export stays available, and explicit Choose folder/reauthorization activates the restored cadence. Restored Off remains inactive without requiring that warning and retains an existing selected folder for later reuse.
 - M14-N does not add a silent Downloads fallback. Configuration/help stays in Settings/Import & Export rather than the primary drafting Workspace.
-- M14-N.1 implements only the background/runtime operations that this future surface will call: cadence reconciliation, safe directory adoption, query-only scheduled permission checks, one-shot alarm execution, verified output, status state, and retention. It does not render the cadence/location/status controls, call `showDirectoryPicker()`, request permission, or claim production real-Chrome UI validation. Those remain M14-N.2.
+- M14-N.1 implements the background/runtime operations: cadence reconciliation, safe directory adoption, query-only scheduled permission checks, one-shot alarm execution, verified output, status state, and retention. M14-N.2 implements the cadence/location/status controls and explicit foreground picker/reauthorization wiring without duplicating those operations. M14-N.3 retains all final production real-Chrome evidence and M14-N closeout.
 
 ### Approved Future M14-M/M14-O Library Metadata
 

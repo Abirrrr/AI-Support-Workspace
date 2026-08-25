@@ -8,6 +8,8 @@ import type { ClipboardDeliveryPermission } from '../../extension/snippet-trigge
 import type { WindowsImageClipboardCapability } from '../../extension/snippet-trigger/native-clipboard-capability';
 import type { NativeClipboardCapabilityStatus } from '../../application/snippet/image-clipboard-transport';
 import type { SnippetPasteMode } from '../../domain/settings';
+import type { AutomaticBackupOptionsApplication } from '../../application/automatic-backup/automatic-backup-options';
+import { AutomaticBackupSettings } from './AutomaticBackupSettings';
 
 const LOAD_FAILURE_MESSAGE = "Couldn't load settings. Reload and try again.";
 const SAVE_FAILURE_MESSAGE = "Couldn't save settings. Try again.";
@@ -15,6 +17,7 @@ const SAVE_SUCCESS_MESSAGE = 'Settings saved.';
 
 interface SettingsViewProps {
   settings: SettingsApplication;
+  automaticBackup?: AutomaticBackupOptionsApplication | undefined;
   clipboardDelivery?: ClipboardDeliveryPermission | undefined;
   windowsImageClipboard?: WindowsImageClipboardCapability | undefined;
 }
@@ -26,6 +29,7 @@ interface Feedback {
 
 export function SettingsView({
   settings,
+  automaticBackup,
   clipboardDelivery,
   windowsImageClipboard,
 }: SettingsViewProps) {
@@ -288,6 +292,10 @@ export function SettingsView({
           {saving ? 'Saving…' : 'Save settings'}
         </button>
       </form>
+
+      {automaticBackup === undefined ? null : (
+        <AutomaticBackupSettings automaticBackup={automaticBackup} />
+      )}
 
       {clipboardDelivery === undefined ? null : (
         <section

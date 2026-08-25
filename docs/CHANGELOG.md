@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
+
+- Added the focused Settings surface for `Off | Daily | Weekly`, with the existing Weekly default, plus user-facing `Off`, `Ready`, `Backup location needs attention`, and `No backup location selected` states.
+- Added explicit-click Choose Folder and Change Folder flows using `showDirectoryPicker({ mode: 'readwrite' })`, plus explicit Reauthorize using `requestPermission({ mode: 'readwrite' })`. Cancellation and denial remain non-destructive and never start prompt loops.
+- Wired cadence changes, selected-handle adoption, permission checks, and reconciliation through a typed Options application facade that reuses M14-N.1. React does not access Dexie, alarms, schedules, Backup v7 construction, retention, deletion, backup-set IDs, or manifests.
+- Preserved Manual Export independently of automatic-folder configuration. Added focused application, browser-adapter, and UI coverage; Dexie remains v6, Backup remains v7, `alarms` remains the only automatic-backup permission, and no dependency or host permission changed.
+- M14-N.3 still owns final real-Chrome production-path validation for lifecycle permission persistence, same/different-folder identity, scheduled execution, actual managed-file creation/retention, unavailable-folder recovery, and M14-N closeout. No such validation is claimed here.
+
 ### M14-N.1 — Automatic Backup Runtime Core
 
 - Implemented one stable named one-shot `chrome.alarms` lifecycle with exact Daily 24-hour and Weekly 168-hour anchors, one-full-interval first run, cadence-reset semantics, service-worker startup reconciliation, at most one missed-run catch-up, and future anchor-aligned scheduling. Added only the `alarms` permission; no repeating alarm, polling, keepalive, backlog replay, `downloads`, or legacy `fileSystem` authority was added.
@@ -7,7 +15,7 @@
 - Extracted canonical Backup v7 construction so manual Export and automatic output share snapshot validation, mapping, strict parsing, serialization, and the 96 MiB limit. Each automatic execution adds the active backup set, creates one canonical identity and exact Windows-safe managed name, and fails on collision without overwrite, alternate identity/name generation, retention, or immediate retry. Successful writes close/reopen and verify byte length, SHA-256, and strict v7 identity before success.
 - Extended the existing Dexie v6 automatic-backup singleton logically—without a schema version or index change—with bounded manifest, schedule, status, and 30-minute lease data plus atomic updates. Added an in-memory overlap guard and context/lease checks so stale runs cannot commit or prune after a folder/cadence switch.
 - Implemented manifest-only success-first retention: Daily keeps seven and Weekly four. Every oldest candidate is reread and must re-prove directory identity, exact filename relationship, v7 automatic IDs/set, byte length, and digest; failure stops pruning with safe overflow. No directory enumeration, pattern-only ownership, arbitrary cleanup, or deletion before replacement success exists.
-- Added focused runtime, adapter, canonical-builder, Dexie, and generated-build assertions covering scheduling, permissions, collision, verification, lease expiry/overlap, folder races, retention, tampering, unrelated files, alarm wiring, and production diagnostic exclusions. M14-N.2 final Options UI and real-Chrome production-path validation, M14-O/P, F1/F2, and M15 remain unimplemented. Dexie remains v6 and Backup remains v7.
+- Added focused runtime, adapter, canonical-builder, Dexie, and generated-build assertions covering scheduling, permissions, collision, verification, lease expiry/overlap, folder races, retention, tampering, unrelated files, alarm wiring, and production diagnostic exclusions. At the M14-N.1 checkpoint, Options UI and real-Chrome production-path validation remained unimplemented. Dexie remains v6 and Backup remains v7.
 
 ### M14-M.4 — Git Metadata Environment Documentation
 
