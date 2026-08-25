@@ -49,6 +49,17 @@ import {
   type ContentScriptRecoveryChromeApi,
   type LifecycleRecoveryRuntime,
 } from './snippet-trigger/lifecycle-recovery';
+import { BackupV7CreationService } from '../application/backup/backup-service';
+import { AutomaticBackupExecutionEngine } from '../application/automatic-backup/automatic-backup-engine';
+import { AutomaticBackupRuntimeCore } from '../application/automatic-backup/automatic-backup-runtime';
+import { BrowserAutomaticBackupDirectoryPort } from '../infrastructure/backup/browser-automatic-backup-directory';
+import { DexieAutomaticBackupStateRepository } from '../infrastructure/persistence/dexie-automatic-backup-state-repository';
+import { DexieBackupSnapshotReader } from '../infrastructure/persistence/dexie-backup-persistence';
+import {
+  ChromeAutomaticBackupAlarmPort,
+  type AutomaticBackupChromeAlarmsApi,
+} from './automatic-backup/chrome-alarm-port';
+import { registerAutomaticBackupRuntime } from './automatic-backup/runtime-registration';
 
 export default defineBackground(() => {
   const chromeApi = getWorkspaceCaptureChromeApi();
@@ -73,6 +84,7 @@ export default defineBackground(() => {
         storage?: {
           readonly session?: DiagnosticSessionStorage;
         };
+        alarms?: AutomaticBackupChromeAlarmsApi;
       };
     }
   ).chrome;
@@ -121,6 +133,28 @@ export default defineBackground(() => {
     const repository = new DexieSnippetEntryRepository(database);
     const usageStatsRepository = new DexieSnippetUsageStatsRepository(database);
     const settingsRepository = new DexieSettingsRepository(database);
+    const automaticBackupStateRepository =
+      new DexieAutomaticBackupStateRepository(database);
+    const automaticBackupDirectoryPort =
+      new BrowserAutomaticBackupDirectoryPort();
+    if (extensionApi?.alarms !== undefined) {
+      const alarmPort = new ChromeAutomaticBackupAlarmPort(extensionApi.alarms);
+      const automaticBackupExecution = new AutomaticBackupExecutionEngine(
+        automaticBackupStateRepository,
+        automaticBackupDirectoryPort,
+        new BackupV7CreationService(new DexieBackupSnapshotReader(database)),
+      );
+      registerAutomaticBackupRuntime(
+        extensionApi.alarms,
+        new AutomaticBackupRuntimeCore(
+          settingsRepository,
+          automaticBackupStateRepository,
+          automaticBackupDirectoryPort,
+          alarmPort,
+          automaticBackupExecution,
+        ),
+      );
+    }
     const coordinator = new TriggerCatalogCoordinator(
       new TriggerCatalogService(repository),
       undefined,

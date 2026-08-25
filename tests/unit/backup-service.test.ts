@@ -626,11 +626,13 @@ describe('backup application services', () => {
       ...snippetFixture,
       id: '623e4567-e89b-42d3-a456-426614174000',
       title: 'Later snippet ID',
+      trigger: ';later',
     };
     const earlierSnippet = {
       ...snippetFixture,
       id: '523e4567-e89b-42d3-a456-426614174000',
       title: 'Earlier snippet ID',
+      trigger: ';earlier',
     };
     const oldestSnippet = {
       ...snippetFixture,

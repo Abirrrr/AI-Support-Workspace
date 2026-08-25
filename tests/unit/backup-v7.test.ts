@@ -9,6 +9,7 @@ import {
   BackupExportService,
   BackupImportService,
   BackupRestoreService,
+  BackupV7CreationService,
 } from '../../src/application/backup/backup-service';
 import { parseBackupFile } from '../../src/application/backup/backup-validator';
 import {
@@ -179,6 +180,24 @@ const malformedCases: readonly [string, (backup: MutableBackup) => void][] = [
 ];
 
 describe('Backup v7 hardening foundation', () => {
+  it('uses the canonical v7 builder for automatic creation metadata', async () => {
+    const backupSetId = '323e4567-e89b-42d3-a456-426614174000';
+    const created = await new BackupV7CreationService(
+      { readSnapshot: () => createSnapshot('weekly') },
+      () => new Date(EXPORTED_AT),
+      () => BACKUP_ID,
+    ).create({ creationMode: 'automatic', backupSetId });
+    expect(parseBackupFile(created.serialized)).toMatchObject({
+      formatVersion: 7,
+      backupId: BACKUP_ID,
+      creationMode: 'automatic',
+      backupSetId,
+    });
+    expect(created.byteLength).toBe(
+      new TextEncoder().encode(created.serialized).byteLength,
+    );
+  });
+
   it('exports deterministic ordered sidecars and round-trips all portable data', async () => {
     const serialized = await exportV7();
     const backup = parseBackupFile(serialized);

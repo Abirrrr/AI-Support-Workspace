@@ -159,6 +159,7 @@ describe('M14-M.1 hardening repositories', () => {
     const state = {
       directoryHandle: { kind: 'directory' as const, name: 'Disposable' },
       backupSetId: crypto.randomUUID(),
+      managedBackups: [],
     };
 
     await expect(repository.load()).resolves.toBeUndefined();
@@ -172,5 +173,51 @@ describe('M14-M.1 hardening repositories', () => {
     await expect(
       new DexieAutomaticBackupStateRepository(database).load(),
     ).resolves.toBeUndefined();
+  });
+
+  it('atomically persists bounded automatic-backup schedule, lease, manifest, and status state', async () => {
+    const repository = new DexieAutomaticBackupStateRepository(database);
+    const backupSetId = crypto.randomUUID();
+    const scheduleId = crypto.randomUUID();
+    const state = await repository.updateAtomically(() => ({
+      directoryHandle: { kind: 'directory', name: 'Managed backups' },
+      backupSetId,
+      schedule: {
+        scheduleId,
+        cadence: 'daily',
+        anchorAt: '2026-08-25T00:00:00.000Z',
+        nextDueAt: '2026-08-26T00:00:00.000Z',
+      },
+      lease: {
+        leaseId: crypto.randomUUID(),
+        backupSetId,
+        scheduleId,
+        acquiredAt: '2026-08-25T00:00:00.000Z',
+        expiresAt: '2026-08-25T00:30:00.000Z',
+      },
+      managedBackups: [
+        {
+          backupId: crypto.randomUUID(),
+          backupSetId,
+          filename: 'exact-managed-file.json',
+          createdAt: '2026-08-25T00:00:00.000Z',
+          formatVersion: 7,
+          creationMode: 'automatic',
+          byteLength: 123,
+          sha256: 'a'.repeat(64),
+        },
+      ],
+      lastAttemptAt: '2026-08-25T00:00:00.000Z',
+      lastSuccessAt: '2026-08-25T00:00:00.000Z',
+      lastFailure: {
+        code: 'retention-warning',
+        occurredAt: '2026-08-25T00:00:00.000Z',
+      },
+    }));
+    await expect(repository.load()).resolves.toEqual(state);
+    const released = await repository.updateAtomically((current) =>
+      current === undefined ? undefined : { ...current, lease: undefined },
+    );
+    expect(released).not.toHaveProperty('lease');
   });
 });

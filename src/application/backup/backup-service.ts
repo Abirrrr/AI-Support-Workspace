@@ -528,6 +528,86 @@ export function assertBackupFitsByteLimit(
   }
 }
 
+export interface CanonicalBackupV7 {
+  readonly backup: BackupFileV7;
+  readonly serialized: string;
+  readonly byteLength: number;
+}
+
+export type BackupV7CreationOptions =
+  | {
+      readonly creationMode: 'manual';
+    }
+  | {
+      readonly creationMode: 'automatic';
+      readonly backupSetId: string;
+    };
+
+export class BackupV7CreationService {
+  constructor(
+    private readonly snapshotReader: BackupSnapshotReader,
+    private readonly now: () => Date = () => new Date(),
+    private readonly createId: () => string = () => crypto.randomUUID(),
+  ) {}
+
+  async create(options: BackupV7CreationOptions): Promise<CanonicalBackupV7> {
+    const snapshot = await this.snapshotReader.readSnapshot();
+    const exportedAt = this.now().toISOString();
+    const snapshotAssets = snapshot.snippetAssets;
+    await Promise.all(snapshotAssets.map(validateSnippetAsset));
+    validateSnippetAssetGraph(snapshot.snippets, snapshotAssets);
+    validateUsageOwnership(snapshot.snippets, snapshot.snippetUsageStats);
+    const sortedAssets = [...snapshotAssets].sort(compareByCreatedAtAndId);
+    await validateGeneratedMetadataFingerprints(
+      snapshot.snippets,
+      snapshot.snippetGeneratedMetadata,
+    );
+    const backup: BackupFileV7 = {
+      format: BACKUP_FORMAT,
+      formatVersion: BACKUP_FORMAT_VERSION,
+      exportedAt,
+      backupId: this.createId(),
+      creationMode: options.creationMode,
+      ...(options.creationMode === 'automatic'
+        ? { backupSetId: options.backupSetId }
+        : {}),
+      data: {
+        knowledge: [...snapshot.knowledge]
+          .sort(compareByCreatedAtAndId)
+          .map(toBackupKnowledgeRecordV5),
+        snippets: [...snapshot.snippets]
+          .sort(compareByCreatedAtAndId)
+          .map(toBackupSnippetRecordV5),
+        snippetAssets: await Promise.all(
+          sortedAssets.map(toBackupSnippetAssetRecordV5),
+        ),
+        snippetUsageStats: [...snapshot.snippetUsageStats]
+          .sort((left, right) => left.snippetId.localeCompare(right.snippetId))
+          .map(toBackupSnippetUsageStatsRecordV7),
+        snippetGeneratedMetadata: [...snapshot.snippetGeneratedMetadata]
+          .sort((left, right) => left.snippetId.localeCompare(right.snippetId))
+          .map(toBackupSnippetGeneratedMetadataRecordV7),
+        settings: {
+          defaultModel: snapshot.settings.defaultModel,
+          snippetPasteMode: snapshot.settings.snippetPasteMode,
+          automaticBackupCadence: snapshot.settings.automaticBackupCadence,
+        },
+      },
+    };
+    const serialized = JSON.stringify(backup);
+    assertBackupFitsByteLimit(serialized);
+    const validated = parseBackupFile(serialized);
+    if (validated.formatVersion !== BACKUP_FORMAT_VERSION_7) {
+      throw new BackupExportError('failure');
+    }
+    return {
+      backup: validated,
+      serialized,
+      byteLength: measureUtf8Bytes(serialized),
+    };
+  }
+}
+
 export class BackupExportService implements BackupExportApplication {
   constructor(
     private readonly snapshotReader: BackupSnapshotReader,
@@ -538,57 +618,14 @@ export class BackupExportService implements BackupExportApplication {
 
   async exportBackup(): Promise<void> {
     try {
-      const snapshot = await this.snapshotReader.readSnapshot();
-      const exportedAt = this.now().toISOString();
-      const snapshotAssets = snapshot.snippetAssets;
-      await Promise.all(snapshotAssets.map(validateSnippetAsset));
-      validateSnippetAssetGraph(snapshot.snippets, snapshotAssets);
-      validateUsageOwnership(snapshot.snippets, snapshot.snippetUsageStats);
-      const sortedAssets = [...snapshotAssets].sort(compareByCreatedAtAndId);
-      await validateGeneratedMetadataFingerprints(
-        snapshot.snippets,
-        snapshot.snippetGeneratedMetadata,
-      );
-      const backup: BackupFileV7 = {
-        format: BACKUP_FORMAT,
-        formatVersion: BACKUP_FORMAT_VERSION,
-        exportedAt,
-        backupId: this.createId(),
-        creationMode: 'manual',
-        data: {
-          knowledge: [...snapshot.knowledge]
-            .sort(compareByCreatedAtAndId)
-            .map(toBackupKnowledgeRecordV5),
-          snippets: [...snapshot.snippets]
-            .sort(compareByCreatedAtAndId)
-            .map(toBackupSnippetRecordV5),
-          snippetAssets: await Promise.all(
-            sortedAssets.map(toBackupSnippetAssetRecordV5),
-          ),
-          snippetUsageStats: [...snapshot.snippetUsageStats]
-            .sort((left, right) =>
-              left.snippetId.localeCompare(right.snippetId),
-            )
-            .map(toBackupSnippetUsageStatsRecordV7),
-          snippetGeneratedMetadata: [...snapshot.snippetGeneratedMetadata]
-            .sort((left, right) =>
-              left.snippetId.localeCompare(right.snippetId),
-            )
-            .map(toBackupSnippetGeneratedMetadataRecordV7),
-          settings: {
-            defaultModel: snapshot.settings.defaultModel,
-            snippetPasteMode: snapshot.settings.snippetPasteMode,
-            automaticBackupCadence: snapshot.settings.automaticBackupCadence,
-          },
-        },
-      };
-      const serialized = JSON.stringify(backup);
-
-      assertBackupFitsByteLimit(serialized);
-
+      const created = await new BackupV7CreationService(
+        this.snapshotReader,
+        this.now,
+        this.createId,
+      ).create({ creationMode: 'manual' });
       await this.downloadPort.download(
-        serialized,
-        createBackupFilename(exportedAt),
+        created.serialized,
+        createBackupFilename(created.backup.exportedAt),
       );
     } catch (error) {
       if (error instanceof BackupExportError) throw error;

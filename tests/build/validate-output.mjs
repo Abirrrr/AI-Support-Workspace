@@ -27,8 +27,8 @@ assert.equal(manifest.name, 'AI Support Workspace');
 assert.deepEqual(
   manifest.permissions ?? [],
   nativeDevelopmentMode
-    ? ['sidePanel', 'activeTab', 'scripting', 'storage']
-    : ['sidePanel', 'activeTab', 'scripting'],
+    ? ['sidePanel', 'activeTab', 'scripting', 'alarms', 'storage']
+    : ['sidePanel', 'activeTab', 'scripting', 'alarms'],
 );
 assert.deepEqual(manifest.optional_permissions ?? [], [
   'clipboardWrite',
@@ -73,6 +73,9 @@ assert.equal(
 );
 assert.equal('devtools_page' in manifest, false);
 assert.equal(manifest.permissions.includes('tabs'), false);
+assert.equal(manifest.permissions.includes('alarms'), true);
+assert.equal(manifest.permissions.includes('downloads'), false);
+assert.equal(manifest.permissions.includes('fileSystem'), false);
 assert.equal(manifest.permissions.includes('storage'), nativeDevelopmentMode);
 assert.equal(manifest.permissions.includes('clipboardRead'), false);
 assert.equal(manifest.permissions.includes('nativeMessaging'), false);
@@ -150,6 +153,10 @@ if (nativeDevelopmentMode) {
 }
 assert.match(serviceWorkerSource, /onInstalled/);
 assert.match(serviceWorkerSource, /onStartup/);
+assert.match(serviceWorkerSource, /ai-support-workspace-automatic-backup/);
+assert.match(serviceWorkerSource, /onAlarm/);
+assert.doesNotMatch(serviceWorkerSource, /requestPermission/);
+assert.doesNotMatch(serviceWorkerSource, /periodInMinutes\s*:/);
 assert.match(serviceWorkerSource, /executeScript/);
 assert.match(serviceWorkerSource, /content_scripts/);
 
