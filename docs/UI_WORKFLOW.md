@@ -69,7 +69,7 @@ Copy Reply
 - Future Context images are transient by default and flow to AI generation only through a provider-independent capability boundary. Unsupported images must not be silently discarded.
 - The future active AI workflow retrieves relevant Text Snippets as reference material; it does not require the user to maintain separate Knowledge records.
 - The generated response should be editable before it is used or shared.
-- Reusable reference/delivery material is managed in the Snippet Library. No direct “Save as Snippet” action from Generated Output is approved by Decision 47. Knowledge remains current compatibility data until separate removal/migration work is approved.
+- Reusable reference/delivery material is managed in the Snippet Library. Current M9 has no Save as Snippet action; future M15 adds a user-invoked Generated Output handoff to Text Snippet authoring and still requires explicit Save. Knowledge remains current compatibility data until separate removal/migration work is approved.
 - Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
 - Current implementation: the popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries opens the options page in a normal browser tab, where Knowledge and Snippet CRUD remain.
 - Approved future target: clicking the extension toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the panel header opens the full Options / Libraries page; Snippets, Settings, Import / Export, automatic backup, paste behavior, model/provider configuration, and future management stay in Options. Current Knowledge remains there only until its separately implemented future UI retirement.
@@ -87,7 +87,7 @@ Guidance / Gist
 
 [ Model dropdown ]   [ Generate ]
 
-Generated Output                         [Copy]
+Generated Output           [Save as Snippet] [Copy]
 [ editable generated response                 ]
 ```
 
@@ -95,7 +95,7 @@ Generated Output                         [Copy]
 - Generate is enabled for Context-only, Gist-only, or both and disabled only when both are empty. Context-only implies a sensible grounded reply; minimal Gist may refer to the pending/latest Context subject; Gist-only may directly specify the message.
 - Context Images are compact, removable, request-scoped multimodal AI input. They are not Image Snippets, Knowledge records, or permanent Library assets. Any mounted-workspace continuity remains separate from reusable Snippet ownership.
 - The Model control is a provider-independent dropdown supplied through application/provider boundaries, not Ollama-specific discovery inside the Workspace.
-- Generated Output stays editable while Context/Gist change and generation repeats. Generation clears neither input. Copy remains on the output header; no direct Insert/Paste action is approved.
+- Generated Output stays editable while Context/Gist change and generation repeats. Generation clears neither input. Save as Snippet opens/navigates to Text Snippet authoring with the current response prefilled; the user may edit title, trigger, tags, and content, and only explicit Save creates a record. Generation itself never saves a Snippet. Copy remains on the output header; no direct Insert/Paste action is approved.
 - Redundant product headings, intro prose, “Local support drafting,” and persistent Ollama installation/helper copy do not occupy the future primary drafting surface.
 - This is approved future behavior. The current M9/M11 Side Panel, free-text model input, text-only Context, and current Prompt Builder remain implemented until future M15 work changes them.
 
@@ -175,6 +175,8 @@ Expand Snippet into Response
 - Create and edit show inline invalid-format and duplicate-trigger feedback. The list displays a configured trigger and omits trigger decoration for `null`.
 - The Library exposes All/Text/Images filters, search, and one New Snippet chooser with Text Snippet and Image Snippet. Plain/Rich is not a normal user-facing choice.
 - Every new Text Snippet is Rich and opens in the constrained Tiptap composer with Bold, Italic, Link, Bullet List, Numbered List, Undo, and Redo. Users type and manage normal paragraphs/list items directly; internal blocks and inline segments are not exposed. Tiptap HTML and runtime state are never persisted.
+- Linked text carrying the existing safe-link mark should use conventional blue and underlined presentation inside the Snippet editor. This future F1 correction adds no arbitrary color control, general underline formatting, broader typography, or stored-content change.
+- Choosing Edit should load the selected Snippet, bring the editor into view, and focus the primary appropriate editor field accessibly and deterministically. This future F2 correction preserves current edit/data behavior, requires no route redesign, and cannot rely on an arbitrary delay.
 - Historical Plain appears as Text. Opening creates an equivalent Rich draft with line breaks preserved; Cancel leaves storage unchanged, and the first successful Save updates the same identity/metadata through normal repository semantics. No startup or bulk migration occurs.
 - Supported Rich paragraphs, marks, links, and lists reopen normally. Existing legacy URL/local-image Rich records that cannot safely round-trip show a small read-only compatibility state; content and assets remain preserved and IDs remain hidden.
 - The Image editor's primary workflow is: take a screenshot, keep it on the clipboard, choose New Image Snippet, focus the paste target, press `Ctrl+V`, review the local preview, set metadata, and Save. No prior file save is required; labelled PNG/JPEG/WebP selection is secondary.
@@ -508,7 +510,7 @@ Read replacement warning and check acknowledgement
 ↓
 Restore backup
 ↓
-Atomically replace Knowledge, Snippets, SnippetAssets, Settings, usage, and generated metadata; clear local backup authority
+Atomically replace Knowledge, Snippets, SnippetAssets, Settings, usage, and generated metadata; preserve separately owned local backup authority
 ```
 
 ### Workflow Notes
@@ -565,6 +567,7 @@ Local persistence
 - **M14 — Snippet Authoring and Delivery:** COMPLETE at `e34cd76`. M14-J and M14-K are complete and real-browser validated. M14-K.3 Principal-approved optional additive Windows automatic Text/Image paste in Intercom and Crisp, clipboard-only/manual workflows, unknown-trigger safety, and live Settings propagation. Manual `Ctrl+V` remains permanently supported. Decisions 46–49 remain future product direction, not current workflow implementation.
 - **M14-L/M14-L.1 — Snippet Hardening Architecture:** checkpointed documentation architecture. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact.
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. M14-M.1 implements only the Dexie v6/Backup v7 persistence boundary; ordinary production Options still has no automatic-backup product UI or scheduled output.
+- **M14-M.1/M14-M.1.1:** complete and synchronized at `20b509c`; Dexie v6 and Backup v7 are implemented. **M14-M.2** records F1/F2 as required pre-M14-P Snippet UX work and F3 Save as Snippet as M15 work; none is implemented by the documentation task. M14-M usage behavior is next.
 
 The lifecycle availability flow is:
 

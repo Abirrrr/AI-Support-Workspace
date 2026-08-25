@@ -1,5 +1,11 @@
 # Changelog
 
+### M14-M.2 — Real-World Snippet Feedback & Completion-Gate Recording
+
+- Recorded F1 as conventional blue/underlined presentation for text carrying the existing safe-link mark in the Snippet editor, without arbitrary color/underline/typography controls or persisted Rich Text changes. Recorded F2 as accessible deterministic Edit-to-editor view/focus without timing hacks, route redesign, or data-behavior changes. Both are future daily-use UX corrections required before M14-P closes.
+- Assigned F3 **Save as Snippet** to M15 Generated Output: open/navigate to Text Snippet authoring with response content prefilled, allow title/trigger/tags/content edits, and create only after explicit user Save. Generation success never auto-saves a Snippet.
+- Clarified that M15 remains blocked until M14-P reviews the complete Snippet subsystem, real-world feedback, user-visible performance, regressions, and documentation consistency. Class-C optimization remains deferred during active foundations, but meaningful delay after M14-P remeasurement requires a focused pre-M15 gate. Recorded M14-M.1/M14-M.1.1 at synchronized checkpoint `20b509c`; changed documentation only and implemented no feedback.
+
 ### M14-M.1.1 — Backup Cadence & Local Authority Ownership Correction
 
 - Confirmed the authoritative portable cadence contract as exact `off | daily | weekly`, retaining `weekly` for new profiles, historical Settings without the field, and Backup v1-v6 imports. Added explicit persistence and v7 round-trip coverage for all three values plus invalid-cadence rejection.
