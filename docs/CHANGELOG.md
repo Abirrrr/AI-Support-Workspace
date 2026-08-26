@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-P.3 — UI/UX Architecture & Roadmap Documentation
+
+- Added Decision 56 and synchronized the intentional sequence M14-P.3 documentation → M14-P.4 visible navigation/Library implementation → M14-O generated retrieval → final M14-P completion gate → M15 AI Workspace.
+- Documented, but did not implement, pinned-toolbar action → global Side Panel, the compact accessible Settings gear → existing Options path, and M14-P.4 ownership of the navigation shell. Actual Merchant Context, Context Images, Guidance / Gist, model selection, Generate/provider execution, editable Generated Output, Copy, and F3 Save as Snippet remain M15.
+- Documented UI-only Knowledge retirement with complete data, Dexie v6, repository/test, and Backup v1–v7 import/restore preservation. No Knowledge deletion, migration, Backup evolution, or retrieval/Prompt Builder implementation is included.
+- Documented the Snippet item hierarchy, separate Text/Image and numeric-only Usage chips, bounded Details, accessible Delete → Edit → Copy icon actions, explicit target-identifying delete confirmation, and existing atomic deletion ownership.
+- Documented the M14-P.4 retained-Image Edit preview bug fix and target UX: bounded actual preview, existing screenshot `Ctrl+V`/file replacement/removal, intentional render-error fallback, and strict separation between CSS containment and stored/delivered image quality. No UI, source, test, manifest, permission, schema, Backup, trigger, delivery, M14-O, or M15 functionality changed in M14-P.3.
+
 ### M14-P.2 — Daily-Use Snippet UX Cleanup (F1 + F2)
 
 - Implemented F1 as presentation-only editor-root anchor styling: persisted safe links display blue and underlined in the Text Snippet content surface. Ordinary text and unrelated application anchors remain unaffected; safe URL validation, marks, persistence, sanitization, and clipboard serialization are unchanged. No Text color, Underline, typography, or toolbar capability was added.

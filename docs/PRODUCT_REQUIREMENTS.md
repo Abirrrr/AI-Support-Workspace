@@ -2,12 +2,12 @@
 
 ## Product Scope
 
-The product provides a local-first support workspace with reusable Snippet delivery and AI-assisted drafting. The current implementation still includes Knowledge and Snippet Libraries. The approved future drafting experience makes Text Snippets the sole active user-managed AI reference library while retaining the underlying Knowledge implementation for compatibility until a separate cleanup/migration is approved.
+The product provides a local-first support workspace with reusable Snippet delivery and AI-assisted drafting. The current implementation still includes Knowledge and Snippet Libraries; approved M14-P.4 hides Knowledge from active navigation while retaining its complete underlying implementation and data for compatibility. Text Snippets are the sole active user-managed AI reference library, while Image Snippets remain delivery-only.
 
 ## Functional Requirements (Planned)
 
 - Capture support context from the browser and local workspace.
-- Preserve currently implemented Knowledge records locally for compatibility; retire the Knowledge Library from the future active AI workflow/UI only after a separately approved implementation task.
+- Preserve currently implemented Knowledge records locally for compatibility; hide the Knowledge Library from active navigation in M14-P.4 without deleting data, schema, code, tests, or Backup/import compatibility.
 - Store reusable snippets locally as a Snippet Library.
 - Prepare a triggered Text or Image Snippet on the clipboard, remove only the unchanged trigger after confirmed copy, and let the user insert it with native Ctrl+V in a supported focused web editor.
 - Retrieve relevant content quickly during support work.
@@ -16,9 +16,9 @@ The product provides a local-first support workspace with reusable Snippet deliv
 
 ## Current Knowledge Compatibility vs. Future Active Text Snippet Library
 
-- Current implementation: Knowledge and Snippet remain separate persisted domains, repositories, Backup data, options-page surfaces, retrieval collections, and Prompt Builder sections.
+- Current implementation before M14-P.4: Knowledge and Snippet remain separate persisted domains, repositories, Backup data, options-page surfaces, retrieval collections, and Prompt Builder sections.
 - Approved future active product: Text Snippets are the sole user-managed AI reference library and may provide relevant support information, phrasing, response patterns, prior examples, and workflow/reference wording.
-- The Knowledge Library retires from the future active AI workflow/UI, but its domain, Dexie data/store, repository interfaces, Backup compatibility, and tests are not deleted or migrated by M14-K.4. Permanent removal requires a separate approved cleanup/migration task.
+- M14-P.4 hides the Knowledge Library surface from active navigation. Its domain, Dexie data/store, repository interfaces, historical records, Backup v1–v7 compatibility, import/restore behavior, and tests are not deleted or migrated. M14-P.4 does not silently change the versioned M6/M7/M9 retrieval/Prompt Builder contracts; permanent removal or AI-contract migration requires its separately assigned work.
 - Image Snippets remain reusable delivery assets and are excluded from AI retrieval/reference content.
 
 ## Future AI Drafting Semantics
@@ -47,8 +47,8 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - M14-L/L.1 assigned implementation-ready architecture to M14-M.0 through M14-P. M14-N.1 and M14-N.2 remain historical implementation checkpoints; Decision 55 replaces their current product-facing outcome through M14-N.3 simplification and reminder behavior.
 - M14-P.2 implements daily-use F1: existing safe-link-mark text renders blue and underlined only inside the Snippet rich-text content editor. This is conventional presentation of current link semantics, not arbitrary color controls, general underline formatting, broader typography, global anchor styling, clipboard styling, or a persisted Rich Text domain change.
 - M14-P.2 implements daily-use F2: explicit Edit loads the selected Snippet into the existing unified form, brings that authoring surface into view, and focuses Text content or the Image Title input through deterministic React lifecycle behavior. It adds no route, second editor, timer, polling, automatic file picker, automatic save, or focus movement from non-Edit events.
-- F1/F2 automated validation is complete; Principal real-Chrome UX validation remains required before checkpoint authorization. M14-P overall still reviews all Text/Image authoring and delivery behavior, hardening features, import/export, generated retrieval after M14-O, real-world feedback, user-visible performance, regressions, and documentation consistency before M15 begins.
-- Class-C performance work remains deferred while hardening foundations are active, but M14-P must re-measure real-world Snippet delivery. Meaningful remaining user-visible delay requires a focused pre-M15 optimization gate rather than automatic deferral until after AI Workspace implementation.
+- F1/F2 are completed and validated at approved M14-P.2 checkpoint `64b5dd8`. M14-P overall still reviews all Text/Image authoring and delivery behavior, hardening features, import/export, generated retrieval after M14-O, real-world feedback, user-visible performance, regressions, and documentation consistency before M15 begins.
+- M14-P.1 is completed and accepted at `7bc5005`: Text planning/serialization is effectively instantaneous, guarded PNG preparation is efficient, native PNG serialization is materially optimized, JPEG/WebP preserve genuine decode/re-encode semantics, and image quality is unchanged. One-shot native startup remains an accepted architectural opportunity; M14-P.4 must not reopen it absent a regression.
 - Lightweight `usageCount` / `lastUsedAt` applies to Text and Image Snippets. One use means authoritative clipboard preparation plus successful exact trigger cleanup, regardless of later automatic-paste outcome or whether manual `Ctrl+V` occurs. Retrieval, viewing/editing, backup, failed activation/copy/cleanup, and unknown triggers do not count. A one-use receipt and separate sidecar write make persistence best-effort and non-blocking.
 - The implemented Library displays only the numeric usage count, treating an absent sidecar as `0`, and gives the numeric element an accessible count label. It adds no visible `use`/`uses` wording, popularity/recent sorting, ranking, dashboards, charts, analytics, history, or telemetry. The count saturates at `Number.MAX_SAFE_INTEGER`; usage does not alter authored timestamps or invalidate generated metadata.
 - Decision 55 retires current product-facing unattended automatic filesystem backup. M14-N.1/M14-N.2 remain historical checkpoints; the former M14-N.3 real-Chrome automatic-backup validation is cancelled.
@@ -60,6 +60,20 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - Generated tags apply only to Text Snippets, remain separate from authored ordered tags, and are non-authoritative. Tag generation runs after authored Save through the provider-independent `GenerationProvider` boundary and configured-model resolver; it never blocks or rolls back Save and never guesses or installs a model.
 - Generated input is limited to title/rendered Text/authored tags and capped at 64 KiB UTF-8; oversized input skips generation without affecting Save. Output is an exact bounded JSON array: at most eight unique normalized plain-string tags, each 1–40 Unicode code points, with a 4 KiB raw response limit and fail-closed validation. No raw response, prompt, or Snippet content is logged or persisted.
 - Future deterministic retrieval preserves title/authored-tag/content weights and adds fingerprint-valid generated tags only at the lowest weight. Usage and recency remain outside retrieval in this package, so popularity cannot dominate relevance. Knowledge and Prompt Builder v1 remain unchanged until M15.
+
+## M14-P.4 Navigation and Snippet Library UI Requirements
+
+- The pinned extension toolbar icon opens/toggles the existing global AI Support Workspace Side Panel directly through the approved Chrome Side Panel architecture. The popup ceases to be the primary product launcher. This is approved for M14-P.4 and is not implemented by M14-P.3.
+- The Side Panel is the primary application surface and includes one small gear icon action named `Open Settings and Libraries`. It opens the existing Options/management surface only from explicit user action, remains keyboard accessible, and does not duplicate Settings state or introduce hidden navigation.
+- M14-P.4 may prepare only that shell. M15 retains Merchant Context, Context Images, Guidance / Gist, provider-independent model selection, Generate/provider execution, editable Generated Output, Copy, and F3 Save as Snippet.
+- After Knowledge is hidden, active management navigation exposes Snippet Library, Settings, and Import / Export—no additional destination is inferred.
+- Each Snippet item presents Name/Title, Trigger, Type, numeric Usage, bounded Details, and Actions. Type and Usage are separate compact chips. Type remains exactly Text or Image; Usage remains visually numeric-only with an accessible `Usage count: <count>` equivalent and never affects retrieval.
+- Actions appear in Delete → Edit → Copy order and prefer compact icons with accessible labels equivalent to `Delete Snippet`, `Edit Snippet`, and `Copy Snippet`, keyboard operation, visible focus, and tooltip/title support. Copy remains supported.
+- Delete requires a simple target-identifying confirmation with Cancel and explicit Delete. The initial delete action never destroys data; only confirmation invokes the existing atomic Snippet/asset/sidecar deletion semantics. No typed-name or multi-step ceremony is required.
+- Details use a useful bounded safe content preview: safe rich/plain content for Text and an appropriate bounded image preview for Image. Exact truncation/layout remains implementation-owned and requires no model change.
+- M14-P.4 repairs the observed existing-Image Edit broken preview. A valid retained image remains visible while metadata is edited without reselection. The editor exposes bounded Current image, explicit replacement through established screenshot `Ctrl+V` and file selection, and explicit removal. A true render failure uses an intentional fallback and never silently deletes, replaces, or mutates the asset.
+- Preview-only CSS containment may fit an image visually but may not resize persisted bytes, crop, downsample, reduce quality, or change PNG/JPEG/WebP storage/delivery semantics. No automatic file picker or clipboard action is allowed.
+- M14-P.4 adds no generated metadata/retrieval, embeddings, AI behavior, new Snippet type, trigger redesign, image-processing optimization, Knowledge deletion, Dexie migration, Backup change, or permission. Canonical activation remains `;trigger + Space`; immediate/no-Space and alternate-prefix explorations remain declined.
 
 ## Output Workspace v1
 

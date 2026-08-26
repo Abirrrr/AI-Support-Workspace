@@ -8,7 +8,7 @@ This document is intentionally implementation-independent and should be read alo
 
 ## 2. Primary Navigation
 
-The current implemented product is organized around a small set of top-level areas:
+Before M14-P.4, the implemented product is organized around:
 
 - Support
 - Knowledge Library
@@ -16,9 +16,37 @@ The current implemented product is organized around a small set of top-level are
 - Settings
 - Import / Export
 
-These areas represent the current primary navigation. Decision 46 approves a future active-product navigation that removes Knowledge Library from the normal AI workflow/UI and uses Text Snippets as the sole user-managed AI reference Library. Until that implementation and a separately approved compatibility cleanup, the current Knowledge surface and data remain available.
+Decision 56 makes the intended post-M14-P.4 management navigation authoritative:
+
+- Snippet Library
+- Settings
+- Import / Export
+
+Knowledge Library is hidden from active navigation/UI in M14-P.4, while its data, persistence, Backup/import compatibility, and current versioned application contracts remain intact. Text Snippets are the active user-managed reference Library; Image Snippets remain delivery-only. No additional navigation destination is implied.
 
 Future functionality may be introduced later, but any additional navigation areas should be treated as future workflows rather than part of the current documented experience.
+
+### Approved M14-P.4 Primary Application Entry
+
+```text
+Pinned extension toolbar icon
+↓
+Global AI Support Workspace Side Panel
+```
+
+The popup is retired as the primary launcher during M14-P.4. Chrome's approved native Side Panel action behavior owns open/toggle; the selected-text shortcut remains a separate open/activate flow.
+
+### Approved M14-P.4 Settings Path
+
+```text
+Side Panel
+↓
+Small accessible Settings gear
+↓
+Existing Options management/configuration surface
+```
+
+The gear is named `Open Settings and Libraries`, acts only on explicit user activation, and does not duplicate Settings state, create a hidden route, or add a menu. M14-P.4 may establish this shell only; M15 retains actual AI Workspace functionality.
 
 ## 3. Support Workspace Workflow
 
@@ -72,7 +100,7 @@ Copy Reply
 - Reusable reference/delivery material is managed in the Snippet Library. Current M9 has no Save as Snippet action; future M15 adds a user-invoked Generated Output handoff to Text Snippet authoring and still requires explicit Save. Knowledge remains current compatibility data until separate removal/migration work is approved.
 - Milestone 9 completed the first extension-owned global Chrome Side Panel Workspace with manual Merchant Context, manual Guidance, a transient model input, Generate, editable plain-text output, and Copy. Milestone 11 now initializes that model input from one optional saved default when a new Side Panel session starts; later Workspace edits remain transient. The panel remains visible beside the active support website so the user does not switch to a standalone Workspace tab. Images, explicit reset, save-draft actions, and reply insertion remain outside the current workflow.
 - Current implementation: the popup remains a launcher. Open Workspace opens the global Side Panel for the current browser window from the direct user action; Open Libraries opens the options page in a normal browser tab, where Knowledge and Snippet CRUD remain.
-- Approved future target: clicking the extension toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the panel header opens the full Options / Libraries page; Snippets, Settings, Import / Export, automatic backup, paste behavior, model/provider configuration, and future management stay in Options. Current Knowledge remains there only until its separately implemented future UI retirement.
+- Approved M14-P.4 target: clicking the extension toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the panel header opens the Options management surface; Snippets, Settings, Import / Export, backup, paste behavior, model/provider configuration, and future management stay in Options. Knowledge is hidden from active navigation only and retained as compatibility data.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
 ### Approved Future Compact Side Panel
@@ -99,9 +127,9 @@ Generated Output           [Save as Snippet] [Copy]
 - Redundant product headings, intro prose, “Local support drafting,” and persistent Ollama installation/helper copy do not occupy the future primary drafting surface.
 - This is approved future behavior. The current M9/M11 Side Panel, free-text model input, text-only Context, and current Prompt Builder remain implemented until future M15 work changes them.
 
-## 4. Current Knowledge Compatibility Workflow
+## 4. Knowledge Compatibility Workflow
 
-The Knowledge Library remains implemented today for existing records, Backup compatibility, and current workflow reconstruction. Decision 46 retires it from the future active AI workflow/UI; it does not delete or migrate the current data or implementation.
+The Knowledge Library remains implemented before M14-P.4. Decision 56 requires M14-P.4 to hide this user-facing workflow from active navigation without deleting or migrating its current data, persistence, tests, Backup/import support, or historical architecture.
 
 ```text
 Open Knowledge Library
@@ -134,6 +162,7 @@ Reuse in Support Workflow
 - Knowledge should be searchable so the user can quickly find relevant material during support work.
 - Knowledge is stored locally and remains available without a backend.
 - Future users should not be required to maintain Knowledge separately from Text Snippets. Permanent removal/migration is a separate future task.
+- After M14-P.4, this flow is not discoverable from active user navigation. Compatibility data remains local and restorable.
 
 ## 5. Snippet Workflow
 
@@ -165,6 +194,29 @@ Edit or Reuse Snippet
 Expand Snippet into Response
 ```
 
+The approved M14-P.4 browse/action flow is:
+
+```text
+Snippet Library
+↓
+Browse Name, Trigger, Type, Usage, and bounded Details
+↓
+Delete | Edit | Copy
+```
+
+Visual action order is Delete → Edit → Copy. Each compact icon action retains an accessible label, keyboard operation, and visible focus. Copy remains supported.
+
+```text
+Delete Snippet
+↓
+Delete "<Snippet name>"?
+This Snippet will be permanently removed.
+↓
+Cancel or explicit Delete
+```
+
+The initial Delete activation is never destructive. Cancel changes nothing; confirmation invokes the existing atomic associated-data deletion flow.
+
 ### Workflow Notes
 
 - Snippets are intended for reusable short content.
@@ -177,11 +229,15 @@ Expand Snippet into Response
 - Every new Text Snippet is Rich and opens in the constrained Tiptap composer with Bold, Italic, Link, Bullet List, Numbered List, Undo, and Redo. Users type and manage normal paragraphs/list items directly; internal blocks and inline segments are not exposed. Tiptap HTML and runtime state are never persisted.
 - M14-P.2 F1 renders linked text carrying the existing safe-link mark blue and underlined inside the Text Snippet content editor. The editor-root anchor scope does not affect ordinary text or application links and adds no arbitrary color control, general underline formatting, broader typography, clipboard-output styling, or stored-content change.
 - M14-P.2 F2 makes each explicit Edit action load the selected Snippet in the existing unified form, scroll that form into view, and focus the Text content editor or Image Title input. React lifecycle/request ownership makes this deterministic without an arbitrary delay, polling, autofocus, automatic file picker, or changed edit/save/data behavior. Repeated same-Snippet and A→B Edit refresh the navigation request; load/filter/new-authoring events do not move focus.
+- M14-P.4 presents Type and Usage as separate compact chips. Type is exactly Text or Image. Usage is visually numeric-only, treats absence as `0`, carries an accessible `Usage count: <count>` label, and remains informational rather than a retrieval signal.
+- Each item has a separated bounded Details area: safe rich/plain preview for Text and a contained image/detail preview for Image. Exact truncation and layout are implementation-owned; unrestricted content growth is not required.
 - Historical Plain appears as Text. Opening creates an equivalent Rich draft with line breaks preserved; Cancel leaves storage unchanged, and the first successful Save updates the same identity/metadata through normal repository semantics. No startup or bulk migration occurs.
 - Supported Rich paragraphs, marks, links, and lists reopen normally. Existing legacy URL/local-image Rich records that cannot safely round-trip show a small read-only compatibility state; content and assets remain preserved and IDs remain hidden.
 - The Image editor's primary workflow is: take a screenshot, keep it on the clipboard, choose New Image Snippet, focus the paste target, press `Ctrl+V`, review the local preview, set metadata, and Save. No prior file save is required; labelled PNG/JPEG/WebP selection is secondary.
 - Pasting one PNG/JPEG/WebP into the extension-owned editor uses user-initiated paste event data and requires no `clipboardRead`; selecting from disk uses a labelled file input. Validation errors are accessible and focused.
 - A new Image Snippet cannot Save without exactly one valid image. Removing a new draft clears its preview and disables Save; replacing a persisted image occurs only through successful atomic Save. Cancel preserves stored data. Object URLs are revoked on replacement, removal, cancel, and unmount.
+- M14-P.4 repairs the observed existing-Image Edit broken preview. Editing a valid saved Image must show a bounded actual **Current image** preview without requiring reselection, followed by understandable explicit replacement through screenshot `Ctrl+V` or file selection and explicit removal. A genuine render failure uses an intentional application fallback rather than a native broken-image visual and never silently deletes, replaces, or mutates the asset.
+- Preview containment may use CSS/object-fit only. It cannot resize persisted image data, crop underlying bytes, downsample, reduce quality, or change PNG/JPEG/WebP delivery. No automatic file picker or clipboard action is allowed.
 - Users never see asset IDs, Blob/base64, binary storage terms, or a URL requirement. There is no global Image Library, image collection, shared asset picker, or "Use as Context" action.
 - Legacy Rich content is never converted automatically. A future explicit conversion may appear only for a Rich record containing exactly one valid local-image block and no other block/asset; mixed Rich records remain preserved and fail-closed.
 - Variables and dynamic customer fields remain unavailable.
@@ -586,7 +642,7 @@ Normal navigation continues to use static content-script injection. The user sho
 - **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
-### Approved Future M15 Workspace Entry and Settings Navigation
+### Approved M14-P.4 Workspace Entry and Settings Navigation
 
 ```text
 Click extension toolbar action
@@ -600,7 +656,7 @@ Gear opens existing Options / Libraries page
 
 The gear is an icon-only native button in the title row with accessible name `Open Settings and Libraries`, visible keyboard focus, native Enter/Space activation, and a sufficient pointer target. It invokes `chrome.runtime.openOptionsPage()` and provides safe non-blocking failure announcement. It does not consume a content row, display a large **Open Libraries** button, or open a dropdown/menu.
 
-This future M15 workflow removes only the intermediate popup step. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest, retire the popup/default popup without competing toolbar behaviors, and preserve a popup-free action plus `side_panel.default_path` and `options_ui`.
+This M14-P.4 workflow removes only the intermediate popup step and adds the management path. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest, retire the popup/default popup without competing toolbar behaviors, and preserve a popup-free action plus `side_panel.default_path` and `options_ui`. Merchant Context, Context Images, Guidance / Gist, model selection, Generate, editable Generated Output, Copy, and Save as Snippet remain M15.
 
 M14-I.2 defines the Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through the stable `native-dev` build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. M14-K.2 implements Decision 45's separate optional automatic-paste protocol through the same companion; stale focus declines, no result is retried, and manual `Ctrl+V` remains the fallback.
 

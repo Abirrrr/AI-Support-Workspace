@@ -7,10 +7,35 @@
 
 ## Current Milestone
 
-- M14-P.2 — Daily-Use Snippet UX Cleanup (F1 + F2)
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / PRINCIPAL REAL-CHROME VALIDATION PENDING**. Starting checkpoint `7bc5005` is synchronized and contains approved M14-P.1. Safe links are blue and underlined only inside the Text Snippet content editor. Explicit Edit deterministically scrolls the existing authoring form into view and focuses Text content or the Image Title field without timers, polling, autofocus, duplicate editors, automatic save, or file-picker activation. Delivery/performance, trigger, persistence, Backup, and native boundaries are unchanged. M14-P overall is not complete. M14-O follows successful M14-P.2 review/checkpoint, then the M14-P final completion gate and M15.
+- M14-P.3 — UI/UX Architecture & Roadmap Documentation
+- Status: **ACTIVE / DOCUMENTATION ONLY**. Starting checkpoint `64b5dd8` is synchronized and contains approved M14-P.2; M14-P.1 remains accepted at `7bc5005`. Decision 56 documents the product-priority sequence M14-P.3 → M14-P.4 → M14-O → final M14-P gate → M15. This task changes no runtime, tests, manifest, permission, persistence, Backup, trigger, delivery, image quality, or AI behavior.
 
 ## Task State
+
+### M14-P.3 — UI/UX Architecture & Roadmap Documentation
+
+```text
+Active task: M14-P.3 — UI/UX Architecture & Roadmap Documentation
+Starting checkpoint: 64b5dd8 — feat: improve snippet editing experience
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+Change type: documentation/product architecture only
+Decision: 56 — visible navigation and Snippet management before M14-O
+Next implementation: M14-P.4 — Navigation & Snippet Library UI Completion
+Then: M14-O → final M14-P completion gate → M15
+Dexie physical version: 6 (UNCHANGED)
+Canonical Backup version: 7 (UNCHANGED)
+Runtime/tests/manifest/permissions: UNCHANGED
+Staging/commit/push: NONE
+```
+
+M14-P.4 owns the approved toolbar action → global Side Panel transition, retirement of the popup/default popup, and the small accessible Settings gear → existing Options/management path. It may establish that navigation shell only; Merchant Context, Context Images, Guidance / Gist, provider-independent model selection, Generate/provider execution, editable Generated Output, Copy, and F3 Save as Snippet remain M15 functionality. The approved future M15 layout remains Merchant Context with attachments, Guidance / Gist, `[Model dropdown] [Generate]`, and editable Generated Output with `[Save as Snippet] [Copy]`.
+
+M14-P.4 hides Knowledge Library from active UI/navigation without deleting or migrating Knowledge records, domain/repository code, Dexie v6 storage, tests, or Backup v1–v7 import/restore compatibility. Active management navigation is Snippet Library, Settings, and Import / Export. Text Snippets are the active user-managed reference Library; Image Snippets remain delivery-only. Presentation work does not silently revise the current versioned Retrieval/Prompt Builder contracts; actual AI-workflow behavior remains M15-owned.
+
+Each future Snippet item presents Name/Title, Trigger, a separate Text/Image type chip, a separate visually numeric-only Usage chip with accessible count label, bounded Details, and accessible icon Actions in Delete → Edit → Copy order. Delete requires a target-identifying Cancel/Delete confirmation before existing atomic deletion. Existing Image Edit must show its retained image in a bounded preview without reselection, preserve explicit screenshot `Ctrl+V`, file replacement and removal, and show an intentional render-error fallback instead of a native broken image. Visual containment cannot alter stored/delivered bytes, resolution, dimensions, quality, or PNG/JPEG/WebP semantics.
+
+M14-P.4 excludes M14-O generated metadata/retrieval, M15 AI behavior, trigger redesign, image processing, new Snippet types, Knowledge deletion, Dexie migration, Backup change, and new permissions. Canonical activation remains `;trigger + Space`; alternate prefixes and immediate/no-Space activation remain declined. M14-P.1 remains accepted and its performance/image-quality boundaries must not be reopened absent regression evidence.
 
 ### M14-P.2 — Daily-Use Snippet UX Cleanup (F1 + F2)
 
@@ -29,7 +54,7 @@ Timers/polling/autofocus/automatic save: NONE
 Delivery/M14-P.1/native/trigger/image quality: UNCHANGED
 Dexie physical version: 6 (UNCHANGED)
 Canonical Backup version: 7 (UNCHANGED)
-Next: Principal real-Chrome UX check, then M14-O
+Historical next at task completion: Principal real-Chrome UX check; now approved at `64b5dd8`
 Staging/commit/push: NONE
 ```
 
@@ -54,7 +79,7 @@ Category D: Text and guarded PNG preparation (NO ACTION)
 Dexie physical version: 6 (UNCHANGED)
 Canonical Backup version: 7 (UNCHANGED)
 Native protocol: v1/v2 (UNCHANGED)
-Next: Principal real-Chrome check, then M14-O
+Historical next at task completion: Principal real-Chrome check; now approved at `7bc5005`
 Staging/commit/push: NONE
 ```
 
@@ -78,7 +103,7 @@ Automatic filesystem backup: RETIRED FROM CURRENT PRODUCT
 Dexie physical version: 6 (UNCHANGED)
 Canonical Backup version: 7 (UNCHANGED)
 Permissions: alarms/downloads/fileSystem/notifications absent
-Next after review/checkpoint: M14-O
+Historical next at task completion: review/checkpoint; later sequence superseded by Decision 56
 Staging/commit/push: NONE
 ```
 
@@ -935,7 +960,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is COMPLETE. Post-M14 Snippet Hardening is active. M14-N.1/N.2 remain historical automatic-backup checkpoints; M14-N.3 implements the approved Manual Backup v7 plus local 30-day reminder strategy and retires automatic production activation. M14-P.1 is approved at `7bc5005`; M14-P.2 is implemented with automated validation passing and awaits Principal review/manual validation. M14-O follows an approved M14-P.2 checkpoint.
+- Status: Milestone 14 is COMPLETE. Post-M14 Snippet Hardening is active. M14-N.1/N.2 remain historical automatic-backup checkpoints; M14-N.3 implements Manual Backup v7 plus the local 30-day reminder. M14-P.1 is approved at `7bc5005`, M14-P.2 is approved at `64b5dd8`, and M14-P.3 is the active documentation-only decision checkpoint. M14-P.4 is the next implementation; M14-O follows it, then the final M14-P gate and M15.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -951,7 +976,7 @@ Image trigger + Space
 - **M14-I.4.1 — Native Companion Capability Status Correction:** IMPLEMENTED / AUTOMATED-VALIDATED / REAL-CHROME SETTINGS READINESS PASS / COMMITTED IN `ebe915f`. Callback-aligned Native Messaging and stable service-worker `sendResponse` handling map compatible success to Ready while keeping unavailable, incompatible, and invalid responses distinct.
 - **M14-I.5 — Native Image Delivery Cleanup and M14-I Finalization:** IMPLEMENTED / CLEANUP COMPLETE / POST-CLEANUP REAL-CHROME SMOKE PASS / COMMITTED IN `ebe915f`. Failed offscreen Image delivery, File semantics, A1/A2/B runtime probes, probe-only contracts/tests, and obsolete diagnostics are removed. Text offscreen delivery and Windows native Image delivery remain the only supported transports for their respective kinds.
 - **M14-K Optional Automatic Native Paste:** COMPLETE AT `e34cd76`. Decision 45 defines the separable, carefully focus-gated Windows input architecture after clipboard preparation. M14-K.2 implements it through the existing C# companion, rejects AutoHotkey and arbitrary send-keys, and preserves manual `Ctrl+V` as a permanent mode/fallback.
-- **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** COMPLETE / DOCUMENTATION ONLY. Decisions 50–53 remain authoritative and Decision 54 remains intact.
+- **M14-L/M14-L.1 — Snippet Hardening Architecture and Reconciliation:** COMPLETE / DOCUMENTATION ONLY. Decisions 50–53 remain authoritative; Decision 54's navigation architecture remains intact and Decision 56 reassigns its implementation timing to M14-P.4.
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** PASS / REAL-CHROME VALIDATED. The File System Access selected-folder model, restart recovery, service-worker reuse, exact owned-file lifecycle, and unavailable-location safety are proven. Different-folder distinction remains an M14-N non-blocking verification before retention reliance.
 - **M14-M.1/M14-M.1.1 — Coordinated Data Foundation:** COMPLETE / CHECKPOINTED AND SYNCHRONIZED AT `20b509c`. Dexie v6, Backup v7, sidecar repositories, cadence persistence, local state boundary, deletion/invalidation, v1-v6 compatibility, and atomic restore are complete.
 - **M14-M.2 — Real-World Snippet Feedback & Completion Gate:** DOCUMENTATION-ONLY CHECKPOINT COMPLETE. It assigned F1 link presentation and F2 edit navigation/focus before M14-P closes and F3 Save as Snippet to M15. M14-P.2 now implements F1/F2; F3 remains unimplemented and assigned to M15.
@@ -960,9 +985,10 @@ Image trigger + Space
 - **M14-N.2 — Options Activation & Runtime Wiring:** IMPLEMENTED / AUTOMATED PASS. Explicit folder selection/change/reauthorization, cadence, safe status, and M14-N.1 wiring are present; manual Export remains independent.
 - **M14-N.3 — Backup Strategy Simplification & Monthly Reminder:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Former automatic-backup real-Chrome validation cancelled; Manual Export, local success time, reminder UI, runtime retirement, compatibility, and documentation pivot implemented.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
-- **M14-P — Snippet Hardening Validation & Closeout:** IN PROGRESS. M14-P.1 is approved at `7bc5005`; M14-P.2 F1/F2 cleanup is implemented and awaiting Principal review/manual validation. The final completion gate remains after M14-O and must preserve M14-K delivery before M15.
-- **M15 Workspace Shell Action UX — ASSIGNED / NOT STARTED:** The current toolbar action still opens the popup. Decision 54 requires M15 to retire the popup/default popup, use native toolbar-action global Side Panel open/toggle behavior, and add a compact accessible Side Panel Settings gear that opens the existing Options / Libraries page. Text/Image Snippets, backup/export, automatic backup, paste behavior, model/provider settings, other settings, and current Knowledge compatibility remain in Options.
-- **M15 — AI Drafting Workflow Refinement and Multimodal Context:** implement Decision 46/47 compact UI, Guidance / Gist, Text-Snippet active reference retrieval, provider-independent model selection, editable output, and request-scoped Context Images. Knowledge compatibility remains non-destructively dormant; unsupported images never disappear silently. Detailed architecture remains deferred.
+- **M14-P.3 — UI/UX Architecture & Roadmap Documentation:** ACTIVE / DOCUMENTATION ONLY. Decision 56 and the cross-document handoff define visible UI ownership without implementation.
+- **M14-P.4 — Navigation & Snippet Library UI Completion:** NOT STARTED / NEXT IMPLEMENTATION. Toolbar-to-Side-Panel, Settings gear, UI-only Knowledge hiding, Snippet hierarchy/chips/actions/delete confirmation, and retained Image preview repair are assigned here with strict data/delivery/AI non-goals.
+- **M14-P — Final Snippet Completion Gate:** IN PROGRESS OVERALL / FINAL GATE NOT STARTED. M14-P.1 and M14-P.2 are approved checkpoints. After M14-P.4 and M14-O, the final gate must confirm visible UX, navigation, Image editing, accepted performance, generated retrieval, regressions, documentation, and manual evidence before M15.
+- **M15 — AI Workspace Functionality and Multimodal Context:** NOT STARTED. It consumes the M14-P.4 shell and owns Merchant Context, Context Images, Guidance / Gist, model selection, Generate/provider execution, editable Generated Output, Copy, and F3 Save as Snippet. Knowledge compatibility remains non-destructively preserved; unsupported images never disappear silently.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
 - The Side Panel focus direction remains unassigned. M14–M16 retain their roadmap ownership. M13 remains authoritative for trigger persistence, editor activation, and runtime synchronization; M14-B preserves those behaviors while projecting structured content to the existing plain catalog payload. Decision 36 does not reopen M9, redefine M10, or change the existing Ollama/AI workflow.
@@ -1207,7 +1233,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed architecture checkpoint: M14-L/L.1 at `5450cff`. M14-K remains CLOSED / COMPLETE and REAL-BROWSER VALIDATED. M14-M.0 is **PASS / REAL-CHROME VALIDATED**; M14-M.1 plus M14-M.1.1 are committed and synchronized at `20b509c`; M14-M.2 is committed and synchronized at `f4d9ab0`; M14-M.3/M14-M.3.1 is committed and synchronized at `2475f8b`; and M14-M.4 records the completed separate Git metadata relocation without changing product architecture.
+- Last completed implementation checkpoint: M14-P.2 at `64b5dd8`; M14-P.1 remains approved at `7bc5005`. Earlier architecture/hardening continuity remains M14-L/L.1 at `5450cff`, M14-M.0 PASS, M14-M.1/M14-M.1.1 at `20b509c`, M14-M.2 at `f4d9ab0`, M14-M.3/M14-M.3.1 at `2475f8b`, and the M14-M.4 separate-Git-metadata record.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1216,7 +1242,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: Principal reviews the M14-P.2 diff and automated evidence, performs the focused real-Chrome F1/F2 UX validation, and authorizes a checkpoint if accepted. M14-O is next; the M14-P final completion gate and M15 follow in that order.
+- Exact next action: Principal reviews the M14-P.3 documentation-only Decision 56 diff and authorizes a checkpoint if accepted. Then issue the implementation specification for M14-P.4 — Navigation & Snippet Library UI Completion. M14-O follows M14-P.4; the final M14-P gate and M15 follow in that order.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks

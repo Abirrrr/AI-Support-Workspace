@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-N.3 is complete at `d410ecb`, and approved M14-P.1 is synchronized at `7bc5005`. M14-P.2 is the active focused daily-use UX gate promoted ahead of M14-O: safe links are blue and underlined only inside the Text Snippet editor, while explicit Edit scrolls the existing authoring form and focuses Text content or Image Title without timers, polling, automatic save, or file-picker activation. Delivery/performance, safety, protocol, automatic/manual paste, Dexie v6, and Backup v7 remain unchanged.
+Milestones 9–14 are complete. M14-P.1 is approved at `7bc5005`, and M14-P.2 is approved at `64b5dd8`. M14-P.3 is the active documentation-only checkpoint: it records the approved toolbar-to-Side-Panel and Settings path, UI-only Knowledge hiding, Snippet Library hierarchy/actions/delete confirmation, Image Edit preview repair, and the strict M14-P.4/M14-O/final-M14-P/M15 sequence. Runtime, delivery, trigger behavior, image quality, Dexie v6, and Backup v7 remain unchanged.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-M14-P.2 requires Principal real-Chrome validation of saved/reopened safe-link presentation and explicit Text/Image Edit scroll/focus. After successful review/checkpoint, sequencing is M14-O Generated Text Snippet Tags & Retrieval → M14-P final completion gate → M15. M14-P overall is not complete. F3 Save as Snippet remains M15, and canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+After M14-P.3 review/checkpoint, the next implementation is M14-P.4 — Navigation & Snippet Library UI Completion. Then come M14-O Generated Text Snippet Tags & Retrieval, the final M14-P completion gate, and M15 AI Workspace. M14-P overall is not complete. F3 Save as Snippet and all actual AI Workspace behavior remain M15; canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).

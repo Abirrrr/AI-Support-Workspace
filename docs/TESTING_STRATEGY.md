@@ -416,9 +416,24 @@ M14-P.2 F1 tests render persisted safe-link content through the real Tiptap edit
 
 M14-P.2 F2 tests stub only the standard `scrollIntoView` boundary and exercise the real unified Library component. Explicit Text Edit must load the selected draft, scroll the authoring form once, and focus the Tiptap content root after the editor instance exists; same-record and A→B Edit issue fresh requests. Explicit Image Edit must scroll the same form, focus Title, preserve the loaded asset, and never programmatically click the file input. Initial load, usage/data load, filtering/search, and new authoring must not scroll or move focus. Tests prohibit timing thresholds and production hooks; source inspection plus lint/build output must contain no focus `setTimeout`, polling, autofocus, duplicate editor, general color/underline control, or delivery-path edit.
 
+### M14-P.4 Navigation and Snippet Library UI Validation Contract
+
+M14-P.3 adds no tests; it records the following required M14-P.4 implementation coverage:
+
+- Generated-manifest and browser-adapter tests prove a pinned toolbar action opens/toggles the global Side Panel through the approved Chrome behavior, the popup/default popup is absent, `side_panel.default_path` and the keyboard shortcut remain valid, and no new permission or host permission appears.
+- Side Panel component/adapter tests require one compact Settings gear with accessible name `Open Settings and Libraries`, native keyboard operation, visible focus styling, one explicit options-page invocation, safe failure feedback, and no duplicate Settings state, hidden automatic navigation, large Libraries row, or menu.
+- Options navigation tests prove Knowledge is absent from active UI/navigation while Snippet Library, Settings, and Import / Export remain present. Persistence/Backup regressions prove Knowledge records/store/repository and v1–v7 import/restore compatibility remain intact and no Knowledge deletion or migration occurs.
+- Snippet item tests require visible Name/Title, Trigger when configured, separate Text/Image type and numeric-only Usage chips, accessible `Usage count: <count>` semantics, bounded Details, and action presence/order Delete → Edit → Copy. Icon actions require accessible names, keyboard activation, and visible focus; textual icon recognition alone is insufficient.
+- Delete tests prove initial activation does not call persistence, confirmation identifies the target, Cancel is non-destructive, and explicit Delete calls the existing deletion boundary exactly once. Existing integration tests remain authoritative for atomic Snippet/asset/usage/generated-metadata cascade and failure rollback.
+- Details tests cover safe bounded Text preview and bounded Image preview without exposing IDs/Blob/base64 or permitting unrestricted content growth. Exact visual truncation receives focused component evidence plus manual narrow-width review.
+- Existing Image Edit tests must load and visibly render the retained saved image without reselection, preserve it through metadata-only editing/Cancel, and retain explicit screenshot `Ctrl+V`, file replacement, and remove behavior. Tests prove no automatic picker or clipboard action, no persistence before Save, and no delivery-path change.
+- Image failure tests simulate an unrenderable retained asset and require an intentional application fallback rather than a browser-native broken image, silent deletion, automatic replacement, or data mutation. Source/output inspection proves preview containment is CSS-only and performs no resize, crop, downsampling, re-encoding, quality change, or PNG/JPEG/WebP delivery change.
+- Trigger/delivery regressions preserve canonical `;trigger + Space`, declined immediate/no-Space behavior, Text/Image planning, clipboard-only/automatic modes, usage receipts, Decision 42 image safety, M14-P.1 serializer performance implementation, and unchanged image bytes.
+- Real Chrome validation confirms toolbar action → global Side Panel with no popup; Settings gear → existing Options; Knowledge hidden; icon action order/accessibility; Delete Cancel/confirm; representative Text/Image chips and bounded Details; retained Image preview/replacement/remove/`Ctrl+V`; intentional broken-preview fallback; narrow layout; and unchanged Snippet trigger/delivery behavior. It must not claim M15 AI functionality.
+
 Windows cannot atomically identify the browser's internal editor at the exact native input instant. The deterministic invalidation/focus matrix and the successful real-destination path are the closeout evidence; any future observed wrong-editor paste still blocks automatic-mode release and requires architecture review. Elapsed-time tuning alone is not an acceptable correction.
 
-### Decisions 46–54 Historical Validation Contract and Decision 55 Pivot
+### Decisions 46–56 Historical Validation Contract and Decision 55 Pivot
 
 The selected-folder/scheduler requirements below preserve the historical M14-M.0/M14-N.1/M14-N.2 test record. Decision 55 cancels their current-product continuation; the M14-N.3 reminder/retirement requirements near the end of this section are authoritative.
 
@@ -448,7 +463,7 @@ The exact Principal workflow is: run `pnpm build:native-dev`; load or reload `.o
 - Generated-tag tests must preserve authored order/content, restrict metadata to Text, invalidate on title/content/authored-tag fingerprint change, leave trigger-only edits intact, and prove Save succeeds before/independently of provider work. Cover missing model/provider, timeout/cancel/failure, no direct Ollama/business provider branch, exact configured-model resolution, no guessed/pulled model, and no retry queue.
 - Tag-output tests must enforce the 64 KiB canonical input cap plus complete-array/4 KiB/eight-tag/1–40-code-point/NFKC/lowercase/whitespace/control/HTML/deduplication output contract and reject all malformed/prose/object/trailing/oversized cases without persisting raw output. Backfill tests allow qualifying edit or explicit maximum-20/concurrency-one/cancellable batch only; startup, delivery, and retrieval trigger no generation.
 - Retrieval tests preserve Text-only eligibility, Knowledge/Prompt Builder v1 continuity, and deterministic per-token weights title 5/authored tags 3/content 1/generated tags 1 only for a matching fingerprint. Missing/wrong tags cannot remove other evidence. Usage/recency do not enter ranking, so popularity cannot dominate relevance.
-- Every future schema/Backup/permission change receives its own migration, compatibility, generated-output, and real-browser risk review. Current Dexie v5 and Backup v6 must not be rewritten in place.
+- Every future schema/Backup/permission change receives its own migration, compatibility, generated-output, and real-browser risk review. Current Dexie v6 and Backup v7 must not be rewritten in place.
 
 ### Real Chrome Manual Validation
 

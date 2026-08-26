@@ -22,7 +22,7 @@ The product is intended to be:
 
 The product should reduce the time required to find the right information, reuse proven replies, and compose support responses with AI assistance without sending sensitive data to an external service.
 
-The implemented Knowledge Library remains available for compatibility today. Decision 46 approves its future retirement from the active workflow/UI without destructive deletion or migration; underlying data and Backup support remain until separately approved cleanup work.
+The implemented Knowledge Library remains available before M14-P.4. Decision 56 assigns its active-navigation/UI hiding to M14-P.4 without destructive deletion or migration; underlying data, schema, code, tests, and Backup/import support remain until separately approved cleanup work.
 
 ## Guiding Principles
 
