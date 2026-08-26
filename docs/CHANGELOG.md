@@ -1,5 +1,14 @@
 # Changelog
 
+### M14-N.3 — Backup Strategy Simplification & Monthly Reminder
+
+- Recorded Decision 55 and cancelled the previously planned real-Chrome automatic-backup validation. M14-N.1/M14-N.2 remain historical checkpoints, while current product backup becomes Manual Backup v7 Export plus local successful-export tracking and a 30-elapsed-day advisory reminder.
+- Added a focused Dexie-v6-compatible `lastSuccessfulBackupAt` boundary on the existing Settings record. Only completed Manual Export records the injected-clock UTC timestamp; failure/cancellation does not. Settings save and restore preserve it locally, while Backup v7 mapping/import cannot contain or fabricate it.
+- Simplified the Import / Export UI to show Last backup (`Never` or date), recommend export when absent or at least 30 days old, and reset after success. The reminder is advisory and adds no forced/automatic export, timer, alarm, notification, or permission prompt.
+- Retired production automatic scheduler/execution, alarm registration, File System Access adapters, folder selection/reauthorization/status UI, managed retention, and automatic-specific tests. Removed the now-ownerless M14-M.0 native-dev selected-folder diagnostic. Historical `automaticBackupState` remains dormant under Dexie v6; historical files are untouched.
+- Removed the unowned `alarms` permission. Added no `downloads`, notification, host permission, dependency, schema version, or Backup format change. Backup remains v7 and historical v1–v7/cadence compatibility remains tested.
+- Focused M14-N.3 validation passes 4 files / 62 tests; the full suite passes 64 files / 797 tests with one opt-in skip. Lint, format, typecheck, Playwright discovery, production/native-development builds and output audits, diff checks, and Git integrity validation pass. Manual browser validation remains Principal-owned after review.
+
 ### M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
 
 - Added the focused Settings surface for `Off | Daily | Weekly`, with the existing Weekly default, plus user-facing `Off`, `Ready`, `Backup location needs attention`, and `No backup location selected` states.

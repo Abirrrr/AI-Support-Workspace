@@ -460,26 +460,23 @@ Transient Model Field Starts with Saved Default
 - The M14-K.2 preference is `snippetPasteMode: 'clipboard-only' | 'automatic'`. It used the existing singleton Settings record without adding a store/index or Dexie version at that checkpoint. Backup v5 remains frozen; M14-K.2 introduced strict Backup v6 and valid v1-v5 imports map to `clipboard-only`. M14-M.1 subsequently adds only the coordinated Dexie v6/Backup v7 data foundation.
 - M14-K.2.3 preserves this UI exactly. The first real Intercom automatic Text attempt reached the automatic branch but fell back after `post-cleanup-check`; later corrections and M14-K.3 Principal evidence validate the complete automatic path in Intercom and Crisp. `Paste sent` remains limited to full native input acceptance and does not claim destination insertion. `Snippet copied — press Ctrl+V` / `Image copied — press Ctrl+V` remains the truthful populated-clipboard fallback, and manual `Ctrl+V` remains permanently supported.
 
-### M14-N Automatic Backup Settings (M14-N.2 UI Implemented; M14-N.3 Validation Pending)
+### M14-N.3 Current Backup and Reminder Workflow
 
 ```text
-Automatic Backup
-[ Weekly ▼ ]
+Backup
 
-Backup Location
-[ Choose Folder ]
-[ No backup location selected | Ready | Backup location needs attention | Off ]
-[ Change Folder ]
-[ Reauthorize ] (attention only)
+Last backup
+[ date | Never ]
+
+[ Backup recommended ] (when Never or >= 30 elapsed days)
+[ Export backup ]
 ```
 
-- Cadence values are exactly Off, Daily, and Weekly; Weekly is recommended/default. Daily retains the latest seven and Weekly the latest four successful managed backups. Off clears scheduling but retains the selected location for later reuse until the user explicitly forgets it.
-- Choose Folder and Change Folder are the only picker gestures. They open `showDirectoryPicker({ mode: 'readwrite' })`; explicit Reauthorize calls `requestPermission({ mode: 'readwrite' })` when attention is required. The UI displays only safe status information, not a path, handle, or internal identity.
-- Scheduled backup never opens a Save dialog or permission prompt. Revoked, moved, deleted, unsupported, or unavailable locations show `Backup location needs attention`; Snippet use continues and manual Export remains available.
-- Daily keeps the latest seven and Weekly the latest four successfully written and verified managed backups. The UI does not imply ownership of unrelated files; a retention-proof warning may leave safe extras.
-- Restored cadence is a preference, not filesystem authority. Profile restore preserves any independently held local selected-folder authorization. Restored Daily/Weekly with no usable local folder fabricates none, remains inactive, and shows `Backup location needs attention`; it never opens a background prompt or rapid failure loop. Manual Export stays available, and explicit Choose folder/reauthorization activates the restored cadence. Restored Off remains inactive without requiring that warning and retains an existing selected folder for later reuse.
-- M14-N does not add a silent Downloads fallback. Configuration/help stays in Settings/Import & Export rather than the primary drafting Workspace.
-- M14-N.1 implements the background/runtime operations: cadence reconciliation, safe directory adoption, query-only scheduled permission checks, one-shot alarm execution, verified output, status state, and retention. M14-N.2 implements the cadence/location/status controls and explicit foreground picker/reauthorization wiring without duplicating those operations. M14-N.3 retains all final production real-Chrome evidence and M14-N closeout.
+- The previous automatic cadence/location/reauthorization controls are retired. The current product never asks the user to configure an unattended backup folder.
+- Opening Import / Export loads the local status. No trusted successful export displays `Never` and recommends creating one. Less than 30 elapsed days has no warning. Exactly 30 days or more shows **Backup recommended**.
+- The existing **Export backup** button creates and downloads canonical Manual Backup v7. Only successful completion records `lastSuccessfulBackupAt`; failure/cancellation leaves the prior state unchanged. A later success refreshes the displayed date and clears the recommendation.
+- The reminder is advisory and never blocks use, forces an export, opens a loop, schedules background work, or requests filesystem permission. There is no automatic write, retention, deletion, folder picker, alarm, or notification.
+- Backup v7 import remains compatible with historical cadence but cannot change local backup-success time or create authority. Historical automatic state and files remain untouched.
 
 ### Approved Future M14-M/M14-O Library Metadata
 
@@ -512,13 +509,13 @@ Read replacement warning and check acknowledgement
 ↓
 Restore backup
 ↓
-Atomically replace Knowledge, Snippets, SnippetAssets, Settings, usage, and generated metadata; preserve separately owned local backup authority
+Atomically replace Knowledge, Snippets, SnippetAssets, portable Settings, usage, and generated metadata; preserve local backup-reminder state
 ```
 
 ### Workflow Notes
 
 - Export explains the local backup purpose, shows `Backup files may contain merchant knowledge, internal notes, and reusable support replies. Store them securely.`, and provides one `Export backup` control with busy and accessible status states.
-- New exports use strict Backup Format v7 and include Knowledge, Plain/Rich/Image Snippets, SnippetAssets, authored Settings, portable automatic-backup cadence, usage statistics, and separate generated Text metadata through explicit version-owned DTOs. Versions 1–6 remain frozen/importable with empty sidecars and `weekly` cadence defaults; v1 restores Snippets without triggers, and v4 legacy Rich local-image records remain Rich without automatic conversion. Local directory handles/authority never appear in the file. A valid v1 preview states `This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.`
+- New exports use strict Backup Format v7 and include Knowledge, Plain/Rich/Image Snippets, SnippetAssets, authored Settings, frozen historical cadence, usage statistics, and separate generated Text metadata through explicit version-owned DTOs. Versions 1–6 remain frozen/importable with empty sidecars and `weekly` cadence defaults. Local `lastSuccessfulBackupAt`, directory handles, and authority never appear in the file. Import preserves the current local reminder state and activates no automatic behavior.
 - The backup is unencrypted JSON. M12 provides no password protection, compression, ZIP, cryptographic signing, cloud upload, or automatic or scheduled backup.
 - Successful export reports `Backup exported.` Failure reports `Couldn't export your data. Try again.` Backup v4/v5 use the documented 96 MiB serialized UTF-8 guard; v1-v3 retain their historical 25 MiB guard.
 - Import uses one visibly labelled file input accepting `.json,application/json`; MIME and extension are hints while content validation is authoritative. There is no drag-and-drop zone or pasted-JSON editor.

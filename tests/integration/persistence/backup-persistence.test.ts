@@ -517,8 +517,29 @@ describe('Dexie backup snapshot and atomic restore', () => {
         (await database.settings.get(GLOBAL_SETTINGS_ID))
           ?.automaticBackupCadence,
       ).toBe(cadence);
+      expect(
+        (await database.settings.get(GLOBAL_SETTINGS_ID))
+          ?.lastSuccessfulBackupAt,
+      ).toBeUndefined();
     },
   );
+
+  it('preserves local backup success across import instead of fabricating it from Backup v7', async () => {
+    const localTimestamp = '2026-08-08T00:00:00.000Z';
+    await database.settings.update(GLOBAL_SETTINGS_ID, {
+      lastSuccessfulBackupAt: localTimestamp,
+    });
+
+    await new BackupRestoreService(
+      new DexieTransactionalBackupRestorePort(database),
+    ).restoreBackup(createEmptyV7Backup('daily'));
+
+    expect(await database.settings.get(GLOBAL_SETTINGS_ID)).toMatchObject({
+      automaticBackupCadence: 'daily',
+      lastSuccessfulBackupAt: localTimestamp,
+    });
+    expect(await database.automaticBackupState.count()).toBe(0);
+  });
 
   it('excludes simulated future DTO fields from persisted records', async () => {
     const knowledge = Object.assign(

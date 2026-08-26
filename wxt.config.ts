@@ -26,7 +26,6 @@ export default defineConfig({
       'sidePanel',
       'activeTab',
       'scripting',
-      'alarms',
       ...(mode === 'native-dev' ? ['storage' as const] : []),
     ],
     optional_permissions: ['clipboardWrite', 'offscreen', 'nativeMessaging'],

@@ -7,10 +7,12 @@ import {
   BackupRestoreError,
 } from '../../application/backup/backup-errors';
 import type { PreparedBackupImport } from '../../application/backup/backup-service';
+import type { BackupReminderSnapshot } from '../../application/backup/backup-reminder';
 import { CatalogUnavailableAfterMutationError } from '../../application/snippet/catalog-mutation';
 
 export interface ImportExportActions {
   exportBackup(): Promise<void>;
+  loadBackupReminder(): Promise<BackupReminderSnapshot>;
   prepareImport(file: File): Promise<PreparedBackupImport>;
   restoreBackup(prepared: PreparedBackupImport): Promise<void>;
 }
@@ -54,11 +56,30 @@ export function ImportExportView({
   const [prepared, setPrepared] = useState<PreparedBackupImport>();
   const [acknowledged, setAcknowledged] = useState(false);
   const [exportFeedback, setExportFeedback] = useState<Feedback>();
+  const [backupReminder, setBackupReminder] =
+    useState<BackupReminderSnapshot>();
   const [importFeedback, setImportFeedback] = useState<Feedback>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewHeadingRef = useRef<HTMLHeadingElement>(null);
   const importStatusRef = useRef<HTMLDivElement>(null);
   const busy = exporting || processingFile || restoring;
+
+  useEffect(() => {
+    let active = true;
+    void actions.loadBackupReminder().then(
+      (snapshot) => {
+        if (active) setBackupReminder(snapshot);
+      },
+      () => {
+        if (active) {
+          setBackupReminder({ lastSuccessfulBackupAt: null, status: 'never' });
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [actions]);
 
   useEffect(() => {
     if (prepared) previewHeadingRef.current?.focus();
@@ -82,6 +103,11 @@ export function ImportExportView({
 
     try {
       await actions.exportBackup();
+      try {
+        setBackupReminder(await actions.loadBackupReminder());
+      } catch {
+        setBackupReminder({ lastSuccessfulBackupAt: null, status: 'never' });
+      }
       setExportFeedback({
         kind: 'success',
         message: BACKUP_MESSAGES.exportSuccess,
@@ -181,6 +207,32 @@ export function ImportExportView({
           Export your current Knowledge, Snippets, local image assets, and saved
           Settings as one JSON file.
         </p>
+        <dl className="mt-4 text-sm">
+          <div>
+            <dt className="font-medium text-slate-700">Last backup</dt>
+            <dd className="mt-1 text-slate-950">
+              {backupReminder?.lastSuccessfulBackupAt === undefined
+                ? 'Loading…'
+                : backupReminder.lastSuccessfulBackupAt === null
+                  ? 'Never'
+                  : new Intl.DateTimeFormat(undefined, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    }).format(new Date(backupReminder.lastSuccessfulBackupAt))}
+            </dd>
+          </div>
+        </dl>
+        {backupReminder?.status === 'never' ||
+        backupReminder?.status === 'due' ? (
+          <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="font-semibold">Backup recommended</p>
+            <p className="mt-1">
+              {backupReminder.status === 'never'
+                ? 'Create a backup so you have a recovery copy of your local data.'
+                : 'Your last backup is at least 30 days old.'}
+            </p>
+          </div>
+        ) : null}
         <p className="mt-3 text-sm font-medium text-amber-800">
           Backup files may contain merchant knowledge, internal notes, reusable
           support replies, and local images. Store them securely.

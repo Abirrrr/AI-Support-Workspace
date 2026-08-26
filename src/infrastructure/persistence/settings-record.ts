@@ -5,4 +5,5 @@ export interface SettingsRecord {
   readonly defaultModel: string | null;
   readonly snippetPasteMode?: unknown;
   readonly automaticBackupCadence?: unknown;
+  readonly lastSuccessfulBackupAt?: unknown;
 }

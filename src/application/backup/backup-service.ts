@@ -78,6 +78,7 @@ import {
   validateSnippetUsageStats,
   type SnippetUsageStats,
 } from '../../domain/snippet-usage-stats';
+import type { SuccessfulBackupRecorder } from './backup-reminder';
 
 export const VERSION_1_TRIGGER_WARNING =
   'This version 1 backup does not contain Snippet triggers. Restored Snippets will have no triggers.';
@@ -614,6 +615,7 @@ export class BackupExportService implements BackupExportApplication {
     private readonly downloadPort: BackupDownloadPort,
     private readonly now: () => Date = () => new Date(),
     private readonly createId: () => string = () => crypto.randomUUID(),
+    private readonly successfulBackupRecorder?: SuccessfulBackupRecorder,
   ) {}
 
   async exportBackup(): Promise<void> {
@@ -627,6 +629,7 @@ export class BackupExportService implements BackupExportApplication {
         created.serialized,
         createBackupFilename(created.backup.exportedAt),
       );
+      await this.successfulBackupRecorder?.recordSuccessfulBackup();
     } catch (error) {
       if (error instanceof BackupExportError) throw error;
       throw new BackupExportError('failure', error);

@@ -136,6 +136,16 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
           this.database.snippetGeneratedMetadata,
         ],
         async () => {
+          const existingSettings =
+            await this.database.settings.get(GLOBAL_SETTINGS_ID);
+          const localBackupReminder =
+            existingSettings !== undefined &&
+            'lastSuccessfulBackupAt' in existingSettings
+              ? {
+                  lastSuccessfulBackupAt:
+                    existingSettings.lastSuccessfulBackupAt,
+                }
+              : {};
           await this.database.knowledgeEntries.clear();
           await runHook(this.testHooks, 'knowledge-cleared');
           await this.database.snippetEntries.clear();
@@ -183,6 +193,7 @@ export class DexieTransactionalBackupRestorePort implements TransactionalBackupR
             defaultModel: data.settings.defaultModel,
             snippetPasteMode: data.settings.snippetPasteMode,
             automaticBackupCadence: data.settings.automaticBackupCadence,
+            ...localBackupReminder,
           });
           await runHook(this.testHooks, 'settings-written');
 

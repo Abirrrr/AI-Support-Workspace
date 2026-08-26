@@ -45,6 +45,10 @@ const settings: SettingsApplication = {
 
 const importExport: ImportExportActions = {
   exportBackup: async () => undefined,
+  loadBackupReminder: async () => ({
+    lastSuccessfulBackupAt: null,
+    status: 'never',
+  }),
   prepareImport: async () => {
     throw new Error('Not used by this render test.');
   },

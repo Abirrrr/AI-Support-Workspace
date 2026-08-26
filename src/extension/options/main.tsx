@@ -6,21 +6,13 @@ import {
   BackupExportService,
   BackupImportService,
   BackupRestoreService,
-  BackupV7CreationService,
   type PreparedBackupImport,
 } from '../../application/backup/backup-service';
+import { BackupReminderService } from '../../application/backup/backup-reminder';
 import { SettingsService } from '../../application/settings/settings-service';
-import { AutomaticBackupOptionsService } from '../../application/automatic-backup/automatic-backup-options';
-import { AutomaticBackupExecutionEngine } from '../../application/automatic-backup/automatic-backup-engine';
-import { AutomaticBackupRuntimeCore } from '../../application/automatic-backup/automatic-backup-runtime';
 import { SnippetLibraryService } from '../../application/snippet/snippet-library';
 import { BrowserBackupDownloadAdapter } from '../../infrastructure/backup/browser-backup-download-adapter';
 import { BrowserBackupFileSource } from '../../infrastructure/backup/browser-backup-file-source';
-import { BrowserAutomaticBackupDirectoryPort } from '../../infrastructure/backup/browser-automatic-backup-directory';
-import {
-  BrowserAutomaticBackupFolderAccess,
-  type DirectoryPickerEnvironment,
-} from '../../infrastructure/backup/browser-automatic-backup-folder-access';
 import { createDatabase } from '../../infrastructure/persistence/database';
 import {
   DexieBackupSnapshotReader,
@@ -31,15 +23,11 @@ import { DexieSettingsRepository } from '../../infrastructure/persistence/dexie-
 import { DexieSnippetEntryRepository } from '../../infrastructure/persistence/dexie-snippet-entry-repository';
 import { DexieSnippetAssetRepository } from '../../infrastructure/persistence/dexie-snippet-asset-repository';
 import { DexieSnippetUsageStatsRepository } from '../../infrastructure/persistence/dexie-snippet-usage-stats-repository';
-import { DexieAutomaticBackupStateRepository } from '../../infrastructure/persistence/dexie-automatic-backup-state-repository';
+import { DexieBackupReminderStateRepository } from '../../infrastructure/persistence/dexie-backup-reminder-state-repository';
 import { RuntimeCatalogMutationPort } from '../../infrastructure/snippet-trigger/runtime-catalog-mutation-port';
 import { ChromeClipboardDeliveryPermission } from '../snippet-trigger/clipboard-permission';
 import { ChromeWindowsImageClipboardCapability } from '../snippet-trigger/native-clipboard-capability';
 import { OptionsShell } from '../../ui/options/OptionsShell';
-import {
-  ChromeAutomaticBackupAlarmPort,
-  type AutomaticBackupChromeAlarmsApi,
-} from '../automatic-backup/chrome-alarm-port';
 import '../../ui/styles.css';
 
 const root = document.querySelector('#root');
@@ -74,7 +62,6 @@ const optionsChrome = (
       runtime?: ConstructorParameters<
         typeof ChromeWindowsImageClipboardCapability
       >[0]['runtime'];
-      alarms?: AutomaticBackupChromeAlarmsApi;
     };
   }
 ).chrome;
@@ -99,10 +86,6 @@ const snippetLibrary = new SnippetLibraryService(
   new DexieSnippetUsageStatsRepository(database),
 );
 if (import.meta.env.MODE === 'native-dev' && catalogRuntime !== undefined) {
-  void import('./selected-folder-feasibility-diagnostic').then(
-    ({ registerSelectedFolderFeasibilityDiagnostic }) =>
-      registerSelectedFolderFeasibilityDiagnostic(catalogRuntime),
-  );
   void import('./snippet-list-serialization-diagnostic').then(
     ({ registerSnippetListSerializationDiagnostic }) =>
       registerSnippetListSerializationDiagnostic(
@@ -114,9 +97,15 @@ if (import.meta.env.MODE === 'native-dev' && catalogRuntime !== undefined) {
   );
 }
 const backupSnapshotReader = new DexieBackupSnapshotReader(database);
+const backupReminder = new BackupReminderService(
+  new DexieBackupReminderStateRepository(database),
+);
 const backupExport = new BackupExportService(
   backupSnapshotReader,
   new BrowserBackupDownloadAdapter(),
+  undefined,
+  undefined,
+  backupReminder,
 );
 const backupImport = new BackupImportService();
 const backupRestore = new BackupRestoreService(
@@ -125,42 +114,16 @@ const backupRestore = new BackupRestoreService(
 );
 const importExport = {
   exportBackup: () => backupExport.exportBackup(),
+  loadBackupReminder: () => backupReminder.load(),
   prepareImport: (file: File) =>
     backupImport.prepareImport(new BrowserBackupFileSource(file)),
   restoreBackup: (prepared: PreparedBackupImport) =>
     backupRestore.restoreBackup(prepared.backup),
 };
-const automaticBackupStateRepository = new DexieAutomaticBackupStateRepository(
-  database,
-);
-const automaticBackupDirectoryPort = new BrowserAutomaticBackupDirectoryPort();
-const automaticBackup =
-  optionsChrome?.alarms === undefined
-    ? undefined
-    : new AutomaticBackupOptionsService(
-        settings,
-        automaticBackupStateRepository,
-        automaticBackupDirectoryPort,
-        new BrowserAutomaticBackupFolderAccess(
-          globalThis as DirectoryPickerEnvironment,
-        ),
-        new AutomaticBackupRuntimeCore(
-          settingsRepository,
-          automaticBackupStateRepository,
-          automaticBackupDirectoryPort,
-          new ChromeAutomaticBackupAlarmPort(optionsChrome.alarms),
-          new AutomaticBackupExecutionEngine(
-            automaticBackupStateRepository,
-            automaticBackupDirectoryPort,
-            new BackupV7CreationService(backupSnapshotReader),
-          ),
-        ),
-      );
 
 createRoot(root).render(
   <StrictMode>
     <OptionsShell
-      automaticBackup={automaticBackup}
       clipboardDelivery={clipboardDelivery}
       knowledgeLibrary={knowledgeLibrary}
       importExport={importExport}

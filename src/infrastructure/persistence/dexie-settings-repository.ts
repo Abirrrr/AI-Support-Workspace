@@ -36,11 +36,15 @@ export class DexieSettingsRepository implements SettingsRepository {
 
   async save(settings: Settings): Promise<Settings> {
     return runPersistenceOperation('save settings', async () => {
+      const existing = await this.database.settings.get(GLOBAL_SETTINGS_ID);
       const record: SettingsRecord = {
         id: GLOBAL_SETTINGS_ID,
         defaultModel: settings.defaultModel,
         snippetPasteMode: settings.snippetPasteMode,
         automaticBackupCadence: settings.automaticBackupCadence,
+        ...(existing !== undefined && 'lastSuccessfulBackupAt' in existing
+          ? { lastSuccessfulBackupAt: existing.lastSuccessfulBackupAt }
+          : {}),
       };
 
       await this.database.settings.put(record);

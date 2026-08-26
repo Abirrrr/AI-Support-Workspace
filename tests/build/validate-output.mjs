@@ -27,8 +27,8 @@ assert.equal(manifest.name, 'AI Support Workspace');
 assert.deepEqual(
   manifest.permissions ?? [],
   nativeDevelopmentMode
-    ? ['sidePanel', 'activeTab', 'scripting', 'alarms', 'storage']
-    : ['sidePanel', 'activeTab', 'scripting', 'alarms'],
+    ? ['sidePanel', 'activeTab', 'scripting', 'storage']
+    : ['sidePanel', 'activeTab', 'scripting'],
 );
 assert.deepEqual(manifest.optional_permissions ?? [], [
   'clipboardWrite',
@@ -73,7 +73,7 @@ assert.equal(
 );
 assert.equal('devtools_page' in manifest, false);
 assert.equal(manifest.permissions.includes('tabs'), false);
-assert.equal(manifest.permissions.includes('alarms'), true);
+assert.equal(manifest.permissions.includes('alarms'), false);
 assert.equal(manifest.permissions.includes('downloads'), false);
 assert.equal(manifest.permissions.includes('fileSystem'), false);
 assert.equal(manifest.permissions.includes('storage'), nativeDevelopmentMode);
@@ -153,8 +153,11 @@ if (nativeDevelopmentMode) {
 }
 assert.match(serviceWorkerSource, /onInstalled/);
 assert.match(serviceWorkerSource, /onStartup/);
-assert.match(serviceWorkerSource, /ai-support-workspace-automatic-backup/);
-assert.match(serviceWorkerSource, /onAlarm/);
+assert.doesNotMatch(
+  serviceWorkerSource,
+  /ai-support-workspace-automatic-backup/,
+);
+assert.doesNotMatch(serviceWorkerSource, /onAlarm/);
 assert.doesNotMatch(serviceWorkerSource, /requestPermission/);
 assert.doesNotMatch(serviceWorkerSource, /periodInMinutes\s*:/);
 assert.match(serviceWorkerSource, /executeScript/);
@@ -221,14 +224,17 @@ const optionsScriptSource = await readFile(
   resolve(outputDirectory, optionsScriptPath),
   'utf8',
 );
-assert.match(optionsScriptSource, /Automatic Backup/);
-assert.match(optionsScriptSource, /No backup location selected/);
-assert.match(optionsScriptSource, /Backup location needs attention/);
-assert.match(optionsScriptSource, /Choose Folder/);
-assert.match(optionsScriptSource, /Change Folder/);
-assert.match(optionsScriptSource, /Reauthorize/);
-assert.match(optionsScriptSource, /showDirectoryPicker/);
-assert.match(optionsScriptSource, /requestPermission/);
+assert.match(optionsScriptSource, /Last backup/);
+assert.match(optionsScriptSource, /Backup recommended/);
+assert.match(optionsScriptSource, /Export backup/);
+assert.doesNotMatch(optionsScriptSource, /Automatic Backup/);
+assert.doesNotMatch(optionsScriptSource, /No backup location selected/);
+assert.doesNotMatch(optionsScriptSource, /Backup location needs attention/);
+assert.doesNotMatch(optionsScriptSource, /Choose Folder/);
+assert.doesNotMatch(optionsScriptSource, /Change Folder/);
+assert.doesNotMatch(optionsScriptSource, /Reauthorize/);
+assert.doesNotMatch(optionsScriptSource, /showDirectoryPicker/);
+assert.doesNotMatch(optionsScriptSource, /requestPermission/);
 const generatedJavaScriptPaths = (
   await readdir(outputDirectory, { recursive: true })
 )
@@ -239,19 +245,21 @@ const generatedJavaScript = (
     generatedJavaScriptPaths.map((path) => readFile(path, 'utf8')),
   )
 ).join('\n');
+assert.doesNotMatch(
+  generatedJavaScript,
+  /native-dev-selected-folder-backup-feasibility-v1/,
+);
+assert.doesNotMatch(
+  generatedJavaScript,
+  /native-dev-selected-folder-background-round-trip/,
+);
+assert.doesNotMatch(
+  generatedJavaScript,
+  /ai-support-workspace-selected-folder-feasibility-v1/,
+);
+assert.doesNotMatch(generatedJavaScript, /showDirectoryPicker/);
+
 if (nativeDevelopmentMode) {
-  assert.match(
-    generatedJavaScript,
-    /native-dev-selected-folder-backup-feasibility-v1/,
-  );
-  assert.match(
-    generatedJavaScript,
-    /native-dev-selected-folder-background-round-trip/,
-  );
-  assert.match(
-    generatedJavaScript,
-    /ai-support-workspace-selected-folder-feasibility-v1/,
-  );
   assert.match(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.match(generatedJavaScript, /diagnoseSnippetListSerialization/);
   assert.match(generatedJavaScript, /getAutomaticPasteResult/);
@@ -296,18 +304,6 @@ if (nativeDevelopmentMode) {
   assert.match(generatedJavaScript, /hostSessionMatchesTarget/);
   assert.match(generatedJavaScript, /hostIntegrityRelation/);
 } else {
-  assert.doesNotMatch(
-    generatedJavaScript,
-    /native-dev-selected-folder-backup-feasibility-v1/,
-  );
-  assert.doesNotMatch(
-    generatedJavaScript,
-    /native-dev-selected-folder-background-round-trip/,
-  );
-  assert.doesNotMatch(
-    generatedJavaScript,
-    /ai-support-workspace-selected-folder-feasibility-v1/,
-  );
   assert.doesNotMatch(generatedJavaScript, /aiSupportWorkspaceDiagnostics/);
   assert.doesNotMatch(generatedJavaScript, /diagnoseSnippetListSerialization/);
   assert.doesNotMatch(generatedJavaScript, /getAutomaticPasteResult/);

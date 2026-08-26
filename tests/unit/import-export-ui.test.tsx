@@ -78,6 +78,12 @@ function createActions(
 ): ImportExportActions {
   return {
     exportBackup: vi.fn(async () => undefined),
+    loadBackupReminder: vi.fn<ImportExportActions['loadBackupReminder']>(
+      async () => ({
+        lastSuccessfulBackupAt: null,
+        status: 'never',
+      }),
+    ),
     prepareImport: vi.fn(async () => prepared),
     restoreBackup: vi.fn(async () => undefined),
     ...overrides,
@@ -114,6 +120,7 @@ describe('ImportExportView', () => {
       screen.getByRole('heading', { name: 'Import / Export' }),
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Export backup' })).toBeTruthy();
+    expect(screen.getByText('Last backup')).toBeTruthy();
     const fileInput = screen.getByLabelText('Backup file');
     expect(fileInput.getAttribute('type')).toBe('file');
     expect(fileInput.getAttribute('accept')).toBe('.json,application/json');
@@ -124,6 +131,36 @@ describe('ImportExportView', () => {
     ).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Restore backup' })).toBeNull();
     expect(document.body.className).not.toContain('overflow-x-auto');
+  });
+
+  it('shows the advisory reminder and resets it after a successful export', async () => {
+    const loadBackupReminder = vi
+      .fn<ImportExportActions['loadBackupReminder']>()
+      .mockResolvedValueOnce({
+        lastSuccessfulBackupAt: '2026-07-01T00:00:00.000Z',
+        status: 'due',
+      })
+      .mockResolvedValueOnce({
+        lastSuccessfulBackupAt: '2026-08-26T00:00:00.000Z',
+        status: 'current',
+      });
+    render(
+      <ImportExportView
+        actions={createActions({ loadBackupReminder })}
+        onRestored={vi.fn()}
+      />,
+    );
+
+    expect(await screen.findByText('Backup recommended')).toBeTruthy();
+    expect(
+      screen.getByText('Your last backup is at least 30 days old.'),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Export backup' }));
+    expect(await screen.findByText(BACKUP_MESSAGES.exportSuccess)).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.queryByText('Backup recommended')).toBeNull(),
+    );
   });
 
   it('exports with busy state and exact success or safe error messages', async () => {
@@ -174,7 +211,7 @@ describe('ImportExportView', () => {
     const previewHeading = await screen.findByRole('heading', {
       name: 'Backup preview',
     });
-    expect(document.activeElement).toBe(previewHeading);
+    await waitFor(() => expect(document.activeElement).toBe(previewHeading));
     expect(screen.getByText('merchant-backup.json')).toBeTruthy();
     expect(screen.getByText(backup.exportedAt)).toBeTruthy();
     expect(screen.getByText(BACKUP_MESSAGES.noSavedModel)).toBeTruthy();

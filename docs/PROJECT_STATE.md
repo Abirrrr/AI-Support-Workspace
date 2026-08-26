@@ -7,10 +7,36 @@
 
 ## Current Milestone
 
-- M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `dcfda47` is synchronized. The Settings cadence control, explicit Choose/Change Folder and Reauthorize gestures, typed safe status model, and Options-to-M14-N.1 runtime wiring are implemented. Dexie remains v6 and Backup remains v7. M14-N.3 owns final real-Chrome production-path validation and M14-N closeout; M14-O, M14-P, F1/F2, and M15 remain unstarted.
+- M14-N.3 — Backup Strategy Simplification & Monthly Reminder
+- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `300568f` is synchronized. The previously planned M14-N.3 real-Chrome automatic-backup validation is cancelled. Current product behavior is Manual Backup v7 Export plus local `lastSuccessfulBackupAt` and a 30-elapsed-day advisory reminder. Production automatic filesystem runtime/UI, selected-folder workflow, retention, and `alarms` permission are retired. Dexie remains v6 and Backup remains v7; M14-N.1/M14-N.2 remain historical checkpoints. M14-O is next after review, manual validation, and checkpoint authorization.
 
 ## Task State
+
+### M14-N.3 — Backup Strategy Simplification & Monthly Reminder
+
+```text
+Active task: M14-N.3 — Backup Strategy Simplification & Monthly Reminder
+Starting checkpoint: 300568f — feat: add automatic backup options activation
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+Current backup: Manual Backup v7 Export
+Local reminder state: lastSuccessfulBackupAt
+Reminder: advisory at >= 30 elapsed days; no background timer
+Automatic filesystem backup: RETIRED FROM CURRENT PRODUCT
+Dexie physical version: 6 (UNCHANGED)
+Canonical Backup version: 7 (UNCHANGED)
+Permissions: alarms/downloads/fileSystem/notifications absent
+Next after review/checkpoint: M14-O
+Staging/commit/push: NONE
+```
+
+Only successful completion of existing Manual Export records canonical UTC `lastSuccessfulBackupAt` through an injected clock. Click, preparation, serialization, failure, and cancellation do not record success; a later success replaces the prior value. The timestamp is local reminder state on the existing Dexie v6 Settings record, excluded from portable Settings and Backup v7. Restore preserves the current local value and cannot import or fabricate local success or filesystem authority.
+
+The Import / Export surface shows Last backup as a date or `Never` and recommends export when no trusted success exists or at least 30 elapsed days have passed. The reminder is advisory only: it never blocks use, forces or creates an export, schedules work, prompts for a folder, or uses alarms/notifications. Malformed and future values fail safe as `Never`.
+
+Focused M14-N.3 validation passes 4 files / 62 tests. The full Vitest suite passes 64 files with 797 tests plus one opt-in file/test skipped. Lint, format check, typecheck, Playwright discovery (1 test), production build/output validation, native-development build/output validation, `git diff --check`, and Git integrity validation pass. Generated production output contains Manual Export and reminder copy; it contains no alarm handler, automatic runtime marker, selected-folder picker/request-permission path, retention deletion marker, or removed UI copy. Manual browser validation is not claimed.
+
+Production startup/alarm registration, automatic execution, selected-directory adapters, folder selection/reauthorization UI, managed retention, and the M14-M.0 selected-folder diagnostic are removed. Historical `automaticBackupState` rows remain physically dormant under Dexie v6; current product code does not read or activate them. Frozen Backup v7 continues accepting `automaticBackupCadence`, but current product behavior does not expose or act on it. Historical user backup files are never enumerated, modified, or deleted.
 
 ### M14-N.2 — Automatic Backup Options Activation & Runtime Wiring
 
@@ -857,7 +883,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is COMPLETE. M14-J and M14-K are complete and real-browser validated. M14-K is Principal-approved and closed at implementation checkpoint `e34cd76`. Post-M14 Snippet Hardening is active: M14-M.0 passed, M14-M.1/M14-M.1.1 are checkpointed at `20b509c`, M14-M.2 is checkpointed at `f4d9ab0`, M14-M.3/M14-M.3.1 is checkpointed at `2475f8b`, and M14-M.4 records the separate Git metadata environment. M14-N.1 runtime and M14-N.2 Options wiring are implemented with automated validation; M14-N.3 production real-Chrome validation and M14-N closeout remain next.
+- Status: Milestone 14 is COMPLETE. Post-M14 Snippet Hardening is active. M14-N.1/N.2 remain historical automatic-backup checkpoints; M14-N.3 now implements the approved Manual Backup v7 plus local 30-day reminder strategy and retires automatic production activation. M14-O is next after Principal review, manual validation, and checkpoint authorization.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -880,7 +906,7 @@ Image trigger + Space
 - **M14-M.3/M14-M.3.1 — Snippet Usage Statistics Behavior and Display Simplification:** COMPLETE / CHECKPOINTED AND SYNCHRONIZED AT `2475f8b`. The 30-second transient one-use receipt, exact cleanup acknowledgement, atomic saturating sidecar update, failure isolation, Text/Image and mode parity, and numeric-only accessible Library projection are implemented.
 - **M14-N.1 — Automatic Backup Runtime Core:** IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REVIEW PENDING. File System Access production adapter, one-shot `alarms`, exact Daily latest-seven and Weekly latest-four retention, canonical v7 output, verification, manifest, and concurrency controls are present.
 - **M14-N.2 — Options Activation & Runtime Wiring:** IMPLEMENTED / AUTOMATED PASS. Explicit folder selection/change/reauthorization, cadence, safe status, and M14-N.1 wiring are present; manual Export remains independent.
-- **M14-N.3 — Real-Chrome Validation & Automatic Backup Closeout:** NOT STARTED. Final production lifecycle, identity, execution, file, retention, recovery, and closeout evidence remains required.
+- **M14-N.3 — Backup Strategy Simplification & Monthly Reminder:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Former automatic-backup real-Chrome validation cancelled; Manual Export, local success time, reminder UI, runtime retirement, compatibility, and documentation pivot implemented.
 - **M14-O — Generated Text Snippet Tags & Retrieval Integration:** NOT STARTED. Text-only fingerprinted metadata, provider-independent post-save generation, bounded output/backfill, and deterministic weight-1 retrieval.
 - **M14-P — Snippet Hardening Validation & Closeout:** NOT STARTED. Complete automated/real-Chrome hardening evidence and preserve M14-K delivery before M15.
 - **M15 Workspace Shell Action UX — ASSIGNED / NOT STARTED:** The current toolbar action still opens the popup. Decision 54 requires M15 to retire the popup/default popup, use native toolbar-action global Side Panel open/toggle behavior, and add a compact accessible Side Panel Settings gear that opens the existing Options / Libraries page. Text/Image Snippets, backup/export, automatic backup, paste behavior, model/provider settings, other settings, and current Knowledge compatibility remain in Options.
@@ -1138,7 +1164,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: complete the M14-N.2 validation/report handoff for Principal review. If accepted, M14-N.3 is the next separately gated task for production real-Chrome evidence and Automatic Backup closeout. Do not begin M14-O, M14-P, F1/F2, or M15 from this task.
+- Exact next action: Principal reviews the M14-N.3 diff and automated evidence, determines the minimum manual Options/Export validation, then authorizes a checkpoint if accepted. M14-O is next; do not begin M14-P, F1/F2 cleanup, or M15 from M14-N.3.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
