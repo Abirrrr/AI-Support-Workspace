@@ -12,6 +12,7 @@
     "dev": "wxt",
     "build": "wxt build && node tests/build/validate-output.mjs",
     "build:native-dev": "wxt build --mode native-dev && node tests/build/validate-output.mjs --mode native-dev",
+    "benchmark:snippet-delivery": "node tests/performance/run-snippet-delivery-benchmark.mjs",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --ignore-unknown .",
     "typecheck": "tsc --noEmit",

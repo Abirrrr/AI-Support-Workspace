@@ -7,10 +7,35 @@
 
 ## Current Milestone
 
-- M14-N.3 — Backup Strategy Simplification & Monthly Reminder
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. Starting checkpoint `300568f` is synchronized. The previously planned M14-N.3 real-Chrome automatic-backup validation is cancelled. Current product behavior is Manual Backup v7 Export plus local `lastSuccessfulBackupAt` and a 30-elapsed-day advisory reminder. Production automatic filesystem runtime/UI, selected-folder workflow, retention, and `alarms` permission are retired. Dexie remains v6 and Backup remains v7; M14-N.1/M14-N.2 remain historical checkpoints. M14-O is next after review, manual validation, and checkpoint authorization.
+- M14-P.1 — Snippet Delivery Performance Re-measurement & Optimization
+- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / PRINCIPAL REAL-CHROME VALIDATION PENDING**. Starting checkpoint `d410ecb` is synchronized and contains completed M14-N.3. Current Chromium measurements classify native PNG request serialization as the only Category-A opportunity and reduce its 4.46 MiB warm median from 254.3 ms to 1.5 ms while preserving exact protocol-v1 data. Text and direct PNG preparation remain regression baselines; genuine JPEG/WebP conversion and one-shot host consolidation remain Category C. M14-P overall is not complete. M14-O follows this gate, then F1/F2 daily-use UX cleanup, M14-P final completion, and M15.
 
 ## Task State
+
+### M14-P.1 — Snippet Delivery Performance Re-measurement & Optimization
+
+```text
+Active task: M14-P.1 — Snippet Delivery Performance Re-measurement & Optimization
+Starting checkpoint: d410ecb — feat: simplify backup strategy and add reminder
+Starting tree: clean; master synchronized with origin/master; git fsck acceptable
+
+Measurement: stable local 64x64, 640x480, and 1440x900 PNG/JPEG/WebP
+Category A: native PNG request base64 serialization (IMPLEMENTED)
+Category B: duplicate Blob reads/source copies (DECLINED AS TOO SMALL)
+Category C: genuine codec work and one-shot process consolidation (DEFERRED)
+Category D: Text and guarded PNG preparation (NO ACTION)
+Dexie physical version: 6 (UNCHANGED)
+Canonical Backup version: 7 (UNCHANGED)
+Native protocol: v1/v2 (UNCHANGED)
+Next: Principal real-Chrome check, then M14-O
+Staging/commit/push: NONE
+```
+
+The diagnostic-only benchmark uses deterministic opaque pseudorandom fixtures and the real planner, serializer, browser PNG preparer, and native request builder in headless Chromium. Warm 1440×900 preparation medians are low-single-digit milliseconds for guarded PNG, tens of milliseconds for JPEG, and low-hundreds of milliseconds for WebP on the current environment. Text serialization/planning is below the benchmark timer's meaningful human-interaction scale. These current results are substantially faster than the historical M14-K 1-second-class JPEG/WebP result, while still confirming genuine decode/re-encode as the dominant non-PNG browser stage.
+
+The newly isolated Category-A cost was the protocol-v1 request's monolithic `Uint8Array` → binary string → base64 conversion. The implementation now uses the equivalent byte-array base64 API when available and a bounded 24 KiB, three-byte-aligned fallback otherwise. On the 1.06 MiB PNG fixture, warm request construction improved from 45.5 ms to 0.6 ms (98.7%); on the 4.46 MiB fixture it improved from 254.3 ms to 1.5 ms (99.4%). Exact fixture equality, maximum payload handling, chunk-boundary padding, and efficient-path single invocation are deterministic tests rather than timing assertions.
+
+Current content-free native measurements remain material but architectural: one-shot protocol-v1 capability startup/round-trip measured 64.3 ms median and 70.3 ms p95 over 20 warm runs, while protocol-v2 context capture measured 69.4 ms median and 77.7 ms p95. Synthetic native paste was not issued and the live clipboard was not overwritten for benchmarking. Persistent hosts, consolidated operations, derived-image persistence, protocol expansion, relaxed safety, resizing, and destination branches remain declined. Decision 42, Decision 45, M14-M.3 receipts, the canonical `;` trigger, Dexie v6, Backup v7, permissions, and production telemetry boundaries are unchanged.
 
 ### M14-N.3 — Backup Strategy Simplification & Monthly Reminder
 

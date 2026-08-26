@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-P.1 — Snippet Delivery Performance Re-measurement & Optimization
+
+- Re-measured the current Text, PNG, JPEG, WebP, native request-construction, one-shot capability, and context-capture paths before optimizing. Added a test-only local Chromium benchmark with deterministic 64×64, 640×480, and 1440×900 fixtures, cold/warm distributions, and no timing-based CI threshold or production telemetry.
+- Classified Text and guarded PNG preparation as D/no action; duplicate Blob reads and source copies as B/too small; genuine JPEG/WebP decode/re-encode plus persistent/consolidated native hosting as C/architecture; and monolithic native PNG base64 request serialization as A/meaningful and safe now.
+- Replaced only the protocol-v1 request's monolithic conversion with the equivalent byte-array base64 API and a bounded 24 KiB three-byte-aligned fallback. Exact request data and shape remain unchanged. Warm medians improve from 45.5 ms to 0.6 ms for 1.06 MiB and 254.3 ms to 1.5 ms for 4.46 MiB (98.7% and 99.4%).
+- Added deterministic exact-base64 coverage across fallback chunk/padding boundaries and efficient-path invocation. Decision 42 safety, genuine JPEG/WebP decoding, output appearance, Decision 45 automatic paste, M14-M.3 usage receipts, canonical `;`, Dexie v6, Backup v7, native protocol v1/v2, permissions, dependencies, and destination-generic behavior are unchanged.
+- Current one-shot evidence is 64.3 ms median / 70.3 ms p95 for content-free capability and 69.4 ms median / 77.7 ms p95 for context capture over 20 warm runs. Synthetic paste and live clipboard overwrite were deliberately not benchmarked. Principal real-Chrome daily-workflow validation remains required; M14-P overall is not complete, M14-O/F1/F2/M15 are not implemented here.
+
 ### M14-N.3 — Backup Strategy Simplification & Monthly Reminder
 
 - Recorded Decision 55 and cancelled the previously planned real-Chrome automatic-backup validation. M14-N.1/M14-N.2 remain historical checkpoints, while current product backup becomes Manual Backup v7 Export plus local successful-export tracking and a 30-elapsed-day advisory reminder.

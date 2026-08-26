@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-N.1 and M14-N.2 remain historical automatic-backup feasibility/implementation checkpoints. M14-N.3 records the Principal/Product simplification: the current product uses Manual Backup v7 Export, local successful-export tracking, and a 30-day advisory reminder; production automatic filesystem scheduling, folder management, retention, and `alarms` are retired. Dexie remains v6, Backup remains v7, and historical automatic state/files remain dormant and untouched. M14-O is next after review and checkpoint. Clipboard-only/manual `Ctrl+V` remains permanently supported.
+Milestones 9–14 are complete. M14-N.3 is complete at `d410ecb`: the current product uses Manual Backup v7 Export, local successful-export tracking, and a 30-day advisory reminder; production automatic filesystem scheduling, folder management, retention, and `alarms` are retired. M14-P.1 is the active focused performance gate promoted ahead of M14-O. It re-measures current Text/Image delivery and optimizes only evidence-backed native PNG request serialization without changing safety, protocol, automatic paste, or manual `Ctrl+V` fallback. Dexie remains v6 and Backup remains v7.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-Decision 55 makes Manual Backup v7 plus local `lastSuccessfulBackupAt` and a 30-day advisory reminder authoritative. The former M14-N.3 real-Chrome automatic-backup validation is cancelled; M14-N.1/N.2 remain historical checkpoints. M14-O Generated Text Snippet Tags & Retrieval is next. Before M14-P closes, daily-use link presentation, deterministic Edit focus/navigation, the complete Snippet subsystem, and real-world delivery performance must be reviewed and stabilized. F3 Save as Snippet remains M15, and the canonical Snippet trigger prefix remains `;`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+M14-P.1 now requires Principal real-Chrome validation of Text, PNG, and JPEG/WebP responsiveness in the actual daily-use workflow. After this focused gate, sequencing is M14-O Generated Text Snippet Tags & Retrieval → F1/F2 daily-use UX cleanup → M14-P final completion gate → M15. M14-P overall is not complete. F3 Save as Snippet remains M15, and the canonical Snippet trigger prefix remains `;`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).

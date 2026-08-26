@@ -1,4 +1,3 @@
-import { encodeBase64 } from '../../application/backup/base64';
 import type { NativePasteAttemptDiagnostic } from '../../application/snippet/automatic-paste-transport';
 
 export const NATIVE_CLIPBOARD_PROTOCOL_VERSION = 1;
@@ -8,6 +7,30 @@ export const NATIVE_CLIPBOARD_REQUEST_ID_PATTERN = /^[0-9a-f]{32}$/;
 export const NATIVE_CLIPBOARD_ACTIVATION_ID_PATTERN = /^[0-9a-f]{32}$/;
 export const NATIVE_WINDOW_HANDLE_PATTERN = /^[0-9a-f]{16}$/;
 export const NATIVE_WINDOW_HANDLE_MAX = 0x7fff_ffff_ffff_ffffn;
+
+const NATIVE_CLIPBOARD_BASE64_CHUNK_BYTES = 0x6000;
+
+function encodeNativeClipboardBase64(bytes: Uint8Array): string {
+  const toBase64 = (bytes as Uint8Array & { readonly toBase64?: () => string })
+    .toBase64;
+  if (toBase64 !== undefined) return toBase64.call(bytes);
+
+  const chunks = new Array<string>(
+    Math.ceil(bytes.byteLength / NATIVE_CLIPBOARD_BASE64_CHUNK_BYTES),
+  );
+  for (
+    let offset = 0, index = 0;
+    offset < bytes.byteLength;
+    offset += NATIVE_CLIPBOARD_BASE64_CHUNK_BYTES, index += 1
+  ) {
+    chunks[index] = btoa(
+      String.fromCharCode(
+        ...bytes.subarray(offset, offset + NATIVE_CLIPBOARD_BASE64_CHUNK_BYTES),
+      ),
+    );
+  }
+  return chunks.join('');
+}
 
 export const NATIVE_CLIPBOARD_HOST_ERROR_CODES = [
   'protocol-version-unsupported',
@@ -262,7 +285,7 @@ export function createWriteImagePngRequest(
     image: {
       encoding: 'base64',
       byteLength: pngBytes.byteLength,
-      data: encodeBase64(pngBytes),
+      data: encodeNativeClipboardBase64(pngBytes),
     },
   };
 }

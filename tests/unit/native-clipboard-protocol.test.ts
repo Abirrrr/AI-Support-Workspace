@@ -100,6 +100,38 @@ describe('native clipboard protocol v1', () => {
     ]);
   });
 
+  it.each([24_575, 24_576, 24_577, 98_305])(
+    'preserves canonical base64 across the bounded chunk boundary at %i bytes',
+    (length) => {
+      const bytes = Uint8Array.from(
+        { length },
+        (_value, index) => (index * 131 + 17) & 0xff,
+      );
+      Object.defineProperty(bytes, 'toBase64', { value: undefined });
+      const request = createWriteImagePngRequest(
+        '0123456789abcdef0123456789abcdef',
+        bytes,
+      );
+      expect(request.image.data).toBe(Buffer.from(bytes).toString('base64'));
+    },
+  );
+
+  it('uses the efficient equivalent byte-array encoder when available', () => {
+    const bytes = Uint8Array.from([0x89, 0x50, 0x4e, 0x47]);
+    let calls = 0;
+    Object.defineProperty(bytes, 'toBase64', {
+      value: () => {
+        calls += 1;
+        return 'iVBORw==';
+      },
+    });
+    expect(
+      createWriteImagePngRequest('0123456789abcdef0123456789abcdef', bytes)
+        .image.data,
+    ).toBe('iVBORw==');
+    expect(calls).toBe(1);
+  });
+
   it('rejects empty, oversized, and malformed-ID request construction', () => {
     expect(() =>
       createWriteImagePngRequest(
