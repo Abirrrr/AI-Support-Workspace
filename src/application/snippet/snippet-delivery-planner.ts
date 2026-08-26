@@ -6,6 +6,7 @@ import {
 } from '../../domain/snippet-asset';
 import { containsLocalImageBlock } from '../../domain/snippet-content';
 import type { TriggerCatalogEntryKind } from '../../shared/trigger-catalog-messages';
+import type { SnippetEntry } from '../../domain/snippet-entry';
 import {
   inspectClipboardImageDimensions,
   type ClipboardImageDimensions,
@@ -64,11 +65,26 @@ export class SnippetDeliveryPlanner {
     if (snippet.trigger !== request.trigger) {
       throw new SnippetDeliveryError('stale-trigger');
     }
-    if (request.kind === 'text') {
-      if (
-        snippet.content.kind === 'image' ||
-        containsLocalImageBlock(snippet.content)
-      ) {
+    const plan = await this.planSnippet(snippet);
+    if (plan.kind !== request.kind) {
+      throw new SnippetDeliveryError('unsupported-content');
+    }
+    return plan;
+  }
+
+  async planById(snippetId: string): Promise<SnippetDeliveryPlan> {
+    const snippet = await this.snippetRepository.get(snippetId);
+    if (snippet === undefined) {
+      throw new SnippetDeliveryError('snippet-unavailable');
+    }
+    return this.planSnippet(snippet);
+  }
+
+  private async planSnippet(
+    snippet: SnippetEntry,
+  ): Promise<SnippetDeliveryPlan> {
+    if (snippet.content.kind !== 'image') {
+      if (containsLocalImageBlock(snippet.content)) {
         throw new SnippetDeliveryError('unsupported-content');
       }
       return {
@@ -76,9 +92,6 @@ export class SnippetDeliveryPlanner {
         snippetId: snippet.id,
         ...serializeSnippetClipboardText(snippet.content),
       };
-    }
-    if (snippet.content.kind !== 'image') {
-      throw new SnippetDeliveryError('unsupported-content');
     }
     const [asset, ownedAssets] = await Promise.all([
       this.assetRepository.get(snippet.content.assetId),

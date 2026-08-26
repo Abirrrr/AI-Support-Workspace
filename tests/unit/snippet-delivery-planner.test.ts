@@ -74,6 +74,34 @@ function plannerFor(
 }
 
 describe('unified authoritative Snippet delivery planner', () => {
+  it('plans Library Text Copy by stable ID without trigger activation state', async () => {
+    const planner = plannerFor(
+      entry({ kind: 'plain', text: 'Library copy' }),
+    ).planner;
+    await expect(planner.planById(snippetId)).resolves.toEqual({
+      kind: 'text',
+      snippetId,
+      plainText: 'Library copy',
+      html: '<p>Library copy</p>',
+    });
+  });
+
+  it('plans Library Image Copy from the authoritative owned asset', async () => {
+    const imageAsset = asset();
+    const { planner, assetRepository } = plannerFor(
+      entry({ kind: 'image', assetId }),
+      [imageAsset],
+    );
+    await expect(planner.planById(snippetId)).resolves.toMatchObject({
+      kind: 'image',
+      snippetId,
+      blob: imageAsset.blob,
+      dimensions: { width: 1, height: 1 },
+    });
+    expect(assetRepository.get).toHaveBeenCalledWith(assetId);
+    expect(assetRepository.listBySnippet).toHaveBeenCalledWith(snippetId);
+  });
+
   it('plans historical Plain and supported Rich through one Text plan', async () => {
     const plain = plannerFor(
       entry({ kind: 'plain', text: 'Hello\n\nWorld' }),

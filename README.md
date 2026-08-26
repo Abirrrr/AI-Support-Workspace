@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-P.1 is approved at `7bc5005`, and M14-P.2 is approved at `64b5dd8`. M14-P.3 is the active documentation-only checkpoint: it records the approved toolbar-to-Side-Panel and Settings path, UI-only Knowledge hiding, Snippet Library hierarchy/actions/delete confirmation, Image Edit preview repair, and the strict M14-P.4/M14-O/final-M14-P/M15 sequence. Runtime, delivery, trigger behavior, image quality, Dexie v6, and Backup v7 remain unchanged.
+Milestones 9–14 are complete. M14-P.3 / Decision 56 is approved at `406ff08`. M14-P.4/M14-P.4.1 remains the unstaged implementation baseline, and M14-P.4.2 is implemented with automated validation passing: the responsive Workspace presentation and normal-tab existing Options application join the direct toolbar-to-Side-Panel flow, management UI, authoritative Library Copy, deletion safety, and retained-Image preview repair. Principal real-Chrome validation remains required. Actual AI behavior remains M15; permissions, trigger delivery, usage semantics, image quality, Dexie v6, and Backup v7 remain unchanged.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-After M14-P.3 review/checkpoint, the next implementation is M14-P.4 — Navigation & Snippet Library UI Completion. Then come M14-O Generated Text Snippet Tags & Retrieval, the final M14-P completion gate, and M15 AI Workspace. M14-P overall is not complete. F3 Save as Snippet and all actual AI Workspace behavior remain M15; canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+Complete automated and real-Chrome validation of M14-P.4/M14-P.4.1/M14-P.4.2, then obtain Principal checkpoint authorization. Next is M14-O, followed by the final M14-P gate and M15 AI Workspace. M14-P overall is not complete. F3 Save as Snippet and all actual AI behavior remain M15; canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).

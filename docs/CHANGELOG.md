@@ -1,5 +1,20 @@
 # Changelog
 
+### M14-P.4.2 — Side Panel Workspace UI & Settings Tab Correction
+
+- Recorded the Principal/Product clarification that M14-P.4 owns the approved responsive AI Workspace presentation while M15 continues to own all functional provider/model, Context Image, Prompt Builder, generation, output lifecycle/Copy, persistence, and F3 Save as Snippet behavior.
+- Corrects the manual-validation shell-only Side Panel by rendering Merchant Context, Context Images structure, Guidance / Gist, disabled provider-neutral Model/Generate, and editable Generated Output with disabled Save as Snippet/Copy actions. No fake model/output, provider call, generation-on-mount, or AI persistence is introduced.
+- Configures the existing authoritative Options application for a normal browser tab, retiring embedded-dialog behavior without a duplicate Settings page, popup, custom window, or new broad permission. Narrow-width responsive semantics and production-output ownership receive focused automated coverage; real-Chrome visual validation remains required.
+- Focused M14-P validation passes 10 files / 87 tests; full Vitest passes 66 files / 822 tests plus one opt-in file/test skipped. Lint, formatting, typecheck, Playwright discovery, production/native builds, manifest/bundle audits, diff checks, and repository integrity validation pass.
+
+### M14-P.4.1 — Authoritative Snippet Library Copy Boundary
+
+- Recorded the Principal-approved correction after M14-P.4 stopped cleanly on its missing management Copy authority. `CopySnippetToClipboard` is the application boundary from stable Snippet ID through authoritative record/asset loading to shared existing Text/Image clipboard preparation and writers.
+- Locked Library Copy as explicit clipboard-only behavior: no Automatic Paste, trigger/catalog/editor cleanup state, usage receipt/increment, preview-derived Image bytes, duplicate serializer/converter/native protocol, schema/Backup/permission change, or data mutation. The remaining M14-P.4 implementation resumes under this clarification.
+- Completed resumed M14-P.4: direct native toolbar-to-Side-Panel, popup retirement, compact Settings gear, UI-only Knowledge hiding, bounded Details, separate Type/Usage chips, and Delete → Edit → Copy icon actions.
+- Added stable-ID delete confirmation with non-destructive Cancel and exactly-once authoritative deletion. Repaired retained Image Edit by moving object-URL creation into the active effect lifecycle so StrictMode cleanup cannot revoke the live preview; bounded preview/fallback preserves replacement, removal, `Ctrl+V`, bytes, and quality.
+- Focused validation passes 9 files / 92 tests; full Vitest passes 65 files / 817 tests plus one opt-in file/test skipped. Lint, formatting, typecheck, Playwright discovery, production/native builds and output audits, benchmark, diff checks, and integrity checks pass. Real Chrome remains Principal-owned.
+
 ### M14-P.3 — UI/UX Architecture & Roadmap Documentation
 
 - Added Decision 56 and synchronized the intentional sequence M14-P.3 documentation → M14-P.4 visible navigation/Library implementation → M14-O generated retrieval → final M14-P completion gate → M15 AI Workspace.

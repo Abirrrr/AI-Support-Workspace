@@ -14,6 +14,7 @@ import {
   type OffscreenClipboardFailureCode,
   type OffscreenClipboardWriteMessage,
 } from '../../shared/snippet-delivery-messages';
+import type { AuthoritativeSnippetClipboardWriter } from '../../application/snippet/copy-snippet-to-clipboard';
 
 export class ClipboardPermissionRequiredError extends Error {
   constructor() {
@@ -60,9 +61,7 @@ export interface ClipboardExtensionApi {
   };
 }
 
-export interface ClipboardTransport {
-  write(plan: SnippetDeliveryPlan, requestId: string): Promise<void>;
-}
+export type ClipboardTransport = AuthoritativeSnippetClipboardWriter;
 
 export interface TextClipboardTransport {
   write(plan: TextClipboardPlan, requestId: string): Promise<void>;

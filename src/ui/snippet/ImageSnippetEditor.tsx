@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ClipboardEvent } from 'react';
+import { useEffect, useState, type ClipboardEvent } from 'react';
 
 import {
   isSnippetAssetMimeType,
@@ -92,6 +92,9 @@ export function ImageSnippetEditor({
       </div>
       {asset !== undefined ? (
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="mb-2 text-sm font-semibold text-slate-800">
+            Current image
+          </p>
           <LocalImagePreview blob={asset.blob} key={asset.id} />
           <button
             className="mt-3 rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
@@ -113,13 +116,45 @@ export function ImageSnippetEditor({
 }
 
 function LocalImagePreview({ blob }: { readonly blob: Blob }) {
-  const preview = useMemo(() => new ImagePreviewUrl(URL), []);
-  const [url] = useState(() => preview.replace(blob));
-  useEffect(() => () => preview.clear(), [preview]);
+  const [url, setUrl] = useState<string>();
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const preview = new ImagePreviewUrl(URL);
+    const nextUrl = preview.replace(blob);
+    void Promise.resolve().then(() => {
+      if (!active) return;
+      setFailed(false);
+      setUrl(nextUrl);
+    });
+    return () => {
+      active = false;
+      preview.clear();
+    };
+  }, [blob]);
+  if (failed) {
+    return (
+      <div
+        className="flex min-h-32 items-center justify-center rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+        role="status"
+      >
+        Image preview unavailable. You can keep, replace, or remove this image.
+      </div>
+    );
+  }
+  if (url === undefined) {
+    return (
+      <div
+        className="min-h-32 rounded-md bg-slate-100"
+        aria-label="Loading image preview"
+      />
+    );
+  }
   return (
     <img
       alt="Image snippet preview"
-      className="max-h-96 w-full object-contain"
+      className="max-h-80 w-full rounded-md object-contain"
+      onError={() => setFailed(true)}
       src={url}
     />
   );

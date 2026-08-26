@@ -49,8 +49,18 @@ import {
   type ContentScriptRecoveryChromeApi,
   type LifecycleRecoveryRuntime,
 } from './snippet-trigger/lifecycle-recovery';
+import { enableToolbarSidePanelAction } from './sidepanel/toolbar-action';
 
 export default defineBackground(() => {
+  const sidePanel = (
+    globalThis as typeof globalThis & {
+      chrome?: {
+        sidePanel?: Parameters<typeof enableToolbarSidePanelAction>[0];
+      };
+    }
+  ).chrome?.sidePanel;
+  void enableToolbarSidePanelAction(sidePanel).catch(() => undefined);
+
   const chromeApi = getWorkspaceCaptureChromeApi();
 
   if (chromeApi !== undefined) {

@@ -33,6 +33,7 @@ import { ImageSnippetEditor } from './ImageSnippetEditor';
 import { ImagePreviewUrl } from './image-preview-url';
 import { isSupportedTextSnippetContent } from './text-editor-document';
 import { TextSnippetEditor } from './TextSnippetEditor';
+import type { CopySnippetToClipboard } from '../../application/snippet/copy-snippet-to-clipboard';
 
 type EditorMode = 'closed' | 'chooser' | 'text' | 'image' | 'compatibility';
 type LibraryFilter = 'all' | 'text' | 'images';
@@ -51,7 +52,7 @@ interface SnippetDraft {
 
 interface SnippetLibraryViewProps {
   snippetLibrary: SnippetLibrary;
-  confirmDelete?: (entry: SnippetEntry) => boolean;
+  copySnippet?: CopySnippetToClipboard | undefined;
 }
 
 const EMPTY_RICH_CONTENT: RichSnippetContent = {
@@ -61,12 +62,6 @@ const EMPTY_RICH_CONTENT: RichSnippetContent = {
 
 function emptyDraft(): SnippetDraft {
   return { title: '', content: EMPTY_RICH_CONTENT, tags: '', trigger: '' };
-}
-
-function defaultDeleteConfirmation(entry: SnippetEntry): boolean {
-  return globalThis.confirm(
-    `Delete “${entry.title}”? This permanently removes the local snippet.`,
-  );
 }
 
 async function readSnippetLibraryData(snippetLibrary: SnippetLibrary) {
@@ -103,6 +98,7 @@ function ImageThumbnail({
   readonly snippetLibrary: SnippetLibrary;
 }) {
   const [url, setUrl] = useState<string>();
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     let active = true;
     const preview = new ImagePreviewUrl(URL);
@@ -110,20 +106,37 @@ function ImageThumbnail({
       snippetLibrary.loadAsset?.(assetId) ?? Promise.resolve(undefined)
     ).then(
       (asset) => {
-        if (active && asset !== undefined) setUrl(preview.replace(asset.blob));
+        if (!active) return;
+        if (asset === undefined) {
+          setFailed(true);
+          return;
+        }
+        setFailed(false);
+        setUrl(preview.replace(asset.blob));
       },
-      () => undefined,
+      () => active && setFailed(true),
     );
     return () => {
       active = false;
       preview.clear();
     };
   }, [assetId, snippetLibrary]);
+  if (failed) {
+    return (
+      <div
+        className="mt-3 flex h-20 w-28 items-center justify-center rounded-md border border-amber-200 bg-amber-50 px-2 text-center text-xs text-amber-800"
+        role="status"
+      >
+        Preview unavailable
+      </div>
+    );
+  }
   return url ? (
     <img
-      alt=""
-      className="mt-3 h-20 w-28 rounded-md border border-slate-200 object-cover"
+      alt="Image Snippet details preview"
+      className="mt-2 max-h-32 w-full rounded-md border border-slate-200 object-contain"
       loading="lazy"
+      onError={() => setFailed(true)}
       src={url}
     />
   ) : null;
@@ -131,7 +144,7 @@ function ImageThumbnail({
 
 export function SnippetLibraryView({
   snippetLibrary,
-  confirmDelete = defaultDeleteConfirmation,
+  copySnippet,
 }: SnippetLibraryViewProps) {
   const [entries, setEntries] = useState<readonly SnippetEntry[]>([]);
   const [usageCounts, setUsageCounts] = useState<ReadonlyMap<string, number>>(
@@ -148,7 +161,13 @@ export function SnippetLibraryView({
     SnippetAsset | SnippetAssetDraft
   >();
   const [editingId, setEditingId] = useState<string>();
-  const [operation, setOperation] = useState<'saving' | 'deleting'>();
+  const [operation, setOperation] = useState<
+    'saving' | 'deleting' | 'copying'
+  >();
+  const [pendingDelete, setPendingDelete] =
+    useState<Pick<SnippetEntry, 'id' | 'title'>>();
+  const returnFocusId = useRef<string | undefined>(undefined);
+  const deleteButtons = useRef(new Map<string, HTMLButtonElement>());
   const [errorMessage, setErrorMessage] = useState<string>();
   const [triggerErrorMessage, setTriggerErrorMessage] = useState<string>();
   const [statusMessage, setStatusMessage] = useState<string>();
@@ -370,23 +389,43 @@ export function SnippetLibraryView({
     }
   }
 
-  async function deleteEntry(entry: SnippetEntry) {
-    if (!confirmDelete(entry)) return;
+  useLayoutEffect(() => {
+    if (pendingDelete !== undefined || returnFocusId.current === undefined)
+      return;
+    deleteButtons.current.get(returnFocusId.current)?.focus();
+    returnFocusId.current = undefined;
+  }, [pendingDelete]);
+
+  function requestDelete(entry: SnippetEntry) {
+    returnFocusId.current = entry.id;
+    setPendingDelete({ id: entry.id, title: entry.title });
+  }
+
+  async function confirmPendingDelete() {
+    if (pendingDelete === undefined || operation === 'deleting') return;
+    const target = entries.find((entry) => entry.id === pendingDelete.id);
+    if (target === undefined) {
+      setPendingDelete(undefined);
+      setErrorMessage(
+        'That Snippet is no longer available. Nothing was deleted.',
+      );
+      return;
+    }
     setOperation('deleting');
     setErrorMessage(undefined);
     try {
-      await snippetLibrary.delete(entry.id);
+      await snippetLibrary.delete(target.id);
       setEntries((current) =>
-        current.filter((candidate) => candidate.id !== entry.id),
+        current.filter((candidate) => candidate.id !== target.id),
       );
-      if (editingId === entry.id) closeEditor();
+      if (editingId === target.id) closeEditor();
       setStatusMessage('Snippet deleted.');
     } catch (error) {
       if (error instanceof CatalogUnavailableAfterMutationError) {
         setEntries((current) =>
-          current.filter((candidate) => candidate.id !== entry.id),
+          current.filter((candidate) => candidate.id !== target.id),
         );
-        if (editingId === entry.id) closeEditor();
+        if (editingId === target.id) closeEditor();
         setStatusMessage(
           'Snippet deleted. Trigger expansion is temporarily unavailable.',
         );
@@ -395,7 +434,31 @@ export function SnippetLibraryView({
       }
     } finally {
       setOperation(undefined);
+      setPendingDelete(undefined);
     }
+  }
+
+  async function copyEntry(entry: SnippetEntry) {
+    if (copySnippet === undefined) {
+      setErrorMessage(
+        'Clipboard delivery is unavailable. Check Settings and try again.',
+      );
+      return;
+    }
+    setOperation('copying');
+    setErrorMessage(undefined);
+    setStatusMessage(undefined);
+    const result = await copySnippet.copy(entry.id);
+    if (result.outcome === 'copied') {
+      setStatusMessage(
+        result.kind === 'image' ? 'Image copied.' : 'Snippet copied.',
+      );
+    } else {
+      setErrorMessage(
+        'We could not copy this Snippet. Check Settings and try again.',
+      );
+    }
+    setOperation(undefined);
   }
 
   const visibleEntries = useMemo(() => {
@@ -680,9 +743,9 @@ export function SnippetLibraryView({
                 const usageCount = usageCounts.get(entry.id) ?? 0;
 
                 return (
-                  <li className="p-4" key={entry.id}>
+                  <li className="p-4" data-snippet-id={entry.id} key={entry.id}>
                     <div className="flex items-start justify-between gap-4">
-                      <div>
+                      <div className="min-w-0">
                         <h3 className="font-semibold text-slate-950">
                           {entry.title}
                         </h3>
@@ -691,45 +754,113 @@ export function SnippetLibraryView({
                             {entry.trigger}
                           </p>
                         ) : null}
-                        <span className="mt-2 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                          {entry.content.kind === 'image' ? 'Image' : 'Text'}
-                        </span>
-                        <p
-                          aria-label={`Usage count: ${usageCount}`}
-                          className="mt-2 text-xs text-slate-500"
-                        >
-                          {usageCount}
-                        </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div
+                        aria-label="Snippet actions"
+                        className="flex shrink-0 gap-1"
+                      >
                         <button
-                          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                          aria-label="Delete Snippet"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                           disabled={isBusy}
-                          onClick={() => void beginEditing(entry)}
+                          onClick={() => requestDelete(entry)}
+                          ref={(node) => {
+                            if (node === null)
+                              deleteButtons.current.delete(entry.id);
+                            else deleteButtons.current.set(entry.id, node);
+                          }}
+                          title="Delete Snippet"
                           type="button"
                         >
-                          Edit
+                          <svg
+                            aria-hidden="true"
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </button>
                         <button
-                          className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-700"
+                          aria-label="Edit Snippet"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           disabled={isBusy}
-                          onClick={() => void deleteEntry(entry)}
+                          onClick={() => void beginEditing(entry)}
+                          title="Edit Snippet"
                           type="button"
                         >
-                          Delete
+                          <svg
+                            aria-hidden="true"
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="m4 20 4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10L4 20Z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          aria-label="Copy Snippet"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          disabled={isBusy}
+                          onClick={() => void copyEntry(entry)}
+                          title="Copy Snippet"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <rect height="12" rx="2" width="12" x="8" y="8" />
+                            <path
+                              d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
                         </button>
                       </div>
                     </div>
-                    {entry.content.kind === 'image' ? (
-                      <ImageThumbnail
-                        assetId={entry.content.assetId}
-                        snippetLibrary={snippetLibrary}
-                      />
-                    ) : (
-                      <p className="mt-3 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
-                        {renderSnippetPlainText(entry.content)}
+                    <div className="mt-3 flex gap-2">
+                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                        {entry.content.kind === 'image' ? 'Image' : 'Text'}
+                      </span>
+                      <span
+                        aria-label={`Usage count: ${usageCount}`}
+                        className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
+                      >
+                        {usageCount}
+                      </span>
+                    </div>
+                    <div className="mt-4 border-t border-slate-100 pt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Details
                       </p>
-                    )}
+                      {entry.content.kind === 'image' ? (
+                        <ImageThumbnail
+                          assetId={entry.content.assetId}
+                          snippetLibrary={snippetLibrary}
+                        />
+                      ) : (
+                        <p className="mt-2 line-clamp-3 max-h-18 overflow-hidden whitespace-pre-wrap text-sm text-slate-600">
+                          {renderSnippetPlainText(entry.content)}
+                        </p>
+                      )}
+                    </div>
                   </li>
                 );
               })}
@@ -737,6 +868,45 @@ export function SnippetLibraryView({
           )}
         </div>
       ) : null}
+      {pendingDelete === undefined ? null : (
+        <div
+          aria-labelledby="delete-snippet-title"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+          role="dialog"
+        >
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+            <h3
+              className="text-lg font-semibold text-slate-950"
+              id="delete-snippet-title"
+            >
+              Delete &quot;{pendingDelete.title}&quot;?
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              This Snippet will be permanently removed.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                autoFocus
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={operation === 'deleting'}
+                onClick={() => setPendingDelete(undefined)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                disabled={operation === 'deleting'}
+                onClick={() => void confirmPendingDelete()}
+                type="button"
+              >
+                {operation === 'deleting' ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

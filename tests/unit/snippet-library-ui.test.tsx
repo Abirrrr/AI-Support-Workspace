@@ -5,6 +5,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -227,6 +228,75 @@ describe('unified Snippet Library', () => {
     expect(screen.queryByText('Welcome response')).toBeNull();
   });
 
+  it('presents bounded Details and accessible actions in Delete, Edit, Copy order', async () => {
+    render(
+      <SnippetLibraryView snippetLibrary={library([plain, imageEntry])} />,
+    );
+    const title = await screen.findByText('Welcome response');
+    const item = title.closest('li');
+    if (item === null) throw new Error('Expected Snippet item.');
+    expect(within(item).getByText('Details')).toBeTruthy();
+    expect(item.textContent).toContain('Hello\nthere');
+    expect(within(item).getByText('Text')).toBeTruthy();
+    expect(within(item).getByLabelText('Usage count: 0').textContent).toBe('0');
+    expect(
+      within(item)
+        .getAllByRole('button')
+        .map((button) => button.getAttribute('aria-label')),
+    ).toEqual(['Delete Snippet', 'Edit Snippet', 'Copy Snippet']);
+  });
+
+  it('delegates Copy by stable ID without mutating usage or persistence', async () => {
+    const service = library([plain]);
+    service.loadUsageStats = vi.fn(async () => []);
+    const copySnippet = {
+      copy: vi.fn(async () => ({ outcome: 'copied', kind: 'text' }) as const),
+    };
+    render(
+      <SnippetLibraryView copySnippet={copySnippet} snippetLibrary={service} />,
+    );
+    await screen.findByText('Welcome response');
+    fireEvent.click(screen.getByRole('button', { name: 'Copy Snippet' }));
+    await screen.findByText('Snippet copied.');
+    expect(copySnippet.copy).toHaveBeenCalledWith(SNIPPET_ID);
+    expect(service.create).not.toHaveBeenCalled();
+    expect(service.update).not.toHaveBeenCalled();
+    expect(service.delete).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Usage count: 0').textContent).toBe('0');
+  });
+
+  it('requires target-identifying confirmation and Cancel deletes nothing', async () => {
+    const service = library([plain]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Welcome response');
+    const deleteButton = screen.getByRole('button', { name: 'Delete Snippet' });
+    fireEvent.click(deleteButton);
+    expect(service.delete).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog').textContent).toContain(
+      'Delete "Welcome response"?',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(service.delete).not.toHaveBeenCalled();
+    await waitFor(() => expect(document.activeElement).toBe(deleteButton));
+  });
+
+  it('confirms deletion exactly once using the stable Snippet ID', async () => {
+    const service = library([plain]);
+    const deletion = deferred<boolean>();
+    service.delete = vi.fn(() => deletion.promise);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Welcome response');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Snippet' }));
+    const confirm = screen.getByRole('button', { name: 'Delete' });
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+    expect(service.delete).toHaveBeenCalledOnce();
+    expect(service.delete).toHaveBeenCalledWith(SNIPPET_ID);
+    deletion.resolve(true);
+    await screen.findByText('Snippet deleted.');
+    expect(screen.queryByText('Welcome response')).toBeNull();
+  });
+
   it('offers only Text and Image creation and new Text records are Rich', async () => {
     const service = library();
     render(<SnippetLibraryView snippetLibrary={service} />);
@@ -253,7 +323,7 @@ describe('unified Snippet Library', () => {
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Welcome response');
     expect(service.update).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     expect(
       await screen.findByRole('toolbar', { name: 'Text formatting' }),
     ).toBeTruthy();
@@ -274,7 +344,7 @@ describe('unified Snippet Library', () => {
       </>,
     );
     await screen.findByText('Linked setup');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
 
     const editor = await screen.findByLabelText('Text snippet content');
     expect(editor.className).toContain('[&_a]:text-blue-700');
@@ -291,7 +361,7 @@ describe('unified Snippet Library', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(service.update).toHaveBeenCalledOnce());
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     const reopened = await screen.findByLabelText('Text snippet content');
     expect(reopened.className).toContain('[&_a]:text-blue-700');
     expect(reopened.className).toContain('[&_a]:underline');
@@ -306,7 +376,7 @@ describe('unified Snippet Library', () => {
     expect(scrollIntoView).not.toHaveBeenCalled();
     expect(screen.queryByLabelText('Text snippet content')).toBeNull();
 
-    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editButtons = screen.getAllByRole('button', { name: 'Edit Snippet' });
     const editPlain = editButtons[0];
     const editRich = editButtons[1];
     if (editPlain === undefined || editRich === undefined)
@@ -373,7 +443,7 @@ describe('unified Snippet Library', () => {
     const service = library([legacy]);
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Widget setup');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     expect(screen.getByText('This Text Snippet is read-only')).toBeTruthy();
     expect(service.update).not.toHaveBeenCalled();
     expect(document.body.textContent).not.toContain(ASSET_ID);
@@ -460,10 +530,31 @@ describe('unified Snippet Library', () => {
     const service = library([imageEntry]);
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Limitation screenshot');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
     expect(service.loadAsset).toHaveBeenCalledWith(ASSET_ID);
     expect(document.body.textContent).not.toContain(ASSET_ID);
+  });
+
+  it('replaces a browser image error with an intentional retained-image fallback', async () => {
+    const service = library([imageEntry]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
+    const preview = await screen.findByAltText('Image snippet preview');
+    fireEvent.error(preview);
+    expect(
+      screen.getByText(
+        'Image preview unavailable. You can keep, replace, or remove this image.',
+      ),
+    ).toBeTruthy();
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+      'Limitation screenshot',
+    );
+    expect(screen.getByLabelText('Replace Image')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Remove image' })).toBeTruthy();
+    expect(service.update).not.toHaveBeenCalled();
+    expect(service.delete).not.toHaveBeenCalled();
   });
 
   it('scrolls Image Edit into view and focuses Title without opening the file picker', async () => {
@@ -473,7 +564,7 @@ describe('unified Snippet Library', () => {
     await screen.findByText('Limitation screenshot');
     expect(scrollIntoView).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     const form = await screen.findByRole('form', {
       name: 'Edit image snippet',
     });
@@ -494,7 +585,7 @@ describe('unified Snippet Library', () => {
     const service = library([imageEntry]);
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Limitation screenshot');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     expect(
       (await screen.findByAltText('Image snippet preview')).getAttribute('src'),
     ).toBe('blob:original.png');
@@ -512,7 +603,7 @@ describe('unified Snippet Library', () => {
     fireEvent.click(cancel);
     expect(service.update).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     await waitFor(() =>
       expect(
         screen.getByAltText('Image snippet preview').getAttribute('src'),
@@ -524,7 +615,7 @@ describe('unified Snippet Library', () => {
     const service = library([imageEntry]);
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Limitation screenshot');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     await screen.findByAltText('Image snippet preview');
     fireEvent.change(screen.getByLabelText('Replace Image'), {
       target: { files: [localFile('image/webp', 'replacement.webp')] },
@@ -554,7 +645,7 @@ describe('unified Snippet Library', () => {
     });
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Limitation screenshot');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     await screen.findByAltText('Image snippet preview');
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'Updated screenshot title' },
@@ -608,7 +699,7 @@ describe('unified Snippet Library', () => {
     await screen.findByText('Second screenshot');
     await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
 
-    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editButtons = screen.getAllByRole('button', { name: 'Edit Snippet' });
     const editA = editButtons[0];
     const editB = editButtons[1];
     if (editA === undefined || editB === undefined)
@@ -659,7 +750,7 @@ describe('unified Snippet Library', () => {
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Second screenshot');
     await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
-    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editButtons = screen.getAllByRole('button', { name: 'Edit Snippet' });
     const editA = editButtons[0];
     const editB = editButtons[1];
     if (editA === undefined || editB === undefined)
@@ -694,7 +785,7 @@ describe('unified Snippet Library', () => {
     render(<SnippetLibraryView snippetLibrary={service} />);
     await screen.findByText('Limitation screenshot');
     await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Snippet' }));
     await waitFor(() => expect(loadAsset).toHaveBeenCalledTimes(2));
     const cancel = screen.getAllByRole('button', { name: 'Cancel' }).at(-1);
     if (cancel === undefined) throw new Error('Expected a Cancel button.');

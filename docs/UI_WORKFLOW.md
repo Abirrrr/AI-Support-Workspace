@@ -8,7 +8,7 @@ This document is intentionally implementation-independent and should be read alo
 
 ## 2. Primary Navigation
 
-Before M14-P.4, the implemented product is organized around:
+Before M14-P.4, the implemented product was organized around:
 
 - Support
 - Knowledge Library
@@ -34,7 +34,7 @@ Pinned extension toolbar icon
 Global AI Support Workspace Side Panel
 ```
 
-The popup is retired as the primary launcher during M14-P.4. Chrome's approved native Side Panel action behavior owns open/toggle; the selected-text shortcut remains a separate open/activate flow.
+The popup is retired. Chrome's native Side Panel action behavior owns toolbar open/toggle; the selected-text shortcut remains a separate Side Panel-open command boundary. The M14-P.4 Side Panel renders the compact responsive Workspace presentation and Settings action. M15 owns the actual AI/provider behavior behind those visible boundaries.
 
 ### Approved M14-P.4 Settings Path
 
@@ -43,10 +43,30 @@ Side Panel
 ↓
 Small accessible Settings gear
 ↓
-Existing Options management/configuration surface
+Existing Options management/configuration surface in a normal browser tab
 ```
 
-The gear is named `Open Settings and Libraries`, acts only on explicit user activation, and does not duplicate Settings state, create a hidden route, or add a menu. M14-P.4 may establish this shell only; M15 retains actual AI Workspace functionality.
+The gear is named `Open Settings and Libraries`, acts only on explicit user activation, and opens the single existing Options application configured for normal-tab display. It does not duplicate Settings state, create a hidden route/custom window, or add a menu. M14-P.4 owns the visible Workspace structure; M15 retains actual AI Workspace functionality.
+
+### M14-P.4 Workspace Presentation Boundary
+
+```text
+Merchant Context
+[ compact auto-growing multiline input ]
+
+Context Images
+[ structural attachment area ]
+
+Guidance / Gist
+[ compact auto-growing multiline input ]
+
+[ disabled provider-neutral Model ] [ disabled Generate ]
+
+Generated Output       [ disabled Save as Snippet ] [ disabled Copy ]
+[ editable output surface ]
+```
+
+This presentation reflows within normal narrow Side Panel widths and does not require horizontal scrolling. It does not accept Context Images, invent models or output, invoke a provider/Prompt Builder/generation, persist AI state, copy Generated Output, or create/prefill/save a Snippet. Those behaviors remain M15/F3-owned.
 
 ## 3. Support Workspace Workflow
 
@@ -205,6 +225,8 @@ Delete | Edit | Copy
 ```
 
 Visual action order is Delete → Edit → Copy. Each compact icon action retains an accessible label, keyboard operation, and visible focus. Copy remains supported.
+
+Copy invokes `CopySnippetToClipboard` with the stable Snippet ID. That application operation loads authoritative Text/Image data and delegates to the established clipboard preparation/writer path. It is clipboard-only: it never activates Automatic Paste, touches an editor or trigger, creates cleanup/receipt state, or increments usage. Image preview URLs/bytes are presentation-only and never supply clipboard content.
 
 ```text
 Delete Snippet
@@ -654,9 +676,9 @@ AI Support Workspace                         [Settings gear]
 Gear opens existing Options / Libraries page
 ```
 
-The gear is an icon-only native button in the title row with accessible name `Open Settings and Libraries`, visible keyboard focus, native Enter/Space activation, and a sufficient pointer target. It invokes `chrome.runtime.openOptionsPage()` and provides safe non-blocking failure announcement. It does not consume a content row, display a large **Open Libraries** button, or open a dropdown/menu.
+The gear is an icon-only native button in the title row with accessible name `Open Settings and Libraries`, visible keyboard focus, native Enter/Space activation, and a sufficient pointer target. It invokes `chrome.runtime.openOptionsPage()` while the existing Options entrypoint supplies `options_ui.open_in_tab: true`, and provides safe non-blocking failure announcement. It does not consume a content row, display a large **Open Libraries** button, open a dropdown/menu, or create a second Settings application.
 
-This M14-P.4 workflow removes only the intermediate popup step and adds the management path. It preserves the current global Side Panel, options-page management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation must inspect WXT's generated action manifest, retire the popup/default popup without competing toolbar behaviors, and preserve a popup-free action plus `side_panel.default_path` and `options_ui`. Merchant Context, Context Images, Guidance / Gist, model selection, Generate, editable Generated Output, Copy, and Save as Snippet remain M15.
+This M14-P.4 workflow removes the intermediate popup step, adds the management path, and renders the approved responsive Workspace presentation. It preserves the global Side Panel, Options management boundary, selected-text keyboard shortcut behavior, and least-privilege permission set. Its implementation retires the popup/default popup without competing toolbar behaviors and preserves a popup-free action plus `side_panel.default_path` and normal-tab `options_ui`. M15 owns Context Image ingestion, model selection behavior, Generate/provider execution, Prompt Builder integration, generated-output lifecycle/Copy, and Save as Snippet behavior.
 
 M14-I.2 defines the Windows Native Messaging companion that writes genuine image clipboard data without a focused extension page. Decision 43 selects one-shot PNG-only messages, registered PNG plus CF_DIBV5, WIC, exact extension-origin restrictions, and per-user installation. M14-I.4 makes the development helper reachable through the stable `native-dev` build and exact `.dev` HKCU registration; readiness and native Image delivery passed in real Chrome. Production installation remains absent. M14-K.2 implements Decision 45's separate optional automatic-paste protocol through the same companion; stale focus declines, no result is retried, and manual `Ctrl+V` remains the fallback.
 

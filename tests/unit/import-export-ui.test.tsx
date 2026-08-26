@@ -16,7 +16,6 @@ import {
   BackupRestoreError,
 } from '../../src/application/backup/backup-errors';
 import type { PreparedBackupImport } from '../../src/application/backup/backup-service';
-import type { KnowledgeLibrary } from '../../src/application/knowledge/knowledge-library';
 import type { SettingsApplication } from '../../src/application/settings/settings-service';
 import type { SnippetLibrary } from '../../src/application/snippet/snippet-library';
 import { CatalogUnavailableAfterMutationError } from '../../src/application/snippet/catalog-mutation';
@@ -471,46 +470,18 @@ describe('ImportExportView', () => {
 });
 
 describe('options-page restore refresh', () => {
-  it('remounts Knowledge, Snippets, and Settings locally without browser messaging', async () => {
+  it('remounts active Snippets and Settings locally without browser messaging', async () => {
     let restored = false;
-    const knowledgeFixture = requireValue(
-      backup.data.knowledge[0],
-      'Knowledge entry',
-    );
     const snippetFixture = requireValue(
       backup.data.snippets[0],
       'Snippet entry',
     );
-    const restoredKnowledge = backup.data.knowledge.map((entry) => ({
-      ...entry,
-      tags: [...entry.tags],
-    }));
     const restoredSnippets = backup.data.snippets.map((entry) => ({
       ...entry,
       content: createPlainSnippetContent(entry.content),
       tags: [...entry.tags],
       trigger: null,
     }));
-    const knowledgeLibrary: KnowledgeLibrary = {
-      load: vi.fn(async () =>
-        restored
-          ? restoredKnowledge
-          : [
-              {
-                ...knowledgeFixture,
-                title: 'Before knowledge',
-                tags: [...knowledgeFixture.tags],
-              },
-            ],
-      ),
-      create: vi.fn(async () => {
-        throw new Error('not used');
-      }),
-      update: vi.fn(async () => {
-        throw new Error('not used');
-      }),
-      delete: vi.fn(async () => false),
-    };
     const snippetLibrary: SnippetLibrary = {
       load: vi.fn(async () =>
         restored
@@ -554,13 +525,10 @@ describe('options-page restore refresh', () => {
     render(
       <OptionsShell
         importExport={importExport}
-        knowledgeLibrary={knowledgeLibrary}
         settings={settings}
         snippetLibrary={snippetLibrary}
       />,
     );
-    expect(await screen.findByText('Before knowledge')).toBeTruthy();
-    fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
     expect(await screen.findByText('Before snippet')).toBeTruthy();
     fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     expect(await screen.findByDisplayValue('before-model')).toBeTruthy();
@@ -576,13 +544,10 @@ describe('options-page restore refresh', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Restore backup' }));
     await screen.findByText(BACKUP_MESSAGES.restoreSuccess);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Knowledge Library' }));
-    expect(await screen.findByText('Hidden knowledge title')).toBeTruthy();
     fireEvent.click(screen.getByRole('tab', { name: 'Snippet Library' }));
     expect(await screen.findByText('Hidden snippet title')).toBeTruthy();
     fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     expect(await screen.findByDisplayValue('restored-model')).toBeTruthy();
-    expect(knowledgeLibrary.load).toHaveBeenCalledTimes(2);
     expect(snippetLibrary.load).toHaveBeenCalledTimes(2);
     expect(settings.load).toHaveBeenCalledTimes(2);
   });

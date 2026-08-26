@@ -10,6 +10,9 @@ export default defineConfig({
   entrypointsDir: 'extension',
   modules: ['@wxt-dev/module-react'],
   manifest: ({ mode }) => ({
+    action: {
+      default_title: 'AI Support Workspace',
+    },
     commands: {
       'capture-selection-to-workspace': {
         description: 'Capture selected text in AI Support Workspace',

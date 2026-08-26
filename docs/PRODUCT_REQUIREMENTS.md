@@ -63,12 +63,14 @@ The product provides a local-first support workspace with reusable Snippet deliv
 
 ## M14-P.4 Navigation and Snippet Library UI Requirements
 
-- The pinned extension toolbar icon opens/toggles the existing global AI Support Workspace Side Panel directly through the approved Chrome Side Panel architecture. The popup ceases to be the primary product launcher. This is approved for M14-P.4 and is not implemented by M14-P.3.
-- The Side Panel is the primary application surface and includes one small gear icon action named `Open Settings and Libraries`. It opens the existing Options/management surface only from explicit user action, remains keyboard accessible, and does not duplicate Settings state or introduce hidden navigation.
-- M14-P.4 may prepare only that shell. M15 retains Merchant Context, Context Images, Guidance / Gist, provider-independent model selection, Generate/provider execution, editable Generated Output, Copy, and F3 Save as Snippet.
+- The pinned extension toolbar icon opens/toggles the global AI Support Workspace Side Panel directly through the approved Chrome Side Panel architecture. M14-P.4 retires the popup as a competing launcher and ships the approved responsive Workspace presentation.
+- The Side Panel is the primary application surface and includes one small gear icon action named `Open Settings and Libraries`. It opens the existing authoritative Options application in a normal browser tab through `options_ui.open_in_tab: true`, only from explicit user action, remains keyboard accessible, and does not duplicate Settings state, create a custom window, or introduce hidden navigation or a new permission.
+- M14-P.4 owns the visible compact structure for Merchant Context, Context Images, Guidance / Gist, Model, Generate, Generated Output, Save as Snippet, Copy, and an editable output surface. Provider/model-dependent actions remain disabled and no provider-specific models, fake output, generation, AI persistence, image ingestion, Prompt Builder integration, Generated Output Copy, or F3 behavior is introduced.
+- M15 owns the actual behavior behind that presentation: provider/model discovery and selection, Context Image processing, generation execution, output lifecycle and Copy, Prompt Builder integration, and F3 Save as Snippet.
 - After Knowledge is hidden, active management navigation exposes Snippet Library, Settings, and Import / Export—no additional destination is inferred.
 - Each Snippet item presents Name/Title, Trigger, Type, numeric Usage, bounded Details, and Actions. Type and Usage are separate compact chips. Type remains exactly Text or Image; Usage remains visually numeric-only with an accessible `Usage count: <count>` equivalent and never affects retrieval.
 - Actions appear in Delete → Edit → Copy order and prefer compact icons with accessible labels equivalent to `Delete Snippet`, `Edit Snippet`, and `Copy Snippet`, keyboard operation, visible focus, and tooltip/title support. Copy remains supported.
+- Library Copy delegates by stable Snippet ID to the `CopySnippetToClipboard` application boundary. It reuses authoritative Text/Image clipboard preparation and writers, is clipboard-only even when Automatic Paste is configured, creates no trigger cleanup/receipt state, does not increment usage, and never uses Image preview bytes as clipboard authority.
 - Delete requires a simple target-identifying confirmation with Cancel and explicit Delete. The initial delete action never destroys data; only confirmation invokes the existing atomic Snippet/asset/sidecar deletion semantics. No typed-name or multi-step ceremony is required.
 - Details use a useful bounded safe content preview: safe rich/plain content for Text and an appropriate bounded image preview for Image. Exact truncation/layout remains implementation-owned and requires no model change.
 - M14-P.4 repairs the observed existing-Image Edit broken preview. A valid retained image remains visible while metadata is edited without reselection. The editor exposes bounded Current image, explicit replacement through established screenshot `Ctrl+V` and file selection, and explicit removal. A true render failure uses an intentional fallback and never silently deletes, replaces, or mutates the asset.
@@ -188,13 +190,13 @@ Image: one locally stored PNG/JPEG/WebP
 
 Text plus an image intentionally uses two independent shortcuts, such as `;limitation-text` and `;image-limitation`.
 
-## Future Workspace Shell Action UX
+## Workspace Shell Action UX
 
-The current extension toolbar action opens the implemented popup. From there, Open Workspace opens the global AI Support Workspace Side Panel, while Open Libraries opens the existing full options page in a normal browser tab.
+M14-P.4 retires the implemented popup. The extension toolbar action opens/toggles the global AI Support Workspace Side Panel directly, while the compact Settings gear opens the existing full Options application in a normal browser tab.
 
-The approved future target is one step shorter: clicking the toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the Side Panel title row opens the existing Options / Libraries page. Knowledge compatibility, Text/Image Snippets, Settings, Manual Backup/Restore, paste behavior, model/provider settings, and future management workflows remain in Options and must not be duplicated or moved wholesale into the panel. V1 has no large **Open Libraries** panel row and no Settings dropdown/menu.
+Knowledge compatibility, Text/Image Snippets, Settings, Manual Backup/Restore, paste behavior, model/provider settings, and future management workflows remain in Options and are not duplicated or moved wholesale into the panel. V1 has no large **Open Libraries** panel row and no Settings dropdown/menu.
 
-M15 implementation must use `chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:true})`, preserve the existing `sidePanel` permission and global panel/keyboard-shortcut semantics, inspect WXT's generated manifest/action wiring, and retire `action.default_popup` plus the popup entry point cleanly while preserving a popup-free toolbar action. The Settings gear uses `chrome.runtime.openOptionsPage()`, is keyboard-operable with the accessible name `Open Settings and Libraries`, and needs no new permission. M14-L implements none of this.
+M14-P.4 uses `chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:true})`, preserves the existing `sidePanel` permission and global panel/keyboard-shortcut semantics, and retires `action.default_popup` plus the popup entry point while preserving a popup-free toolbar action. The Settings gear uses `chrome.runtime.openOptionsPage()`, is keyboard-operable with the accessible name `Open Settings and Libraries`, and targets the single WXT Options entrypoint configured with `manifest.open_in_tab`/generated `options_ui.open_in_tab: true`. No new permission is required. M15 consumes this presentation/navigation and owns its AI behavior.
 
 ## M15 — Multimodal Screenshot Context
 

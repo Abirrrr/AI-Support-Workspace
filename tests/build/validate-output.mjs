@@ -73,6 +73,7 @@ assert.equal(
 );
 assert.equal('devtools_page' in manifest, false);
 assert.equal(manifest.permissions.includes('tabs'), false);
+assert.equal(manifest.permissions.includes('windows'), false);
 assert.equal(manifest.permissions.includes('alarms'), false);
 assert.equal(manifest.permissions.includes('downloads'), false);
 assert.equal(manifest.permissions.includes('fileSystem'), false);
@@ -98,8 +99,11 @@ const sidePanelPage = manifest.side_panel?.default_path;
 const offscreenPage = 'offscreen.html';
 
 assert.equal(typeof serviceWorker, 'string');
-assert.equal(typeof popupPage, 'string');
+assert.equal(popupPage, undefined);
+assert.equal(manifest.action?.default_title, 'AI Support Workspace');
 assert.equal(typeof optionsPage, 'string');
+assert.equal(optionsPage, 'options.html');
+assert.equal(manifest.options_ui?.open_in_tab, true);
 assert.equal(sidePanelPage, 'sidepanel.html');
 assert.equal(manifest.content_scripts?.length, 1);
 assert.deepEqual(manifest.content_scripts[0].matches, [
@@ -129,7 +133,6 @@ assert.equal(manifest.content_scripts[0].js.length, 1);
 await Promise.all(
   [
     serviceWorker,
-    popupPage,
     optionsPage,
     sidePanelPage,
     offscreenPage,
@@ -137,11 +140,14 @@ await Promise.all(
   ].map((relativePath) => access(resolve(outputDirectory, relativePath))),
 );
 await assert.rejects(access(resolve(outputDirectory, 'workspace.html')));
+await assert.rejects(access(resolve(outputDirectory, 'popup.html')));
+await assert.rejects(access(resolve(outputDirectory, 'settings.html')));
 
 const serviceWorkerSource = await readFile(
   resolve(outputDirectory, serviceWorker),
   'utf8',
 );
+assert.match(serviceWorkerSource, /openPanelOnActionClick/);
 if (nativeDevelopmentMode) {
   assert.match(serviceWorkerSource, /sendNativeMessage/);
   assert.match(serviceWorkerSource, new RegExp(nativeDevelopment.hostName));
@@ -224,6 +230,36 @@ const optionsScriptSource = await readFile(
   resolve(outputDirectory, optionsScriptPath),
   'utf8',
 );
+const sidePanelHtml = await readFile(
+  resolve(outputDirectory, sidePanelPage),
+  'utf8',
+);
+const sidePanelScriptPath = sidePanelHtml.match(
+  /<script[^>]+src="\/([^"]*sidepanel[^"]*\.js)"/,
+)?.[1];
+assert.equal(typeof sidePanelScriptPath, 'string');
+const sidePanelScriptSource = await readFile(
+  resolve(outputDirectory, sidePanelScriptPath),
+  'utf8',
+);
+assert.match(sidePanelScriptSource, /AI Support Workspace/);
+assert.match(sidePanelScriptSource, /Open Settings and Libraries/);
+assert.match(sidePanelScriptSource, /Merchant Context/);
+assert.match(sidePanelScriptSource, /Context Images/);
+assert.match(sidePanelScriptSource, /Guidance \/ Gist/);
+assert.match(sidePanelScriptSource, /Not configured/);
+assert.match(sidePanelScriptSource, /Generate/);
+assert.match(sidePanelScriptSource, /Generated Output/);
+assert.match(sidePanelScriptSource, /Save as Snippet/);
+assert.match(sidePanelScriptSource, /Copy/);
+assert.match(sidePanelScriptSource, /responsive-side-panel/);
+assert.match(sidePanelScriptSource, /responsive-model-actions/);
+assert.match(sidePanelScriptSource, /responsive-output-actions/);
+assert.doesNotMatch(sidePanelScriptSource, /Ollama|OpenAI|Anthropic/);
+assert.doesNotMatch(
+  sidePanelScriptSource,
+  /OutputWorkflow|PromptBuilder|OllamaProvider|GenerationProvider|generateSnippetTags/,
+);
 assert.match(optionsScriptSource, /Last backup/);
 assert.match(optionsScriptSource, /Backup recommended/);
 assert.match(optionsScriptSource, /Export backup/);
@@ -235,6 +271,14 @@ assert.doesNotMatch(optionsScriptSource, /Change Folder/);
 assert.doesNotMatch(optionsScriptSource, /Reauthorize/);
 assert.doesNotMatch(optionsScriptSource, /showDirectoryPicker/);
 assert.doesNotMatch(optionsScriptSource, /requestPermission/);
+assert.doesNotMatch(optionsScriptSource, /Knowledge Library/);
+assert.match(optionsScriptSource, /Delete Snippet/);
+assert.match(optionsScriptSource, /Edit Snippet/);
+assert.match(optionsScriptSource, /Copy Snippet/);
+assert.match(optionsScriptSource, /This Snippet will be permanently removed/);
+assert.match(optionsScriptSource, /Usage count:/);
+assert.match(optionsScriptSource, /Current image/);
+assert.match(optionsScriptSource, /Image preview unavailable/);
 const generatedJavaScriptPaths = (
   await readdir(outputDirectory, { recursive: true })
 )
