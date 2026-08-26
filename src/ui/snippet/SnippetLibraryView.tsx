@@ -1,4 +1,11 @@
-import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import type { SnippetEntryInput } from '../../application/persistence/snippet-entry-repository';
 import {
@@ -29,6 +36,11 @@ import { TextSnippetEditor } from './TextSnippetEditor';
 
 type EditorMode = 'closed' | 'chooser' | 'text' | 'image' | 'compatibility';
 type LibraryFilter = 'all' | 'text' | 'images';
+
+interface EditNavigationRequest {
+  readonly id: number;
+  readonly mode: 'text' | 'image' | 'compatibility';
+}
 
 interface SnippetDraft {
   title: string;
@@ -141,6 +153,42 @@ export function SnippetLibraryView({
   const [triggerErrorMessage, setTriggerErrorMessage] = useState<string>();
   const [statusMessage, setStatusMessage] = useState<string>();
   const assetLoadGeneration = useRef(0);
+  const editNavigationGeneration = useRef(0);
+  const [editNavigationRequest, setEditNavigationRequest] =
+    useState<EditNavigationRequest>();
+  const authoringFormRef = useRef<HTMLFormElement>(null);
+  const imageTitleRef = useRef<HTMLInputElement>(null);
+  const compatibilitySectionRef = useRef<HTMLElement>(null);
+  const compatibilityCloseRef = useRef<HTMLButtonElement>(null);
+
+  function requestEditNavigation(requestMode: EditNavigationRequest['mode']) {
+    editNavigationGeneration.current += 1;
+    setEditNavigationRequest({
+      id: editNavigationGeneration.current,
+      mode: requestMode,
+    });
+  }
+
+  useLayoutEffect(() => {
+    if (editNavigationRequest === undefined) return;
+    if (
+      editNavigationRequest.mode === 'compatibility' &&
+      mode === 'compatibility'
+    ) {
+      compatibilitySectionRef.current?.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+      });
+      compatibilityCloseRef.current?.focus();
+      return;
+    }
+    if (editNavigationRequest.mode !== mode) return;
+    authoringFormRef.current?.scrollIntoView({
+      behavior: 'auto',
+      block: 'start',
+    });
+    if (mode === 'image') imageTitleRef.current?.focus();
+  }, [editNavigationRequest, mode]);
 
   async function loadEntries() {
     setLoadState('loading');
@@ -186,6 +234,7 @@ export function SnippetLibraryView({
     setDraft(emptyDraft());
     setImageAsset(undefined);
     setEditingId(undefined);
+    setEditNavigationRequest(undefined);
     setTriggerErrorMessage(undefined);
   }
 
@@ -193,6 +242,7 @@ export function SnippetLibraryView({
     assetLoadGeneration.current += 1;
     setDraft(emptyDraft());
     setEditingId(undefined);
+    setEditNavigationRequest(undefined);
     setMode('text');
     setErrorMessage(undefined);
   }
@@ -202,6 +252,7 @@ export function SnippetLibraryView({
     setDraft(emptyDraft());
     setImageAsset(undefined);
     setEditingId(undefined);
+    setEditNavigationRequest(undefined);
     setMode('image');
     setErrorMessage(undefined);
   }
@@ -221,6 +272,7 @@ export function SnippetLibraryView({
         trigger: entry.trigger ?? '',
       });
       setMode('image');
+      requestEditNavigation('image');
       try {
         const asset = await snippetLibrary.loadAsset?.(entry.content.assetId);
         if (assetLoadGeneration.current !== loadGeneration) return;
@@ -239,10 +291,12 @@ export function SnippetLibraryView({
       !isSupportedTextSnippetContent(entry.content)
     ) {
       setMode('compatibility');
+      requestEditNavigation('compatibility');
       return;
     }
     setDraft(draftFromEntry(entry));
     setMode('text');
+    requestEditNavigation('text');
   }
 
   function updateDraft(field: 'title' | 'tags' | 'trigger', value: string) {
@@ -461,6 +515,7 @@ export function SnippetLibraryView({
         <section
           aria-label="Legacy snippet compatibility"
           className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5"
+          ref={compatibilitySectionRef}
         >
           <h3 className="font-semibold text-amber-950">
             This Text Snippet is read-only
@@ -472,6 +527,7 @@ export function SnippetLibraryView({
           <button
             className="mt-4 rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium"
             onClick={closeEditor}
+            ref={compatibilityCloseRef}
             type="button"
           >
             Close
@@ -486,6 +542,7 @@ export function SnippetLibraryView({
           }
           className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
           onSubmit={(event) => void saveEntry(event)}
+          ref={authoringFormRef}
         >
           <div className="flex justify-between">
             <h3 className="font-semibold text-slate-900">
@@ -507,6 +564,7 @@ export function SnippetLibraryView({
               className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2"
               disabled={isBusy}
               onChange={(event) => updateDraft('title', event.target.value)}
+              ref={mode === 'image' ? imageTitleRef : undefined}
               type="text"
               value={draft.title}
             />
@@ -549,6 +607,9 @@ export function SnippetLibraryView({
                 onChange={(content) =>
                   setDraft((current) => ({ ...current, content }))
                 }
+                {...(editNavigationRequest?.mode === 'text'
+                  ? { focusRequest: editNavigationRequest.id }
+                  : {})}
               />
             </div>
           ) : (

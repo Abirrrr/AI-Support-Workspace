@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   EditorContent,
   Extension,
@@ -23,6 +23,7 @@ import {
 interface TextSnippetEditorProps {
   readonly content: RichSnippetContent;
   readonly disabled?: boolean;
+  readonly focusRequest?: number;
   readonly onChange: (content: RichSnippetContent) => void;
 }
 
@@ -111,11 +112,13 @@ export const textSnippetExtensions = [
 export function TextSnippetEditor({
   content,
   disabled = false,
+  focusRequest,
   onChange,
 }: TextSnippetEditorProps) {
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [feedback, setFeedback] = useState<string>();
+  const handledFocusRequest = useRef<number | undefined>(undefined);
   const editor = useEditor(
     {
       extensions: textSnippetExtensions,
@@ -126,7 +129,7 @@ export function TextSnippetEditor({
         attributes: {
           'aria-label': 'Text snippet content',
           class:
-            'min-h-40 px-3 py-3 text-sm text-slate-950 focus:outline-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_p]:my-2',
+            'min-h-40 px-3 py-3 text-sm text-slate-950 focus:outline-none [&_a]:text-blue-700 [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_p]:my-2',
         },
         handlePaste: (_view, event) => {
           const hasImage = Array.from(event.clipboardData?.items ?? []).some(
@@ -152,6 +155,19 @@ export function TextSnippetEditor({
   useEffect(() => {
     editor?.setEditable(!disabled);
   }, [disabled, editor]);
+
+  useEffect(() => {
+    if (
+      editor === null ||
+      disabled ||
+      focusRequest === undefined ||
+      handledFocusRequest.current === focusRequest
+    ) {
+      return;
+    }
+    editor.commands.focus('start', { scrollIntoView: false });
+    handledFocusRequest.current = focusRequest;
+  }, [disabled, editor, focusRequest]);
 
   if (editor === null)
     return <p className="text-sm text-slate-600">Loading editor…</p>;

@@ -1,5 +1,12 @@
 # Changelog
 
+### M14-P.2 — Daily-Use Snippet UX Cleanup (F1 + F2)
+
+- Implemented F1 as presentation-only editor-root anchor styling: persisted safe links display blue and underlined in the Text Snippet content surface. Ordinary text and unrelated application anchors remain unaffected; safe URL validation, marks, persistence, sanitization, and clipboard serialization are unchanged. No Text color, Underline, typography, or toolbar capability was added.
+- Implemented F2 over the existing unified authoring state. Each explicit Edit action issues a fresh navigation request; after the matching form renders it scrolls into view with standard non-animated browser behavior. Text focuses the mounted Tiptap content start, Image focuses Title, and legacy read-only content focuses its Close control. No second editor, route, timer, polling, autofocus, focus trap, automatic file picker, or automatic save exists.
+- Added deterministic real-component coverage for F1 scope/save/reopen/security isolation; Text same/A→B Edit scroll and focus; Image scroll/focus/asset/file-picker isolation; and no focus/scroll from load, filtering, or new authoring. Existing unsaved-transition, identity, asset ownership, validation, save/cancel, tags, trigger, usage, and generated-metadata behavior remain unchanged.
+- Preserved approved M14-P.1 source and performance behavior, Text/Image delivery, image quality, Decision 42/45, native protocol/source, `;trigger + Space`, Dexie v6, Backup v7, permissions, dependencies, and destination-generic behavior. M14-O, F3, and M15 are not started; M14-P overall is not complete. Principal real-Chrome UX validation remains required.
+
 ### M14-P.1 — Snippet Delivery Performance Re-measurement & Optimization
 
 - Re-measured the current Text, PNG, JPEG, WebP, native request-construction, one-shot capability, and context-capture paths before optimizing. Added a test-only local Chromium benchmark with deterministic 64×64, 640×480, and 1440×900 fixtures, cold/warm distributions, and no timing-based CI threshold or production telemetry.

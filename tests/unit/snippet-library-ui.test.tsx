@@ -47,6 +47,29 @@ const rich: SnippetEntry = {
     ],
   },
 };
+const linkedRich: SnippetEntry = {
+  ...rich,
+  id: '723e4567-e89b-42d3-a456-426614174000',
+  title: 'Linked setup',
+  content: {
+    kind: 'rich',
+    blocks: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'link',
+            text: 'Open help',
+            url: 'https://example.com/help',
+            bold: false,
+            italic: false,
+          },
+          { type: 'text', text: ' safely', bold: false, italic: false },
+        ],
+      },
+    ],
+  },
+};
 const imageEntry: SnippetEntry = {
   ...plain,
   id: '423e4567-e89b-42d3-a456-426614174000',
@@ -130,7 +153,14 @@ function library(entries: readonly SnippetEntry[] = []): SnippetLibrary {
   };
 }
 
+const scrollIntoView = vi.fn();
+
 beforeEach(() => {
+  scrollIntoView.mockClear();
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: scrollIntoView,
+  });
   Object.defineProperty(URL, 'createObjectURL', {
     configurable: true,
     value: vi.fn((blob: Blob) => `blob:${(blob as File).name || 'preview'}`),
@@ -235,6 +265,103 @@ describe('unified Snippet Library', () => {
     });
   });
 
+  it('scopes blue underlined safe-link presentation to the Text editor across Save and reopen', async () => {
+    const service = library([linkedRich]);
+    render(
+      <>
+        <a href="https://outside.example">Outside application link</a>
+        <SnippetLibraryView snippetLibrary={service} />
+      </>,
+    );
+    await screen.findByText('Linked setup');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+
+    const editor = await screen.findByLabelText('Text snippet content');
+    expect(editor.className).toContain('[&_a]:text-blue-700');
+    expect(editor.className).toContain('[&_a]:underline');
+    expect(editor.querySelector('a')?.textContent).toBe('Open help');
+    expect(editor.querySelector('p')?.className).not.toContain('text-blue');
+    expect(editor.querySelector('p')?.className).not.toContain('underline');
+    const outside = screen.getByText('Outside application link');
+    expect(outside.className).not.toContain('text-blue');
+    expect(outside.className).not.toContain('underline');
+    expect(
+      screen.queryByRole('button', { name: /underline|text color/i }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.update).toHaveBeenCalledOnce());
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const reopened = await screen.findByLabelText('Text snippet content');
+    expect(reopened.className).toContain('[&_a]:text-blue-700');
+    expect(reopened.className).toContain('[&_a]:underline');
+    expect(reopened.querySelector('a')?.getAttribute('href')).toBe(
+      'https://example.com/help',
+    );
+  });
+
+  it('scrolls and focuses Text content only for explicit repeated Edit requests', async () => {
+    render(<SnippetLibraryView snippetLibrary={library([plain, rich])} />);
+    await screen.findByText('Widget setup');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText('Text snippet content')).toBeNull();
+
+    const editButtons = screen.getAllByRole('button', { name: 'Edit' });
+    const editPlain = editButtons[0];
+    const editRich = editButtons[1];
+    if (editPlain === undefined || editRich === undefined)
+      throw new Error('Expected two Edit buttons.');
+
+    fireEvent.click(editPlain);
+    const plainEditor = await screen.findByLabelText('Text snippet content');
+    await waitFor(() => expect(document.activeElement).toBe(plainEditor));
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+      'Welcome response',
+    );
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      behavior: 'auto',
+      block: 'start',
+    });
+
+    fireEvent.click(editPlain);
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByLabelText('Text snippet content'),
+      ),
+    );
+
+    fireEvent.click(editRich);
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(3));
+    const richEditor = await screen.findByLabelText('Text snippet content');
+    await waitFor(() => expect(document.activeElement).toBe(richEditor));
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+      'Widget setup',
+    );
+  });
+
+  it('does not move focus or scroll for load, filtering, or new authoring', async () => {
+    render(<SnippetLibraryView snippetLibrary={library([plain])} />);
+    await screen.findByText('Welcome response');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    const search = screen.getByPlaceholderText('Search snippets...');
+    search.focus();
+    fireEvent.change(search, { target: { value: 'welcome' } });
+    fireEvent.click(screen.getByRole('button', { name: 'text' }));
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(search);
+
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: /Text Snippet/ }));
+    await screen.findByLabelText('Text snippet content');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(
+      screen.getByLabelText('Text snippet content'),
+    );
+  });
+
   it('protects legacy image-containing Rich content with a read-only compatibility state', async () => {
     const legacy: SnippetEntry = {
       ...rich,
@@ -337,6 +464,30 @@ describe('unified Snippet Library', () => {
     expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
     expect(service.loadAsset).toHaveBeenCalledWith(ASSET_ID);
     expect(document.body.textContent).not.toContain(ASSET_ID);
+  });
+
+  it('scrolls Image Edit into view and focuses Title without opening the file picker', async () => {
+    const fileInputClick = vi.spyOn(HTMLInputElement.prototype, 'click');
+    const service = library([imageEntry]);
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Limitation screenshot');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const form = await screen.findByRole('form', {
+      name: 'Edit image snippet',
+    });
+    const title = screen.getByLabelText('Title');
+    await waitFor(() => expect(document.activeElement).toBe(title));
+    expect(form.contains(title)).toBe(true);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenLastCalledWith({
+      behavior: 'auto',
+      block: 'start',
+    });
+    expect(fileInputClick).not.toHaveBeenCalled();
+    expect(await screen.findByAltText('Image snippet preview')).toBeTruthy();
+    expect(service.update).not.toHaveBeenCalled();
   });
 
   it('keeps the original persisted image when a replacement draft is cancelled', async () => {

@@ -65,6 +65,17 @@ describe('constrained Text Snippet Tiptap behavior', () => {
     });
   });
 
+  it('keeps unsafe link schemes outside the constrained editor document', () => {
+    const editor = editorWithText();
+    editor.commands.setTextSelection({ from: 1, to: 6 });
+    expect(editor.commands.setLink({ href: 'javascript:alert(1)' })).toBe(
+      false,
+    );
+    expect(content(editor).blocks[0]).toMatchObject({
+      children: [{ type: 'text', text: 'Hello' }],
+    });
+  });
+
   it('creates bullet and numbered lists and splits a normal next item', () => {
     const bullet = editorWithText('First');
     bullet.commands.selectAll();

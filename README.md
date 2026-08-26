@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-N.3 is complete at `d410ecb`: the current product uses Manual Backup v7 Export, local successful-export tracking, and a 30-day advisory reminder; production automatic filesystem scheduling, folder management, retention, and `alarms` are retired. M14-P.1 is the active focused performance gate promoted ahead of M14-O. It re-measures current Text/Image delivery and optimizes only evidence-backed native PNG request serialization without changing safety, protocol, automatic paste, or manual `Ctrl+V` fallback. Dexie remains v6 and Backup remains v7.
+Milestones 9–14 are complete. M14-N.3 is complete at `d410ecb`, and approved M14-P.1 is synchronized at `7bc5005`. M14-P.2 is the active focused daily-use UX gate promoted ahead of M14-O: safe links are blue and underlined only inside the Text Snippet editor, while explicit Edit scrolls the existing authoring form and focuses Text content or Image Title without timers, polling, automatic save, or file-picker activation. Delivery/performance, safety, protocol, automatic/manual paste, Dexie v6, and Backup v7 remain unchanged.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-M14-P.1 now requires Principal real-Chrome validation of Text, PNG, and JPEG/WebP responsiveness in the actual daily-use workflow. After this focused gate, sequencing is M14-O Generated Text Snippet Tags & Retrieval → F1/F2 daily-use UX cleanup → M14-P final completion gate → M15. M14-P overall is not complete. F3 Save as Snippet remains M15, and the canonical Snippet trigger prefix remains `;`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+M14-P.2 requires Principal real-Chrome validation of saved/reopened safe-link presentation and explicit Text/Image Edit scroll/focus. After successful review/checkpoint, sequencing is M14-O Generated Text Snippet Tags & Retrieval → M14-P final completion gate → M15. M14-P overall is not complete. F3 Save as Snippet remains M15, and canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
