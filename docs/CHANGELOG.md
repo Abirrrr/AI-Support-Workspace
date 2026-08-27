@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-P.5 — Performance Closure & Roadmap Documentation
+
+- Recorded Decision 57 and the Principal/Product conclusion that accepted M14-P.1 checkpoint `7bc5005` remains the authoritative Snippet-delivery performance baseline. No second broad/speculative Text optimization pass is planned before M14-O; this is an evidence-based closure, not abandonment of performance.
+- Assigned the next Text performance verification to the final M14-P Snippet Completion Gate: rerun/compare the established baseline where appropriate, validate real-Chrome daily-use trigger-to-delivery responsiveness, and localize any meaningful user-visible regression before authorizing a focused optimization task. No arbitrary CI timing SLA or optimization from small synthetic differences is introduced.
+- Preserved Text as the highest performance priority, Image quality/correctness/Decision 42 safety over absolute speed, genuine JPEG/WebP decoding, unchanged resolution/quality, and the approved one-shot native model. No persistent host/service/daemon/keepalive or protocol redesign is authorized.
+- Established M14-O as the next implementation milestone and kept generated metadata, fingerprinting, retrieval, tag reads, generation, and backfill outside the delivery hot path. The authoritative order is M14-P.5 documentation → M14-O → final M14-P with Text regression verification → M15.
+- Updated repository continuity after approved synchronized M14-P.4 checkpoint `52befe0`. This checkpoint changes documentation only: no source, test, native, manifest, permission, package, dependency, schema, Backup, delivery, M14-O, or M15 implementation is included; nothing is staged, committed, or pushed by M14-P.5.
+
 ### M14-P.4.2 — Side Panel Workspace UI & Settings Tab Correction
 
 - Recorded the Principal/Product clarification that M14-P.4 owns the approved responsive AI Workspace presentation while M15 continues to own all functional provider/model, Context Image, Prompt Builder, generation, output lifecycle/Copy, persistence, and F3 Save as Snippet behavior.

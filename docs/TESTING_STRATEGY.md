@@ -418,9 +418,9 @@ M14-P.2 F2 tests stub only the standard `scrollIntoView` boundary and exercise t
 
 ### M14-P.4 Navigation and Snippet Library UI Validation Contract
 
-M14-P.3 recorded the contract; M14-P.4/M14-P.4.1/M14-P.4.2 now implement it. Current focused validation passes 10 files / 87 tests, and the full Vitest run passes 66 files / 822 tests plus one opt-in file/test skipped. Production/native output validation proves popup-free action ownership, responsive Workspace/gear presentation, normal-tab Options configuration, no bundled M15 provider workflow, active Knowledge hiding, Library actions/confirmation/details, and Image fallback. Real toolbar, narrow-panel visuals, and browser-tab presentation remain Principal-owned manual Chrome validation.
+M14-P.3 recorded the contract; M14-P.4/M14-P.4.1/M14-P.4.2 implements it and is complete at approved checkpoint `52befe0`. Its recorded focused validation passes 10 files / 87 tests, and the full Vitest run passes 66 files / 822 tests plus one opt-in file/test skipped. Production/native output validation proves popup-free action ownership, responsive Workspace/gear presentation, normal-tab Options configuration, no bundled M15 provider workflow, active Knowledge hiding, Library actions/confirmation/details, and Image fallback. The real toolbar, narrow-panel, and browser-tab checks remain part of the accepted M14-P.4 checkpoint evidence rather than M14-P.5 implementation.
 
-M14-P.4.2 adds deterministic Side Panel presentation coverage for the heading/Settings action, Merchant Context, Context Images structure, Guidance / Gist, Model/Generate row, Generated Output, Save as Snippet, Copy, and editable output surface. Tests assert provider-dependent actions are disabled, no provider/model-specific catalog or fabricated response appears, rendering invokes no generation/provider/persistence boundary, and responsive hooks avoid fixed desktop width while allowing rows/actions to wrap. Manifest/build tests assert `options_ui.open_in_tab: true`, the existing Options page target, absence of popup/default-popup ownership, absence of duplicate Options output, and unchanged least-privilege permissions. Focused M14-P validation passes 10 files / 87 tests; full Vitest passes 66 files / 822 tests plus one opt-in file/test skipped. Unit/build evidence does not substitute for real-Chrome narrow-panel and normal-tab validation.
+M14-P.4.2 adds deterministic Side Panel presentation coverage for the heading/Settings action, Merchant Context, Context Images structure, Guidance / Gist, Model/Generate row, Generated Output, Save as Snippet, Copy, and editable output surface. Tests assert provider-dependent actions are disabled, no provider/model-specific catalog or fabricated response appears, rendering invokes no generation/provider/persistence boundary, and responsive hooks avoid fixed desktop width while allowing rows/actions to wrap. Manifest/build tests assert `options_ui.open_in_tab: true`, the existing Options page target, absence of popup/default-popup ownership, absence of duplicate Options output, and unchanged least-privilege permissions. Focused M14-P validation passes 10 files / 87 tests; full Vitest passes 66 files / 822 tests plus one opt-in file/test skipped. Unit/build evidence complements the accepted real-Chrome M14-P.4 checkpoint.
 
 - Generated-manifest and browser-adapter tests prove a pinned toolbar action opens/toggles the global Side Panel through the approved Chrome behavior, the popup/default popup is absent, `side_panel.default_path` and the keyboard shortcut remain valid, and no new permission or host permission appears.
 - Side Panel component/adapter tests require one compact Settings gear with accessible name `Open Settings and Libraries`, native keyboard operation, visible focus styling, one explicit options-page invocation, safe failure feedback, and no duplicate Settings state, hidden automatic navigation, large Libraries row, or menu.
@@ -436,7 +436,22 @@ M14-P.4.2 adds deterministic Side Panel presentation coverage for the heading/Se
 
 Windows cannot atomically identify the browser's internal editor at the exact native input instant. The deterministic invalidation/focus matrix and the successful real-destination path are the closeout evidence; any future observed wrong-editor paste still blocks automatic-mode release and requires architecture review. Elapsed-time tuning alone is not an acceptable correction.
 
-### Decisions 46–56 Historical Validation Contract and Decision 55 Pivot
+### M14-P.5 Performance Closure and Final M14-P Regression Contract
+
+M14-P.1 is the authoritative performance baseline. M14-P.5 adds no implementation or benchmark number and schedules no second speculative optimization pass before M14-O. The final M14-P gate owns the next performance check.
+
+Automated final-gate evidence must:
+
+- rerun `pnpm benchmark:snippet-delivery` or the established focused Text portion where appropriate and compare the Text result with the accepted M14-P.1 baseline;
+- preserve delivery regression coverage for trigger detection, service-worker coordination, Text clipboard planning/writing, cleanup, clipboard-only and Automatic Paste behavior, and usage-receipt isolation;
+- verify M14-O generation, fingerprinting, generated-tag reads, retrieval, and backfill do not enter or block the trigger-to-delivery hot path; and
+- avoid brittle absolute timing assertions in CI. Small synthetic differences alone do not fail the product or create optimization work.
+
+Manual final-gate evidence must use real Chrome and the normal daily-use editor to exercise Text trigger → delivery responsiveness and confirm that Text still feels effectively immediate. It must state whether M14-O or later Snippet work introduced a meaningful regression. If a delay is perceived, diagnosis must measure and classify the actual stage—trigger detection, service-worker coordination, clipboard preparation/write, native process contact, cleanup, Automatic Paste, or destination-editor behavior—before optimization is approved. Text serialization is not presumed responsible.
+
+If measured and user-visible behavior remains effectively immediate, close the performance concern and perform no additional optimization. If a meaningful delay is proven, create only a focused follow-up for the responsible stage. Image performance remains quality/correctness/safety first: no resizing, downsampling, resolution or quality reduction, genuine JPEG/WebP decode bypass, or weaker Decision 42 guard is an acceptable performance test outcome.
+
+### Decisions 46–57 Validation Contract and Decision 55 Pivot
 
 The selected-folder/scheduler requirements below preserve the historical M14-M.0/M14-N.1/M14-N.2 test record. Decision 55 cancels their current-product continuation; the M14-N.3 reminder/retirement requirements near the end of this section are authoritative.
 
