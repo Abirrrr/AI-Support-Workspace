@@ -1,5 +1,13 @@
 # Changelog
 
+### M14-O — Generated Text Snippet Tags & Retrieval
+
+- Implemented the Decision 53 lifecycle over the existing Dexie v6 `snippetGeneratedMetadata` sidecar and frozen Backup v7 contract: explicit version-1 UTF-8/SHA-256 material serialization, strict normalized metadata validation, existing transactional material invalidation/deletion, and atomic conditional persistence against the current authoritative Text source.
+- Added the provider-neutral `GenerateSnippetTags` raw-response port and deterministic application service with immutable snapshots, 64 KiB input, strict complete maximum-4-KiB JSON-array parsing, at most eight unique NFKC/trimmed/whitespace-collapsed/lowercase 1–40-code-point tags, application-owned UTC `generatedAt`, stale-result revalidation, and per-Snippet concurrent-attempt protection. There is no production adapter, provider/model call, automatic Save/startup generation, retry queue, or generated-tag UI.
+- Added explicit deterministic Text-only backfill with maximum 20 records, concurrency one, cancellation, valid-current skip, missing/stale/invalid eligibility, Image exclusion, and per-item failure isolation. Nothing invokes it automatically or from UI.
+- Integrated fingerprint-valid generated tags into local lexical retrieval at weight 1 while retaining title 5/authored tags 3/content 1 and existing created-time/ID tie-breaking. Missing, stale, malformed, unsupported, duplicate, or unreadable metadata fails soft; usage, recency, and `generatedAt` are excluded; Image and Knowledge/Prompt Builder behavior remain unchanged.
+- Focused M14-O validation passes 7 files / 106 tests; full Vitest passes 68 files / 876 tests plus one opt-in file/test skipped. No dependency, permission, native, schema, Backup version, trigger, delivery, image-processing, Side Panel/Options/Library, Copy, F3, or M15 functional change was introduced.
+
 ### M14-P.5.1 — Milestone Transition Correction
 
 - Recorded Principal approval and the synchronized M14-P.5 checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`, then advanced current repository continuity to active M14-O — Generated Text Snippet Tags & Retrieval.

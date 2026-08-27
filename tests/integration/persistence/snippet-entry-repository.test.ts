@@ -581,6 +581,13 @@ describe('DexieSnippetEntryRepository', () => {
         throw new Error('forced post-Snippet-write failure');
       },
     });
+    const originalMetadata = {
+      snippetId: original.id,
+      generatedTags: ['original'],
+      sourceFingerprint: await createSnippetSourceFingerprint(original),
+      generatedAt: '2026-08-09T00:00:02.000Z',
+    };
+    await database.snippetGeneratedMetadata.add(originalMetadata);
 
     await expect(
       failingRepository.update(original.id, {
@@ -615,6 +622,9 @@ describe('DexieSnippetEntryRepository', () => {
     expect(
       await database.snippetAssets.get(replacementAssetId),
     ).toBeUndefined();
+    expect(await database.snippetGeneratedMetadata.get(original.id)).toEqual(
+      originalMetadata,
+    );
   });
 
   it('rolls back a Snippet delete when owned-asset deletion fails', async () => {
@@ -721,5 +731,66 @@ describe('DexieSnippetEntryRepository', () => {
     expect(
       await database.snippetGeneratedMetadata.get(created.id),
     ).toBeUndefined();
+  });
+
+  it('invalidates title, content, and ordered authored-tag changes but preserves trigger-only edits', async () => {
+    let current = await repository.create({
+      title: 'Material source',
+      content: createPlainSnippetContent('Original content'),
+      tags: ['first', 'second'],
+      trigger: ';material',
+    });
+    const saveMetadata = async () => {
+      await database.snippetGeneratedMetadata.put({
+        snippetId: current.id,
+        generatedTags: ['derived'],
+        sourceFingerprint: await createSnippetSourceFingerprint(current),
+        generatedAt: '2026-08-09T00:00:02.000Z',
+      });
+    };
+
+    await saveMetadata();
+    current = await repository.update(current.id, {
+      title: 'Changed title',
+      content: current.content,
+      tags: current.tags,
+      trigger: current.trigger,
+    });
+    expect(
+      await database.snippetGeneratedMetadata.get(current.id),
+    ).toBeUndefined();
+
+    await saveMetadata();
+    current = await repository.update(current.id, {
+      title: current.title,
+      content: createPlainSnippetContent('Changed content'),
+      tags: current.tags,
+      trigger: current.trigger,
+    });
+    expect(
+      await database.snippetGeneratedMetadata.get(current.id),
+    ).toBeUndefined();
+
+    await saveMetadata();
+    current = await repository.update(current.id, {
+      title: current.title,
+      content: current.content,
+      tags: ['second', 'first'],
+      trigger: current.trigger,
+    });
+    expect(
+      await database.snippetGeneratedMetadata.get(current.id),
+    ).toBeUndefined();
+
+    await saveMetadata();
+    await repository.update(current.id, {
+      title: current.title,
+      content: current.content,
+      tags: current.tags,
+      trigger: ';trigger-only',
+    });
+    expect(
+      await database.snippetGeneratedMetadata.get(current.id),
+    ).toBeDefined();
   });
 });

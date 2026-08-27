@@ -154,6 +154,29 @@ describe('M14-M.1 hardening repositories', () => {
     ).rejects.toThrow('Failed to save generated Snippet metadata.');
   });
 
+  it('atomically refuses generated metadata when the authoritative source changed', async () => {
+    const snippetRepository = new DexieSnippetEntryRepository(database);
+    const original = await createTextSnippet();
+    const repository = new DexieSnippetGeneratedMetadataRepository(database);
+    const metadata = {
+      snippetId: original.id,
+      generatedTags: ['original'],
+      sourceFingerprint: await createSnippetSourceFingerprint(original),
+      generatedAt: USED_AT,
+    };
+    await snippetRepository.update(original.id, {
+      title: 'Changed while generation ran',
+      content: original.content,
+      tags: original.tags,
+      trigger: original.trigger,
+    });
+
+    await expect(
+      repository.saveIfSourceMatches(metadata, original),
+    ).resolves.toBe(false);
+    await expect(repository.get(original.id)).resolves.toBeUndefined();
+  });
+
   it('round-trips the smallest local directory-handle state and clears it', async () => {
     const repository = new DexieAutomaticBackupStateRepository(database);
     const state = {

@@ -8,7 +8,7 @@
 ## Current Milestone
 
 - M14-O — Generated Text Snippet Tags & Retrieval
-- Status: **ACTIVE / IMPLEMENTATION NOT YET STARTED**. M14-P.5 is complete, Principal-approved, committed, and pushed at checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is the documentation-only continuity correction that records this transition. Implement M14-O according to Decision 53 while preserving Decisions 56 and 57 and every validated M14-P regression boundary.
+- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. M14-O implements Decision 53 over the existing Dexie v6/Backup v7 sidecar with a provider-neutral generation port, strict parsing, version-1 material fingerprinting, transactional invalidation and stale-write protection, explicit bounded backfill, and deterministic 5/3/1/1 retrieval. Decisions 56 and 57 and every validated M14-P regression boundary remain unchanged.
 
 ## Task State
 
@@ -16,11 +16,15 @@
 
 ```text
 Current active implementation milestone: M14-O — Generated Text Snippet Tags & Retrieval
-Status: ACTIVE / IMPLEMENTATION NOT YET STARTED
+Status: IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW
 Approved predecessor: M14-P.5 at d94181746cff07632fba1cdb9c6d874b569b4f21
 Architecture authority: Decision 53
 Regression authorities: Decisions 56 and 57; validated M14-P boundaries
-Exact next engineering action: implement M14-O
+Focused validation: 7 files / 106 tests PASS
+Full Vitest validation: 68 files / 876 tests PASS; one opt-in file/test skipped
+Production generator/provider wiring: NONE
+Generated-tag UI: NONE
+Exact next engineering action: Principal reviews M14-O implementation and validation
 Then: final M14-P gate with Text regression validation → M15
 ```
 
@@ -31,6 +35,12 @@ M14-P.1 records that Text planning/serialization is effectively instantaneous re
 There is no additional broad performance milestone before M14-O. Text remains the highest performance priority and should feel effectively instantaneous in normal use, but evidence does not show a meaningful Text application-layer bottleneck. Speculative micro-optimization would risk the stable daily-use path without demonstrated product benefit. This closes speculative work while preserving performance as a completion-gate concern.
 
 M14-O is the active implementation milestone and must remain retrieval-only with respect to delivery. Trigger expansion must not wait for generated metadata, fingerprinting, retrieval, generated-tag reads, generation, or backfill. The final M14-P gate will rerun the established Text diagnostic where appropriate, compare against M14-P.1, and validate real-Chrome trigger-to-delivery responsiveness in a normal daily-use editor. If Text remains effectively immediate, the concern closes. If a meaningful delay appears, the gate first localizes the trigger, worker, clipboard, native, cleanup, Automatic Paste, or destination-editor stage and authorizes only a focused task for the proven cause.
+
+M14-O keeps generated tags Text-only, derived, non-authoritative, and separate from authored ordered tags. The committed version-1 canonical fingerprint covers exact title, deterministic rendered Text, and authored tag order; trigger, usage, generated metadata, generated time, and unrelated operational timestamps are excluded. Material update invalidation and Snippet deletion remain in the existing authored Dexie transaction. The new conditional metadata save atomically compares the current authoritative material with the immutable generation snapshot, while per-Snippet attempt ordering prevents an older concurrent result from overwriting a newer one.
+
+The application layer exposes a provider-neutral `GenerateSnippetTags` raw-response port and deterministic service. M14-O adds no production adapter, provider/model call, automatic generation-on-save wiring, startup work, background scheduler, or UI. Generation input is exact semantic Text material capped at 64 KiB UTF-8. The entire raw response is capped at 4 KiB and must be one JSON string array; normalization is NFKC, trim, internal-whitespace collapse, locale-independent lowercase, strict 1–40 code-point validation, control/newline/markup rejection, first-order deduplication, and maximum eight tags. The explicit backfill selects at most 20 eligible Text Snippets by `createdAt` then ID, skips valid current metadata and Image Snippets, runs concurrency one, supports cancellation, and isolates item failure.
+
+Retrieval optionally reads the sidecar in its existing local application path and validates every candidate against the current version-1 fingerprint before scoring. Per unique query token, title is 5, authored tags 3, content 1, and valid generated tags 1. Duplicate generated tokens cannot multiply authority. Missing, stale, unsupported, malformed, or unreadable metadata contributes zero and cannot block title/authored/content retrieval. Usage count, last-used time, and generated time never affect score or tie-breaking. Knowledge and Prompt Builder v1 remain compatible; Image Snippets remain excluded.
 
 ### M14-P.3 — UI/UX Architecture & Roadmap Documentation
 
@@ -1008,7 +1018,7 @@ Image trigger + Space
 - **M14-N.1 — Automatic Backup Runtime Core:** IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REVIEW PENDING. File System Access production adapter, one-shot `alarms`, exact Daily latest-seven and Weekly latest-four retention, canonical v7 output, verification, manifest, and concurrency controls are present.
 - **M14-N.2 — Options Activation & Runtime Wiring:** IMPLEMENTED / AUTOMATED PASS. Explicit folder selection/change/reauthorization, cadence, safe status, and M14-N.1 wiring are present; manual Export remains independent.
 - **M14-N.3 — Backup Strategy Simplification & Monthly Reminder:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Former automatic-backup real-Chrome validation cancelled; Manual Export, local success time, reminder UI, runtime retirement, compatibility, and documentation pivot implemented.
-- **M14-O — Generated Text Snippet Tags & Retrieval Integration:** ACTIVE / IMPLEMENTATION NOT YET STARTED. Decision 53 owns Text-only fingerprinted metadata, provider-independent generation, bounded output/backfill, and deterministic weight-1 retrieval; Decisions 56 and 57 remain regression boundaries.
+- **M14-O — Generated Text Snippet Tags & Retrieval Integration:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Decision 53 is implemented with Text-only fingerprinted metadata, a provider-neutral `GenerateSnippetTags` port with no production adapter, strict bounded parsing, atomic stale-result protection, explicit max-20/concurrency-one backfill, and deterministic generated-tag weight 1. Decisions 56 and 57 remain regression boundaries.
 - **M14-P.3 — UI/UX Architecture & Roadmap Documentation:** COMPLETE AT `406ff08`. Decision 56 and the cross-document handoff define visible UI ownership.
 - **M14-P.4/M14-P.4.1/M14-P.4.2 — Navigation & Snippet Library UI Completion:** COMPLETE / APPROVED AT `52befe0`. The approved navigation, responsive Workspace presentation, normal-tab Options ownership, management UI, Copy authority, deletion safety, and Image preview scope is present.
 - **M14-P.5 — Performance Closure & Roadmap Documentation:** COMPLETE / PRINCIPAL-APPROVED AT `d94181746cff07632fba1cdb9c6d874b569b4f21`. Decision 57 makes M14-P.1 authoritative, schedules no second speculative performance milestone before M14-O, and assigns Text regression verification to the final M14-P gate.
@@ -1231,7 +1241,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Implement M14-O — Generated Text Snippet Tags & Retrieval according to Decision 53 while preserving Decisions 56 and 57 and all M14-P validated regression boundaries. M14-P.5 is already approved and checkpointed at `d94181746cff07632fba1cdb9c6d874b569b4f21`; M14-P.5.1 only corrects repository continuity and does not implement M14-O.
+- Principal reviews the M14-O implementation, focused/full validation, documentation synchronization, and production-output audit. If approved, authorize the M14-O checkpoint; the final M14-P Snippet Completion Gate follows with Text performance regression verification before M15.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -1255,6 +1265,7 @@ Image trigger + Space
 - The headless Retrieval Engine exists with deterministic exact-token lexical ranking over Knowledge and Snippets through their existing repository contracts.
 - The headless Prompt Builder exists with deterministic provider-independent composition over optional Merchant Context, optional Guidance, and optional prepared Retrieval Results.
 - The project-owned `GenerationProvider` and local-only `OllamaProvider` exist and remain unchanged. Rich Snippet Templates is assigned to M14, Multimodal Screenshot Context to M15, OpenAI Provider Expansion to M16, and supported future activation of an already-visible Chrome Side Panel remains an approved unassigned direction.
+- M14-O adds the narrower provider-neutral `GenerateSnippetTags` application port without a production adapter. Existing provider code is unchanged and is not invoked by generated-tag production runtime. No automatic save/startup/backfill wiring exists.
 
 ## Continuity Handoff
 
@@ -1268,7 +1279,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next engineering action: implement active M14-O according to Decision 53 while preserving Decisions 56 and 57 and all M14-P validated regression boundaries. The final M14-P gate with Text performance regression verification follows M14-O, and M15 follows that gate. No second speculative performance milestone is inserted.
+- Exact next engineering action: Principal reviews active M14-O and authorizes its checkpoint if accepted. The final M14-P gate with Text performance regression verification follows the approved M14-O checkpoint, and M15 follows that gate. No second speculative performance milestone is inserted.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -1300,5 +1311,5 @@ Image trigger + Space
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
 - M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; the complete approved M14-K implementation is synchronized at `e34cd76`; and M14-K.5 closeout is synchronized at `3e5d545`.
 - M14-M.3/M14-M.3.1 usage-statistics implementation is committed and synchronized at `2475f8b` (`feat: add snippet usage statistics`). M14-M.4 begins from that clean synchronized checkpoint and creates no commit or push.
-- M14-P.1 is approved at `7bc5005`, M14-P.2 at `64b5dd8`, M14-P.3 at `406ff08`, M14-P.4/M14-P.4.1/M14-P.4.2 at synchronized checkpoint `52befe0`, and M14-P.5 at approved synchronized checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is the documentation-only continuity correction that activates M14-O in repository authority; it creates no commit or push without separate Principal authorization.
+- M14-P.1 is approved at `7bc5005`, M14-P.2 at `64b5dd8`, M14-P.3 at `406ff08`, M14-P.4/M14-P.4.1/M14-P.4.2 at synchronized checkpoint `52befe0`, and M14-P.5 at approved synchronized checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is the documentation-only continuity correction at `e738d8e7331a567a4cc530ab60ecd2d5bd103053` that activates M14-O in repository authority. M14-O implementation begins from that clean synchronized checkpoint and creates no commit or push without separate Principal authorization.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

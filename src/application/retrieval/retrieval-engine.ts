@@ -1,8 +1,13 @@
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
 import { renderSnippetPlainText } from '../../domain/snippet-content';
+import {
+  isSnippetGeneratedMetadataCurrent,
+  type SnippetGeneratedMetadata,
+} from '../../domain/snippet-generated-metadata';
 import type { KnowledgeEntryRepository } from '../persistence/knowledge-entry-repository';
 import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
+import type { SnippetGeneratedMetadataRepository } from '../persistence/snippet-generated-metadata-repository';
 
 const TOKEN_PATTERN = /[\p{L}\p{N}]+/gu;
 
@@ -55,16 +60,19 @@ function scoreRecord(
   title: string,
   tags: readonly string[],
   content: string,
+  generatedTags: readonly string[] = [],
 ): number {
   const titleTokens = tokenize(title);
   const tagTokens = tokenizeTags(tags);
   const contentTokens = tokenize(content);
+  const generatedTagTokens = tokenizeTags(generatedTags);
   let score = 0;
 
   for (const token of queryTokens) {
     if (titleTokens.has(token)) score += 5;
     if (tagTokens.has(token)) score += 3;
     if (contentTokens.has(token)) score += 1;
+    if (generatedTagTokens.has(token)) score += 1;
   }
 
   return score;
@@ -94,31 +102,56 @@ function retrieveKnowledge(
     .sort(compareScoredRecords);
 }
 
-function retrieveSnippets(
+async function retrieveSnippets(
   records: readonly SnippetEntry[],
   queryTokens: ReadonlySet<string>,
-): SnippetRetrievalResult[] {
-  return records
-    .filter((record) => record.content.kind !== 'image')
-    .map((record): SnippetRetrievalResult => ({
-      kind: 'snippet',
-      id: record.id,
-      record,
-      score: scoreRecord(
-        queryTokens,
-        record.title,
-        record.tags,
-        renderSnippetPlainText(record.content),
-      ),
-    }))
-    .filter((result) => result.score > 0)
-    .sort(compareScoredRecords);
+  metadataRecords: readonly SnippetGeneratedMetadata[],
+): Promise<SnippetRetrievalResult[]> {
+  const metadataBySnippet = new Map<
+    string,
+    SnippetGeneratedMetadata | undefined
+  >();
+  for (const metadata of metadataRecords) {
+    metadataBySnippet.set(
+      metadata.snippetId,
+      metadataBySnippet.has(metadata.snippetId) ? undefined : metadata,
+    );
+  }
+
+  const textRecords = records.filter(
+    (record) => record.content.kind !== 'image',
+  );
+  const scored = await Promise.all(
+    textRecords.map(async (record): Promise<SnippetRetrievalResult> => {
+      const metadata = metadataBySnippet.get(record.id);
+      const generatedTags = (await isSnippetGeneratedMetadataCurrent(
+        metadata,
+        record,
+      ))
+        ? (metadata?.generatedTags ?? [])
+        : [];
+      return {
+        kind: 'snippet',
+        id: record.id,
+        record,
+        score: scoreRecord(
+          queryTokens,
+          record.title,
+          record.tags,
+          renderSnippetPlainText(record.content),
+          generatedTags,
+        ),
+      };
+    }),
+  );
+  return scored.filter((result) => result.score > 0).sort(compareScoredRecords);
 }
 
 export class RetrievalEngine {
   constructor(
     private readonly knowledgeRepository: KnowledgeEntryRepository,
     private readonly snippetRepository: SnippetEntryRepository,
+    private readonly metadataRepository?: SnippetGeneratedMetadataRepository,
   ) {}
 
   async retrieve(query: string): Promise<RetrievalResults> {
@@ -128,14 +161,31 @@ export class RetrievalEngine {
       return { knowledge: [], snippets: [] };
     }
 
-    const [knowledgeRecords, snippetRecords] = await Promise.all([
-      this.knowledgeRepository.list(),
-      this.snippetRepository.list(),
-    ]);
+    const [knowledgeRecords, snippetRecords, metadataRecords] =
+      await Promise.all([
+        this.knowledgeRepository.list(),
+        this.snippetRepository.list(),
+        this.loadGeneratedMetadataFailSoft(),
+      ]);
 
     return {
       knowledge: retrieveKnowledge(knowledgeRecords, queryTokens),
-      snippets: retrieveSnippets(snippetRecords, queryTokens),
+      snippets: await retrieveSnippets(
+        snippetRecords,
+        queryTokens,
+        metadataRecords,
+      ),
     };
+  }
+
+  private async loadGeneratedMetadataFailSoft(): Promise<
+    readonly SnippetGeneratedMetadata[]
+  > {
+    if (this.metadataRepository === undefined) return [];
+    try {
+      return await this.metadataRepository.list();
+    } catch {
+      return [];
+    }
   }
 }

@@ -1,5 +1,10 @@
 import type { SnippetGeneratedMetadataRepository } from '../../application/persistence/snippet-generated-metadata-repository';
-import type { SnippetGeneratedMetadata } from '../../domain/snippet-generated-metadata';
+import {
+  createSnippetSourceFingerprint,
+  hasSameGeneratedMetadataSource,
+  type SnippetGeneratedMetadata,
+  type SnippetGeneratedMetadataSource,
+} from '../../domain/snippet-generated-metadata';
 import type { AiSupportWorkspaceDatabase } from './database';
 import { runPersistenceOperation } from './repository-helpers';
 import {
@@ -55,6 +60,46 @@ export class DexieSnippetGeneratedMetadataRepository implements SnippetGenerated
           },
         );
         return toSnippetGeneratedMetadata(record);
+      },
+    );
+  }
+
+  saveIfSourceMatches(
+    metadata: SnippetGeneratedMetadata,
+    source: SnippetGeneratedMetadataSource,
+  ): Promise<boolean> {
+    return runPersistenceOperation(
+      'conditionally save generated Snippet metadata',
+      async () => {
+        const record = toSnippetGeneratedMetadataRecord(metadata);
+        if (
+          (await createSnippetSourceFingerprint(source)) !==
+          record.sourceFingerprint
+        ) {
+          throw new TypeError(
+            'Generated Snippet metadata does not match its source snapshot.',
+          );
+        }
+
+        return this.database.transaction(
+          'rw',
+          this.database.snippetEntries,
+          this.database.snippetGeneratedMetadata,
+          async () => {
+            const owner = await this.database.snippetEntries.get(
+              metadata.snippetId,
+            );
+            if (
+              owner === undefined ||
+              owner.content.kind === 'image' ||
+              !hasSameGeneratedMetadataSource(owner, source)
+            ) {
+              return false;
+            }
+            await this.database.snippetGeneratedMetadata.put(record);
+            return true;
+          },
+        );
       },
     );
   }

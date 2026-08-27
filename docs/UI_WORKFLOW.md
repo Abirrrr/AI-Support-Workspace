@@ -637,6 +637,20 @@ Local persistence
 - The product should remain usable even when the user is offline.
 - Local data access should be fast, predictable, and reliable.
 
+### M14-O Internal Generated-Metadata Workflow
+
+```text
+Explicit application invocation for one Text Snippet
+→ immutable title/rendered-Text/authored-tag snapshot
+→ version-1 material fingerprint and bounded input
+→ injected GenerateSnippetTags port
+→ strict complete-response validation and normalization
+→ current-source revalidation
+→ atomic sidecar save only when material still matches
+```
+
+Generated tags have no user-facing workflow in M14-O. They do not appear in cards, editors, Settings, tooltips, or the Side Panel. Production has no generator adapter, automatic Save invocation, startup/background generation, or backfill control. The explicit backfill application boundary is maximum 20 Text Snippets, deterministic, cancellable, and concurrency one; it is not currently exposed by UI. Retrieval may use only fingerprint-valid tags and otherwise continues with authored title/tags/content. Image Snippets and Knowledge UI compatibility are unchanged.
+
 ## 12. Future Workflows
 
 ### Assigned Future Capability Workflows
@@ -645,6 +659,7 @@ Local persistence
 - **M14-L/M14-L.1 — Snippet Hardening Architecture:** checkpointed documentation architecture. Decisions 50–53 are Principal-approved in substance and Decision 54 remains intact.
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. M14-M.1 implements only the Dexie v6/Backup v7 persistence boundary; ordinary production Options still has no automatic-backup product UI or scheduled output.
 - **M14-M.1/M14-M.1.1:** complete and synchronized at `20b509c`; Dexie v6 and Backup v7 are implemented. **M14-M.2** is synchronized at `f4d9ab0` and records F1/F2 as required pre-M14-P Snippet UX work and F3 Save as Snippet as M15 work. **M14-M.3** implements deterministic non-blocking usage behavior, and M14-M.3.1 displays only the numeric count in the Library, with absence as `0`; neither implements F1/F2/F3, automatic backup, or generated tags.
+- **M14-O — Generated Text Snippet Tags & Retrieval:** implemented headlessly with no generated-tag UI or production generator. The final M14-P completion gate follows Principal review/checkpoint; M15 remains responsible for functional AI Workspace behavior and F3.
 
 The lifecycle availability flow is:
 

@@ -159,6 +159,13 @@ const malformedCases: readonly [string, (backup: MutableBackup) => void][] = [
         'today'),
   ],
   [
+    'unsupported generated metadata version field',
+    (backup) =>
+      (firstFixtureRecord(
+        backup.data.snippetGeneratedMetadata,
+      ).generationVersion = 2),
+  ],
+  [
     'cadence',
     (backup) => (backup.data.settings.automaticBackupCadence = 'monthly'),
   ],

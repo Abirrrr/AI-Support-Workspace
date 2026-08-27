@@ -3,8 +3,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { RetrievalEngine } from '../../src/application/retrieval/retrieval-engine';
 import type { KnowledgeEntryRepository } from '../../src/application/persistence/knowledge-entry-repository';
 import type { SnippetEntryRepository } from '../../src/application/persistence/snippet-entry-repository';
+import type { SnippetGeneratedMetadataRepository } from '../../src/application/persistence/snippet-generated-metadata-repository';
 import type { KnowledgeEntry } from '../../src/domain/knowledge-entry';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
+import {
+  createSnippetSourceFingerprint,
+  type SnippetGeneratedMetadata,
+} from '../../src/domain/snippet-generated-metadata';
 import {
   createPlainSnippetContent,
   type SnippetContent,
@@ -81,6 +86,24 @@ function createRepositories(
     knowledgeRepository,
     snippetRepository,
     engine: new RetrievalEngine(knowledgeRepository, snippetRepository),
+  };
+}
+
+function createMetadataRepository(
+  records: readonly SnippetGeneratedMetadata[],
+  listFailure?: Error,
+): SnippetGeneratedMetadataRepository {
+  return {
+    get: vi.fn(async (snippetId) =>
+      records.find((record) => record.snippetId === snippetId),
+    ),
+    list: vi.fn(async () => {
+      if (listFailure !== undefined) throw listFailure;
+      return records;
+    }),
+    save: vi.fn(async (metadata) => metadata),
+    saveIfSourceMatches: vi.fn(async () => false),
+    delete: vi.fn(async () => false),
   };
 }
 
@@ -421,5 +444,181 @@ describe('RetrievalEngine', () => {
     expect(snippetRepository.create).not.toHaveBeenCalled();
     expect(snippetRepository.update).not.toHaveBeenCalled();
     expect(snippetRepository.delete).not.toHaveBeenCalled();
+  });
+
+  it('adds fingerprint-valid generated tags at weight 1 alongside 5/3/1 authored fields', async () => {
+    const combined = createSnippetEntry({
+      id: 'snippet-combined-generated',
+      title: 'Refund',
+      tags: ['refund'],
+      content: 'refund',
+    });
+    const generatedOnly = createSnippetEntry({
+      id: 'snippet-generated-only',
+      title: 'Unrelated',
+      tags: [],
+      content: 'Unrelated',
+      createdAt: '2026-07-26T12:00:01.000Z',
+    });
+    const { knowledgeRepository, snippetRepository } = createRepositories(
+      [],
+      [generatedOnly, combined],
+    );
+    const metadata = await Promise.all(
+      [combined, generatedOnly].map(
+        async (record): Promise<SnippetGeneratedMetadata> => ({
+          snippetId: record.id,
+          generatedTags: ['refund'],
+          sourceFingerprint: await createSnippetSourceFingerprint(record),
+          generatedAt: '2026-08-27T00:00:00.000Z',
+        }),
+      ),
+    );
+    const engine = new RetrievalEngine(
+      knowledgeRepository,
+      snippetRepository,
+      createMetadataRepository(metadata),
+    );
+
+    expect(
+      (await engine.retrieve('refund')).snippets.map(({ id, score }) => ({
+        id,
+        score,
+      })),
+    ).toEqual([
+      { id: combined.id, score: 10 },
+      { id: generatedOnly.id, score: 1 },
+    ]);
+  });
+
+  it('gives stale, unsupported, malformed, and duplicate generated metadata zero authority without blocking lexical retrieval', async () => {
+    const authored = createSnippetEntry({
+      id: 'snippet-authored-fallback',
+      title: 'Refund',
+      content: 'Unrelated',
+    });
+    const generatedOnly = createSnippetEntry({
+      id: 'snippet-invalid-generated',
+      title: 'Unrelated',
+      content: 'Unrelated',
+    });
+    const { knowledgeRepository, snippetRepository } = createRepositories(
+      [],
+      [generatedOnly, authored],
+    );
+    const validFingerprint =
+      await createSnippetSourceFingerprint(generatedOnly);
+    const cases: unknown[] = [
+      {
+        snippetId: generatedOnly.id,
+        generatedTags: ['refund'],
+        sourceFingerprint: '0'.repeat(64),
+        generatedAt: '2026-08-27T00:00:00.000Z',
+      },
+      {
+        snippetId: generatedOnly.id,
+        generatedTags: ['refund'],
+        sourceFingerprint: validFingerprint,
+        generatedAt: '2026-08-27T00:00:00.000Z',
+        generationVersion: 2,
+      },
+      {
+        snippetId: generatedOnly.id,
+        generatedTags: ['UPPER'],
+        sourceFingerprint: validFingerprint,
+        generatedAt: 'not-a-time',
+      },
+      {
+        snippetId: generatedOnly.id,
+        generatedTags: ['refund', 'refund'],
+        sourceFingerprint: validFingerprint,
+        generatedAt: '2026-08-27T00:00:00.000Z',
+      },
+    ];
+
+    for (const invalid of cases) {
+      const engine = new RetrievalEngine(
+        knowledgeRepository,
+        snippetRepository,
+        createMetadataRepository([invalid as SnippetGeneratedMetadata]),
+      );
+      expect(
+        (await engine.retrieve('refund')).snippets.map(({ id, score }) => ({
+          id,
+          score,
+        })),
+      ).toEqual([{ id: authored.id, score: 5 }]);
+    }
+
+    const failedJoin = new RetrievalEngine(
+      knowledgeRepository,
+      snippetRepository,
+      createMetadataRepository([], new Error('malformed physical row')),
+    );
+    await expect(failedJoin.retrieve('refund')).resolves.toMatchObject({
+      snippets: [{ id: authored.id, score: 5 }],
+    });
+  });
+
+  it('deduplicates generated tokens and excludes usage, recency, generatedAt, and Image metadata from score and tie-breaking', async () => {
+    const first = Object.assign(
+      createSnippetEntry({
+        id: 'snippet-a',
+        title: 'Unrelated',
+        content: 'Unrelated',
+      }),
+      { usageCount: 999, lastUsedAt: '2030-01-01T00:00:00.000Z' },
+    );
+    const second = Object.assign(
+      createSnippetEntry({
+        id: 'snippet-b',
+        title: 'Unrelated',
+        content: 'Unrelated',
+      }),
+      { usageCount: 0, lastUsedAt: null },
+    );
+    const image = createSnippetEntry({
+      id: 'snippet-image-generated',
+      title: 'Refund',
+      tags: ['refund'],
+      content: {
+        kind: 'image',
+        assetId: '123e4567-e89b-42d3-a456-426614174000',
+      },
+    });
+    const { knowledgeRepository, snippetRepository } = createRepositories(
+      [],
+      [image, second, first],
+    );
+    const metadata: SnippetGeneratedMetadata[] = await Promise.all(
+      [first, second].map(async (record, index) => ({
+        snippetId: record.id,
+        generatedTags: ['refund status', 'payment refund'],
+        sourceFingerprint: await createSnippetSourceFingerprint(record),
+        generatedAt:
+          index === 0 ? '2030-01-01T00:00:00.000Z' : '2020-01-01T00:00:00.000Z',
+      })),
+    );
+    metadata.push({
+      snippetId: image.id,
+      generatedTags: ['refund'],
+      sourceFingerprint: 'a'.repeat(64),
+      generatedAt: '2026-08-27T00:00:00.000Z',
+    });
+    const engine = new RetrievalEngine(
+      knowledgeRepository,
+      snippetRepository,
+      createMetadataRepository(metadata),
+    );
+
+    expect(
+      (await engine.retrieve('refund')).snippets.map(({ id, score }) => ({
+        id,
+        score,
+      })),
+    ).toEqual([
+      { id: first.id, score: 1 },
+      { id: second.id, score: 1 },
+    ]);
   });
 });
