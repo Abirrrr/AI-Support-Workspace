@@ -1,5 +1,11 @@
 # Changelog
 
+### M14-P.5.1 — Milestone Transition Correction
+
+- Recorded Principal approval and the synchronized M14-P.5 checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`, then advanced current repository continuity to active M14-O — Generated Text Snippet Tags & Retrieval.
+- Preserved Decision 53 as M14-O architecture and Decisions 56 and 57 as regression boundaries. The final M14-P gate still follows M14-O, and M15 follows that gate.
+- Documentation continuity only: M14-O implementation has not occurred, and no source, tests, native code, manifest/configuration, permissions, schema, Dexie v6, or Backup v7 behavior changed.
+
 ### M14-P.5 — Performance Closure & Roadmap Documentation
 
 - Recorded Decision 57 and the Principal/Product conclusion that accepted M14-P.1 checkpoint `7bc5005` remains the authoritative Snippet-delivery performance baseline. No second broad/speculative Text optimization pass is planned before M14-O; this is an evidence-based closure, not abandonment of performance.

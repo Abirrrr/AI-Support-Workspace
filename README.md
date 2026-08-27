@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-P.1 through M14-P.4 are approved checkpoints; M14-P.4/M14-P.4.1/M14-P.4.2 is synchronized at `52befe0` with the responsive Workspace presentation, normal-tab Options application, direct toolbar-to-Side-Panel flow, management UI, authoritative Library Copy, deletion safety, and retained-Image preview repair. M14-P.5 is the active documentation-only performance closure: M14-P.1 remains authoritative and no second speculative optimization milestone is planned before M14-O. Actual AI behavior remains M15; permissions, trigger delivery, usage semantics, image quality, Dexie v6, and Backup v7 remain unchanged.
+Milestones 9–14 are complete. M14-P.1 through M14-P.5 are approved checkpoints; M14-P.5 is synchronized at `d94181746cff07632fba1cdb9c6d874b569b4f21`, keeps M14-P.1 authoritative, and closes speculative performance work before M14-O. M14-P.5.1 corrects repository continuity, and M14-O — Generated Text Snippet Tags & Retrieval is the active implementation milestone but is not yet implemented. Actual AI Workspace behavior remains M15; permissions, trigger delivery, usage semantics, image quality, Dexie v6, and Backup v7 remain unchanged.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-Review and checkpoint the M14-P.5 documentation-only performance closure. M14-O — Generated Text Snippet Tags & Retrieval is the next implementation milestone, followed by the final M14-P gate—including measured and real-Chrome Text performance regression verification—and M15 AI Workspace. No additional broad performance milestone sits before M14-O. M14-P overall is not complete. F3 Save as Snippet and all actual AI behavior remain M15; canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+Implement active M14-O — Generated Text Snippet Tags & Retrieval according to Decision 53 while preserving Decisions 56 and 57. The final M14-P gate—including measured and real-Chrome Text performance regression verification—follows M14-O, then M15 AI Workspace. No additional broad performance milestone sits before M14-O. M14-P overall is not complete. F3 Save as Snippet and all actual AI behavior remain M15; canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
