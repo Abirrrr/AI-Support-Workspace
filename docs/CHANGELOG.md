@@ -1,5 +1,21 @@
 # Changelog
 
+### M14-P.6.1 — Final Snippet Completion Gate Closeout
+
+- Recorded Principal real-Chrome/manual validation **PASS** for the complete 14-item matrix: toolbar → Side Panel; Settings → normal Options tab; Text Automatic and clipboard-only trigger delivery; Image trigger/delivery; Library Text and Image Copy; usage semantics; Text Edit F2; retained Image preview; Delete confirmation; Safe-link F1; Manual Backup/reminder; and overall Text responsiveness. No per-item measurements are claimed beyond the Principal's PASS.
+- Closed M14-P as **COMPLETE / PRINCIPAL-APPROVED**. The automated M14-P.6 audit passed with no blocker, no known blocking Snippet issue remains, M14-O and Image quality/safety are accepted, and the complete Text/Image Snippet foundation is stable and complete.
+- Closed the Text performance final gate as **PASS** with no meaningful regression against M14-P.1. No further Snippet performance milestone is scheduled; future optimization remains evidence-dependent.
+- Declared M15 — AI Workspace the next milestone while keeping its implementation explicitly not started. The next Principal action is to define and activate the first M15 implementation subtask.
+- Documentation-only closeout: no source, test, native, manifest, permission, dependency, schema, Dexie v6, or Backup v7 change; no staging, commit, or push.
+
+### M14-P.6 — Final Snippet Completion Gate Audit
+
+- Audited the complete Text/Image Snippet inventory, authoring and Edit workflows, F1/F2, Image preview/Decision 42 quality and safety, canonical `;trigger + Space`, destination adapters, clipboard-only and optional Automatic Paste, Library Copy, usage receipts, deletion, Side Panel/Options/Library UI, dormant Knowledge compatibility, Manual Backup v7/reminder, Import/Export, M14-O lifecycle/retrieval, persistence, permissions, dependencies, and production output. No blocking defect or architecture drift was found and no product behavior changed.
+- Re-ran the Decision 57 diagnostic. Plain serialization, rich serialization, and Text planning each report warm p95 0 ms and maximum 0.1 ms, consistent with the accepted M14-P.1 effectively-instantaneous class. Static imports/call paths confirm delivery and Library Copy contain no M14-O lookup, fingerprint, retrieval, generation, or backfill work. No speculative optimization or native redesign was performed.
+- Focused validation passes: Text/Image authoring 51, trigger delivery 146, clipboard/Automatic Paste 174, Library Copy 4, usage 19, UI/navigation 72, Backup 150, and M14-O 106 tests. Full Vitest passes 68 files / 876 tests with one opt-in live-provider file/test skipped; lint, format, typecheck, Playwright discovery, production/native-development builds, output validation, diff checking, and Git integrity pass.
+- Production retains required permissions `sidePanel`, `activeTab`, and `scripting`; optional `clipboardWrite`, `offscreen`, and `nativeMessaging`; and only HTTP/HTTPS host access. No popup, `alarms`, downloads/filesystem authority, broad `tabs`/`windows`, production diagnostic, generated-tag UI/provider, Knowledge navigation, or automatic-backup runtime is present.
+- Documentation Impact Review synchronized current state, architecture, Decision 57 evidence, requirements, roadmap/backlog, testing, workflows, changelog, and README. `DATABASE_SCHEMA.md` was inspected and remains accurate at Dexie v6/Backup v7, so it required no change. M14-P is **not complete** and M15 is **not active** pending Principal review and the required real-Chrome matrix.
+
 ### M14-O — Generated Text Snippet Tags & Retrieval
 
 - Implemented the Decision 53 lifecycle over the existing Dexie v6 `snippetGeneratedMetadata` sidecar and frozen Backup v7 contract: explicit version-1 UTF-8/SHA-256 material serialization, strict normalized metadata validation, existing transactional material invalidation/deletion, and atomic conditional persistence against the current authoritative Text source.

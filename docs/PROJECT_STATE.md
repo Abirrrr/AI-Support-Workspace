@@ -7,26 +7,40 @@
 
 ## Current Milestone
 
-- M14-O — Generated Text Snippet Tags & Retrieval
-- Status: **IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW**. M14-O implements Decision 53 over the existing Dexie v6/Backup v7 sidecar with a provider-neutral generation port, strict parsing, version-1 material fingerprinting, transactional invalidation and stale-write protection, explicit bounded backfill, and deterministic 5/3/1/1 retrieval. Decisions 56 and 57 and every validated M14-P regression boundary remain unchanged.
+- Completed milestone: M14-P — Final Snippet Completion Gate
+- Closeout task: M14-P.6.1 — Final Snippet Completion Gate Closeout
+- Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15 — AI Workspace is the **NEXT MILESTONE**, but M15 implementation remains **NOT STARTED**.
 
 ## Task State
 
-### M14-O — Generated Text Snippet Tags & Retrieval
+### M14-P.6.1 — Final Snippet Completion Gate Closeout
 
 ```text
-Current active implementation milestone: M14-O — Generated Text Snippet Tags & Retrieval
-Status: IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW
-Approved predecessor: M14-P.5 at d94181746cff07632fba1cdb9c6d874b569b4f21
-Architecture authority: Decision 53
-Regression authorities: Decisions 56 and 57; validated M14-P boundaries
-Focused validation: 7 files / 106 tests PASS
-Full Vitest validation: 68 files / 876 tests PASS; one opt-in file/test skipped
-Production generator/provider wiring: NONE
-Generated-tag UI: NONE
-Exact next engineering action: Principal reviews M14-O implementation and validation
-Then: final M14-P gate with Text regression validation → M15
+Roadmap milestone: M14-P — Final Snippet Completion Gate
+Closeout task: M14-P.6.1 — Final Snippet Completion Gate Closeout
+Status: COMPLETE / PRINCIPAL-APPROVED
+Approved predecessor: M14-O at 6e893886ea23870c374e7e96dcc09a1c92184afc
+Gate authorities: Decisions 42, 45, 50–57 and approved M14-P checkpoints
+Production feature changes authorized: NONE
+M14-P.6 automated audit: PASS — 68 files / 876 tests; one opt-in file/test skipped
+M14-P.6.1 Principal real-Chrome/manual validation: PASS
+Text benchmark: warm p95 0 ms and maximum 0.1 ms for plain/rich serialization and planning
+Text performance final gate: PASS; no meaningful regression against M14-P.1
+M14-P completion: COMPLETE / PRINCIPAL-APPROVED
+Next milestone: M15 — AI Workspace
+M15 implementation: NOT STARTED
+Exact next Principal action: define and activate the first M15 implementation subtask
 ```
+
+Principal real-Chrome/manual validation passed for the complete required matrix: toolbar → Side Panel; Settings → normal Options tab; Text Automatic trigger; Text clipboard-only; Image trigger/delivery; Library Text Copy; Library Image Copy; usage semantics; Text Edit F2; Image retained preview; Delete confirmation; Safe-link F1; Manual Backup/reminder; and overall Text responsiveness. This records only the Principal's accepted PASS and invents no per-item measurements.
+
+The completed Snippet foundation includes Text Snippets; Image Snippets; rich Text authoring; safe links; authored tags; trigger delivery; canonical `;trigger + Space`; clipboard-only delivery; Automatic Paste; Library Copy; usage statistics; Copy/Edit/Delete management UI; Delete confirmation; F1/F2; Image retained-preview lifecycle; Image safety/quality boundaries; Backup v7 plus the manual reminder strategy; hidden-but-compatible Knowledge; generated Text Snippet metadata; the provider-independent `GenerateSnippetTags` boundary; generated-tag retrieval weights 5/3/1/1; explicit backfill maximum 20/concurrency one; Side Panel Workspace presentation; normal-tab Options; and the accepted Text performance baseline. None of these is active follow-up work.
+
+Text performance final gate is **PASS**. No meaningful regression was found against M14-P.1, no further Snippet performance optimization is currently required, and future optimization remains evidence-dependent. Image quality, correctness, and Decision 42 safety are accepted without reducing resolution or quality or bypassing genuine decode behavior.
+
+M15 owns Merchant Context behavior, Context image attachments, Guidance / Gist behavior, provider-independent model selection, Generate, provider execution, the editable Generated Output lifecycle, Copy Generated Output, and F3 Save Generated Output as Snippet. The existing Side Panel presentation is already present, but none of these M15 functional behaviors has started. The next Principal action is to define and activate the first M15 implementation subtask.
+
+M14-O is IMPLEMENTED / APPROVED / CHECKPOINTED at `6e893886ea23870c374e7e96dcc09a1c92184afc`. Its generated tags remain Text-only, derived, non-authoritative, separate from authored tags, and absent from the delivery hot path. The provider-neutral `GenerateSnippetTags` port has no production provider, UI, startup invocation, or background backfill.
 
 M14-P.5 is COMPLETE at approved checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is only the documentation continuity correction that advances repository authority after that already-approved checkpoint; it adds no implementation milestone and changes no executable behavior. M14-P.1 remains the authoritative performance baseline, no second broad/speculative performance milestone precedes M14-O, and the final M14-P gate owns Text performance regression verification.
 
@@ -34,7 +48,7 @@ M14-P.1 records that Text planning/serialization is effectively instantaneous re
 
 There is no additional broad performance milestone before M14-O. Text remains the highest performance priority and should feel effectively instantaneous in normal use, but evidence does not show a meaningful Text application-layer bottleneck. Speculative micro-optimization would risk the stable daily-use path without demonstrated product benefit. This closes speculative work while preserving performance as a completion-gate concern.
 
-M14-O is the active implementation milestone and must remain retrieval-only with respect to delivery. Trigger expansion must not wait for generated metadata, fingerprinting, retrieval, generated-tag reads, generation, or backfill. The final M14-P gate will rerun the established Text diagnostic where appropriate, compare against M14-P.1, and validate real-Chrome trigger-to-delivery responsiveness in a normal daily-use editor. If Text remains effectively immediate, the concern closes. If a meaningful delay appears, the gate first localizes the trigger, worker, clipboard, native, cleanup, Automatic Paste, or destination-editor stage and authorizes only a focused task for the proven cause.
+M14-O is checkpointed and remains retrieval-only with respect to delivery. M14-P.6 source/import inspection confirms trigger expansion and Library Copy do not invoke or wait for generated metadata, fingerprinting, retrieval, generated-tag reads, generation, or backfill. The established Text diagnostic remains consistent with M14-P.1: warm p95 is 0 ms and maximum 0.1 ms for plain/rich serialization and planning. Principal real-Chrome validation accepted overall Text responsiveness, so the performance concern is closed with no speculative optimization or additional performance milestone.
 
 M14-O keeps generated tags Text-only, derived, non-authoritative, and separate from authored ordered tags. The committed version-1 canonical fingerprint covers exact title, deterministic rendered Text, and authored tag order; trigger, usage, generated metadata, generated time, and unrelated operational timestamps are excluded. Material update invalidation and Snippet deletion remain in the existing authored Dexie transaction. The new conditional metadata save atomically compares the current authoritative material with the immutable generation snapshot, while per-Snippet attempt ordering prevents an older concurrent result from overwriting a newer one.
 
@@ -994,11 +1008,11 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 is COMPLETE. Post-M14 Snippet Hardening is active. M14-P.1 is approved at `7bc5005`, M14-P.2 at `64b5dd8`, M14-P.3 at `406ff08`, M14-P.4/M14-P.4.1/M14-P.4.2 is approved at `52befe0`, and M14-P.5 is complete at approved checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 records the documentation-only continuity transition. M14-O is the active implementation milestone, followed by the final M14-P gate with Text performance regression validation, then M15.
+- Status: Milestone 14 and the complete post-M14 Snippet Hardening foundation are complete. M14-P.1 through M14-P.5 are approved checkpoints, M14-O is approved at `6e893886ea23870c374e7e96dcc09a1c92184afc`, the M14-P.6 automated audit passed, and the M14-P.6.1 Principal real-Chrome/manual closeout passed. M14-P is **COMPLETE / PRINCIPAL-APPROVED**. M15 — AI Workspace is next, but its implementation is not started.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
-- The completed runtime shell provides the approved background service worker, content script, popup, and options-page boundaries required for later milestones.
+- The current runtime shell provides the approved background service worker, content script, popup-free toolbar-to-Side-Panel flow, and normal-tab Options boundary required for later milestones. The earlier popup entry point is retired.
 - Completed M13 provides optional unique Snippet triggers; canonical validation; Dexie schema version 3; Backup Format v2 with v1 import compatibility; a transient service-worker catalog synchronized through long-lived typed frame ports; exact plain-text-only replacement and caret restoration in supported textarea, absent/text/search input, and contenteditable editors; multiline textarea/contenteditable support; all-normal-HTTP/HTTPS availability; bounded trigger inspection with no full-editor scanning; no clipboard, telemetry, or provider transmission; and fail-safe normal typing when expansion is unavailable.
 
 ## Approved Future Product Directions
@@ -1018,13 +1032,13 @@ Image trigger + Space
 - **M14-N.1 — Automatic Backup Runtime Core:** IMPLEMENTED / AUTOMATED PASS / PRINCIPAL REVIEW PENDING. File System Access production adapter, one-shot `alarms`, exact Daily latest-seven and Weekly latest-four retention, canonical v7 output, verification, manifest, and concurrency controls are present.
 - **M14-N.2 — Options Activation & Runtime Wiring:** IMPLEMENTED / AUTOMATED PASS. Explicit folder selection/change/reauthorization, cadence, safe status, and M14-N.1 wiring are present; manual Export remains independent.
 - **M14-N.3 — Backup Strategy Simplification & Monthly Reminder:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Former automatic-backup real-Chrome validation cancelled; Manual Export, local success time, reminder UI, runtime retirement, compatibility, and documentation pivot implemented.
-- **M14-O — Generated Text Snippet Tags & Retrieval Integration:** IMPLEMENTED / AUTOMATED VALIDATION PASS / AWAITING PRINCIPAL REVIEW. Decision 53 is implemented with Text-only fingerprinted metadata, a provider-neutral `GenerateSnippetTags` port with no production adapter, strict bounded parsing, atomic stale-result protection, explicit max-20/concurrency-one backfill, and deterministic generated-tag weight 1. Decisions 56 and 57 remain regression boundaries.
+- **M14-O — Generated Text Snippet Tags & Retrieval Integration:** IMPLEMENTED / APPROVED / CHECKPOINTED AT `6e893886ea23870c374e7e96dcc09a1c92184afc`. Decision 53 is implemented with Text-only fingerprinted metadata, a provider-neutral `GenerateSnippetTags` port with no production adapter, strict bounded parsing, atomic stale-result protection, explicit max-20/concurrency-one backfill, and deterministic generated-tag weight 1. Decisions 56 and 57 remain regression boundaries.
 - **M14-P.3 — UI/UX Architecture & Roadmap Documentation:** COMPLETE AT `406ff08`. Decision 56 and the cross-document handoff define visible UI ownership.
 - **M14-P.4/M14-P.4.1/M14-P.4.2 — Navigation & Snippet Library UI Completion:** COMPLETE / APPROVED AT `52befe0`. The approved navigation, responsive Workspace presentation, normal-tab Options ownership, management UI, Copy authority, deletion safety, and Image preview scope is present.
 - **M14-P.5 — Performance Closure & Roadmap Documentation:** COMPLETE / PRINCIPAL-APPROVED AT `d94181746cff07632fba1cdb9c6d874b569b4f21`. Decision 57 makes M14-P.1 authoritative, schedules no second speculative performance milestone before M14-O, and assigns Text regression verification to the final M14-P gate.
-- **M14-P.5.1 — Milestone Transition Correction:** DOCUMENTATION-ONLY continuity correction that advances repository authority from the already-approved M14-P.5 checkpoint to active M14-O. It introduces no implementation milestone or executable behavior.
-- **M14-P — Final Snippet Completion Gate:** IN PROGRESS OVERALL / FINAL GATE NOT STARTED. After M14-O, the gate must confirm visible UX, navigation, Image editing, generated retrieval, regressions, documentation, manual evidence, and measured/real-Chrome Text responsiveness against M14-P.1 before M15.
-- **M15 — AI Workspace Functionality and Multimodal Context:** NOT STARTED. It consumes the M14-P.4 presentation and owns Context/Gist semantics, Context Image ingestion, provider/model selection, Prompt Builder integration, Generate/provider execution, generated-output lifecycle/Copy, and F3 Save as Snippet. Knowledge compatibility remains non-destructively preserved; unsupported images never disappear silently.
+- **M14-P.5.1 — Milestone Transition Correction:** DOCUMENTATION-ONLY continuity correction that advanced repository authority from the already-approved M14-P.5 checkpoint to the then-active M14-O. It introduced no implementation milestone or executable behavior.
+- **M14-P.6/M14-P.6.1 / M14-P — Final Snippet Completion Gate:** COMPLETE / PRINCIPAL-APPROVED. Automated feature-family, full-suite, build/output, dependency, schema, security, and performance evidence passes with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. Text performance and Image quality/safety are accepted; no known blocking Snippet issue remains.
+- **M15 — AI Workspace Functionality and Multimodal Context:** NEXT / NOT STARTED. It consumes the M14-P.4 presentation and owns Merchant Context behavior, Context image attachments, Guidance / Gist behavior, provider-independent model selection, Generate/provider execution, editable Generated Output lifecycle/Copy, and F3 Save Generated Output as Snippet. Knowledge compatibility remains non-destructively preserved; unsupported images never disappear silently. No M15 implementation task is active.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
 - The Side Panel focus direction remains unassigned. M14–M16 retain their roadmap ownership. M13 remains authoritative for trigger persistence, editor activation, and runtime synchronization; M14-B preserves those behaviors while projecting structured content to the existing plain catalog payload. Decision 36 does not reopen M9, redefine M10, or change the existing Ollama/AI workflow.
@@ -1241,7 +1255,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- Principal reviews the M14-O implementation, focused/full validation, documentation synchronization, and production-output audit. If approved, authorize the M14-O checkpoint; the final M14-P Snippet Completion Gate follows with Text performance regression verification before M15.
+- Principal defines and activates the first M15 implementation subtask. M15 is the next milestone, but no M15 source behavior is active or authorized by this closeout.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -1270,7 +1284,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Last completed implementation checkpoint: M14-P.4/M14-P.4.1/M14-P.4.2 at `52befe0`; M14-P.5 is the approved documentation checkpoint at `d94181746cff07632fba1cdb9c6d874b569b4f21`; and M14-P.1 remains the accepted performance baseline at `7bc5005`. Earlier architecture/hardening continuity remains M14-L/L.1 at `5450cff`, M14-M.0 PASS, M14-M.1/M14-M.1.1 at `20b509c`, M14-M.2 at `f4d9ab0`, M14-M.3/M14-M.3.1 at `2475f8b`, and the M14-M.4 separate-Git-metadata record.
+- Last completed implementation checkpoint: M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`; M14-P.6/M14-P.6.1 closes the final documentation/validation gate without executable changes. M14-P.5 is the approved documentation checkpoint at `d94181746cff07632fba1cdb9c6d874b569b4f21`, and M14-P.1 remains the accepted performance baseline at `7bc5005`. Earlier architecture/hardening continuity remains M14-L/L.1 at `5450cff`, M14-M.0 PASS, M14-M.1/M14-M.1.1 at `20b509c`, M14-M.2 at `f4d9ab0`, M14-M.3/M14-M.3.1 at `2475f8b`, and the M14-M.4 separate-Git-metadata record.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1279,7 +1293,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next engineering action: Principal reviews active M14-O and authorizes its checkpoint if accepted. The final M14-P gate with Text performance regression verification follows the approved M14-O checkpoint, and M15 follows that gate. No second speculative performance milestone is inserted.
+- Exact next Principal action: define and activate the first M15 implementation subtask. M15 implementation has not started, and this closeout authorizes no M15 source behavior. No additional Snippet performance milestone is scheduled.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -1311,5 +1325,5 @@ Image trigger + Space
 - M14-E implementation checkpoint: `1828f09` (`feat: add local image asset foundation and backup v4`).
 - M14-F.1 Decision 39 is committed at `b7d16ec`; M14-G/G.1/G.2/G.2.1 is committed at `672185e`; M14-I through M14-I.5 is committed and pushed at `ebe915f`; its documentation closeout is committed at `28dcf53`; M14-J.1 through M14-J.5.1 are committed at `797a68a`; M14-J lifecycle recovery/closeout is committed and pushed at `e4e9645`; M14-K.1 / Decision 45 is committed at `5066476`; the complete approved M14-K implementation is synchronized at `e34cd76`; and M14-K.5 closeout is synchronized at `3e5d545`.
 - M14-M.3/M14-M.3.1 usage-statistics implementation is committed and synchronized at `2475f8b` (`feat: add snippet usage statistics`). M14-M.4 begins from that clean synchronized checkpoint and creates no commit or push.
-- M14-P.1 is approved at `7bc5005`, M14-P.2 at `64b5dd8`, M14-P.3 at `406ff08`, M14-P.4/M14-P.4.1/M14-P.4.2 at synchronized checkpoint `52befe0`, and M14-P.5 at approved synchronized checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is the documentation-only continuity correction at `e738d8e7331a567a4cc530ab60ecd2d5bd103053` that activates M14-O in repository authority. M14-O implementation begins from that clean synchronized checkpoint and creates no commit or push without separate Principal authorization.
+- M14-P.1 is approved at `7bc5005`, M14-P.2 at `64b5dd8`, M14-P.3 at `406ff08`, M14-P.4/M14-P.4.1/M14-P.4.2 at synchronized checkpoint `52befe0`, and M14-P.5 at approved synchronized checkpoint `d94181746cff07632fba1cdb9c6d874b569b4f21`. M14-P.5.1 is the documentation-only continuity correction at `e738d8e7331a567a4cc530ab60ecd2d5bd103053`; M14-O is approved and synchronized at `6e893886ea23870c374e7e96dcc09a1c92184afc`. M14-P.6 begins from that clean synchronized checkpoint and creates no commit or push without separate Principal authorization.
 - Checkpoint history relevant to the handoff: `043daca` defined M13 architecture, `b76fcb4` implemented M13, `9a3c7ef` closed M13, `c1105d4` defined M14-A, `ed23f30` implemented M14-B, and `a787100` implemented M14-C.

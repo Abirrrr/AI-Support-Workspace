@@ -4,7 +4,7 @@ This repository is the foundation for a long-lived, local-first Chrome extension
 
 ## Current Scope
 
-Milestones 9–14 are complete. M14-P.1 through M14-P.5 are approved checkpoints. Active M14-O — Generated Text Snippet Tags & Retrieval is implemented with automated validation passing and awaits Principal review. It adds headless Text-only versioned generated metadata, a provider-neutral generation port with no production adapter, strict bounded parsing, explicit max-20/concurrency-one backfill, and local 5/3/1/1 lexical retrieval. Actual AI Workspace behavior remains M15; UI, permissions, trigger delivery, usage semantics, image quality, Dexie v6, and Backup v7 remain unchanged.
+Milestones 9–14 are complete. M14-O — Generated Text Snippet Tags & Retrieval is approved and checkpointed at `6e89388`, and M14-P — Final Snippet Completion Gate is **COMPLETE / PRINCIPAL-APPROVED** after the M14-P.6 automated audit and the Principal-accepted 14-item real-Chrome/manual matrix both passed with no blocker. Text performance and Image quality/safety are accepted. M15 — AI Workspace is the next milestone, but its functional implementation has not started.
 
 ## Technology Stack
 
@@ -36,4 +36,4 @@ This working tree may remain in a synchronized Google Drive directory, but Git m
 
 ## Next Step
 
-Principal review and checkpoint M14-O if accepted. The final M14-P gate—including measured and real-Chrome Text performance regression verification—then follows, before M15 AI Workspace. M14-P overall is not complete. There is no generated-tag UI or production tag generator; F3 Save as Snippet and all functional AI Workspace behavior remain M15. Canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).
+The next Principal action is to define and activate the first M15 implementation subtask. M15 owns Merchant Context behavior, Context image attachments, Guidance / Gist behavior, provider-independent model selection, Generate/provider execution, editable Generated Output lifecycle and Copy, and F3 Save Generated Output as Snippet. The existing Side Panel presentation is present, but none of those functional behaviors is active under M15 yet. Dexie remains v6, Backup remains v7, and canonical activation remains `;trigger + Space`. See [the roadmap](docs/ROADMAP.md), [the decision record](docs/DECISIONS.md), and [the project state](docs/PROJECT_STATE.md).

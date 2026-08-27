@@ -87,6 +87,7 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - Image delivery prioritizes quality, correctness, and safety over absolute latency. Optimization may not resize, crop, downsample, reduce resolution or quality, bypass genuine JPEG/WebP decoding, relabel bytes, or weaken Decision 42 guards.
 - One-shot native startup overhead remains an evidence-dependent architectural opportunity. No persistent native host, Windows service, daemon, keepalive, or native protocol expansion is currently approved solely to remove its startup cost.
 - M14-O is retrieval infrastructure and must preserve M14-P.1. Generated metadata, fingerprinting, retrieval, generated-tag reads, generation, and backfill must not become trigger-expansion or delivery prerequisites.
+- M14-P.6 automated gate evidence passes: Text warm p95 remains 0 ms with 0.1 ms maxima for plain/rich serialization and planning, delivery imports no M14-O work, complete/focused suites and production-output checks pass, and no product behavior changed. M14-P.6.1 records the Principal-accepted complete 14-item real-Chrome/manual matrix PASS. M14-P is **COMPLETE / PRINCIPAL-APPROVED**, with Text performance and Image quality/safety accepted and no known blocking Snippet issue. M15 — AI Workspace is next, but its functional implementation has not started.
 
 ## Output Workspace v1
 
