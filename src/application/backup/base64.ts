@@ -17,14 +17,30 @@ export function encodeBase64(bytes: Uint8Array): string {
 }
 
 export function decodeCanonicalBase64(value: string): Uint8Array {
-  if (
-    value.length % 4 !== 0 ||
-    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
-      value,
-    )
-  ) {
+  if (value.length % 4 !== 0) {
     throw new InvalidBase64Error();
   }
+
+  const paddingLength = value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0;
+  const dataLength = value.length - paddingLength;
+  for (let index = 0; index < dataLength; index += 1) {
+    const code = value.charCodeAt(index);
+    const isAlphabetCharacter =
+      (code >= 0x41 && code <= 0x5a) ||
+      (code >= 0x61 && code <= 0x7a) ||
+      (code >= 0x30 && code <= 0x39) ||
+      code === 0x2b ||
+      code === 0x2f;
+    if (!isAlphabetCharacter) {
+      throw new InvalidBase64Error();
+    }
+  }
+  for (let index = dataLength; index < value.length; index += 1) {
+    if (value.charCodeAt(index) !== 0x3d) {
+      throw new InvalidBase64Error();
+    }
+  }
+
   let binary: string;
   try {
     binary = atob(value);

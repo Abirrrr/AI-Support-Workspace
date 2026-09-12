@@ -20,10 +20,20 @@ import {
 import type { AutomaticBackupCadence } from '../../src/domain/automatic-backup';
 import { createPlainSnippetContent } from '../../src/domain/snippet-content';
 import { createSnippetSourceFingerprint } from '../../src/domain/snippet-generated-metadata';
+import { MAX_SNIPPET_ASSET_BYTES } from '../../src/domain/snippet-asset';
 
 const SNIPPET_ID = '123e4567-e89b-42d3-a456-426614174000';
 const BACKUP_ID = '223e4567-e89b-42d3-a456-426614174000';
 const EXPORTED_AT = '2026-08-25T02:03:04.000Z';
+
+function expectExactBytes(actual: Uint8Array, expected: Uint8Array): void {
+  expect(actual.byteLength).toBe(expected.byteLength);
+  for (let index = 0; index < expected.byteLength; index += 1) {
+    if (actual[index] !== expected[index]) {
+      throw new Error(`Byte mismatch at index ${index}.`);
+    }
+  }
+}
 
 async function createSnapshot(
   automaticBackupCadence: AutomaticBackupCadence = 'daily',
@@ -203,6 +213,67 @@ describe('Backup v7 hardening foundation', () => {
     expect(created.byteLength).toBe(
       new TextEncoder().encode(created.serialized).byteLength,
     );
+  });
+
+  it('creates, validates, imports, and restores an exact 5 MiB asset byte-for-byte', async () => {
+    const assetId = '323e4567-e89b-42d3-a456-426614174000';
+    const bytes = new Uint8Array(MAX_SNIPPET_ASSET_BYTES);
+    bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const snapshot: BackupSnapshot = {
+      knowledge: [],
+      snippets: [
+        {
+          id: SNIPPET_ID,
+          title: 'Near-limit image',
+          content: { kind: 'image', assetId },
+          tags: [],
+          createdAt: EXPORTED_AT,
+          updatedAt: EXPORTED_AT,
+          trigger: ';near-limit',
+        },
+      ],
+      snippetAssets: [
+        {
+          id: assetId,
+          snippetId: SNIPPET_ID,
+          mimeType: 'image/png',
+          blob: new Blob([bytes], { type: 'image/png' }),
+          byteSize: bytes.byteLength,
+          originalFilename: 'near-limit.png',
+          createdAt: EXPORTED_AT,
+        },
+      ],
+      settings: {
+        defaultModel: null,
+        snippetPasteMode: 'clipboard-only',
+        automaticBackupCadence: 'weekly',
+      },
+      snippetUsageStats: [],
+      snippetGeneratedMetadata: [],
+    };
+    const created = await new BackupV7CreationService(
+      { readSnapshot: async () => snapshot },
+      () => new Date(EXPORTED_AT),
+      () => BACKUP_ID,
+    ).create({ creationMode: 'manual' });
+    const prepared = await new BackupImportService().prepareImport({
+      name: 'near-limit.json',
+      size: created.byteLength,
+      readText: async () => created.serialized,
+    });
+    const replaceAll = vi.fn<TransactionalBackupRestorePort['replaceAll']>(
+      async () => undefined,
+    );
+
+    await new BackupRestoreService({ replaceAll }).restoreBackup(
+      prepared.backup,
+    );
+
+    expect(prepared.preview.assetCount).toBe(1);
+    const restored = replaceAll.mock.calls[0]?.[0].snippetAssets[0];
+    if (restored === undefined) throw new Error('Missing restored asset.');
+    expect(restored.byteSize).toBe(MAX_SNIPPET_ASSET_BYTES);
+    expectExactBytes(new Uint8Array(await restored.blob.arrayBuffer()), bytes);
   });
 
   it('exports deterministic ordered sidecars and round-trips all portable data', async () => {

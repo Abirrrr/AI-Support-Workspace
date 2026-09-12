@@ -1,5 +1,15 @@
 # Changelog
 
+### M14-S — Large Canonical Base64 Backup Correctness Fix (2026-09-12)
+
+- Reproduced the M14-Q 1440×900 PNG at 4,459,989 bytes / 5,946,652 canonical base64 characters and isolated `Maximum call stack size exceeded` to the anchored canonical-shape regular expression. In the same Chromium run, `atob`, `Uint8Array` conversion, canonical re-encoding, and exact byte comparison all passed independently.
+- Replaced only that stack-unsafe regular expression with a bounded deterministic ASCII alphabet/padding scan. The existing length gate, browser decoder error mapping, exact re-encoding comparison, canonical RFC 4648 rejection, and returned bytes remain unchanged.
+- Added focused canonical and malformed coverage for empty, padded, full-quartet unpadded, invalid length/alphabet, misplaced/excess padding, whitespace/newlines, noncanonical pad bits, truncated/corrupted input, the M14-Q representative decoded size, and the exact 5 MiB asset boundary.
+- Verified the real Backup v7 creation → strict validation/import → restore path with an exact 5 MiB asset and exact restored bytes. A post-fix Chromium run passed the actual valid M14-Q PNG through Backup v7 creation, import, and restore with preserved 1440×900 dimensions, MIME, byte count, and exact bytes; newline-corrupted base64 remained rejected.
+- Preserved Backup v1–v7 format and compatibility, the 5 MiB/20 MiB/40 MiB and serialized Backup limits, MIME/signature/dimension/pixel/memory guards, atomic restore, image bytes/quality, Dexie v6, schema/indexes, permissions, native protocols, dependencies/lockfile, and M15's **NOT STARTED** state.
+- Validation: focused Backup/base64/asset suite 7 files / 128 tests; full Vitest 69 files / 897 tests passed with one opt-in file/test skipped; lint, typecheck, M14-Q-aware configured formatting, intended-file formatting, configured Playwright (1 passed), actual Chromium workflow, production build/output validation, diff checks, Git integrity, and protected M14-Q LOCAL ONLY evidence integrity. No manual Chrome UI, destination, clipboard, download, or native-host workflow was required for this pure Backup decoder correction.
+- Documentation Impact Review: Project State, Changelog, Testing Strategy, and Backlog updated. Architecture, Decisions, database schema, product requirements, product vision, UI workflow, Roadmap, setup, and native documentation require no change because no contract, format, UI, schema, permission, or native boundary changed.
+
 ### M14-R — Interruption-Safe Coding-Agent Workflow Standardization (documentation/workflow only, 2026-09-12)
 
 - Established `Interruption-Safe Agent Execution` as a permanent coding-agent rule: substantial work uses a concise Durable Resume Checkpoint in repository documentation, updates it at meaningful boundaries and before costly or session-length work, pauses safely when capacity is uncertain, and resumes from repository state without depending on the original conversation.

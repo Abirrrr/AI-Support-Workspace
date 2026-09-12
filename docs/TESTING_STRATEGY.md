@@ -25,6 +25,12 @@ Raw audit evidence is intentionally immutable. Check formatting with `pnpm.cmd f
 
 Browser protocol roundtrips, fake transport stages, instrumented counter passes, and real end-to-end delivery are distinct evidence. Forced debugger-assisted worker recovery does not prove natural suspension. Sampled renderer heap/DOM counters are not total process/image/GPU peak memory or proof of a leak. The ordered manual Chrome/Intercom/Crisp plan and exact NOT RUN gaps remain in the report; earlier Principal manual approval is historical evidence, not a new M14-Q timing result.
 
+## M14-S canonical base64 correctness regression
+
+M14-S preserves the strict Backup contract while removing a stack-unsafe validation implementation. Focused automated coverage must accept empty canonical data, one- and two-padding forms, and unpadded complete quartets; reject invalid lengths and alphabet characters, misplaced/excess padding, whitespace/line wrapping, noncanonical pad bits, and truncated/corrupted forms; and exact-round-trip both the 4,459,989-byte M14-Q representative size and the 5 MiB asset boundary.
+
+Backup coverage must exercise the application-owned Backup creation, strict validation/import, and restore services with a near-limit asset, prove exact restored byte equality, and retain the existing malformed-input, version 1–7 compatibility, MIME/signature, graph-limit, serialized-limit, and atomicity tests. A focused Chromium check against the original generated 1440×900 PNG is appropriate because it reproduces the browser engine's prior regular-expression stack failure and proves the corrected real Backup path without adding a timing threshold. This correctness fix does not require clipboard, destination-editor, native-host, or visual UI manual testing.
+
 ## Risk-Based Manual Validation
 
 Manual validation must target destructive operations, data-loss or corruption risks, persistence, security-sensitive behavior, external integrations, and core browser-only workflows. Automated tests may carry low-risk, reversible, and readily detectable edge cases when they provide reliable coverage.

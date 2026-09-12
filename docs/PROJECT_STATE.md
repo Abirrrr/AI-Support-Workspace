@@ -7,27 +7,51 @@
 
 ## Current Milestone
 
-- Active supplemental task: **M14-R — Interruption-Safe Coding-Agent Workflow Standardization**. Status: **DOCUMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-12. This independent task makes repository-based resumability a permanent coding-agent standard. It is not M14-Q.1, a performance or product task, or M15 implementation.
-- Completed supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `50031877c0ac307be4781d120b412081970b25bc`. Approved M14-Q LOCAL ONLY evidence remains intentionally untracked/ignored and is not M14-R work.
+- Active supplemental task: **M14-S — Large Canonical Base64 Backup Correctness Fix**. Status: **IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-12. The valid-large-PNG Backup failure identified by M14-Q is corrected with a bounded canonical base64 shape scan while Backup v1–v7, exact bytes, existing safety limits, schema, permissions, and architecture remain unchanged. It is not a general performance task or M15 implementation.
+- Completed supplemental task: **M14-R — Interruption-Safe Coding-Agent Workflow Standardization**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `f2fe6e6`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd`.
+- Completed supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `50031877c0ac307be4781d120b412081970b25bc`. Approved M14-Q LOCAL ONLY evidence remains intentionally untracked/ignored and is not M14-S work.
 - Completed milestone: M14-P — Final Snippet Completion Gate
 - Closeout task: M14-P.6.1 — Final Snippet Completion Gate Closeout
 - Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15 — AI Workspace is the **NEXT MILESTONE**, but M15 implementation remains **NOT STARTED**.
 
 ## Task State
 
+### M14-S — Large Canonical Base64 Backup Correctness Fix
+
+M14-S is a narrowly authorized production correctness fix for the valid 4,459,989-byte, 1440×900 PNG whose approximately 5.95-million-character canonical base64 representation failed in all 15 M14-Q diagnostic attempts through `decodeCanonicalBase64`. It must preserve strict RFC 4648 canonical validation and exact round-trip bytes, malformed and noncanonical rejection, the existing 5 MiB asset limit and all MIME/signature/dimension/pixel/memory guards, Backup v1–v7 format and compatibility, restore atomicity, image quality, schema, permissions, native protocol, and dependency boundaries.
+
+#### M14-S Resume State
+
+```text
+Task: M14-S — Large Canonical Base64 Backup Correctness Fix
+Status: IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW
+Starting branch: master
+Starting HEAD: f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd
+Fetched origin/master: f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd
+Starting ahead/behind: 0/0
+Starting index/tracked tree: clean
+Approved M14-Q LOCAL ONLY evidence: present; do not modify, stage, delete, or move
+Completed: pre-fix failure isolated to the anchored regex; bounded alphabet/padding scan implemented with exact re-encoding retained; focused suite passed (7 files / 128 tests); actual Chromium 1440×900 / 4,459,989-byte PNG passed Backup v7 create, validate/import, restore, exact bytes and malformed rejection; full lint/typecheck/Vitest/Playwright/production build and output validation passed; M14-Q-aware configured formatting and all M14-S file formatting passed; Documentation Impact Review completed
+Validation detail: full Vitest 69 files / 897 tests passed with one opt-in file/test skipped; configured Playwright 1 passed; repository-wide formatting without the required M14-Q evidence ignore reported only four intentionally immutable M14-Q result files and was not used to alter them
+Final integrity: unstaged and cached diff checks passed; index empty; M14-S intended-file/status review passed; git fsck reported only known dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files remain present with exact approved hashes; final HEAD and fetched origin/master remain f2fe6e6 with ahead/behind 0/0
+Exact next action: Principal reviews M14-S and decides whether to authorize its Git checkpoint after final integrity verification is recorded
+Git restrictions: stage NONE; commit NONE; push NONE
+M15 implementation: NOT STARTED
+```
+
 ### M14-R — Interruption-Safe Coding-Agent Workflow Standardization
 
 M14-R is an independent documentation and engineering-workflow task. It standardizes interruption-safe execution for future substantial coding-agent work without changing product/runtime behavior, architecture, schema, Backup, permissions, native protocol, Snippets, providers, performance implementation, dependencies, or M15 functionality.
 
-The authoritative `Interruption-Safe Agent Execution` rule now requires substantial work to identify a concise Durable Resume Checkpoint in repository documentation before substantial execution. It defines minimum resume state, meaningful-phase and pre-cost checkpoint cadence, efficient usage/context behavior without a vendor-specific fixed percentage, safe-pause steps, unexpected-interruption reconstruction order, same-task identity across session interruption, and completion cleanup. `Durable Resume Checkpoint != Git Checkpoint`: working-state documentation never authorizes staging, commit, or push. Principal task specifications for substantial implementation or diagnostic work must define the durable location, cadence, pause behavior, resume semantics, and Git restrictions; small atomic tasks may omit a dedicated task file while inheriting the global rules.
+The authoritative `Interruption-Safe Agent Execution` rule requires substantial work to identify a concise Durable Resume Checkpoint in repository documentation before substantial execution. It defines minimum resume state, meaningful-phase and pre-cost checkpoint cadence, efficient usage/context behavior without a vendor-specific fixed percentage, safe-pause steps, unexpected-interruption reconstruction order, same-task identity across session interruption, and completion cleanup. `Durable Resume Checkpoint != Git Checkpoint`: working-state documentation never authorizes staging, commit, or push. Principal task specifications for substantial implementation or diagnostic work must define the durable location, cadence, pause behavior, resume semantics, and Git restrictions; small atomic tasks may omit a dedicated task file while inheriting the global rules.
 
 Documentation Impact Review completed. `CODING_AGENT_RULES.md`, `ENGINEERING_PRINCIPLES.md`, `PROJECT_STATE.md`, `CHANGELOG.md`, and `ROADMAP.md` are updated. Architecture, Decisions, database schema, product requirements, product vision, UI workflow, Testing Strategy, and Backlog require **NO CHANGE** because this is an engineering-process standard, not product architecture or behavior.
 
 Validation passes: intended-file and cross-document review; conflict search for pause/resume, task identity, usage/context, and Git-checkpoint semantics; configured formatting check; focused Markdown/trailing-whitespace review; `git diff --check`; `git fsck --full` with historical dangling objects and no corruption diagnostic; exact local/fetched-remote checkpoint match; and hash verification of all 39 approved M14-Q LOCAL ONLY files. Historical M14-Q pre-checkpoint wording inside the completed audit/evidence remains historical and was not rewritten.
 
-Starting/final branch `master`; HEAD `50031877c0ac307be4781d120b412081970b25bc`; fetched `origin/master` matches with ahead/behind `0/0`; Git metadata `C:/Users/shiha/GitMetadata/AI-Support-Workspace.git`. Starting tracked tree and index were clean apart from approved M14-Q LOCAL ONLY evidence. Final intended diff is exactly the five M14-R documents above; all changes are unstaged. Approved M14-Q LOCAL ONLY evidence remains present and byte-identical. Staged NONE; M14-R commit NONE; M14-R push NONE.
+M14-R was reviewed, approved, checkpointed as `f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd`, and pushed to `origin/master`. Its starting checkpoint was M14-Q at `50031877c0ac307be4781d120b412081970b25bc`; the approved M14-Q LOCAL ONLY evidence remained outside Git and byte-identical.
 
-Status: **DOCUMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW**. No unresolved issue or architecture concern. M14-Q is complete and synchronized at `5003187`; M15 remains **NOT STARTED**. Exact next action: Principal reviews M14-R and decides whether to authorize its documentation checkpoint.
+Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `f2fe6e6`**. No unresolved issue or architecture concern. M14-Q is complete and synchronized at `5003187`; M14-S is the active supplemental correctness task; M15 remains **NOT STARTED**.
 
 **Principal-readiness self-check: PASS**.
 
@@ -43,7 +67,7 @@ Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`**
 
 Documentation Impact Review completed: report, this state, Roadmap, Changelog, Backlog and Testing Strategy synchronized; audit README gives reproduction. Architecture/schema/decisions/product/workflow/native/root setup docs need no changes because contracts/behavior did not change. All Backlog recommendations remain **PROPOSED / UNAPPROVED / UNSCHEDULED**, with PNG correctness review first proposed. No production fix, optimization, dependency, lockfile, architecture/schema/Backup/permission/native protocol or M15 change occurred. Intended files are those six docs and isolated audit files under `tests/performance/`; final status/hashes are linked from the report.
 
-Principal accepted the audit findings, Documentation Impact Review, corrected checkpoint inventory, and Git checkpoint. The 106-file checkpoint is `50031877c0ac307be4781d120b412081970b25bc` (`chore: complete m14-q performance audit`) and is present on fetched `origin/master`; local and remote are 0/0. The [checkpoint inventory](../tests/performance/results/m14-q-checkpoint-inventory.json) distinguishes committed evidence from the approved LOCAL ONLY evidence that remains untouched in the working tree. **Principal-readiness self-check: PASS** for M14-Q. M14-P.6.1 approval and Decision 57 remain intact; M14-R is the active supplemental task and M15 remains **NOT STARTED**.
+Principal accepted the audit findings, Documentation Impact Review, corrected checkpoint inventory, and Git checkpoint. The 106-file checkpoint is `50031877c0ac307be4781d120b412081970b25bc` (`chore: complete m14-q performance audit`) and is present on fetched `origin/master`; local and remote are 0/0. The [checkpoint inventory](../tests/performance/results/m14-q-checkpoint-inventory.json) distinguishes committed evidence from the approved LOCAL ONLY evidence that remains untouched in the working tree. **Principal-readiness self-check: PASS** for M14-Q. M14-P.6.1 approval and Decision 57 remain intact; M14-S is the active supplemental task and M15 remains **NOT STARTED**.
 
 ### M14-P.6.1 — Final Snippet Completion Gate Closeout
 
