@@ -46,6 +46,10 @@ The repository documentation always takes precedence over conversational memory.
 
 Git preserves the implementation history, while the canonical GitHub remote provides synchronization and backup. Approved milestone checkpoints must be pushed before the repository advances to the next milestone.
 
+## Interruption-Safe Agent Execution
+
+Substantial coding-agent work must be resumable from concise, durable repository state without relying on the original conversation. Record completed evidence, incomplete work, current Git state, and the exact next action at meaningful phase boundaries and before work that may outlast the session. A durable resume checkpoint is working-state documentation, not a Git checkpoint or authorization to stage, commit, or push. Resume the same task identifier after a session interruption and avoid repeating valid expensive work unnecessarily.
+
 ## Repository Continuity Validation
 
 After a major architecture phase, reconstruct the project in a new conversation using repository documentation alone before implementation proceeds. The reconstruction should recover the approved architecture, technology stack, milestone boundaries, current repository state, and next engineering action without relying on prior conversational memory.
