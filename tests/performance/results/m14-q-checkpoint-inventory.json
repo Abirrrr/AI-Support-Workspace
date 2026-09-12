@@ -1,0 +1,1946 @@
+{
+  "task": "M14-Q",
+  "review": "CORRECTED 106-FILE INVENTORY; PRINCIPAL-DIRECTED LOG EXCLUSIONS; GIT CHECKPOINT UNAUTHORIZED",
+  "baselineHead": "9fe2d56e39793191530139ecdea70e6a2fbc4c7f",
+  "sizeBasis": "Exact current worktree bytes, including existing full modified documents and inventory itself; newAdditions excludes five modified tracked documents. Not Git compressed object, patch, or normalized blob size. lfSha256 accepts CRLF/LF checkout conversion only; sha256 is exact review-worktree provenance. Inventory self-hash is null to avoid circularity.",
+  "files": [
+    {
+      "path": "docs/BACKLOG.md",
+      "bytes": 25656,
+      "sha256": "52bae5ffdd6f94e0cb29c89afc01789aceeb4dc21dacf2b02544e5235e762f81",
+      "gitState": "modified tracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "585fecfdaf09f0e121d4b28679bc6762a1177a89a3a032795d7b021676044850"
+    },
+    {
+      "path": "docs/CHANGELOG.md",
+      "bytes": 198771,
+      "sha256": "d070ddf792ec718abe2db830a89bffa5881b6f82b88b0109d0c41befa3547d85",
+      "gitState": "modified tracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "aec489a7e438843c22cbb32de7e38863464e9d222053db083da4444e0fb16804"
+    },
+    {
+      "path": "docs/PERFORMANCE_AUDIT_M14-Q.md",
+      "bytes": 60237,
+      "sha256": "0d2fd04f772725cae2c5a4e6e7af877b5866dc4ade3a510829ef7667fd3922c8",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "2893a3f618c82eefb7b67c234dc0e1221223e25ccb7659bfd7a25a046854e2fe"
+    },
+    {
+      "path": "docs/PROJECT_STATE.md",
+      "bytes": 167285,
+      "sha256": "7b814b9a215db19d047d0eb35044f9c52642a39c953306898b2b152a0fcbc74a",
+      "gitState": "modified tracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "524f0ef03ef5deb6c183499452a88a5d57cd700558b6c1a3cf6fec1ab81da44c"
+    },
+    {
+      "path": "docs/ROADMAP.md",
+      "bytes": 29667,
+      "sha256": "f317c7d9ac57797b2c77938780a2e60bb67fbc345250867c0605ce3573475823",
+      "gitState": "modified tracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "a664d687d802b47ea582a7506f50278861917452663c83b379a18dfdf787a71d"
+    },
+    {
+      "path": "docs/TESTING_STRATEGY.md",
+      "bytes": 110570,
+      "sha256": "5eabb2502ecaf590fcc4464c46301f0b9320dff12bed67ecb29d9d5540695f2e",
+      "gitState": "modified tracked",
+      "group": 1,
+      "category": "documentation",
+      "disposition": "COMMIT",
+      "rationale": "Authorized M14-Q documentation and project continuity.",
+      "lfSha256": "7d9bcf4bc1a3e2d1b8b6bad01add2148c6756eabdb5a405a4356eab293865436"
+    },
+    {
+      "path": "tests/performance/.prettierignore",
+      "bytes": 164,
+      "sha256": "c431cb084e4f560fd936da3df3504c60918f60fbd3d323b9982b4037cb11cdca",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "reproduction instructions",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "c431cb084e4f560fd936da3df3504c60918f60fbd3d323b9982b4037cb11cdca"
+    },
+    {
+      "path": "tests/performance/README.md",
+      "bytes": 12116,
+      "sha256": "9582357ae8f7b6c33bf42dc12ed6e2b5bc310a515d934448ee288241125cc6eb",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "reproduction instructions",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "4451a151d62d3205f1cdba151e0973085fc82496275ff6e69484e6b12e63b6de"
+    },
+    {
+      "path": "tests/performance/aggregate-m14-q-results.mjs",
+      "bytes": 4991,
+      "sha256": "e188f4baed71d9a5298b4f3b94812b30b5df2d0da2d3612161de55ae469bfe8f",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "e188f4baed71d9a5298b4f3b94812b30b5df2d0da2d3612161de55ae469bfe8f"
+    },
+    {
+      "path": "tests/performance/desktop.ini",
+      "bytes": 106,
+      "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored Windows/Drive folder metadata; no audit reproducibility value.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/inspect-m14-q-results.mjs",
+      "bytes": 850,
+      "sha256": "01abbd043cfb9a895b190050471a19d9d01c096f8d705256a15248a99760e7f3",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "01abbd043cfb9a895b190050471a19d9d01c096f8d705256a15248a99760e7f3"
+    },
+    {
+      "path": "tests/performance/m14-q-browser-fixture.mjs",
+      "bytes": 789,
+      "sha256": "d1b66f1e6be490375ccccf2c9e30c9728f172f7fadd0cbcfa4f9d98d85f8a2b9",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "d1b66f1e6be490375ccccf2c9e30c9728f172f7fadd0cbcfa4f9d98d85f8a2b9"
+    },
+    {
+      "path": "tests/performance/m14-q-delivery.html",
+      "bytes": 210,
+      "sha256": "08e8bc9b8b4d4853c5795d5cfca55c7b9037000be11e409ba7c66bff50659829",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "08e8bc9b8b4d4853c5795d5cfca55c7b9037000be11e409ba7c66bff50659829"
+    },
+    {
+      "path": "tests/performance/m14-q-delivery.ts",
+      "bytes": 192,
+      "sha256": "3a424019e67348ef8cc2b3f29b93a4c2995df23f8cdfe18da8d1c4351ec621a0",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "3a424019e67348ef8cc2b3f29b93a4c2995df23f8cdfe18da8d1c4351ec621a0"
+    },
+    {
+      "path": "tests/performance/m14-q-measurement.mjs",
+      "bytes": 1893,
+      "sha256": "21e9bfba169f5e91e7e3c363fa0ff7e4bfbe84c6c8b2c4eac834530668ceeaa9",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "21e9bfba169f5e91e7e3c363fa0ff7e4bfbe84c6c8b2c4eac834530668ceeaa9"
+    },
+    {
+      "path": "tests/performance/m14-q-storage.html",
+      "bytes": 319,
+      "sha256": "6e56017f86029692ca5fddf9f45ff2e25a17c93f36de3a7782bb318c22108be4",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "6e56017f86029692ca5fddf9f45ff2e25a17c93f36de3a7782bb318c22108be4"
+    },
+    {
+      "path": "tests/performance/m14-q-storage.ts",
+      "bytes": 23071,
+      "sha256": "8c107a998dee0b36657e512c0b9c869021f6ea9bb4b2da13665e8358fd712d57",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "8c107a998dee0b36657e512c0b9c869021f6ea9bb4b2da13665e8358fd712d57"
+    },
+    {
+      "path": "tests/performance/m14-q-trigger.html",
+      "bytes": 224,
+      "sha256": "87af1d9d03d5c3a60a0baf13ab634c03c680316877c74b2281c27fd83cb17ea4",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "87af1d9d03d5c3a60a0baf13ab634c03c680316877c74b2281c27fd83cb17ea4"
+    },
+    {
+      "path": "tests/performance/m14-q-trigger.ts",
+      "bytes": 5973,
+      "sha256": "ab955c384437f4030cfac07ab5119eb2f67700e48018b6a35563940a27a0e320",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "ab955c384437f4030cfac07ab5119eb2f67700e48018b6a35563940a27a0e320"
+    },
+    {
+      "path": "tests/performance/results/desktop.ini",
+      "bytes": 106,
+      "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored Windows/Drive folder metadata; no audit reproducibility value.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/m14-q-aggregate-final.md",
+      "bytes": 159487,
+      "sha256": "29765da81279ac1f3c52c31453f3d7c6eb9699d810d75aa0bc0fa4a074a0b827",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Retain final phase-separated summary/build provenance.",
+      "lfSha256": "29765da81279ac1f3c52c31453f3d7c6eb9699d810d75aa0bc0fa4a074a0b827"
+    },
+    {
+      "path": "tests/performance/results/m14-q-aggregate.md",
+      "bytes": 132488,
+      "sha256": "b53769b8a06b8b3dec0d36ce1c132cb8ef0029e9feb9efdd1fe9cc002bda6977",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "redundant/intermediate artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Partial aggregate superseded by final aggregate; original raw inputs and historical hashes remain retained.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/m14-q-base64.json",
+      "bytes": 4198,
+      "sha256": "b9f3686e9d64ac080a6977da5f96fa5d39ece727bbee2ed52482d4e68d3ebc06",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "b9f3686e9d64ac080a6977da5f96fa5d39ece727bbee2ed52482d4e68d3ebc06"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-a-interruption.json",
+      "bytes": 330,
+      "sha256": "d6b1b3018c5ae636ad4ee0e2b9a9f8f8fd7ba6833f84e07662ac9b2c68ee9b5a",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Explicit operator interruption explains missing stress operations; not a product crash.",
+      "lfSha256": "f6e18d5df962b6ee5f44d72c7f8b5b5438fbf860a1f005e743c0e18548209053"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-a.json",
+      "bytes": 58409,
+      "sha256": "a99d4ef426d11aeacb5b0c634c719b71532c171549fb4893b913b4afc6fcba4e",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Partial expensive UI batch; preserve completed samples and recorded failure alongside interruption and replacement repeat.",
+      "lfSha256": "a99d4ef426d11aeacb5b0c634c719b71532c171549fb4893b913b4afc6fcba4e"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-image-edit.json",
+      "bytes": 2955,
+      "sha256": "115f954064c7d42511cc0f41a9def9325db85c09afa4342a17eb58548903dae8",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "115f954064c7d42511cc0f41a9def9325db85c09afa4342a17eb58548903dae8"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-lifecycle-control.json",
+      "bytes": 32101,
+      "sha256": "1e85cb7e94c452e273a0c68138fc84d877673332e9492be3601a8d61eca8536d",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "1e85cb7e94c452e273a0c68138fc84d877673332e9492be3601a8d61eca8536d"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-lifecycle-resume.json",
+      "bytes": 31806,
+      "sha256": "29bf428d824edc686987e048d5e29d71f30035d58ad0934a5e5714afad151a82",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Completed original file-input lifecycle and rAF Save observations are required to understand later instrumentation correction.",
+      "lfSha256": "29bf428d824edc686987e048d5e29d71f30035d58ad0934a5e5714afad151a82"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-lifecycle.json",
+      "bytes": 7389,
+      "sha256": "ec5f55750d71a63bef09d66fd21b88a4e7b805a99de75c863344b0fcb913a72c",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Original zero-height fixture timeout and partial baseline explain corrected lifecycle reruns.",
+      "lfSha256": "ec5f55750d71a63bef09d66fd21b88a4e7b805a99de75c863344b0fcb913a72c"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-mixed.json",
+      "bytes": 21466,
+      "sha256": "cc19ecc36404edfd623317c2e05081247e14c759f28b73adea95684544b407d2",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "cc19ecc36404edfd623317c2e05081247e14c759f28b73adea95684544b407d2"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-process-memory.json",
+      "bytes": 1753,
+      "sha256": "a3d87374b9b40efb67d58753ad7ca3177f69b01e1a86109e8a203f5f6f28ee32",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Historical process samples explain why peak/leak claims were rejected.",
+      "lfSha256": "536117b8db9c804dded14b7c1aa3615fa6023100f943e48f636e3aa322d3b4ca"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-profile.json",
+      "bytes": 21228,
+      "sha256": "5741c7998f97d49356bf1681552b5021dd4ac5bc3822af43e5c43b5cb7aae2e5",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "5741c7998f97d49356bf1681552b5021dd4ac5bc3822af43e5c43b5cb7aae2e5"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-repeat.json",
+      "bytes": 31431,
+      "sha256": "797faac07ca723974fa75bce4d1b6b0cf6ffd0753e049ab9fe7a35eb08a7517f",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "797faac07ca723974fa75bce4d1b6b0cf6ffd0753e049ab9fe7a35eb08a7517f"
+    },
+    {
+      "path": "tests/performance/results/m14-q-browser-resource-snapshots.json",
+      "bytes": 14375,
+      "sha256": "fdca903727f5b1154381d9dfc46ffb9776b266fafacf84caa6c80cb700d4df4e",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Historical counter snapshots support correction from accumulated/reset counters to live-DOM diagnostics.",
+      "lfSha256": "da2142a6203b4c7447ce706f7218594bbc6b2eb997b8e54c7aedb41f0ae3903e"
+    },
+    {
+      "path": "tests/performance/results/m14-q-build-output.json",
+      "bytes": 6113,
+      "sha256": "5989d4f6cb8eff9e72d3abe76b95c2ea7e7fba99da7c2fdbd32a5b32e954945e",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Retain final phase-separated summary/build provenance.",
+      "lfSha256": "c5934b7eebed09b4a9488bca43a45c706e444cd6cdf1884c520b4814f73606d4"
+    },
+    {
+      "path": "tests/performance/results/m14-q-command-log-limitations.md",
+      "bytes": 1205,
+      "sha256": "899b5b72a3800dfa0ba8fd56e061a8631146bbfb5ff6e492a685d2c313414a7f",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Explains mixed encoding/header-only/locked append failures and prevents claiming missing output.",
+      "lfSha256": "899b5b72a3800dfa0ba8fd56e061a8631146bbfb5ff6e492a685d2c313414a7f"
+    },
+    {
+      "path": "tests/performance/results/m14-q-delivery-a.json",
+      "bytes": 76577,
+      "sha256": "4b07419b642fc0922b3ee8acf4ca8d3d0aa394496f3524d87878d0a84d82210e",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "4b07419b642fc0922b3ee8acf4ca8d3d0aa394496f3524d87878d0a84d82210e"
+    },
+    {
+      "path": "tests/performance/results/m14-q-delivery-b.json",
+      "bytes": 76646,
+      "sha256": "eb5f9c79e7d1e6f16662c57e25470978fe5e112f7903a034d4eede4a0e52ea9c",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "eb5f9c79e7d1e6f16662c57e25470978fe5e112f7903a034d4eede4a0e52ea9c"
+    },
+    {
+      "path": "tests/performance/results/m14-q-diagnostics-summary.json",
+      "bytes": 25521,
+      "sha256": "17f09d2f3afc8b786e5f4590213efb9d1e20053db3fcf380a26ed599a0d0e2ae",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Retain final phase-separated summary/build provenance.",
+      "lfSha256": "17f09d2f3afc8b786e5f4590213efb9d1e20053db3fcf380a26ed599a0d0e2ae"
+    },
+    {
+      "path": "tests/performance/results/m14-q-final-boundary-review.json",
+      "bytes": 10824,
+      "sha256": "6950a5e21f1c72025d95a809ba2a48e94736f137b92f3bce2448d1f33abbb394",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "03c9bbaf1e9cfc66d3c7b369ecdfcde3e152e5ae4580c251f4192142cff6e348"
+    },
+    {
+      "path": "tests/performance/results/m14-q-final-git-status.txt",
+      "bytes": 8311,
+      "sha256": "10dd204cc4e759bce1dfcd076860fdba54d36909ed3ca56edc96a7680380a3a5",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Historical broad dirty-tree listing duplicated by retained final boundary review; checkpoint inventory governs selection.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/m14-q-final-manifest.json",
+      "bytes": 28613,
+      "sha256": "68c8bfd915082028d78a1e9055aee68ab81f9b0e1c469c6441676997917633cf",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "244c54c85a2bb489a720af4ed2fc7f3b522938ccfbf1dbf1c10a742d14a619b2"
+    },
+    {
+      "path": "tests/performance/results/m14-q-mixed-fixture-diagnostic.json",
+      "bytes": 7937,
+      "sha256": "1791c4897b0baa8e59bcc82527252dab1c2740cab298a43ae7c4784829b9ad9d",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "1791c4897b0baa8e59bcc82527252dab1c2740cab298a43ae7c4784829b9ad9d"
+    },
+    {
+      "path": "tests/performance/results/m14-q-native.json",
+      "bytes": 23763,
+      "sha256": "a79cba53d52ab6eeb51a0b4387a517b53ee0f325e85e923aa5e845186e7e80b2",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "a79cba53d52ab6eeb51a0b4387a517b53ee0f325e85e923aa5e845186e7e80b2"
+    },
+    {
+      "path": "tests/performance/results/m14-q-pause-manifest-2026-09-12.json",
+      "bytes": 15408,
+      "sha256": "ee16cfb666727e82ead44e362b651955945986f449a01af192beae7898745cc1",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "ee16cfb666727e82ead44e362b651955945986f449a01af192beae7898745cc1"
+    },
+    {
+      "path": "tests/performance/results/m14-q-pause-manifest.json",
+      "bytes": 8431,
+      "sha256": "3b338949a6d9d1c4bd4cd7918501478665741aa70145ec67b4b3a102dbe517be",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "57b11815295e009511b692ac322a3c349b2c0701dd18815f395a4ca66725ab4c"
+    },
+    {
+      "path": "tests/performance/results/m14-q-pause-report.md",
+      "bytes": 24734,
+      "sha256": "01a022af1fadff0e0716ae226c914d43a21acc44098c894b118de8607e34c4e0",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Superseded pause instructions; interruption, original manifests, verification records and final report preserve required correction history.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/m14-q-preserved-evidence-verification.json",
+      "bytes": 4324,
+      "sha256": "476cd4b79c01463152ad59b2ea1ddfe77141379381a4287e15e4e3e5af0e0aa6",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "e95ee72feda87403e92cdfaaf3fda18b9769fab47486cc1ae16be7276ee11bd9"
+    },
+    {
+      "path": "tests/performance/results/m14-q-resume-harness-snapshot.json",
+      "bytes": 4927,
+      "sha256": "86bd58a501ac9615dd7e9ecd8efdca97b32cc9a562c4fe791b90501f3b5ddb95",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Preserve frozen manifest/boundary/provenance/hash verification as historical evidence; path listings include intentionally local-only files and are not checkpoint inclusion lists.",
+      "lfSha256": "bfbed3b2e5c7b77c956c113b89c59f2e1c64698e7f1e30423b5fada711f2dfef"
+    },
+    {
+      "path": "tests/performance/results/m14-q-resumption-report-preserved.md",
+      "bytes": 44432,
+      "sha256": "c024e7a9b533b9e8e6ac4caf566dcffed35a393dcc748052fb3997c443f22196",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Superseded pre-final report with stale resume instructions and relocation-relative links; original hash remains in frozen manifest; final report preserves the material correction trail.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/m14-q-storage-a.json",
+      "bytes": 537542,
+      "sha256": "c7121dc4bfb20a2bfcf59032d3de76061307d898954b6213ce65dc66e9e9aa94",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Initial Text tiers and five failed mixed setups substantiate both performance and PNG correction trail.",
+      "lfSha256": "c7121dc4bfb20a2bfcf59032d3de76061307d898954b6213ce65dc66e9e9aa94"
+    },
+    {
+      "path": "tests/performance/results/m14-q-storage-mapping.json",
+      "bytes": 7014,
+      "sha256": "8f83df941b62de0ebc22919a838218cc47c3b8eeb55ed0d23d3161a71c9cdd32",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "8f83df941b62de0ebc22919a838218cc47c3b8eeb55ed0d23d3161a71c9cdd32"
+    },
+    {
+      "path": "tests/performance/results/m14-q-storage-mixed.json",
+      "bytes": 146863,
+      "sha256": "a0c70dbf473a9d031b15888187d96454c7c19b42760924862df95e26ed176600",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "a0c70dbf473a9d031b15888187d96454c7c19b42760924862df95e26ed176600"
+    },
+    {
+      "path": "tests/performance/results/m14-q-storage-near.json",
+      "bytes": 33723,
+      "sha256": "262f07f87b208ef7998e99f4e717771c7f9870d7e58ef325cca4d65cfc2f9260",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "262f07f87b208ef7998e99f4e717771c7f9870d7e58ef325cca4d65cfc2f9260"
+    },
+    {
+      "path": "tests/performance/results/m14-q-storage-repeat.json",
+      "bytes": 135623,
+      "sha256": "4fec51356aa2eaac8ee0c3bceab3c09b2b66ada0f6f4d916e21a83db58d24708",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "lfSha256": "4fec51356aa2eaac8ee0c3bceab3c09b2b66ada0f6f4d916e21a83db58d24708"
+    },
+    {
+      "path": "tests/performance/results/m14-q-trigger.json",
+      "bytes": 2267491,
+      "sha256": "5ed099d813079310f822d8742337e840722c6676eddca23793dcf5b2be1a811d",
+      "gitState": "untracked",
+      "group": 2,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Structured samples, fixture metadata and outcomes substantiate accepted findings; needed by aggregation or evidence validation.",
+      "principalSizeReview": "2,267,491 bytes: largest proposed addition; retain complete 7,680-invocation correctness matrix. Explicitly flag for inventory approval; no staging authorized.",
+      "lfSha256": "5ed099d813079310f822d8742337e840722c6676eddca23793dcf5b2be1a811d"
+    },
+    {
+      "path": "tests/performance/results/pause-command-evidence/build-result.json",
+      "bytes": 90,
+      "sha256": "2130f9bc425dfa58279a6c2fd0ebed24f1b798a9ab26a9491c342a2abb092c73",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "fd964e57873a2edd5b9b3f98e683966bd5cda6ab925671a7acdb2f35d5de0c2c"
+    },
+    {
+      "path": "tests/performance/results/pause-command-evidence/build.log",
+      "bytes": 29022,
+      "sha256": "7a331cf94987f12ec3dba94b6e0cd08378924ccd56a1e2753e2868beb2501e40",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/pause-command-evidence/desktop.ini",
+      "bytes": 106,
+      "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored Windows/Drive folder metadata; no audit reproducibility value.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/pause-command-evidence/historical-method-current.log",
+      "bytes": 20452,
+      "sha256": "b4b4d740bdbf79b8cf2a08a7fb90348c2de0e3d3345b3a5bad29c05b9a3f847c",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored original console capture; results or exit/time metadata retained; original bytes stay local. Unique historical-method payload separately indexed without changing values.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/pause-command-evidence/historical-method-result.json",
+      "bytes": 102,
+      "sha256": "1d2756b9f72802d73c562edcc7151e15585656deb24d47ac9dd722ba0e5ee3c0",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "ae9e91893d14ddce358d3b9cf8f0d4061f7f0fbb302ff0207e946d552edeaa7d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-image-edit.json",
+      "bytes": 252,
+      "sha256": "5fd39807e1de4f234cf26a6c050beec0581148b8570a60050baa69566dfe7e6d",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "5fd39807e1de4f234cf26a6c050beec0581148b8570a60050baa69566dfe7e6d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-image-edit.txt",
+      "bytes": 150,
+      "sha256": "ed610f0d840b9a7eb1dff3e1abd1ed9556cb95dc1b8a2030f13f58a74bf4525c",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-mixed.json",
+      "bytes": 241,
+      "sha256": "57c4be3bfc31fe560ad0c62f133e864dfda6194059d01d8d956a36f4eeb1b95d",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "57c4be3bfc31fe560ad0c62f133e864dfda6194059d01d8d956a36f4eeb1b95d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-mixed.txt",
+      "bytes": 165,
+      "sha256": "fb094319303b04c9e10e804f267e1a2f5c9325774c243292939b270c5dd9349b",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-profile.json",
+      "bytes": 243,
+      "sha256": "a10929a7a113d7cdbeda809cea83aab83fa18d68a1dd218385c415d7d9614267",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "700a2654d06c5d5e425c0df2e5125232dac54d7e01d3e01da4e074a8ae3fdb1d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-profile.txt",
+      "bytes": 108,
+      "sha256": "672b8cc1c72e51a47fdc7fcd44fca5140f0d6f0f7276d2be84d88a87bca06883",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-repeat.json",
+      "bytes": 250,
+      "sha256": "5fd984346568b18cb83235dcbd0c5dd1fd012cc8719dd9eb5a8c708eccc5174b",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "2208b3272f08773a73b72924e4e2266879e20ece0b1f6021aec523b25a310b5f"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/browser-repeat.log",
+      "bytes": 189,
+      "sha256": "74ee0ff447f6f49d20a7e45304358592f042c954ffe4b1626bc97c606bc78bda",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/build-final.json",
+      "bytes": 212,
+      "sha256": "de8c22e70c27d732fd54eb9e83a1edb1667835fa923dd41fb6421bdb2e9bf839",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "de8c22e70c27d732fd54eb9e83a1edb1667835fa923dd41fb6421bdb2e9bf839"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/build-final.txt",
+      "bytes": 13944,
+      "sha256": "2692668aff0690289e8271d5d0765d9eab0aa3032854eb86964447c1a9a64410",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Principal-directed evidence-log correction: preserve original raw console bytes locally because staged whitespace check fails. Retained corresponding JSON exit/time metadata, final build-output inventory and audit validation/count/warning summaries support the checkpoint without this log.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/build-native-dev-final.json",
+      "bytes": 215,
+      "sha256": "fdb2e69acf5ba2ace33a2f07c3bdb043cbfbbf5273a8d7758cb55bf0d2bd6587",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "fdb2e69acf5ba2ace33a2f07c3bdb043cbfbbf5273a8d7758cb55bf0d2bd6587"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/build-native-dev-final.txt",
+      "bytes": 14531,
+      "sha256": "451e117ef70491f4eb4df80797508cb0ecd95e6f746deecce5264fd09ae57551",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Principal-directed evidence-log correction: preserve original raw console bytes locally because staged whitespace check fails. Retained corresponding JSON exit/time metadata, final build-output inventory and audit validation/count/warning summaries support the checkpoint without this log.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/desktop.ini",
+      "bytes": 106,
+      "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "local-only operational artifact",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored Windows/Drive folder metadata; no audit reproducibility value.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/diff-check-closeout.json",
+      "bytes": 205,
+      "sha256": "b6e3b1d0993ddd30a9778fb7faea14a5af709df09d46af36c3fb1ca39a24943c",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "b6e3b1d0993ddd30a9778fb7faea14a5af709df09d46af36c3fb1ca39a24943c"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/diff-check-closeout.txt",
+      "bytes": 111,
+      "sha256": "c43300583fdcdb00d8946251f35b4c6dbaaf532724c068b6716b844d49e70834",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/diff-check-final.json",
+      "bytes": 216,
+      "sha256": "c763f0d924f33eb0920db4676f8c14fc4b1e55a2e2ad42e2f2a14c7329d2500d",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "c763f0d924f33eb0920db4676f8c14fc4b1e55a2e2ad42e2f2a14c7329d2500d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/diff-check-final.txt",
+      "bytes": 111,
+      "sha256": "7efe21adebe7e10221230ea21609b2ce248cc39dc4817807aaa2eeec069d7458",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/e2e-final.json",
+      "bytes": 206,
+      "sha256": "dd472e4885b07e10335a3b3b2163014602cfd2ca1ceb65aa1236a198cee9d6b0",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "dd472e4885b07e10335a3b3b2163014602cfd2ca1ceb65aa1236a198cee9d6b0"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/e2e-final.txt",
+      "bytes": 459,
+      "sha256": "0cb5aef656df4fc999bc68912a76d0cf012269b8944751dab608fd58154c8690",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "0cb5aef656df4fc999bc68912a76d0cf012269b8944751dab608fd58154c8690"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/evidence-closeout.json",
+      "bytes": 237,
+      "sha256": "9b3bdf68f90c8ddd2199cda4b1b3fa01e0de1739a270d55c3c901a2af3778fb9",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "9b3bdf68f90c8ddd2199cda4b1b3fa01e0de1739a270d55c3c901a2af3778fb9"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/evidence-closeout.txt",
+      "bytes": 324,
+      "sha256": "35553c6785a1bf0a3fde258fdbd5f5412ccbf364bebdce45c718e533cd47f1dc",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/evidence-final.json",
+      "bytes": 237,
+      "sha256": "b5c7e75e457f28bf075a543cb53f7aeabd6af1ae6094518d686a01ca35b00a2c",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "b5c7e75e457f28bf075a543cb53f7aeabd6af1ae6094518d686a01ca35b00a2c"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/evidence-final.txt",
+      "bytes": 324,
+      "sha256": "f2773698de612a373ceb47ebcc4e287f5171d35ac379d0926e4bf0a26cecb958",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/fixture-integrity.json",
+      "bytes": 241,
+      "sha256": "019164039253334a58084b221161e121331ab303b13b130cfd7fa9d9af1d85fb",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "15a79b984cb136241ead373c26f63876ea59fd565795e4afe9ad442290ccb40d"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/fixture-integrity.log",
+      "bytes": 661,
+      "sha256": "b6fddf31332e22d1490e787a6ccdebc8135270f82bb128cb6a2494a62b572586",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-closeout.json",
+      "bytes": 315,
+      "sha256": "e0067b5447ed5c94698f26a3f16996b5203e2ae4a15923763f799d6d48e35655",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "e0067b5447ed5c94698f26a3f16996b5203e2ae4a15923763f799d6d48e35655"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-closeout.txt",
+      "bytes": 442,
+      "sha256": "d64807ea2b1d23016ad773e635631f72d8a544db00520d441cc2ec84b8d4a275",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-final.json",
+      "bytes": 324,
+      "sha256": "8a6de76f4c56ee4112ed840fe1568d00cd80f2b541e158f04d2dd7ff98e3fa45",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "8a6de76f4c56ee4112ed840fe1568d00cd80f2b541e158f04d2dd7ff98e3fa45"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-final.txt",
+      "bytes": 442,
+      "sha256": "97018a2f942f07328f602d14b6cb9378b37e49554a5a070db274d6c6df34be96",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-initial.json",
+      "bytes": 291,
+      "sha256": "12c65493f09280a77375ae51c7f0bfb3b48a748f60a051a9618b684c86ac27dc",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "12c65493f09280a77375ae51c7f0bfb3b48a748f60a051a9618b684c86ac27dc"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/format-initial.txt",
+      "bytes": 10024,
+      "sha256": "2566d62a4a7a78f76978787d28be837d77aded1b21bbd99bb2457ed809c5f331",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "2566d62a4a7a78f76978787d28be837d77aded1b21bbd99bb2457ed809c5f331"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/fsck-final.json",
+      "bytes": 204,
+      "sha256": "8cc7162431cebd0861628921cce1105e571893332a3b797aea5857942f4a7b95",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "8cc7162431cebd0861628921cce1105e571893332a3b797aea5857942f4a7b95"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/fsck-final.txt",
+      "bytes": 7047,
+      "sha256": "b24c5255c3f908d5ec13aa62f2fcb68eaccdffdcbd0fb5de14599a8725fab6b3",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/integrity-after-interruption.json",
+      "bytes": 248,
+      "sha256": "75072a482f3cd59926fc66dd014773ca89c212f359ff83f365aa781688ebb767",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "75072a482f3cd59926fc66dd014773ca89c212f359ff83f365aa781688ebb767"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/integrity-after-interruption.txt",
+      "bytes": 420,
+      "sha256": "319906f5e02c44063061b6fa6384df0008185df4e64649e11895db496a68d7a2",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/integrity-final.json",
+      "bytes": 240,
+      "sha256": "27f971c48ff576c722af385e065824125d86c21bac5f8e97c6ee381a73211443",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "27f971c48ff576c722af385e065824125d86c21bac5f8e97c6ee381a73211443"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/integrity-final.txt",
+      "bytes": 420,
+      "sha256": "e24c0dc4a1b78153d5be591b8dce1cdac5add2dfaf95b2c8e0f0892e29266bcc",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lifecycle-control.json",
+      "bytes": 253,
+      "sha256": "78d8d7c516ad90a86cd383cff5c9f73a7ded52b36cfa29908d8d667f8657f8e8",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "3132d2fd720f05d383ed827a3623723071e0bd0400b62a0ad72111ae9de32946"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lifecycle-control.txt",
+      "bytes": 118,
+      "sha256": "6dcdb59715ff7de317fe2db65d5f14377186ea1e29bc27a23fd2dc36900cccb8",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lifecycle-resume.json",
+      "bytes": 269,
+      "sha256": "99256c1a3c9deefe6795c03d01c24ddc7621c2d51dd86d386652ec643f18208e",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "6f4e19f2d68e26a05812724a5121b2307e780c94342235d352db9d249fb1e38e"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lifecycle-resume.log",
+      "bytes": 127,
+      "sha256": "fa5fd93b1c1ce6d87fc642ca32ebbc2625fb36b6570736ad81cba952f27bd882",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-closeout.json",
+      "bytes": 202,
+      "sha256": "e64e62cbf44fa28f1cc2bc53dbb34b842275e500161e00c7220e792582f83090",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "e64e62cbf44fa28f1cc2bc53dbb34b842275e500161e00c7220e792582f83090"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-closeout.txt",
+      "bytes": 136,
+      "sha256": "20ba53a02ce20aee89e34146821bb6f90bfa31366862a13d3f5e573b418dc288",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-final.json",
+      "bytes": 210,
+      "sha256": "bccf12187ded2ec4c9123e6b2843fa007f9d5a88b6923d3d9876ca0049d98fc4",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "bccf12187ded2ec4c9123e6b2843fa007f9d5a88b6923d3d9876ca0049d98fc4"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-final.txt",
+      "bytes": 136,
+      "sha256": "00c1e05fb44bb9aa4ef8ea6afc5aac8e3c9e7b80809a1952b1e61bf7ae3e8c44",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-initial.json",
+      "bytes": 203,
+      "sha256": "be9cbd7f171f2a3d19bbd68b6c626c15f1f3843657de50fc780f87d05a16cae9",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "be9cbd7f171f2a3d19bbd68b6c626c15f1f3843657de50fc780f87d05a16cae9"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/lint-initial.txt",
+      "bytes": 8001,
+      "sha256": "06522fbad7ad98e546cf2d306a8e14386ffd6ca31d71fe34741d5731b8f962a9",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "historical failure/correction evidence",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "06522fbad7ad98e546cf2d306a8e14386ffd6ca31d71fe34741d5731b8f962a9"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-build-final.json",
+      "bytes": 303,
+      "sha256": "29d658d4e28e9bb914fce3da251ec2388425b5a9a64e38d301e4d05bf65f55db",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "29d658d4e28e9bb914fce3da251ec2388425b5a9a64e38d301e4d05bf65f55db"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-build-final.txt",
+      "bytes": 827,
+      "sha256": "e9f675e97863c2218af0ff26537179622f666d3bbbcd7e14a3c1635759a5c27a",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "bad2c0a6cacb9e27c3ba642bce3cfa401ac2587d10e80ec1fc10de2733964816"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-restore-final.json",
+      "bytes": 281,
+      "sha256": "84177a11a233bab3fb7dd273b4c34457ca024b21b87e22951a0007f70c8dee0f",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "84177a11a233bab3fb7dd273b4c34457ca024b21b87e22951a0007f70c8dee0f"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-restore-final.txt",
+      "bytes": 1720,
+      "sha256": "ecfe075bd0e4dd5c192a8b6ccbf26b7e7a6a76b16be03ca80eaca1720c81c25e",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "f961ac88e35c78b59ef4380118870cd9b1c2384403ee61036c3f7f01e73e1d49"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-test-final.json",
+      "bytes": 300,
+      "sha256": "c718c833f75e7c5076373b5050b9c7697753b5adb3ffaf4363e6f4eef0837c18",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "c718c833f75e7c5076373b5050b9c7697753b5adb3ffaf4363e6f4eef0837c18"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/native-test-final.txt",
+      "bytes": 683,
+      "sha256": "bd170cf64f80fa597339aeb9ef0db4d002787e3172b8dec63f3f82d30514625e",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Retain unique test counts, build warnings/output checks, SDK bootstrap disclosure or original correction diagnostics beyond exit metadata.",
+      "lfSha256": "29c920bb3d8a6f102d6515f939a558ef85e3abb472c5d6801144c6020692edf1"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-mapping.json",
+      "bytes": 242,
+      "sha256": "0ba0f603387fa784f84199c3b080a260f565d451bda66a78ae1675330f2cb700",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "fcf177269ffabb8b05bbfbe0f0ed0c7985b841f1d3501f1ec6432a49da32ab5a"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-mapping.txt",
+      "bytes": 108,
+      "sha256": "c1b11f2b2d45829880a3d949d3efce6642b360c2b14b7ca4d46d7eda36772f31",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-mixed.json",
+      "bytes": 241,
+      "sha256": "a803637094a10a0339e7165bb3cecc016886ac59d349cdcfe62ef4800514dec4",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "4d9d47a068bce5b3e24c2d2196b16e4d9454e8100a74d609e191ecccd16164ea"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-mixed.txt",
+      "bytes": 271,
+      "sha256": "cf64778f7eb9f736bfafd9458987ee6284c67a219da9ea2a40412118dc9f5d9b",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-near.json",
+      "bytes": 248,
+      "sha256": "a87c882278130df0d5b31192ce4f5f50c6ff91a9f19a960ebdbb0022935e726d",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "e454a4e2a4327d2f032cf17fa53f1b25adb48f01ef2581f89896c6e89d057530"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-near.txt",
+      "bytes": 105,
+      "sha256": "7ba149548fe320261a1e7e571ba1df7f50099008c0041247e4362f6679145cfa",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-repeat.json",
+      "bytes": 243,
+      "sha256": "f0760619e64ab735e61ed0d2891fa95d7001c3a42f430a76ec4b643c95c86d54",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "c434a3e5d87f9d2f473a18b00d6f380c7b4b0803b2b0188d9a3f30ccdb357962"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/storage-repeat.log",
+      "bytes": 237,
+      "sha256": "7ec2eecb97f81f0a66d00e2318f3812f86e3f508e0453dec7edd831db968dd91",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/test-final.json",
+      "bytes": 203,
+      "sha256": "754c521484682c74ba3225d07f6bb51abacaa2ef477297a27d60fc6df01353ff",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "754c521484682c74ba3225d07f6bb51abacaa2ef477297a27d60fc6df01353ff"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/test-final.txt",
+      "bytes": 416,
+      "sha256": "c54a434415e70e3a570089be54806115481c823470f9b3858a111a9f8f561af6",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Principal-directed evidence-log correction: preserve original raw console bytes locally because staged whitespace check fails. Retained corresponding JSON exit/time metadata, final build-output inventory and audit validation/count/warning summaries support the checkpoint without this log.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-after-interruption.json",
+      "bytes": 208,
+      "sha256": "be15e6455b3d30db9b19f54e7d2ff210be510778991bb6b9e8c5e85a780c7c77",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "be15e6455b3d30db9b19f54e7d2ff210be510778991bb6b9e8c5e85a780c7c77"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-after-interruption.txt",
+      "bytes": 128,
+      "sha256": "7ec9c061e7de4af8fad1c21037953f1422d6fdf6af65590b7559ca2d4ae63f67",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-before-measurement.json",
+      "bytes": 213,
+      "sha256": "ed9441e976a848bf5e0ca21e149a3e17cb611218bce1aab59030e5a3497a6d1e",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "524568349ab21dcc33b413b767a82e61a1b52fa0edf300a4d6f3d1e5ac0467ca"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-before-measurement.log",
+      "bytes": 70,
+      "sha256": "0ae55ca081b8a8e5b15f33bde054cd1c3ce338eff9141b9dc574a1c2ef4c1800",
+      "gitState": "ignored",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Ignored console log, redundant/header-only or superseded; structured measurements and command metadata retain outcomes. No force-add authorization.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-final.json",
+      "bytes": 216,
+      "sha256": "23632c3243f4ccad7f75de3b86baab3880ece7bf5b389cd96295763d03396b18",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "23632c3243f4ccad7f75de3b86baab3880ece7bf5b389cd96295763d03396b18"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-final.txt",
+      "bytes": 128,
+      "sha256": "f0d986eebc5b3142c636e06c7733f6e13a45133e116aa3af71ca84697e402b16",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-resume-harness.json",
+      "bytes": 217,
+      "sha256": "421172b88fb78eaba73cfa0b4b2e84278b8ebd0fc7e1bd9cfcbe203328993f15",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "COMMIT",
+      "rationale": "Compact command, timestamp, elapsed and exit metadata establishes batch/validation chronology including failures; stdout omission is explicit.",
+      "lfSha256": "11466d16de661e59c129e369579e5e95695097d8eac019dbfe6f7a28598e12b7"
+    },
+    {
+      "path": "tests/performance/results/resume-command-evidence/typecheck-resume-harness.txt",
+      "bytes": 74,
+      "sha256": "5b7b4e94aa2dce3cd3011e60a6780cfdd47f6b6b515091604b454b6548b2ed07",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "command log",
+      "disposition": "LOCAL ONLY",
+      "rationale": "Success/header/console details duplicate structured command metadata and measurement JSON; warnings or limitations summarized in audit.",
+      "lfSha256": null
+    },
+    {
+      "path": "tests/performance/run-m14-q-base64.mjs",
+      "bytes": 3180,
+      "sha256": "1798e8093e189d4e9de7f7ac787d34e9f5904767e910975b670d6f059f7d92b0",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "1798e8093e189d4e9de7f7ac787d34e9f5904767e910975b670d6f059f7d92b0"
+    },
+    {
+      "path": "tests/performance/run-m14-q-browser.mjs",
+      "bytes": 32410,
+      "sha256": "5a1d192833a8c82e73e38fdc5d752c17cc4113600f7152e6fcbe290833d669b4",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "5a1d192833a8c82e73e38fdc5d752c17cc4113600f7152e6fcbe290833d669b4"
+    },
+    {
+      "path": "tests/performance/run-m14-q-command.ps1",
+      "bytes": 1179,
+      "sha256": "1b017eda4ff12816793fa3f670a64babc2c06cb2b331569c39f03c8c0e57cfd5",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "1b017eda4ff12816793fa3f670a64babc2c06cb2b331569c39f03c8c0e57cfd5"
+    },
+    {
+      "path": "tests/performance/run-m14-q-delivery.mjs",
+      "bytes": 4954,
+      "sha256": "c5f4c30ccf4eae8c94bf5386e101a6f0a5534af2f4b7511e26f339daf44ef110",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "c5f4c30ccf4eae8c94bf5386e101a6f0a5534af2f4b7511e26f339daf44ef110"
+    },
+    {
+      "path": "tests/performance/run-m14-q-native.mjs",
+      "bytes": 2978,
+      "sha256": "969ccbe7dc5a900550da396cbcbe6acddd10b3de867647d7339b92247995c2a8",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "969ccbe7dc5a900550da396cbcbe6acddd10b3de867647d7339b92247995c2a8"
+    },
+    {
+      "path": "tests/performance/run-m14-q-storage.mjs",
+      "bytes": 10837,
+      "sha256": "acdde1864bb3a4d24e1116b5c84701ad2437311df9e42644191e7f1e544633ed",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "acdde1864bb3a4d24e1116b5c84701ad2437311df9e42644191e7f1e544633ed"
+    },
+    {
+      "path": "tests/performance/run-m14-q-trigger.mjs",
+      "bytes": 1887,
+      "sha256": "93b6ce4b407fba64d6317452d405fc51ce1e60b093d1a9e3600eb77169ce4e33",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "93b6ce4b407fba64d6317452d405fc51ce1e60b093d1a9e3600eb77169ce4e33"
+    },
+    {
+      "path": "tests/performance/run-m14-q-validation.mjs",
+      "bytes": 3239,
+      "sha256": "50f44ec35ff958d8fd96564d85eae7b6b7a42d786ad95af8f8111b100057de46",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "50f44ec35ff958d8fd96564d85eae7b6b7a42d786ad95af8f8111b100057de46"
+    },
+    {
+      "path": "tests/performance/summarize-m14-q-diagnostics.mjs",
+      "bytes": 3429,
+      "sha256": "678e56dbb88b9252c4b827f4620de6872f3d13d1f75260850d94ba4676e54704",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "678e56dbb88b9252c4b827f4620de6872f3d13d1f75260850d94ba4676e54704"
+    },
+    {
+      "path": "tests/performance/verify-m14-q-evidence.mjs",
+      "bytes": 5909,
+      "sha256": "badd97a62672edac73e6185350cc33384076e1b2a7d1782feaff0eb5c2a62956",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "badd97a62672edac73e6185350cc33384076e1b2a7d1782feaff0eb5c2a62956"
+    },
+    {
+      "path": "tests/performance/verify-m14-q-measurement.mjs",
+      "bytes": 2447,
+      "sha256": "cd5fde3c0803a8865e69cd696eb0f7446372ee587563ec5600473fdc7a49fb2d",
+      "gitState": "untracked",
+      "group": 1,
+      "category": "harness/source",
+      "disposition": "COMMIT",
+      "rationale": "Reproduce audit methods, fixture generation, aggregation, or focused verification; existing production benchmark dependencies remain tracked and unchanged.",
+      "lfSha256": "cd5fde3c0803a8865e69cd696eb0f7446372ee587563ec5600473fdc7a49fb2d"
+    },
+    {
+      "path": "tests/performance/results/m14-q-historical-method-evidence.json",
+      "bytes": 11485,
+      "sha256": "9fd111528c68446b45b857dfcb0a9743405a083220658a05346953b02a3d19ed",
+      "gitState": "untracked",
+      "group": 3,
+      "category": "compact raw evidence",
+      "disposition": "COMMIT",
+      "rationale": "Lossless parsed historical-method payload from ignored UTF-16 console capture, with source hash and explicit derivation; preserves unique 500-sample Text and Image results.",
+      "lfSha256": "b2cc90cab9ad518c1d7eaff32e0e70ed6ca688fbd80c411203be4184b26f9f1c"
+    },
+    {
+      "path": "tests/performance/results/m14-q-checkpoint-inventory.json",
+      "bytes": 108096,
+      "sha256": null,
+      "gitState": "untracked",
+      "group": 3,
+      "category": "final structured evidence",
+      "disposition": "COMMIT",
+      "rationale": "Authoritative checkpoint selection, sizes, dispositions and hashes; includes itself with null SHA-256 to avoid self-reference.",
+      "lfSha256": null
+    }
+  ],
+  "git": {
+    "branch": "master",
+    "head": "9fe2d56e39793191530139ecdea70e6a2fbc4c7f",
+    "statusShort": "M  docs/BACKLOG.md\nM  docs/CHANGELOG.md\nA  docs/PERFORMANCE_AUDIT_M14-Q.md\nM  docs/PROJECT_STATE.md\nM  docs/ROADMAP.md\nM  docs/TESTING_STRATEGY.md\nA  tests/performance/.prettierignore\nA  tests/performance/README.md\nA  tests/performance/aggregate-m14-q-results.mjs\nA  tests/performance/inspect-m14-q-results.mjs\nA  tests/performance/m14-q-browser-fixture.mjs\nA  tests/performance/m14-q-delivery.html\nA  tests/performance/m14-q-delivery.ts\nA  tests/performance/m14-q-measurement.mjs\nA  tests/performance/m14-q-storage.html\nA  tests/performance/m14-q-storage.ts\nA  tests/performance/m14-q-trigger.html\nA  tests/performance/m14-q-trigger.ts\nA  tests/performance/results/m14-q-aggregate-final.md\nA  tests/performance/results/m14-q-base64.json\nA  tests/performance/results/m14-q-browser-a-interruption.json\nA  tests/performance/results/m14-q-browser-a.json\nA  tests/performance/results/m14-q-browser-image-edit.json\nA  tests/performance/results/m14-q-browser-lifecycle-control.json\nA  tests/performance/results/m14-q-browser-lifecycle-resume.json\nA  tests/performance/results/m14-q-browser-lifecycle.json\nA  tests/performance/results/m14-q-browser-mixed.json\nA  tests/performance/results/m14-q-browser-process-memory.json\nA  tests/performance/results/m14-q-browser-profile.json\nA  tests/performance/results/m14-q-browser-repeat.json\nA  tests/performance/results/m14-q-browser-resource-snapshots.json\nA  tests/performance/results/m14-q-build-output.json\nA  tests/performance/results/m14-q-checkpoint-inventory.json\nA  tests/performance/results/m14-q-command-log-limitations.md\nA  tests/performance/results/m14-q-delivery-a.json\nA  tests/performance/results/m14-q-delivery-b.json\nA  tests/performance/results/m14-q-diagnostics-summary.json\nA  tests/performance/results/m14-q-final-boundary-review.json\nA  tests/performance/results/m14-q-final-manifest.json\nA  tests/performance/results/m14-q-historical-method-evidence.json\nA  tests/performance/results/m14-q-mixed-fixture-diagnostic.json\nA  tests/performance/results/m14-q-native.json\nA  tests/performance/results/m14-q-pause-manifest-2026-09-12.json\nA  tests/performance/results/m14-q-pause-manifest.json\nA  tests/performance/results/m14-q-preserved-evidence-verification.json\nA  tests/performance/results/m14-q-resume-harness-snapshot.json\nA  tests/performance/results/m14-q-storage-a.json\nA  tests/performance/results/m14-q-storage-mapping.json\nA  tests/performance/results/m14-q-storage-mixed.json\nA  tests/performance/results/m14-q-storage-near.json\nA  tests/performance/results/m14-q-storage-repeat.json\nA  tests/performance/results/m14-q-trigger.json\nA  tests/performance/results/pause-command-evidence/build-result.json\nA  tests/performance/results/pause-command-evidence/historical-method-result.json\nA  tests/performance/results/resume-command-evidence/browser-image-edit.json\nA  tests/performance/results/resume-command-evidence/browser-mixed.json\nA  tests/performance/results/resume-command-evidence/browser-profile.json\nA  tests/performance/results/resume-command-evidence/browser-repeat.json\nA  tests/performance/results/resume-command-evidence/build-final.json\nA  tests/performance/results/resume-command-evidence/build-native-dev-final.json\nA  tests/performance/results/resume-command-evidence/diff-check-closeout.json\nA  tests/performance/results/resume-command-evidence/diff-check-final.json\nA  tests/performance/results/resume-command-evidence/e2e-final.json\nA  tests/performance/results/resume-command-evidence/e2e-final.txt\nA  tests/performance/results/resume-command-evidence/evidence-closeout.json\nA  tests/performance/results/resume-command-evidence/evidence-final.json\nA  tests/performance/results/resume-command-evidence/fixture-integrity.json\nA  tests/performance/results/resume-command-evidence/format-closeout.json\nA  tests/performance/results/resume-command-evidence/format-final.json\nA  tests/performance/results/resume-command-evidence/format-initial.json\nA  tests/performance/results/resume-command-evidence/format-initial.txt\nA  tests/performance/results/resume-command-evidence/fsck-final.json\nA  tests/performance/results/resume-command-evidence/integrity-after-interruption.json\nA  tests/performance/results/resume-command-evidence/integrity-final.json\nA  tests/performance/results/resume-command-evidence/lifecycle-control.json\nA  tests/performance/results/resume-command-evidence/lifecycle-resume.json\nA  tests/performance/results/resume-command-evidence/lint-closeout.json\nA  tests/performance/results/resume-command-evidence/lint-final.json\nA  tests/performance/results/resume-command-evidence/lint-initial.json\nA  tests/performance/results/resume-command-evidence/lint-initial.txt\nA  tests/performance/results/resume-command-evidence/native-build-final.json\nA  tests/performance/results/resume-command-evidence/native-build-final.txt\nA  tests/performance/results/resume-command-evidence/native-restore-final.json\nA  tests/performance/results/resume-command-evidence/native-restore-final.txt\nA  tests/performance/results/resume-command-evidence/native-test-final.json\nA  tests/performance/results/resume-command-evidence/native-test-final.txt\nA  tests/performance/results/resume-command-evidence/storage-mapping.json\nA  tests/performance/results/resume-command-evidence/storage-mixed.json\nA  tests/performance/results/resume-command-evidence/storage-near.json\nA  tests/performance/results/resume-command-evidence/storage-repeat.json\nA  tests/performance/results/resume-command-evidence/test-final.json\nA  tests/performance/results/resume-command-evidence/typecheck-after-interruption.json\nA  tests/performance/results/resume-command-evidence/typecheck-before-measurement.json\nA  tests/performance/results/resume-command-evidence/typecheck-final.json\nA  tests/performance/results/resume-command-evidence/typecheck-resume-harness.json\nA  tests/performance/run-m14-q-base64.mjs\nA  tests/performance/run-m14-q-browser.mjs\nA  tests/performance/run-m14-q-command.ps1\nA  tests/performance/run-m14-q-delivery.mjs\nA  tests/performance/run-m14-q-native.mjs\nA  tests/performance/run-m14-q-storage.mjs\nA  tests/performance/run-m14-q-trigger.mjs\nA  tests/performance/run-m14-q-validation.mjs\nA  tests/performance/summarize-m14-q-diagnostics.mjs\nA  tests/performance/verify-m14-q-evidence.mjs\nA  tests/performance/verify-m14-q-measurement.mjs\n?? tests/performance/results/m14-q-aggregate.md\n?? tests/performance/results/m14-q-final-git-status.txt\n?? tests/performance/results/m14-q-pause-report.md\n?? tests/performance/results/m14-q-resumption-report-preserved.md\n?? tests/performance/results/resume-command-evidence/browser-image-edit.txt\n?? tests/performance/results/resume-command-evidence/browser-mixed.txt\n?? tests/performance/results/resume-command-evidence/browser-profile.txt\n?? tests/performance/results/resume-command-evidence/build-final.txt\n?? tests/performance/results/resume-command-evidence/build-native-dev-final.txt\n?? tests/performance/results/resume-command-evidence/diff-check-closeout.txt\n?? tests/performance/results/resume-command-evidence/diff-check-final.txt\n?? tests/performance/results/resume-command-evidence/evidence-closeout.txt\n?? tests/performance/results/resume-command-evidence/evidence-final.txt\n?? tests/performance/results/resume-command-evidence/format-closeout.txt\n?? tests/performance/results/resume-command-evidence/format-final.txt\n?? tests/performance/results/resume-command-evidence/fsck-final.txt\n?? tests/performance/results/resume-command-evidence/integrity-after-interruption.txt\n?? tests/performance/results/resume-command-evidence/integrity-final.txt\n?? tests/performance/results/resume-command-evidence/lifecycle-control.txt\n?? tests/performance/results/resume-command-evidence/lint-closeout.txt\n?? tests/performance/results/resume-command-evidence/lint-final.txt\n?? tests/performance/results/resume-command-evidence/storage-mapping.txt\n?? tests/performance/results/resume-command-evidence/storage-mixed.txt\n?? tests/performance/results/resume-command-evidence/storage-near.txt\n?? tests/performance/results/resume-command-evidence/test-final.txt\n?? tests/performance/results/resume-command-evidence/typecheck-after-interruption.txt\n?? tests/performance/results/resume-command-evidence/typecheck-final.txt\n?? tests/performance/results/resume-command-evidence/typecheck-resume-harness.txt",
+    "stagedFiles": [
+      "docs/BACKLOG.md",
+      "docs/CHANGELOG.md",
+      "docs/PERFORMANCE_AUDIT_M14-Q.md",
+      "docs/PROJECT_STATE.md",
+      "docs/ROADMAP.md",
+      "docs/TESTING_STRATEGY.md",
+      "tests/performance/.prettierignore",
+      "tests/performance/README.md",
+      "tests/performance/aggregate-m14-q-results.mjs",
+      "tests/performance/inspect-m14-q-results.mjs",
+      "tests/performance/m14-q-browser-fixture.mjs",
+      "tests/performance/m14-q-delivery.html",
+      "tests/performance/m14-q-delivery.ts",
+      "tests/performance/m14-q-measurement.mjs",
+      "tests/performance/m14-q-storage.html",
+      "tests/performance/m14-q-storage.ts",
+      "tests/performance/m14-q-trigger.html",
+      "tests/performance/m14-q-trigger.ts",
+      "tests/performance/results/m14-q-aggregate-final.md",
+      "tests/performance/results/m14-q-base64.json",
+      "tests/performance/results/m14-q-browser-a-interruption.json",
+      "tests/performance/results/m14-q-browser-a.json",
+      "tests/performance/results/m14-q-browser-image-edit.json",
+      "tests/performance/results/m14-q-browser-lifecycle-control.json",
+      "tests/performance/results/m14-q-browser-lifecycle-resume.json",
+      "tests/performance/results/m14-q-browser-lifecycle.json",
+      "tests/performance/results/m14-q-browser-mixed.json",
+      "tests/performance/results/m14-q-browser-process-memory.json",
+      "tests/performance/results/m14-q-browser-profile.json",
+      "tests/performance/results/m14-q-browser-repeat.json",
+      "tests/performance/results/m14-q-browser-resource-snapshots.json",
+      "tests/performance/results/m14-q-build-output.json",
+      "tests/performance/results/m14-q-checkpoint-inventory.json",
+      "tests/performance/results/m14-q-command-log-limitations.md",
+      "tests/performance/results/m14-q-delivery-a.json",
+      "tests/performance/results/m14-q-delivery-b.json",
+      "tests/performance/results/m14-q-diagnostics-summary.json",
+      "tests/performance/results/m14-q-final-boundary-review.json",
+      "tests/performance/results/m14-q-final-manifest.json",
+      "tests/performance/results/m14-q-historical-method-evidence.json",
+      "tests/performance/results/m14-q-mixed-fixture-diagnostic.json",
+      "tests/performance/results/m14-q-native.json",
+      "tests/performance/results/m14-q-pause-manifest-2026-09-12.json",
+      "tests/performance/results/m14-q-pause-manifest.json",
+      "tests/performance/results/m14-q-preserved-evidence-verification.json",
+      "tests/performance/results/m14-q-resume-harness-snapshot.json",
+      "tests/performance/results/m14-q-storage-a.json",
+      "tests/performance/results/m14-q-storage-mapping.json",
+      "tests/performance/results/m14-q-storage-mixed.json",
+      "tests/performance/results/m14-q-storage-near.json",
+      "tests/performance/results/m14-q-storage-repeat.json",
+      "tests/performance/results/m14-q-trigger.json",
+      "tests/performance/results/pause-command-evidence/build-result.json",
+      "tests/performance/results/pause-command-evidence/historical-method-result.json",
+      "tests/performance/results/resume-command-evidence/browser-image-edit.json",
+      "tests/performance/results/resume-command-evidence/browser-mixed.json",
+      "tests/performance/results/resume-command-evidence/browser-profile.json",
+      "tests/performance/results/resume-command-evidence/browser-repeat.json",
+      "tests/performance/results/resume-command-evidence/build-final.json",
+      "tests/performance/results/resume-command-evidence/build-native-dev-final.json",
+      "tests/performance/results/resume-command-evidence/diff-check-closeout.json",
+      "tests/performance/results/resume-command-evidence/diff-check-final.json",
+      "tests/performance/results/resume-command-evidence/e2e-final.json",
+      "tests/performance/results/resume-command-evidence/e2e-final.txt",
+      "tests/performance/results/resume-command-evidence/evidence-closeout.json",
+      "tests/performance/results/resume-command-evidence/evidence-final.json",
+      "tests/performance/results/resume-command-evidence/fixture-integrity.json",
+      "tests/performance/results/resume-command-evidence/format-closeout.json",
+      "tests/performance/results/resume-command-evidence/format-final.json",
+      "tests/performance/results/resume-command-evidence/format-initial.json",
+      "tests/performance/results/resume-command-evidence/format-initial.txt",
+      "tests/performance/results/resume-command-evidence/fsck-final.json",
+      "tests/performance/results/resume-command-evidence/integrity-after-interruption.json",
+      "tests/performance/results/resume-command-evidence/integrity-final.json",
+      "tests/performance/results/resume-command-evidence/lifecycle-control.json",
+      "tests/performance/results/resume-command-evidence/lifecycle-resume.json",
+      "tests/performance/results/resume-command-evidence/lint-closeout.json",
+      "tests/performance/results/resume-command-evidence/lint-final.json",
+      "tests/performance/results/resume-command-evidence/lint-initial.json",
+      "tests/performance/results/resume-command-evidence/lint-initial.txt",
+      "tests/performance/results/resume-command-evidence/native-build-final.json",
+      "tests/performance/results/resume-command-evidence/native-build-final.txt",
+      "tests/performance/results/resume-command-evidence/native-restore-final.json",
+      "tests/performance/results/resume-command-evidence/native-restore-final.txt",
+      "tests/performance/results/resume-command-evidence/native-test-final.json",
+      "tests/performance/results/resume-command-evidence/native-test-final.txt",
+      "tests/performance/results/resume-command-evidence/storage-mapping.json",
+      "tests/performance/results/resume-command-evidence/storage-mixed.json",
+      "tests/performance/results/resume-command-evidence/storage-near.json",
+      "tests/performance/results/resume-command-evidence/storage-repeat.json",
+      "tests/performance/results/resume-command-evidence/test-final.json",
+      "tests/performance/results/resume-command-evidence/typecheck-after-interruption.json",
+      "tests/performance/results/resume-command-evidence/typecheck-before-measurement.json",
+      "tests/performance/results/resume-command-evidence/typecheck-final.json",
+      "tests/performance/results/resume-command-evidence/typecheck-resume-harness.json",
+      "tests/performance/run-m14-q-base64.mjs",
+      "tests/performance/run-m14-q-browser.mjs",
+      "tests/performance/run-m14-q-command.ps1",
+      "tests/performance/run-m14-q-delivery.mjs",
+      "tests/performance/run-m14-q-native.mjs",
+      "tests/performance/run-m14-q-storage.mjs",
+      "tests/performance/run-m14-q-trigger.mjs",
+      "tests/performance/run-m14-q-validation.mjs",
+      "tests/performance/summarize-m14-q-diagnostics.mjs",
+      "tests/performance/verify-m14-q-evidence.mjs",
+      "tests/performance/verify-m14-q-measurement.mjs"
+    ],
+    "commit": "NONE",
+    "push": "NONE"
+  },
+  "continuity": {
+    "activeTask": "M14-Q",
+    "findingsAndDocumentationImpactReview": "Principal-reviewed and technically approved before this continuation",
+    "scope": "Repository-hygiene and checkpoint-content recommendation only",
+    "M14-P": "COMPLETE / PRINCIPAL-APPROVED",
+    "M15": "NOT STARTED",
+    "productionOrHarnessBehaviorChanged": false,
+    "rawEvidenceRewritten": false,
+    "originalFilesPreservedUnchanged": 138,
+    "originalDocumentationFilesEdited": [
+      "docs/CHANGELOG.md",
+      "docs/PERFORMANCE_AUDIT_M14-Q.md",
+      "docs/PROJECT_STATE.md",
+      "docs/ROADMAP.md",
+      "tests/performance/README.md"
+    ],
+    "newFiles": [
+      "tests/performance/results/m14-q-checkpoint-inventory.json",
+      "tests/performance/results/m14-q-historical-method-evidence.json"
+    ],
+    "deletedFiles": []
+  },
+  "verification": {
+    "evidenceVerifier": "PASS: 16 original evidence hashes; 69 parseable JSON files; completed replacement/new batch invariants; 7680 trigger invocations; 3 overwrite guards; resumption manifest preserved.",
+    "formatting": "PASS: all matched harness MJS/TS/HTML files use Prettier style. Docs/README/results excluded by existing policy; Markdown/JSON/link validation performed separately.",
+    "baselinePreservation": "PASS: 138 original files unchanged; five documentation files changed; no original result or executable harness rewritten.",
+    "portableValidation": "PASS: README inline Node command validates selected hashes/JSON and all report links; LF-only fallback addresses core.autocrlf=true.",
+    "diffCheck": "PASS",
+    "ignoredFiles": "Seven .log files and four desktop.ini files; all LOCAL ONLY; no git add -f.",
+    "originalVerifierLimitation": "Unmodified full-archive verifier requires omitted historical artifacts. README gives selected-content verification for a checkpoint-only checkout.",
+    "performanceMeasurements": "NONE; no browser/storage batches, full suite, builds or native commands rerun.",
+    "previousChecksScope": "Original checkpoint-content-review checks above; current correction checks recorded in evidenceLogCorrection."
+  },
+  "commandsExecuted": [
+    {
+      "command": "Get-Content -LiteralPath <user pasted-text.txt>; Get-Content docs/PERFORMANCE_AUDIT_M14-Q.md, docs/PROJECT_STATE.md, docs/CODING_AGENT_RULES.md; bounded reads of README, evidence, manifests and ignore files",
+      "result": "Read-only scope, continuity, evidence and verifier inspection."
+    },
+    {
+      "command": "rg --files -g AGENTS.md -g *M14* -g *audit*; ancestor Get-Item AGENTS.md probes; rg -n imports/results references and audit continuity terms",
+      "result": "No applicable AGENTS.md found; ancestor probe exit 1 for absent optional files; audit/source references inspected."
+    },
+    {
+      "command": "git status --short; git diff --stat; git diff --name-only; git diff -- docs; git diff --numstat; git branch --show-current; git rev-parse HEAD; git diff --cached --name-only",
+      "result": "master at recorded HEAD; index empty; only authorized documentation tracked changes and isolated audit untracked files."
+    },
+    {
+      "command": "git ls-files --others --exclude-standard tests/performance; git ls-files --others --ignored --exclude-standard tests/performance; git ls-files tests/performance; git check-ignore -v <all 11 ignored inventory paths>",
+      "result": "Complete inventory coverage; seven ignored logs and four ignored desktop.ini files; three historical benchmark prerequisites already tracked."
+    },
+    {
+      "command": "git config --get core.autocrlf; git ls-files .gitattributes",
+      "result": "true; no tracked .gitattributes. No Git configuration changed."
+    },
+    {
+      "command": "Python stdin inventory/classification/hash/link/UTF-16 derivation/document-update helpers; apply_patch documentation edits",
+      "result": "Bounded groups persisted; unique historical JSON parsed without value changes. Initial diagnostic console print failed with UnicodeEncodeError; explicit UTF-8 output corrected inspection, without writing raw evidence."
+    },
+    {
+      "command": "node tests/performance/verify-m14-q-evidence.mjs",
+      "result": "PASS; exit 0; no new measurements; overwrite guard subprocesses terminate before workload execution."
+    },
+    {
+      "command": "pnpm.cmd exec prettier --check \"tests/performance/*.mjs\" \"tests/performance/*.ts\" \"tests/performance/*.html\" --ignore-path .gitignore --ignore-path .prettierignore --ignore-path tests/performance/.prettierignore",
+      "result": "PASS; exit 0; no formatting writes."
+    },
+    {
+      "command": "python C:/Users/shiha/AppData/Local/Temp/m14-q-finalize-checkpoint-review.py; README inline Node validation via node --input-type=module; git diff --check; git status --short",
+      "result": "PASS; exact inventory, original-file preservation, current boundaries, selected hashes/JSON and repository evidence links verified."
+    }
+  ],
+  "principalSizeReview": [
+    {
+      "path": "tests/performance/results/m14-q-trigger.json",
+      "bytes": 2267491,
+      "recommendation": "COMMIT: Principal explicitly approved the 2,267,491-byte complete trigger matrix with the inventory. That approval is unchanged by this three-log correction."
+    }
+  ],
+  "nextAction": "Principal Git checkpoint authorization.",
+  "principalReadinessSelfCheck": "PASS",
+  "totals": {
+    "proposedCommit": {
+      "files": 106,
+      "bytes": 4670816
+    },
+    "newAdditions": {
+      "files": 101,
+      "bytes": 4138867
+    },
+    "modifiedTracked": {
+      "files": 5,
+      "bytes": 531949
+    },
+    "localOnly": {
+      "files": 39,
+      "bytes": 301306
+    },
+    "largest10Proposed": [
+      {
+        "path": "tests/performance/results/m14-q-trigger.json",
+        "bytes": 2267491
+      },
+      {
+        "path": "tests/performance/results/m14-q-storage-a.json",
+        "bytes": 537542
+      },
+      {
+        "path": "docs/CHANGELOG.md",
+        "bytes": 198771
+      },
+      {
+        "path": "docs/PROJECT_STATE.md",
+        "bytes": 167285
+      },
+      {
+        "path": "tests/performance/results/m14-q-aggregate-final.md",
+        "bytes": 159487
+      },
+      {
+        "path": "tests/performance/results/m14-q-storage-mixed.json",
+        "bytes": 146863
+      },
+      {
+        "path": "tests/performance/results/m14-q-storage-repeat.json",
+        "bytes": 135623
+      },
+      {
+        "path": "docs/TESTING_STRATEGY.md",
+        "bytes": 110570
+      },
+      {
+        "path": "tests/performance/results/m14-q-checkpoint-inventory.json",
+        "bytes": 108096
+      },
+      {
+        "path": "tests/performance/results/m14-q-delivery-b.json",
+        "bytes": 76646
+      }
+    ],
+    "largest10LocalOnly": [
+      {
+        "path": "tests/performance/results/m14-q-aggregate.md",
+        "bytes": 132488
+      },
+      {
+        "path": "tests/performance/results/m14-q-resumption-report-preserved.md",
+        "bytes": 44432
+      },
+      {
+        "path": "tests/performance/results/pause-command-evidence/build.log",
+        "bytes": 29022
+      },
+      {
+        "path": "tests/performance/results/m14-q-pause-report.md",
+        "bytes": 24734
+      },
+      {
+        "path": "tests/performance/results/pause-command-evidence/historical-method-current.log",
+        "bytes": 20452
+      },
+      {
+        "path": "tests/performance/results/resume-command-evidence/build-native-dev-final.txt",
+        "bytes": 14531
+      },
+      {
+        "path": "tests/performance/results/resume-command-evidence/build-final.txt",
+        "bytes": 13944
+      },
+      {
+        "path": "tests/performance/results/m14-q-final-git-status.txt",
+        "bytes": 8311
+      },
+      {
+        "path": "tests/performance/results/resume-command-evidence/fsck-final.txt",
+        "bytes": 7047
+      },
+      {
+        "path": "tests/performance/results/resume-command-evidence/fixture-integrity.log",
+        "bytes": 661
+      }
+    ]
+  },
+  "evidenceLogCorrection": {
+    "phase": "COMPLETE; corrected 106-file staged set verified; stop for Principal Git checkpoint authorization",
+    "previousApprovedFiles": 109,
+    "expectedStagedFiles": 106,
+    "removedPaths": [
+      "tests/performance/results/resume-command-evidence/build-final.txt",
+      "tests/performance/results/resume-command-evidence/build-native-dev-final.txt",
+      "tests/performance/results/resume-command-evidence/test-final.txt"
+    ],
+    "rawLogsUnchanged": true,
+    "commit": "NONE",
+    "push": "NONE",
+    "reason": "Principal prohibited committing with a failed cached diff check and prohibited editing raw logs. Exactly three logs become LOCAL ONLY; no replacement files.",
+    "modifiedFiles": [
+      "docs/PERFORMANCE_AUDIT_M14-Q.md",
+      "tests/performance/README.md",
+      "tests/performance/results/m14-q-checkpoint-inventory.json"
+    ],
+    "previouslyExcludedFilesAdded": [],
+    "retainedEvidence": [
+      "tests/performance/results/resume-command-evidence/build-final.json",
+      "tests/performance/results/resume-command-evidence/build-native-dev-final.json",
+      "tests/performance/results/resume-command-evidence/test-final.json",
+      "tests/performance/results/m14-q-build-output.json",
+      "docs/PERFORMANCE_AUDIT_M14-Q.md"
+    ],
+    "retainedOutcomeSummary": {
+      "source": "Existing command metadata, build-output inventory and already accepted audit validation table; no new measurement or inferred test count from exit code.",
+      "productionBuild": "PASS including output validator; exit 0; 2.5153988999999997 seconds",
+      "nativeDevelopmentBuild": "PASS including output validator; exit 0; 27.8369642 seconds",
+      "vitest": "68 files / 876 tests passed; one file/test skipped; exit 0; 35.2537064 seconds",
+      "warnings": "Previously disclosed Vite chunk warning, Node/Playwright warnings and native SDK bootstrap limitations remain in the audit; no raw console output replacement generated."
+    },
+    "checks": {
+      "inventoryAndStagedContent": "PASS: 106 files, exact corrected set and content",
+      "rawPreservation": "PASS: all three removed logs and all earlier local-only files unchanged",
+      "links": "PASS: report/README and all six authorized docs resolve to selected or existing tracked content",
+      "evidenceVerifier": "PASS: 16 original evidence hashes; 69 parseable JSON files; completed replacement/new batch invariants; 7680 trigger invocations; 3 overwrite guards; resumption manifest preserved.",
+      "cachedDiffCheck": "PASS: exit 0",
+      "worktreeDiffCheck": "PASS: exit 0",
+      "previousWhitespaceFailure": "Resolved by excluding the exact three raw logs; their original whitespace was not changed."
+    }
+  },
+  "gitStateBasis": "Per-file gitState records original classification before staging; current staged paths and status are in git and evidenceLogCorrection. Historical manifests and original review commands remain immutable provenance.",
+  "commandsExecutedScope": "Original checkpoint-content review. Current correction: git restore --staged -- <exact three logs>; targeted documentation/index edits and git add -- <three edited paths>; read-only hashes/inventory/link/evidence verification; git diff --cached --check; git diff --check; git status --short. No -f, commit or push."
+}

@@ -1,0 +1,131 @@
+Command: pnpm.cmd lint
+Started UTC: 2026-09-12T09:14:40.788Z
+OLLAMA_LIVE_MODEL empty in this child process.
+$ eslint . --max-warnings=0
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\m14-q-measurement.mjs
+  14:35  error  'requestAnimationFrame' is not defined  no-undef
+  15:3   error  'window' is not defined                 no-undef
+  17:18  error  'window' is not defined                 no-undef
+  18:33  error  'document' is not defined               no-undef
+  18:73  error  'window' is not defined                 no-undef
+  20:17  error  'performance' is not defined            no-undef
+  21:3   error  'window' is not defined                 no-undef
+  23:16  error  'window' is not defined                 no-undef
+  24:14  error  'performance' is not defined            no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\run-m14-q-base64.mjs
+  24:53   error  'performance' is not defined  no-undef
+  24:140  error  'performance' is not defined  no-undef
+  24:245  error  'performance' is not defined  no-undef
+  25:25   error  'atob' is not defined         no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\run-m14-q-browser.mjs
+   25:17   error  'performance' is not defined            no-undef
+   28:47   error  'performance' is not defined            no-undef
+   30:18   error  'URL' is not defined                    no-undef
+   31:43   error  'performance' is not defined            no-undef
+   36:56   error  'requestAnimationFrame' is not defined  no-undef
+   36:87   error  'performance' is not defined            no-undef
+   40:21   error  'indexedDB' is not defined              no-undef
+   47:26   error  'OffscreenCanvas' is not defined        no-undef
+   59:103  error  'TextEncoder' is not defined            no-undef
+   69:50   error  'document' is not defined               no-undef
+   74:21   error  'document' is not defined               no-undef
+   76:19   error  'performance' is not defined            no-undef
+   77:60   error  'HTMLInputElement' is not defined       no-undef
+   77:149  error  'Event' is not defined                  no-undef
+   80:28   error  'requestAnimationFrame' is not defined  no-undef
+   80:66   error  'performance' is not defined            no-undef
+   80:196  error  'document' is not defined               no-undef
+   81:12   error  'performance' is not defined            no-undef
+   98:23   error  'performance' is not defined            no-undef
+   99:9    error  'document' is not defined               no-undef
+  101:32   error  'requestAnimationFrame' is not defined  no-undef
+  101:70   error  'performance' is not defined            no-undef
+  101:176  error  'document' is not defined               no-undef
+  101:224  error  'document' is not defined               no-undef
+  102:16   error  'performance' is not defined            no-undef
+  157:73   error  'performance' is not defined            no-undef
+  157:146  error  'performance' is not defined            no-undef
+  158:154  error  'performance' is not defined            no-undef
+  158:173  error  'document' is not defined               no-undef
+  158:242  error  'document' is not defined               no-undef
+  158:294  error  'requestAnimationFrame' is not defined  no-undef
+  158:322  error  'performance' is not defined            no-undef
+  158:406  error  'requestAnimationFrame' is not defined  no-undef
+  158:437  error  'performance' is not defined            no-undef
+  161:81   error  'performance' is not defined            no-undef
+  161:104  error  'document' is not defined               no-undef
+  161:218  error  'document' is not defined               no-undef
+  161:279  error  'requestAnimationFrame' is not defined  no-undef
+  161:310  error  'performance' is not defined            no-undef
+  182:96   error  'performance' is not defined            no-undef
+  182:165  error  'performance' is not defined            no-undef
+  186:70   error  'setTimeout' is not defined             no-undef
+  193:81   error  'URL' is not defined                    no-undef
+  193:106  error  'URL' is not defined                    no-undef
+  193:127  error  'URL' is not defined                    no-undef
+  193:152  error  'URL' is not defined                    no-undef
+  193:158  error  'URL' is not defined                    no-undef
+  193:236  error  'URL' is not defined                    no-undef
+  195:48   error  'chrome' is not defined                 no-undef
+  200:27   error  'Buffer' is not defined                 no-undef
+  200:92   error  'OffscreenCanvas' is not defined        no-undef
+  205:63   error  'DataTransfer' is not defined           no-undef
+  205:102  error  'File' is not defined                   no-undef
+  205:196  error  'document' is not defined               no-undef
+  205:296  error  'Event' is not defined                  no-undef
+  207:60   error  'document' is not defined               no-undef
+  222:24   error  'chrome' is not defined                 no-undef
+  225:27   error  'performance' is not defined            no-undef
+  227:38   error  'performance' is not defined            no-undef
+  232:53   error  'performance' is not defined            no-undef
+  232:135  error  'performance' is not defined            no-undef
+  237:25   error  'performance' is not defined            no-undef
+  240:31   error  'setTimeout' is not defined             no-undef
+  241:36   error  'MutationObserver' is not defined       no-undef
+  241:66   error  'document' is not defined               no-undef
+  241:123  error  'clearTimeout' is not defined           no-undef
+  242:32   error  'document' is not defined               no-undef
+  243:15   error  'document' is not defined               no-undef
+  245:20   error  'document' is not defined               no-undef
+  245:89   error  'document' is not defined               no-undef
+  245:139  error  'requestAnimationFrame' is not defined  no-undef
+  247:25   error  'performance' is not defined            no-undef
+  259:25   error  'performance' is not defined            no-undef
+  260:24   error  'chrome' is not defined                 no-undef
+  262:29   error  'setTimeout' is not defined             no-undef
+  263:104  error  'clearTimeout' is not defined           no-undef
+  266:22   error  'performance' is not defined            no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\run-m14-q-native.mjs
+  10:14  error  'Buffer' is not defined       no-undef
+  11:16  error  'Buffer' is not defined       no-undef
+  14:17  error  'performance' is not defined  no-undef
+  21:18  error  'performance' is not defined  no-undef
+  21:60  error  'Buffer' is not defined       no-undef
+  25:21  error  'Buffer' is not defined       no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\run-m14-q-storage.mjs
+  29:97   error  'performance' is not defined            no-undef
+  29:149  error  'performance' is not defined            no-undef
+  29:250  error  'requestAnimationFrame' is not defined  no-undef
+  29:306  error  'requestAnimationFrame' is not defined  no-undef
+  61:48   error  'performance' is not defined            no-undef
+  62:113  error  'performance' is not defined            no-undef
+  63:41   error  'performance' is not defined            no-undef
+  67:68   error  'cancelAnimationFrame' is not defined   no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\run-m14-q-validation.mjs
+  35:15   error  'performance' is not defined  no-undef
+  41:139  error  'performance' is not defined  no-undef
+
+C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\tests\performance\verify-m14-q-measurement.mjs
+  19:3  error  'process' is not defined  no-undef
+  26:3  error  'process' is not defined  no-undef
+  36:3  error  'process' is not defined  no-undef
+
+✖ 109 problems (109 errors, 0 warnings)
+
+[ELIFECYCLE] Command failed with exit code 1.

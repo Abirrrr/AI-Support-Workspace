@@ -1,0 +1,8 @@
+{
+  "command": "dotnet restore native/windows-clipboard-companion/AI.SupportWorkspace.ClipboardCompanion.sln",
+  "startedUtc": "2026-09-12T09:19:36.105Z",
+  "finishedUtc": "2026-09-12T09:19:39.414Z",
+  "elapsedSeconds": 3.3088737,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

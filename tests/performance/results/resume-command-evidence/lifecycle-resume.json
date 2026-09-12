@@ -1,0 +1,7 @@
+﻿{
+  "command": "node tests/performance/run-m14-q-browser.mjs lifecycle lifecycle-resume",
+  "startedUtc": "2026-09-12T03:08:09.9703425Z",
+  "finishedUtc": "2026-09-12T03:09:25.3057886Z",
+  "elapsedSeconds": 75.33428889999999,
+  "exitCode": 0
+}

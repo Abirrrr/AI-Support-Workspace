@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd build",
+  "startedUtc": "2026-09-12T09:21:00.497Z",
+  "finishedUtc": "2026-09-12T09:21:03.013Z",
+  "elapsedSeconds": 2.5153988999999997,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

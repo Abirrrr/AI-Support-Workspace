@@ -1,0 +1,97 @@
+{
+  "batch": "image-edit",
+  "started": "2026-09-12T09:14:12.667Z",
+  "failures": [],
+  "tiers": [
+    {
+      "tier": "mixed-image-edit",
+      "fixture": {
+        "count": 1009,
+        "textCount": 1000,
+        "imageCount": 9,
+        "recordJsonBytes": 1745688,
+        "imageBytes": 4883,
+        "images": [
+          {
+            "mimeType": "image/png",
+            "bytes": 280,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/jpeg",
+            "bytes": 784,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/webp",
+            "bytes": 566,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/png",
+            "bytes": 282,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/jpeg",
+            "bytes": 785,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/webp",
+            "bytes": 560,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/png",
+            "bytes": 279,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/jpeg",
+            "bytes": 783,
+            "width": 64,
+            "height": 64
+          },
+          {
+            "mimeType": "image/webp",
+            "bytes": 564,
+            "width": 64,
+            "height": 64
+          }
+        ],
+        "seed": "index-based v1; fixed 2026-09-01; four-way rich/plain/long/Unicode"
+      },
+      "imageEdit": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          82.30000001192093, 55.30000001192093, 44.29999998211861, 57.5,
+          59.30000001192093, 44.20000001788139, 60.400000005960464, 58,
+          43.900000005960464, 44.20000001788139, 44, 43.79999998211861,
+          59.79999998211861, 43.900000005960464, 44.900000005960464,
+          44.30000001192093, 44.099999994039536, 43.900000005960464, 45,
+          59.400000005960464, 64.5, 101.7000000178814, 176.40000000596046,
+          176.40000000596046, 240.80000001192093, 157.30000001192093,
+          174.2000000178814, 135, 174, 121.5
+        ],
+        "minMs": 43.79999998211861,
+        "medianMs": 58,
+        "meanMs": 84.810000004371,
+        "maxMs": 240.80000001192093,
+        "p95Ms": 176.40000000596046
+      }
+    }
+  ],
+  "typing": [],
+  "lifecycle": [],
+  "note": "Supplemental missing Image Edit latency only; 1000 Text + nine 64x64 Images; no repeat of completed Text/search/navigation distributions.",
+  "finished": "2026-09-12T09:14:19.022Z"
+}

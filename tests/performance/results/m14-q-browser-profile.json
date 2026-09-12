@@ -1,0 +1,669 @@
+{
+  "batch": "profile",
+  "started": "2026-09-12T03:25:54.867Z",
+  "failures": [],
+  "tiers": [
+    {
+      "tier": 1000,
+      "fixture": {
+        "count": 1000,
+        "textCount": 1000,
+        "imageCount": 0,
+        "recordJsonBytes": 1743393,
+        "imageBytes": 0,
+        "images": [],
+        "seed": "index-based v1; fixed 2026-09-01; four-way rich/plain/long/Unicode"
+      },
+      "operations": [
+        {
+          "query": "common",
+          "ms": 590.8000000119209,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 3187,
+            "Nodes": 28158,
+            "LayoutDuration": 0.000278,
+            "ScriptDuration": 0.017939,
+            "TaskDuration": 0.021014,
+            "JSHeapUsedSize": 15452332,
+            "JSHeapTotalSize": 24432640,
+            "documents": 2,
+            "nodes": 28158,
+            "jsEventListeners": 3187
+          },
+          "after": {
+            "liveElements": 22035,
+            "JSEventListeners": 6191,
+            "Nodes": 57160,
+            "LayoutDuration": 0.461857,
+            "ScriptDuration": 0.05935,
+            "TaskDuration": 0.613757,
+            "JSHeapUsedSize": 21194776,
+            "JSHeapTotalSize": 25219072,
+            "documents": 2,
+            "nodes": 57160,
+            "jsEventListeners": 6191
+          },
+          "deltaMs": {
+            "TaskDuration": 592.743,
+            "ScriptDuration": 41.411,
+            "LayoutDuration": 461.579
+          }
+        },
+        {
+          "query": "common",
+          "ms": 517.3000000119209,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 3605,
+            "Nodes": 57163,
+            "LayoutDuration": 0.461986,
+            "ScriptDuration": 0.074936,
+            "TaskDuration": 0.648625,
+            "JSHeapUsedSize": 12069020,
+            "JSHeapTotalSize": 25219072,
+            "documents": 2,
+            "nodes": 57163,
+            "jsEventListeners": 3605
+          },
+          "after": {
+            "liveElements": 22035,
+            "JSEventListeners": 6180,
+            "Nodes": 57082,
+            "LayoutDuration": 0.852071,
+            "ScriptDuration": 0.112264,
+            "TaskDuration": 1.180866,
+            "JSHeapUsedSize": 17760892,
+            "JSHeapTotalSize": 29937664,
+            "documents": 1,
+            "nodes": 57082,
+            "jsEventListeners": 6180
+          },
+          "deltaMs": {
+            "TaskDuration": 532.241,
+            "ScriptDuration": 37.328,
+            "LayoutDuration": 390.08500000000004
+          }
+        },
+        {
+          "query": "common",
+          "ms": 552.8000000119209,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 3267,
+            "Nodes": 56064,
+            "LayoutDuration": 0.852192,
+            "ScriptDuration": 0.128868,
+            "TaskDuration": 1.216474,
+            "JSHeapUsedSize": 12099844,
+            "JSHeapTotalSize": 22597632,
+            "documents": 1,
+            "nodes": 56064,
+            "jsEventListeners": 3267
+          },
+          "after": {
+            "liveElements": 22035,
+            "JSEventListeners": 6180,
+            "Nodes": 58169,
+            "LayoutDuration": 1.264097,
+            "ScriptDuration": 0.174442,
+            "TaskDuration": 1.785256,
+            "JSHeapUsedSize": 17802460,
+            "JSHeapTotalSize": 26267648,
+            "documents": 1,
+            "nodes": 58169,
+            "jsEventListeners": 6180
+          },
+          "deltaMs": {
+            "TaskDuration": 568.7819999999999,
+            "ScriptDuration": 45.574000000000005,
+            "LayoutDuration": 411.9050000000001
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 17.599999994039536,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 6180,
+            "Nodes": 57082,
+            "LayoutDuration": 1.264253,
+            "ScriptDuration": 0.187481,
+            "TaskDuration": 1.824953,
+            "JSHeapUsedSize": 13745864,
+            "JSHeapTotalSize": 20762624,
+            "documents": 1,
+            "nodes": 57082,
+            "jsEventListeners": 6180
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 6187,
+            "Nodes": 57084,
+            "LayoutDuration": 1.264364,
+            "ScriptDuration": 0.204093,
+            "TaskDuration": 1.859081,
+            "JSHeapUsedSize": 17011196,
+            "JSHeapTotalSize": 24170496,
+            "documents": 1,
+            "nodes": 57084,
+            "jsEventListeners": 6187
+          },
+          "deltaMs": {
+            "TaskDuration": 34.127999999999936,
+            "ScriptDuration": 16.611999999999988,
+            "LayoutDuration": 0.11099999999997223
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 36.80000001192093,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 9187,
+            "Nodes": 57051,
+            "LayoutDuration": 1.691442,
+            "ScriptDuration": 0.246279,
+            "TaskDuration": 2.488616,
+            "JSHeapUsedSize": 22450404,
+            "JSHeapTotalSize": 28626944,
+            "documents": 1,
+            "nodes": 57051,
+            "jsEventListeners": 9187
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 7181,
+            "Nodes": 57053,
+            "LayoutDuration": 1.691628,
+            "ScriptDuration": 0.281299,
+            "TaskDuration": 2.547216,
+            "JSHeapUsedSize": 12410960,
+            "JSHeapTotalSize": 25219072,
+            "documents": 1,
+            "nodes": 57053,
+            "jsEventListeners": 7181
+          },
+          "deltaMs": {
+            "TaskDuration": 58.60000000000021,
+            "ScriptDuration": 35.020000000000024,
+            "LayoutDuration": 0.18600000000001948
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 36.80000001192093,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 6183,
+            "Nodes": 57050,
+            "LayoutDuration": 2.236787,
+            "ScriptDuration": 0.359271,
+            "TaskDuration": 3.310299,
+            "JSHeapUsedSize": 17810808,
+            "JSHeapTotalSize": 29413376,
+            "documents": 1,
+            "nodes": 57050,
+            "jsEventListeners": 6183
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 5905,
+            "Nodes": 57052,
+            "LayoutDuration": 2.236969,
+            "ScriptDuration": 0.393941,
+            "TaskDuration": 3.367612,
+            "JSHeapUsedSize": 12273528,
+            "JSHeapTotalSize": 24432640,
+            "documents": 1,
+            "nodes": 57052,
+            "jsEventListeners": 5905
+          },
+          "deltaMs": {
+            "TaskDuration": 57.312999999999725,
+            "ScriptDuration": 34.66999999999998,
+            "LayoutDuration": 0.1820000000001265
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 34.30000001192093,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 6183,
+            "Nodes": 60312,
+            "LayoutDuration": 2.69112,
+            "ScriptDuration": 0.449832,
+            "TaskDuration": 4.0219,
+            "JSHeapUsedSize": 17660216,
+            "JSHeapTotalSize": 24956928,
+            "documents": 1,
+            "nodes": 60312,
+            "jsEventListeners": 6183
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 6187,
+            "Nodes": 57053,
+            "LayoutDuration": 2.691473,
+            "ScriptDuration": 0.48156,
+            "TaskDuration": 4.069973,
+            "JSHeapUsedSize": 11931448,
+            "JSHeapTotalSize": 24170496,
+            "documents": 1,
+            "nodes": 57053,
+            "jsEventListeners": 6187
+          },
+          "deltaMs": {
+            "TaskDuration": 48.07300000000048,
+            "ScriptDuration": 31.72799999999998,
+            "LayoutDuration": 0.35299999999960363
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 23,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 6180,
+            "Nodes": 58082,
+            "LayoutDuration": 3.334479,
+            "ScriptDuration": 0.548651,
+            "TaskDuration": 4.913121,
+            "JSHeapUsedSize": 17318276,
+            "JSHeapTotalSize": 25481216,
+            "documents": 1,
+            "nodes": 58082,
+            "jsEventListeners": 6180
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 6184,
+            "Nodes": 57083,
+            "LayoutDuration": 3.33464,
+            "ScriptDuration": 0.570151,
+            "TaskDuration": 4.938957,
+            "JSHeapUsedSize": 20506384,
+            "JSHeapTotalSize": 28626944,
+            "documents": 1,
+            "nodes": 57083,
+            "jsEventListeners": 6184
+          },
+          "deltaMs": {
+            "TaskDuration": 25.83599999999997,
+            "ScriptDuration": 21.499999999999964,
+            "LayoutDuration": 0.1609999999998557
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 29.400000005960464,
+          "before": {
+            "liveElements": 22035,
+            "JSEventListeners": 6184,
+            "Nodes": 86084,
+            "LayoutDuration": 4.132972,
+            "ScriptDuration": 0.650442,
+            "TaskDuration": 5.962055,
+            "JSHeapUsedSize": 12054956,
+            "JSHeapTotalSize": 30986240,
+            "documents": 1,
+            "nodes": 86084,
+            "jsEventListeners": 6184
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 6188,
+            "Nodes": 86087,
+            "LayoutDuration": 4.133115,
+            "ScriptDuration": 0.678692,
+            "TaskDuration": 6.00919,
+            "JSHeapUsedSize": 15249956,
+            "JSHeapTotalSize": 30986240,
+            "documents": 1,
+            "nodes": 86087,
+            "jsEventListeners": 6188
+          },
+          "deltaMs": {
+            "TaskDuration": 47.13499999999993,
+            "ScriptDuration": 28.249999999999996,
+            "LayoutDuration": 0.14300000000044832
+          }
+        }
+      ]
+    },
+    {
+      "tier": 10000,
+      "fixture": {
+        "count": 10000,
+        "textCount": 10000,
+        "imageCount": 0,
+        "recordJsonBytes": 17443893,
+        "imageBytes": 0,
+        "images": [],
+        "seed": "index-based v1; fixed 2026-09-01; four-way rich/plain/long/Unicode"
+      },
+      "operations": [
+        {
+          "query": "common",
+          "ms": 6161.200000017881,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 30182,
+            "Nodes": 280081,
+            "LayoutDuration": 0.00026,
+            "ScriptDuration": 0.190048,
+            "TaskDuration": 0.219543,
+            "JSHeapUsedSize": 84879412,
+            "JSHeapTotalSize": 126873600,
+            "documents": 1,
+            "nodes": 280081,
+            "jsEventListeners": 30182
+          },
+          "after": {
+            "liveElements": 220035,
+            "JSEventListeners": 60172,
+            "Nodes": 560281,
+            "LayoutDuration": 4.398653,
+            "ScriptDuration": 0.853494,
+            "TaskDuration": 6.397441,
+            "JSHeapUsedSize": 88065384,
+            "JSHeapTotalSize": 139194368,
+            "documents": 1,
+            "nodes": 560281,
+            "jsEventListeners": 60172
+          },
+          "deltaMs": {
+            "TaskDuration": 6177.898,
+            "ScriptDuration": 663.446,
+            "LayoutDuration": 4398.393
+          }
+        },
+        {
+          "query": "common",
+          "ms": 6985.5999999940395,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 60176,
+            "Nodes": 560084,
+            "LayoutDuration": 4.398758,
+            "ScriptDuration": 1.022581,
+            "TaskDuration": 6.586416,
+            "JSHeapUsedSize": 116675920,
+            "JSHeapTotalSize": 150990848,
+            "documents": 1,
+            "nodes": 560084,
+            "jsEventListeners": 60176
+          },
+          "after": {
+            "liveElements": 220035,
+            "JSEventListeners": 90180,
+            "Nodes": 850086,
+            "LayoutDuration": 9.940171,
+            "ScriptDuration": 1.446325,
+            "TaskDuration": 13.577692,
+            "JSHeapUsedSize": 165670620,
+            "JSHeapTotalSize": 219381760,
+            "documents": 1,
+            "nodes": 850086,
+            "jsEventListeners": 90180
+          },
+          "deltaMs": {
+            "TaskDuration": 6991.276000000001,
+            "ScriptDuration": 423.74400000000014,
+            "LayoutDuration": 5541.413
+          }
+        },
+        {
+          "query": "common",
+          "ms": 6499.699999988079,
+          "before": {
+            "liveElements": 35,
+            "JSEventListeners": 90184,
+            "Nodes": 850089,
+            "LayoutDuration": 9.940312,
+            "ScriptDuration": 1.648908,
+            "TaskDuration": 13.793693,
+            "JSHeapUsedSize": 187837024,
+            "JSHeapTotalSize": 245071872,
+            "documents": 1,
+            "nodes": 850089,
+            "jsEventListeners": 90184
+          },
+          "after": {
+            "liveElements": 220035,
+            "JSEventListeners": 90172,
+            "Nodes": 840398,
+            "LayoutDuration": 15.036066,
+            "ScriptDuration": 2.172046,
+            "TaskDuration": 20.30154,
+            "JSHeapUsedSize": 119407532,
+            "JSHeapTotalSize": 147058688,
+            "documents": 1,
+            "nodes": 840398,
+            "jsEventListeners": 90172
+          },
+          "deltaMs": {
+            "TaskDuration": 6507.847,
+            "ScriptDuration": 523.1379999999999,
+            "LayoutDuration": 5095.753999999999
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 247.19999998807907,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 120176,
+            "Nodes": 840082,
+            "LayoutDuration": 15.036176,
+            "ScriptDuration": 2.30465,
+            "TaskDuration": 20.55103,
+            "JSHeapUsedSize": 160944268,
+            "JSHeapTotalSize": 227770368,
+            "documents": 1,
+            "nodes": 840082,
+            "jsEventListeners": 120176
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 120183,
+            "Nodes": 840084,
+            "LayoutDuration": 15.036282,
+            "ScriptDuration": 2.550967,
+            "TaskDuration": 20.814004,
+            "JSHeapUsedSize": 187068292,
+            "JSHeapTotalSize": 255819776,
+            "documents": 1,
+            "nodes": 840084,
+            "jsEventListeners": 120183
+          },
+          "deltaMs": {
+            "TaskDuration": 262.9739999999998,
+            "ScriptDuration": 246.3169999999999,
+            "LayoutDuration": 0.10600000000060561
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 206.89999997615814,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 150187,
+            "Nodes": 1130056,
+            "LayoutDuration": 19.575164,
+            "ScriptDuration": 3.504974,
+            "TaskDuration": 27.474738,
+            "JSHeapUsedSize": 235822932,
+            "JSHeapTotalSize": 301666304,
+            "documents": 1,
+            "nodes": 1130056,
+            "jsEventListeners": 150187
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 150194,
+            "Nodes": 1130058,
+            "LayoutDuration": 19.575263,
+            "ScriptDuration": 3.710935,
+            "TaskDuration": 27.695696,
+            "JSHeapUsedSize": 262179032,
+            "JSHeapTotalSize": 330502144,
+            "documents": 1,
+            "nodes": 1130058,
+            "jsEventListeners": 150194
+          },
+          "deltaMs": {
+            "TaskDuration": 220.9580000000031,
+            "ScriptDuration": 205.9610000000003,
+            "LayoutDuration": 0.09899999999873899
+          }
+        },
+        {
+          "query": "rareterm",
+          "ms": 157.30000001192093,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 179785,
+            "Nodes": 1377064,
+            "LayoutDuration": 25.302331,
+            "ScriptDuration": 4.535315,
+            "TaskDuration": 35.313108,
+            "JSHeapUsedSize": 121062424,
+            "JSHeapTotalSize": 234352640,
+            "documents": 1,
+            "nodes": 1377064,
+            "jsEventListeners": 179785
+          },
+          "after": {
+            "liveElements": 57,
+            "JSEventListeners": 174913,
+            "Nodes": 1377066,
+            "LayoutDuration": 25.302443,
+            "ScriptDuration": 4.691548,
+            "TaskDuration": 35.492896,
+            "JSHeapUsedSize": 153085164,
+            "JSHeapTotalSize": 234586112,
+            "documents": 1,
+            "nodes": 1377066,
+            "jsEventListeners": 174913
+          },
+          "deltaMs": {
+            "TaskDuration": 179.78800000000206,
+            "ScriptDuration": 156.2330000000003,
+            "LayoutDuration": 0.11200000000144428
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 175.10000002384186,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 151937,
+            "Nodes": 1667038,
+            "LayoutDuration": 29.199096,
+            "ScriptDuration": 5.397742,
+            "TaskDuration": 41.015706,
+            "JSHeapUsedSize": 198458480,
+            "JSHeapTotalSize": 267616256,
+            "documents": 1,
+            "nodes": 1667038,
+            "jsEventListeners": 151937
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 120223,
+            "Nodes": 1130391,
+            "LayoutDuration": 29.199218,
+            "ScriptDuration": 5.57179,
+            "TaskDuration": 41.621754,
+            "JSHeapUsedSize": 120750152,
+            "JSHeapTotalSize": 235925504,
+            "documents": 1,
+            "nodes": 1130391,
+            "jsEventListeners": 120223
+          },
+          "deltaMs": {
+            "TaskDuration": 606.0480000000013,
+            "ScriptDuration": 174.04799999999997,
+            "LayoutDuration": 0.12199999999751299
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 231.90000000596046,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 90334,
+            "Nodes": 1420392,
+            "LayoutDuration": 33.333282,
+            "ScriptDuration": 5.976934,
+            "TaskDuration": 47.021656,
+            "JSHeapUsedSize": 166590320,
+            "JSHeapTotalSize": 247169024,
+            "documents": 1,
+            "nodes": 1420392,
+            "jsEventListeners": 90334
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 90184,
+            "Nodes": 850084,
+            "LayoutDuration": 33.333398,
+            "ScriptDuration": 6.197304,
+            "TaskDuration": 47.456401,
+            "JSHeapUsedSize": 119004012,
+            "JSHeapTotalSize": 225177600,
+            "documents": 1,
+            "nodes": 850084,
+            "jsEventListeners": 90184
+          },
+          "deltaMs": {
+            "TaskDuration": 434.7449999999995,
+            "ScriptDuration": 220.36999999999995,
+            "LayoutDuration": 0.1160000000055561
+          }
+        },
+        {
+          "query": "zzznomatch",
+          "ms": 146.7000000178814,
+          "before": {
+            "liveElements": 220035,
+            "JSEventListeners": 90180,
+            "Nodes": 850426,
+            "LayoutDuration": 37.085742,
+            "ScriptDuration": 6.542388,
+            "TaskDuration": 52.416575,
+            "JSHeapUsedSize": 165638516,
+            "JSHeapTotalSize": 233537536,
+            "documents": 1,
+            "nodes": 850426,
+            "jsEventListeners": 90180
+          },
+          "after": {
+            "liveElements": 35,
+            "JSEventListeners": 90184,
+            "Nodes": 850429,
+            "LayoutDuration": 37.08585,
+            "ScriptDuration": 6.688035,
+            "TaskDuration": 52.584527,
+            "JSHeapUsedSize": 192028988,
+            "JSHeapTotalSize": 233537536,
+            "documents": 1,
+            "nodes": 850429,
+            "jsEventListeners": 90184
+          },
+          "deltaMs": {
+            "TaskDuration": 167.95199999999966,
+            "ScriptDuration": 145.6470000000003,
+            "LayoutDuration": 0.10799999999733245
+          }
+        }
+      ]
+    }
+  ],
+  "typing": [],
+  "lifecycle": [],
+  "note": "Separate diagnostic metrics pass; excludes these samples from uninstrumented UI distributions. Task/Script/Layout counters share one CDP session per page.",
+  "finished": "2026-09-12T03:27:07.091Z"
+}

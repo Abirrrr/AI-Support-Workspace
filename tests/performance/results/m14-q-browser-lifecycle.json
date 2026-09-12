@@ -1,0 +1,120 @@
+{
+  "batch": "lifecycle",
+  "started": "2026-09-10T14:57:40.243Z",
+  "failures": [
+    {
+      "message": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#rich')\u001b[22m\n\u001b[2m    - locator resolved to <div id=\"rich\" contenteditable=\"true\">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    57 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#rich')\u001b[22m\n\u001b[2m    - locator resolved to <div id=\"rich\" contenteditable=\"true\">…</div>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    57 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at C:\\Users\\shiha\\My Drive\\_Workspace\\AI-Support-Workspace\\tests\\performance\\run-m14-q-browser.mjs:140:63",
+      "completedSamplesInInterruptedOperation": []
+    }
+  ],
+  "tiers": [],
+  "typing": [
+    {
+      "extension": false,
+      "target": "#input",
+      "text": "ordinary text ",
+      "protocolRoundtrip": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          15.246700000000033, 14.213200000000029, 14.653599999999983,
+          17.313100000000077, 15.677800000000047, 17.41680000000008,
+          17.967899999999986, 26.954600000000028, 22.827999999999975,
+          19.4061999999999, 18.047199999999975, 22.369199999999864,
+          20.19249999999988, 14.832499999999982, 16.121399999999994,
+          14.69900000000007, 11.834100000000035, 12.627399999999852,
+          11.263899999999921, 11.558500000000095, 11.527000000000044,
+          12.313599999999951, 11.373399999999947, 13.197999999999865,
+          12.311999999999898, 12.506399999999985, 10.383399999999938,
+          10.45939999999996, 11.084800000000087, 11.223200000000134
+        ],
+        "minMs": 10.383399999999938,
+        "medianMs": 14.213200000000029,
+        "meanMs": 15.05349333333332,
+        "maxMs": 26.954600000000028,
+        "p95Ms": 22.827999999999975
+      }
+    },
+    {
+      "extension": false,
+      "target": "#input",
+      "text": ";unknown ",
+      "protocolRoundtrip": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          7.673599999999851, 7.132000000000062, 8.281200000000126,
+          7.065399999999954, 7.181299999999965, 8.007299999999987,
+          7.351599999999962, 8.257899999999836, 8.57159999999999,
+          7.599300000000085, 7.44360000000006, 7.869599999999991,
+          7.808499999999867, 8.172900000000027, 8.31840000000011,
+          7.374700000000075, 7.975100000000111, 9.035000000000082,
+          9.768100000000004, 9.278700000000072, 7.14670000000001,
+          7.782000000000153, 7.706899999999905, 7.82569999999987,
+          7.884299999999939, 6.7608000000000175, 8.339300000000094,
+          7.870400000000018, 7.720700000000079, 7.8759000000000015
+        ],
+        "minMs": 6.7608000000000175,
+        "medianMs": 7.82569999999987,
+        "meanMs": 7.902616666666677,
+        "maxMs": 9.768100000000004,
+        "p95Ms": 9.278700000000072
+      }
+    },
+    {
+      "extension": false,
+      "target": "#textarea",
+      "text": "ordinary text ",
+      "protocolRoundtrip": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          9.731800000000021, 10.447000000000116, 12.182399999999916,
+          12.451199999999972, 12.204799999999977, 11.537000000000035,
+          12.101499999999987, 13.030500000000075, 13.159200000000055,
+          12.495300000000043, 12.272600000000011, 11.454600000000028,
+          10.69250000000011, 10.332800000000134, 11.022200000000339,
+          10.916600000000017, 11.275800000000345, 11.052900000000136,
+          10.203999999999724, 10.741500000000087, 11.810199999999895,
+          11.677200000000084, 11.87519999999995, 11.350200000000314,
+          11.442900000000009, 10.795600000000377, 10.697599999999966,
+          10.773000000000138, 10.999299999999948, 11.670300000000225
+        ],
+        "minMs": 9.731800000000021,
+        "medianMs": 11.350200000000314,
+        "meanMs": 11.413256666666735,
+        "maxMs": 13.159200000000055,
+        "p95Ms": 13.030500000000075
+      }
+    },
+    {
+      "extension": false,
+      "target": "#textarea",
+      "text": ";unknown ",
+      "protocolRoundtrip": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          7.899600000000191, 7.563999999999851, 8.059600000000046,
+          7.520199999999932, 7.749199999999746, 8.348099999999704,
+          7.907999999999902, 11.687600000000202, 8.367600000000039,
+          7.222200000000157, 7.304900000000089, 8.299299999999675,
+          7.560800000000199, 7.29989999999998, 8.202600000000075,
+          7.328599999999824, 7.283400000000256, 8.580799999999726,
+          7.320999999999913, 7.266500000000178, 8.17599999999993,
+          7.255700000000161, 7.7289999999998145, 7.9539999999997235,
+          7.3465000000001055, 7.95659999999998, 6.848199999999906,
+          7.08199999999988, 7.760400000000118, 6.597600000000057
+        ],
+        "minMs": 6.597600000000057,
+        "medianMs": 7.563999999999851,
+        "meanMs": 7.782663333333312,
+        "maxMs": 11.687600000000202,
+        "p95Ms": 8.580799999999726
+      }
+    }
+  ],
+  "lifecycle": [],
+  "finished": "2026-09-10T14:58:12.598Z"
+}

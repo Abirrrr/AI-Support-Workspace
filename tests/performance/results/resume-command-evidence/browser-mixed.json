@@ -1,0 +1,8 @@
+{
+  "command": "node tests/performance/run-m14-q-browser.mjs mixed",
+  "startedUtc": "2026-09-12T09:09:59.563Z",
+  "finishedUtc": "2026-09-12T09:13:33.784Z",
+  "elapsedSeconds": 214.2189935,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

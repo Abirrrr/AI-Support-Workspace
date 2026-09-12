@@ -1,0 +1,11 @@
+Command: dotnet build native/windows-clipboard-companion/AI.SupportWorkspace.ClipboardCompanion.sln -c Release --no-restore
+Started UTC: 2026-09-12T09:19:51.829Z
+OLLAMA_LIVE_MODEL empty in this child process.
+  AI.SupportWorkspace.ClipboardCompanion -> C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\native\windows-clipboard-companion\src\AI.SupportWorkspace.ClipboardCompanion\bin\Release\net10.0-windows\win-x64\AI.SupportWorkspace.ClipboardCompanion.dll
+  AI.SupportWorkspace.ClipboardCompanion.Tests -> C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\native\windows-clipboard-companion\tests\AI.SupportWorkspace.ClipboardCompanion.Tests\bin\Release\net10.0-windows\win-x64\AI.SupportWorkspace.ClipboardCompanion.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.73

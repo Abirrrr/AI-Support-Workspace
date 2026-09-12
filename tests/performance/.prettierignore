@@ -1,0 +1,3 @@
+# Immutable audit evidence, including historical hashes and raw failures.
+# Supply alongside the root ignore file; do not rewrite raw data for formatting.
+results/

@@ -1,0 +1,240 @@
+{
+  "error": {
+    "message": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+    "cause": "undefined",
+    "stack": "BackupImportError: This isn't a valid AI Support Workspace backup file.\n    at parseVersion7 (http://127.0.0.1:5173/src/application/backup/backup-validator.ts:804:9)\n    at parseBackupFile (http://127.0.0.1:5173/src/application/backup/backup-validator.ts:940:10)\n    at BackupV7CreationService.create (http://127.0.0.1:5173/src/application/backup/backup-service.ts:404:21)\n    at async AuditSession.setup (http://127.0.0.1:5173/tests/performance/m14-q-storage.ts:175:17)\n    at async globalThis.createM14QStorage (http://127.0.0.1:5173/tests/performance/m14-q-storage.ts:434:2)\n    at async eval (eval at evaluate (:303:30), <anonymous>:2:15)\n    at async <anonymous>:329:30"
+  },
+  "pairs": [
+    {
+      "id": "14000000-0000-4000-8000-000000000001",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000002",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000003",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000004",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000005",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000006",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000007",
+      "valid": false,
+      "message": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "cause": "undefined"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000008",
+      "valid": true
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000009",
+      "valid": true
+    }
+  ],
+  "records": [
+    {
+      "id": "14000000-0000-4000-8000-000000000001",
+      "title": "Support quasarunique",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100000"
+      },
+      "tags": ["support", "shipping"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q0"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000002",
+      "title": "Support reply 1",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100001"
+      },
+      "tags": ["support", "billing"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q1"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000003",
+      "title": "Support reply 2",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100002"
+      },
+      "tags": ["support", "shipping"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q2"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000004",
+      "title": "Support reply 3",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100003"
+      },
+      "tags": ["support", "billing"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q3"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000005",
+      "title": "Support reply 4",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100004"
+      },
+      "tags": ["support", "shipping"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q4"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000006",
+      "title": "Support reply 5",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100005"
+      },
+      "tags": ["support", "billing"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q5"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000007",
+      "title": "Support reply 6",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100006"
+      },
+      "tags": ["support", "shipping"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q6"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000008",
+      "title": "Support reply 7",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100007"
+      },
+      "tags": ["support", "billing"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q7"
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000000009",
+      "title": "Support reply 8",
+      "content": {
+        "kind": "image",
+        "assetId": "14000000-0000-4000-8000-000000100008"
+      },
+      "tags": ["support", "shipping"],
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "updatedAt": "2026-09-06T00:00:00.000Z",
+      "trigger": ";q8"
+    }
+  ],
+  "assets": [
+    {
+      "id": "14000000-0000-4000-8000-000000100000",
+      "snippetId": "14000000-0000-4000-8000-000000000001",
+      "mimeType": "image/png",
+      "byteSize": 14275,
+      "originalFilename": "64x64.png",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 14275
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100001",
+      "snippetId": "14000000-0000-4000-8000-000000000002",
+      "mimeType": "image/jpeg",
+      "byteSize": 3969,
+      "originalFilename": "64x64.jpeg",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 3969
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100002",
+      "snippetId": "14000000-0000-4000-8000-000000000003",
+      "mimeType": "image/webp",
+      "byteSize": 4142,
+      "originalFilename": "64x64.webp",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 4142
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100003",
+      "snippetId": "14000000-0000-4000-8000-000000000004",
+      "mimeType": "image/png",
+      "byteSize": 1057699,
+      "originalFilename": "640x480.png",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 1057699
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100004",
+      "snippetId": "14000000-0000-4000-8000-000000000005",
+      "mimeType": "image/jpeg",
+      "byteSize": 238942,
+      "originalFilename": "640x480.jpeg",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 238942
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100005",
+      "snippetId": "14000000-0000-4000-8000-000000000006",
+      "mimeType": "image/webp",
+      "byteSize": 244942,
+      "originalFilename": "640x480.webp",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 244942
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100006",
+      "snippetId": "14000000-0000-4000-8000-000000000007",
+      "mimeType": "image/png",
+      "byteSize": 4459989,
+      "originalFilename": "1440x900.png",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 4459989
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100007",
+      "snippetId": "14000000-0000-4000-8000-000000000008",
+      "mimeType": "image/jpeg",
+      "byteSize": 1011716,
+      "originalFilename": "1440x900.jpeg",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 1011716
+    },
+    {
+      "id": "14000000-0000-4000-8000-000000100008",
+      "snippetId": "14000000-0000-4000-8000-000000000009",
+      "mimeType": "image/webp",
+      "byteSize": 1035282,
+      "originalFilename": "1440x900.webp",
+      "createdAt": "2026-09-06T00:00:00.000Z",
+      "blobSize": 1035282
+    }
+  ]
+}

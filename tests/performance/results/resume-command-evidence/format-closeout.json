@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd format --check --ignore-path .gitignore --ignore-path .prettierignore --ignore-path tests/performance/.prettierignore",
+  "startedUtc": "2026-09-12T09:37:34.134Z",
+  "finishedUtc": "2026-09-12T09:37:37.165Z",
+  "elapsedSeconds": 3.0307443,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

@@ -1,0 +1,8 @@
+{
+  "command": "git diff --check",
+  "startedUtc": "2026-09-12T09:37:33.877Z",
+  "finishedUtc": "2026-09-12T09:37:33.930Z",
+  "elapsedSeconds": 0.0531954,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

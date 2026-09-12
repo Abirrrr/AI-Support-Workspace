@@ -1,0 +1,421 @@
+{
+  "task": "M14-Q",
+  "kind": "Derived evidence index of original structured stdout; no new measurement",
+  "source": {
+    "path": "tests/performance/results/pause-command-evidence/historical-method-current.log",
+    "disposition": "LOCAL ONLY",
+    "bytes": 20452,
+    "sha256": "b4b4d740bdbf79b8cf2a08a7fb90348c2de0e3d3345b3a5bad29c05b9a3f847c",
+    "encoding": "UTF-16 with BOM",
+    "extraction": "Decode UTF-16; parse the single JSON object from first opening brace to matching close; all parsed values preserved. Console preamble excluded. Original remains unchanged."
+  },
+  "historicalInterpretation": "Historical benchmark percentile method is unchanged, including small-n p95 fields. M14-Q does not reinterpret those as supported population tails. Exit metadata remains pause-command-evidence/historical-method-result.json.",
+  "evidence": {
+    "generatedAt": "2026-09-10T14:24:11.830Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "methodology": {
+      "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+      "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+      "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+    },
+    "text": {
+      "plainSerialization": {
+        "coldMs": 1.7,
+        "iterations": 500,
+        "minMs": 0,
+        "medianMs": 0,
+        "meanMs": 0.001,
+        "p95Ms": 0,
+        "maxMs": 0.1
+      },
+      "richSerialization": {
+        "coldMs": 0.5,
+        "iterations": 500,
+        "minMs": 0,
+        "medianMs": 0,
+        "meanMs": 0.004,
+        "p95Ms": 0,
+        "maxMs": 0.3
+      },
+      "planner": {
+        "coldMs": 0.1,
+        "iterations": 500,
+        "minMs": 0,
+        "medianMs": 0,
+        "meanMs": 0.003,
+        "p95Ms": 0,
+        "maxMs": 0.1
+      }
+    },
+    "images": {
+      "image/png": [
+        {
+          "size": "small",
+          "width": 64,
+          "height": 64,
+          "encodedBytes": 14275,
+          "planner": {
+            "coldMs": 0.5,
+            "iterations": 24,
+            "minMs": 0.1,
+            "medianMs": 0.3,
+            "meanMs": 0.337,
+            "p95Ms": 0.5,
+            "maxMs": 1.5
+          },
+          "preparation": {
+            "coldMs": 0.7,
+            "iterations": 12,
+            "minMs": 0,
+            "medianMs": 0.2,
+            "meanMs": 0.183,
+            "p95Ms": 0.3,
+            "maxMs": 0.3
+          },
+          "plannerAndPreparation": {
+            "coldMs": 0.4,
+            "iterations": 12,
+            "minMs": 0.2,
+            "medianMs": 0.4,
+            "meanMs": 0.408,
+            "p95Ms": 0.6,
+            "maxMs": 0.6
+          }
+        },
+        {
+          "size": "medium",
+          "width": 640,
+          "height": 480,
+          "encodedBytes": 1057699,
+          "planner": {
+            "coldMs": 2,
+            "iterations": 12,
+            "minMs": 1.9,
+            "medianMs": 2.1,
+            "meanMs": 2.225,
+            "p95Ms": 2.9,
+            "maxMs": 2.9
+          },
+          "preparation": {
+            "coldMs": 1.6,
+            "iterations": 6,
+            "minMs": 1.1,
+            "medianMs": 1.2,
+            "meanMs": 1.267,
+            "p95Ms": 1.6,
+            "maxMs": 1.6
+          },
+          "plannerAndPreparation": {
+            "coldMs": 3.5,
+            "iterations": 6,
+            "minMs": 3.1,
+            "medianMs": 3.9,
+            "meanMs": 3.683,
+            "p95Ms": 4.1,
+            "maxMs": 4.1
+          }
+        },
+        {
+          "size": "large",
+          "width": 1440,
+          "height": 900,
+          "encodedBytes": 4459989,
+          "planner": {
+            "coldMs": 6,
+            "iterations": 12,
+            "minMs": 4.8,
+            "medianMs": 5.5,
+            "meanMs": 7.575,
+            "p95Ms": 26.5,
+            "maxMs": 26.5
+          },
+          "preparation": {
+            "coldMs": 2.4,
+            "iterations": 6,
+            "minMs": 2.4,
+            "medianMs": 2.5,
+            "meanMs": 2.533,
+            "p95Ms": 2.8,
+            "maxMs": 2.8
+          },
+          "plannerAndPreparation": {
+            "coldMs": 7.5,
+            "iterations": 6,
+            "minMs": 7.8,
+            "medianMs": 8.4,
+            "meanMs": 8.683,
+            "p95Ms": 10,
+            "maxMs": 10
+          }
+        }
+      ],
+      "image/jpeg": [
+        {
+          "size": "small",
+          "width": 64,
+          "height": 64,
+          "encodedBytes": 3969,
+          "planner": {
+            "coldMs": 0.3,
+            "iterations": 24,
+            "minMs": 0.1,
+            "medianMs": 0.2,
+            "meanMs": 0.2,
+            "p95Ms": 0.3,
+            "maxMs": 0.3
+          },
+          "preparation": {
+            "coldMs": 22.8,
+            "iterations": 12,
+            "minMs": 16.1,
+            "medianMs": 16.6,
+            "meanMs": 16.658,
+            "p95Ms": 17.5,
+            "maxMs": 17.5
+          },
+          "plannerAndPreparation": {
+            "coldMs": 20.8,
+            "iterations": 12,
+            "minMs": 11.8,
+            "medianMs": 16.6,
+            "meanMs": 16.292,
+            "p95Ms": 17.8,
+            "maxMs": 17.8
+          }
+        },
+        {
+          "size": "medium",
+          "width": 640,
+          "height": 480,
+          "encodedBytes": 238942,
+          "planner": {
+            "coldMs": 0.9,
+            "iterations": 12,
+            "minMs": 0.5,
+            "medianMs": 0.7,
+            "meanMs": 0.775,
+            "p95Ms": 1,
+            "maxMs": 1
+          },
+          "preparation": {
+            "coldMs": 16.9,
+            "iterations": 6,
+            "minMs": 15.6,
+            "medianMs": 16.1,
+            "meanMs": 16.733,
+            "p95Ms": 17.9,
+            "maxMs": 17.9
+          },
+          "plannerAndPreparation": {
+            "coldMs": 33.3,
+            "iterations": 6,
+            "minMs": 16.7,
+            "medianMs": 31.2,
+            "meanMs": 27.633,
+            "p95Ms": 33.5,
+            "maxMs": 33.5
+          }
+        },
+        {
+          "size": "large",
+          "width": 1440,
+          "height": 900,
+          "encodedBytes": 1011716,
+          "planner": {
+            "coldMs": 2.1,
+            "iterations": 12,
+            "minMs": 1.8,
+            "medianMs": 2,
+            "meanMs": 4.217,
+            "p95Ms": 27,
+            "maxMs": 27
+          },
+          "preparation": {
+            "coldMs": 61.8,
+            "iterations": 6,
+            "minMs": 63.9,
+            "medianMs": 66.8,
+            "meanMs": 69.5,
+            "p95Ms": 79.4,
+            "maxMs": 79.4
+          },
+          "plannerAndPreparation": {
+            "coldMs": 66.7,
+            "iterations": 6,
+            "minMs": 62.5,
+            "medianMs": 66.8,
+            "meanMs": 68.6,
+            "p95Ms": 79.2,
+            "maxMs": 79.2
+          }
+        }
+      ],
+      "image/webp": [
+        {
+          "size": "small",
+          "width": 64,
+          "height": 64,
+          "encodedBytes": 4142,
+          "planner": {
+            "coldMs": 0.3,
+            "iterations": 24,
+            "minMs": 0.2,
+            "medianMs": 0.2,
+            "meanMs": 0.258,
+            "p95Ms": 0.4,
+            "maxMs": 0.4
+          },
+          "preparation": {
+            "coldMs": 12.1,
+            "iterations": 12,
+            "minMs": 15,
+            "medianMs": 16.3,
+            "meanMs": 16.625,
+            "p95Ms": 18.3,
+            "maxMs": 18.3
+          },
+          "plannerAndPreparation": {
+            "coldMs": 16.2,
+            "iterations": 12,
+            "minMs": 15.5,
+            "medianMs": 16.6,
+            "meanMs": 16.742,
+            "p95Ms": 18.4,
+            "maxMs": 18.4
+          }
+        },
+        {
+          "size": "medium",
+          "width": 640,
+          "height": 480,
+          "encodedBytes": 244942,
+          "planner": {
+            "coldMs": 1.1,
+            "iterations": 12,
+            "minMs": 0.7,
+            "medianMs": 1,
+            "meanMs": 0.975,
+            "p95Ms": 1.3,
+            "maxMs": 1.3
+          },
+          "preparation": {
+            "coldMs": 46.7,
+            "iterations": 6,
+            "minMs": 28.9,
+            "medianMs": 34,
+            "meanMs": 33.5,
+            "p95Ms": 36,
+            "maxMs": 36
+          },
+          "plannerAndPreparation": {
+            "coldMs": 33.6,
+            "iterations": 6,
+            "minMs": 33.3,
+            "medianMs": 45.5,
+            "meanMs": 44.417,
+            "p95Ms": 56.1,
+            "maxMs": 56.1
+          }
+        },
+        {
+          "size": "large",
+          "width": 1440,
+          "height": 900,
+          "encodedBytes": 1035282,
+          "planner": {
+            "coldMs": 3.1,
+            "iterations": 12,
+            "minMs": 1.8,
+            "medianMs": 2.8,
+            "meanMs": 2.8,
+            "p95Ms": 3.3,
+            "maxMs": 3.3
+          },
+          "preparation": {
+            "coldMs": 134.5,
+            "iterations": 6,
+            "minMs": 119.8,
+            "medianMs": 137.2,
+            "meanMs": 137.767,
+            "p95Ms": 146.9,
+            "maxMs": 146.9
+          },
+          "plannerAndPreparation": {
+            "coldMs": 130.7,
+            "iterations": 6,
+            "minMs": 115.1,
+            "medianMs": 125.2,
+            "meanMs": 130.15,
+            "p95Ms": 150.9,
+            "maxMs": 150.9
+          }
+        }
+      ]
+    },
+    "nativeRequestPreparation": {
+      "legacySmallPng": {
+        "coldMs": 0.7,
+        "iterations": 15,
+        "minMs": 0.2,
+        "medianMs": 0.3,
+        "meanMs": 0.333,
+        "p95Ms": 0.9,
+        "maxMs": 0.9
+      },
+      "legacyMediumPng": {
+        "coldMs": 22.2,
+        "iterations": 8,
+        "minMs": 20.9,
+        "medianMs": 23.8,
+        "meanMs": 24.213,
+        "p95Ms": 28.2,
+        "maxMs": 28.2
+      },
+      "legacyLargePng": {
+        "coldMs": 100.4,
+        "iterations": 6,
+        "minMs": 97.9,
+        "medianMs": 100.8,
+        "meanMs": 101.533,
+        "p95Ms": 107.3,
+        "maxMs": 107.3
+      },
+      "smallPng": {
+        "coldMs": 1.5,
+        "iterations": 15,
+        "minMs": 0,
+        "medianMs": 0,
+        "meanMs": 0.027,
+        "p95Ms": 0.2,
+        "maxMs": 0.2
+      },
+      "mediumPng": {
+        "coldMs": 0.4,
+        "iterations": 8,
+        "minMs": 0.2,
+        "medianMs": 0.3,
+        "meanMs": 0.263,
+        "p95Ms": 0.3,
+        "maxMs": 0.3
+      },
+      "largePng": {
+        "coldMs": 1.2,
+        "iterations": 6,
+        "minMs": 0.5,
+        "medianMs": 0.9,
+        "meanMs": 1.017,
+        "p95Ms": 1.5,
+        "maxMs": 1.5
+      },
+      "automaticPasteMessages": {
+        "coldMs": 1,
+        "iterations": 500,
+        "minMs": 0,
+        "medianMs": 0,
+        "meanMs": 0.001,
+        "p95Ms": 0,
+        "maxMs": 0.1
+      }
+    }
+  }
+}

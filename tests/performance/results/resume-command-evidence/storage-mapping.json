@@ -1,0 +1,7 @@
+﻿{
+  "command": "node tests/performance/run-m14-q-storage.mjs mapping",
+  "startedUtc": "2026-09-12T09:09:30.3043983Z",
+  "finishedUtc": "2026-09-12T09:09:36.8785896Z",
+  "elapsedSeconds": 6.5720469,
+  "exitCode": 0
+}

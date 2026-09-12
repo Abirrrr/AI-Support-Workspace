@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd lint",
+  "startedUtc": "2026-09-12T09:35:41.386Z",
+  "finishedUtc": "2026-09-12T09:35:47.981Z",
+  "elapsedSeconds": 6.5949573,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

@@ -1,0 +1,7 @@
+﻿{
+  "command": "node tests/performance/run-m14-q-browser.mjs profile",
+  "startedUtc": "2026-09-12T03:25:54.4848149Z",
+  "finishedUtc": "2026-09-12T03:27:07.1053771Z",
+  "elapsedSeconds": 72.6185581,
+  "exitCode": 0
+}

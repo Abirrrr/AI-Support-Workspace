@@ -1,0 +1,2011 @@
+{
+  "task": "M14-Q",
+  "generatedAt": "2026-09-10T14:24:37.992Z",
+  "methodology": {
+    "historicalHarnessModifiedOnDisk": false,
+    "fixture": "Existing deterministic opaque RGB seed, dimensions and codec quality unchanged.",
+    "repetitions": "Five independent fresh browser contexts. First context collects 30 warm Text/message samples, historical image counts (6/12 preparation, 12/24 planner) and native serialization counts (6/8/15). Later contexts collect first-measured calls only.",
+    "coldMeaning": "First measured call per stage in a fresh context, not process/OS-cache cold: all fixtures are created before stage timing and Image preparation has a previously prepared plan.",
+    "warmImageReduction": "Large JPEG/WebP require real encode/decode; retained historical bounded 6-sample count rather than multiplying raster work. Treat their p95 as a small-sample maximum, not a stable tail estimate.",
+    "boundaries": "Fake repository get/list responses; real planner, serializer, Blob reads, browser decoder/encoder and native JSON request builder. No IndexedDB/extension IPC/clipboard/native process/paste/destination timing.",
+    "firstOnlyDistribution": "Runs 2–5 intentionally have zero warm samples; use coldRawMs only, ignoring their empty warm summaries."
+  },
+  "runs": [
+    {
+      "freshContextIndex": 1,
+      "result": {
+        "generatedAt": "2026-09-10T14:24:32.702Z",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+        "methodology": {
+          "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+          "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+          "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+        },
+        "text": {
+          "plainSerialization": {
+            "coldRawMs": 0.5,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 30,
+            "samplesMs": [
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.10000000149011612, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0.0033333333830038708,
+            "maxMs": 0.10000000149011612,
+            "p95Ms": 0
+          },
+          "richSerialization": {
+            "coldRawMs": 0.29999999701976776,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 30,
+            "samplesMs": [
+              0, 0, 0, 0.20000000298023224, 0, 0, 0, 0.6000000014901161, 0, 0,
+              0.10000000149011612, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0.09999999403953552, 0, 0, 0, 0, 0, 0, 0
+            ],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0.03333333333333333,
+            "maxMs": 0.6000000014901161,
+            "p95Ms": 0.20000000298023224
+          },
+          "planner": {
+            "coldRawMs": 0,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 30,
+            "samplesMs": [
+              0, 0, 0.10000000149011612, 0, 0, 0, 0.10000000149011612,
+              0.10000000149011612, 0, 0, 0, 0, 0, 0, 0.09999999403953552, 0, 0,
+              0, 0, 0, 0, 0, 0.10000000149011612, 0, 0, 0, 0.10000000149011612,
+              0, 0, 0
+            ],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0.02000000004967054,
+            "maxMs": 0.10000000149011612,
+            "p95Ms": 0.10000000149011612
+          }
+        },
+        "images": {
+          "image/png": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 14275,
+              "planner": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 24,
+                "samplesMs": [
+                  0.6000000014901161, 0.5, 0.29999999701976776,
+                  0.29999999701976776, 0.30000000447034836, 0.29999999701976776,
+                  0.29999999701976776, 0.30000000447034836, 0.29999999701976776,
+                  0.30000000447034836, 0.29999999701976776, 0.10000000149011612,
+                  0.3999999985098839, 0.20000000298023224, 0.19999999552965164,
+                  0.30000000447034836, 0.19999999552965164, 0.30000000447034836,
+                  0.09999999403953552, 0.4000000059604645, 0.19999999552965164,
+                  0.20000000298023224, 0.19999999552965164, 0.20000000298023224
+                ],
+                "minMs": 0.09999999403953552,
+                "medianMs": 0.29999999701976776,
+                "meanMs": 0.283333333209157,
+                "maxMs": 0.6000000014901161,
+                "p95Ms": 0.5
+              },
+              "preparation": {
+                "coldRawMs": 0.20000000298023224,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  0.10000000149011612, 0.09999999403953552, 0.20000000298023224,
+                  0.10000000149011612, 0.10000000149011612, 0.09999999403953552,
+                  0, 0.20000000298023224, 0.10000000149011612,
+                  0.10000000149011612, 0.09999999403953552, 0.10000000149011612
+                ],
+                "minMs": 0,
+                "medianMs": 0.10000000149011612,
+                "meanMs": 0.10833333308498065,
+                "maxMs": 0.20000000298023224
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 0.3999999985098839,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  0.30000000447034836, 0.29999999701976776, 0.3999999985098839,
+                  0.4000000059604645, 0.29999999701976776, 0.29999999701976776,
+                  0.30000000447034836, 0.3999999985098839, 0.29999999701976776,
+                  0.30000000447034836, 0.29999999701976776, 0.30000000447034836
+                ],
+                "minMs": 0.29999999701976776,
+                "medianMs": 0.30000000447034836,
+                "meanMs": 0.32500000049670535,
+                "maxMs": 0.4000000059604645
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 1057699,
+              "planner": {
+                "coldRawMs": 2,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  2.0999999940395355, 2.100000001490116, 2, 2.3000000044703484,
+                  1.8999999985098839, 2, 1.8999999985098839, 2.2999999970197678,
+                  2.4000000059604645, 2.1999999955296516, 3, 2.7999999970197678
+                ],
+                "minMs": 1.8999999985098839,
+                "medianMs": 2.100000001490116,
+                "meanMs": 2.2499999993791184,
+                "maxMs": 3
+              },
+              "preparation": {
+                "coldRawMs": 1.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  1.3000000044703484, 1.2999999970197678, 1.6000000014901161,
+                  1.1000000014901161, 1.1000000014901161, 1
+                ],
+                "minMs": 1,
+                "medianMs": 1.1000000014901161,
+                "meanMs": 1.233333334326744,
+                "maxMs": 1.6000000014901161
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 3.6999999955296516,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  3.7000000029802322, 2.7999999970197678, 2.899999998509884,
+                  3.600000001490116, 4.100000001490116, 3.2000000029802322
+                ],
+                "minMs": 2.7999999970197678,
+                "medianMs": 3.2000000029802322,
+                "meanMs": 3.3833333340783915,
+                "maxMs": 4.100000001490116
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 4459989,
+              "planner": {
+                "coldRawMs": 6.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  5.200000002980232, 5.299999997019768, 5.600000001490116,
+                  5.299999997019768, 5.200000002980232, 6, 5.5,
+                  5.799999997019768, 6.700000002980232, 6.699999995529652, 7,
+                  6.300000004470348
+                ],
+                "minMs": 5.200000002980232,
+                "medianMs": 5.600000001490116,
+                "meanMs": 5.88333333345751,
+                "maxMs": 7
+              },
+              "preparation": {
+                "coldRawMs": 2.899999998509884,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  2.7000000029802322, 2.899999998509884, 3.100000001490116, 3,
+                  3.0999999940395355, 2.7000000029802322
+                ],
+                "minMs": 2.7000000029802322,
+                "medianMs": 2.899999998509884,
+                "meanMs": 2.9166666666666665,
+                "maxMs": 3.100000001490116
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 9.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  8.5, 9.399999998509884, 8.799999997019768, 8.700000002980232,
+                  8.299999997019768, 10.100000001490116
+                ],
+                "minMs": 8.299999997019768,
+                "medianMs": 8.700000002980232,
+                "meanMs": 8.966666666169962,
+                "maxMs": 10.100000001490116
+              }
+            }
+          ],
+          "image/jpeg": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 3969,
+              "planner": {
+                "coldRawMs": 0.30000000447034836,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 24,
+                "samplesMs": [
+                  0.29999999701976776, 0.29999999701976776, 0.30000000447034836,
+                  0.29999999701976776, 0.30000000447034836, 0.29999999701976776,
+                  0.7000000029802322, 0.29999999701976776, 0.3999999985098839,
+                  0.30000000447034836, 0.29999999701976776, 0.29999999701976776,
+                  0.30000000447034836, 0.19999999552965164, 0.30000000447034836,
+                  0.19999999552965164, 0.30000000447034836, 0.19999999552965164,
+                  0.30000000447034836, 0.19999999552965164, 0.4000000059604645,
+                  0.5999999940395355, 0.5, 0.20000000298023224
+                ],
+                "minMs": 0.19999999552965164,
+                "medianMs": 0.29999999701976776,
+                "meanMs": 0.3249999998758237,
+                "maxMs": 0.7000000029802322,
+                "p95Ms": 0.5999999940395355
+              },
+              "preparation": {
+                "coldRawMs": 17.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  15.899999998509884, 17.700000002980232, 17,
+                  16.299999997019768, 17.399999998509884, 15.600000001490116,
+                  17.200000002980232, 17.399999998509884, 15,
+                  17.799999997019768, 17.100000001490116, 15.299999997019768
+                ],
+                "minMs": 15,
+                "medianMs": 17,
+                "meanMs": 16.64166666629414,
+                "maxMs": 17.799999997019768
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 17,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  16.5, 16.200000002980232, 17.799999997019768,
+                  16.400000005960464, 16.5, 16.69999999552965, 16.5,
+                  16.19999999552965, 17.100000001490116, 15.899999998509884,
+                  17.30000000447035, 16.399999998509884
+                ],
+                "minMs": 15.899999998509884,
+                "medianMs": 16.5,
+                "meanMs": 16.625,
+                "maxMs": 17.799999997019768
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 238942,
+              "planner": {
+                "coldRawMs": 0.8999999985098839,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  0.8000000044703484, 1.5, 2.0999999940395355, 2,
+                  0.9000000059604645, 0.8999999985098839, 0.6999999955296516,
+                  0.8000000044703484, 0.8999999985098839, 1.8999999985098839,
+                  1.6000000014901161, 0.7000000029802322
+                ],
+                "minMs": 0.6999999955296516,
+                "medianMs": 0.8999999985098839,
+                "meanMs": 1.2333333337058623,
+                "maxMs": 2.0999999940395355
+              },
+              "preparation": {
+                "coldRawMs": 32.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  35.20000000298023, 37.599999994039536, 22.5,
+                  16.80000000447035, 15.699999995529652, 17
+                ],
+                "minMs": 15.699999995529652,
+                "medianMs": 17,
+                "meanMs": 24.133333332836628,
+                "maxMs": 37.599999994039536
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 18.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  32.20000000298023, 18.299999997019768, 31.200000002980232,
+                  17.100000001490116, 18, 34
+                ],
+                "minMs": 17.100000001490116,
+                "medianMs": 18.299999997019768,
+                "meanMs": 25.13333333407839,
+                "maxMs": 34
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1011716,
+              "planner": {
+                "coldRawMs": 2.0999999940395355,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  2.100000001490116, 2, 2.3000000044703484, 2,
+                  2.1999999955296516, 2.399999998509884, 2.9000000059604645,
+                  2.6999999955296516, 2.5, 2.100000001490116, 3.5, 3
+                ],
+                "minMs": 2,
+                "medianMs": 2.3000000044703484,
+                "meanMs": 2.4750000002483525,
+                "maxMs": 3.5
+              },
+              "preparation": {
+                "coldRawMs": 68.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  69.5, 83.39999999850988, 83.60000000149012, 69.70000000298023,
+                  88.29999999701977, 73.5
+                ],
+                "minMs": 69.5,
+                "medianMs": 73.5,
+                "meanMs": 78,
+                "maxMs": 88.29999999701977
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 82.5,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  83.10000000149012, 114.29999999701977, 71.89999999850988, 85,
+                  92.89999999850988, 102.20000000298023
+                ],
+                "minMs": 71.89999999850988,
+                "medianMs": 85,
+                "meanMs": 91.56666666641831,
+                "maxMs": 114.29999999701977
+              }
+            }
+          ],
+          "image/webp": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 4142,
+              "planner": {
+                "coldRawMs": 0.30000000447034836,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 24,
+                "samplesMs": [
+                  0.29999999701976776, 0.20000000298023224, 0.29999999701976776,
+                  0.29999999701976776, 0.30000000447034836, 0.5, 0.5,
+                  0.29999999701976776, 0.6000000014901161, 0.3999999985098839,
+                  0.6000000014901161, 0.20000000298023224, 0.5,
+                  0.5999999940395355, 0.6000000014901161, 0.3999999985098839,
+                  0.4000000059604645, 0.3999999985098839, 0.5,
+                  0.6000000014901161, 0.5, 4.799999997019768,
+                  0.3999999985098839, 0.3999999985098839
+                ],
+                "minMs": 0.20000000298023224,
+                "medianMs": 0.3999999985098839,
+                "meanMs": 0.6083333330849806,
+                "maxMs": 4.799999997019768,
+                "p95Ms": 0.6000000014901161
+              },
+              "preparation": {
+                "coldRawMs": 19.700000002980232,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  16.200000002980232, 17, 16.299999997019768,
+                  15.799999997019768, 16.80000000447035, 16.100000001490116,
+                  17.69999999552965, 17.30000000447035, 15.299999997019768,
+                  16.399999998509884, 18.80000000447035, 14.899999998509884
+                ],
+                "minMs": 14.899999998509884,
+                "medianMs": 16.299999997019768,
+                "meanMs": 16.550000000124175,
+                "maxMs": 18.80000000447035
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16.899999998509884,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  17, 17.299999997019768, 15, 17.200000002980232, 16.5, 17, 17,
+                  16.5, 17, 16.700000002980232, 16.399999998509884, 16
+                ],
+                "minMs": 15,
+                "medianMs": 16.700000002980232,
+                "meanMs": 16.63333333345751,
+                "maxMs": 17.299999997019768
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 244942,
+              "planner": {
+                "coldRawMs": 1,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  1.3999999985098839, 1.1000000014901161, 1.1000000014901161, 1,
+                  0.8999999985098839, 1, 1.1000000014901161, 0.7999999970197678,
+                  0.6000000014901161, 0.7999999970197678, 0.8000000044703484,
+                  0.8999999985098839
+                ],
+                "minMs": 0.6000000014901161,
+                "medianMs": 0.8999999985098839,
+                "meanMs": 0.9583333333333334,
+                "maxMs": 1.3999999985098839
+              },
+              "preparation": {
+                "coldRawMs": 30,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  33.29999999701977, 69.60000000149012, 30.399999998509884,
+                  38.900000005960464, 48.19999999552965, 46.70000000298023
+                ],
+                "minMs": 30.399999998509884,
+                "medianMs": 38.900000005960464,
+                "meanMs": 44.51666666691502,
+                "maxMs": 69.60000000149012
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 38.69999999552965,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  52.900000005960464, 43.69999999552965, 30.5,
+                  33.600000001490116, 34.600000001490116, 32.599999994039536
+                ],
+                "minMs": 30.5,
+                "medianMs": 33.600000001490116,
+                "meanMs": 37.98333333308498,
+                "maxMs": 52.900000005960464
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1035282,
+              "planner": {
+                "coldRawMs": 2.399999998509884,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 12,
+                "samplesMs": [
+                  1.8999999985098839, 1.8000000044703484, 2.5,
+                  2.899999998509884, 2.100000001490116, 2.899999998509884,
+                  3.2999999970197678, 2, 2.5, 3, 2.2000000029802322,
+                  1.8999999985098839
+                ],
+                "minMs": 1.8000000044703484,
+                "medianMs": 2.2000000029802322,
+                "meanMs": 2.4166666666666665,
+                "maxMs": 3.2999999970197678
+              },
+              "preparation": {
+                "coldRawMs": 127.80000000447035,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  118.69999999552965, 125.70000000298023, 137.60000000149012,
+                  126.89999999850988, 111.29999999701977, 121
+                ],
+                "minMs": 111.29999999701977,
+                "medianMs": 121,
+                "meanMs": 123.53333333258827,
+                "maxMs": 137.60000000149012
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 112.80000000447035,
+                "firstCallStatus": "measured",
+                "status": "measured",
+                "n": 6,
+                "samplesMs": [
+                  120.79999999701977, 111.70000000298023, 142.5, 125.5, 148.5,
+                  154.79999999701977
+                ],
+                "minMs": 111.70000000298023,
+                "medianMs": 125.5,
+                "meanMs": 133.96666666616997,
+                "maxMs": 154.79999999701977
+              }
+            }
+          ]
+        },
+        "nativeRequestPreparation": {
+          "legacySmallPng": {
+            "coldRawMs": 0.4000000059604645,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 15,
+            "samplesMs": [
+              0.5, 0.29999999701976776, 0.3999999985098839, 0.30000000447034836,
+              0.29999999701976776, 0.29999999701976776, 0.30000000447034836,
+              0.19999999552965164, 0.30000000447034836, 0.29999999701976776,
+              0.3999999985098839, 0.20000000298023224, 0.3999999985098839,
+              0.3999999985098839, 0.4000000059604645
+            ],
+            "minMs": 0.19999999552965164,
+            "medianMs": 0.30000000447034836,
+            "meanMs": 0.3333333333333333,
+            "maxMs": 0.5
+          },
+          "legacyMediumPng": {
+            "coldRawMs": 31.799999997019768,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 8,
+            "samplesMs": [
+              30.200000002980232, 25.700000002980232, 30.399999998509884,
+              26.600000001490116, 25.099999994039536, 25.100000001490116,
+              26.200000002980232, 25.799999997019768
+            ],
+            "minMs": 25.099999994039536,
+            "medianMs": 25.799999997019768,
+            "meanMs": 26.887500000186265,
+            "maxMs": 30.399999998509884
+          },
+          "legacyLargePng": {
+            "coldRawMs": 105.80000000447035,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 6,
+            "samplesMs": [
+              110.60000000149012, 132.10000000149012, 115.20000000298023,
+              99.39999999850988, 132.19999999552965, 169.10000000149012
+            ],
+            "minMs": 99.39999999850988,
+            "medianMs": 115.20000000298023,
+            "meanMs": 126.43333333358169,
+            "maxMs": 169.10000000149012
+          },
+          "smallPng": {
+            "coldRawMs": 0.09999999403953552,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 15,
+            "samplesMs": [
+              0.20000000298023224, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0.013333333532015483,
+            "maxMs": 0.20000000298023224
+          },
+          "mediumPng": {
+            "coldRawMs": 0.20000000298023224,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 8,
+            "samplesMs": [
+              0.29999999701976776, 0.29999999701976776, 0.30000000447034836,
+              0.19999999552965164, 0.20000000298023224, 0.29999999701976776,
+              0.30000000447034836, 0.29999999701976776
+            ],
+            "minMs": 0.19999999552965164,
+            "medianMs": 0.29999999701976776,
+            "meanMs": 0.27499999944120646,
+            "maxMs": 0.30000000447034836
+          },
+          "largePng": {
+            "coldRawMs": 2.2000000029802322,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 6,
+            "samplesMs": [
+              2, 2.5, 2.2999999970197678, 4, 1.6000000014901161,
+              1.2000000029802322
+            ],
+            "minMs": 1.2000000029802322,
+            "medianMs": 2,
+            "meanMs": 2.2666666669150195,
+            "maxMs": 4
+          },
+          "automaticPasteMessages": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "measured",
+            "n": 30,
+            "samplesMs": [
+              0.09999999403953552, 0, 0, 0, 0, 0, 0, 0, 0.10000000149011612, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0.006666666517655055,
+            "maxMs": 0.10000000149011612,
+            "p95Ms": 0.09999999403953552
+          }
+        }
+      }
+    },
+    {
+      "freshContextIndex": 2,
+      "result": {
+        "generatedAt": "2026-09-10T14:24:34.033Z",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+        "methodology": {
+          "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+          "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+          "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+        },
+        "text": {
+          "plainSerialization": {
+            "coldRawMs": 0.30000000447034836,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "richSerialization": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "planner": {
+            "coldRawMs": 0.09999999403953552,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        },
+        "images": {
+          "image/png": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 14275,
+              "planner": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 0.9000000059604645,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 1057699,
+              "planner": {
+                "coldRawMs": 3.5999999940395355,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 1.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 4.699999995529652,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 4459989,
+              "planner": {
+                "coldRawMs": 5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 2.8000000044703484,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 8.199999995529652,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/jpeg": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 3969,
+              "planner": {
+                "coldRawMs": 0.4000000059604645,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 15.799999997019768,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 18.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 238942,
+              "planner": {
+                "coldRawMs": 0.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 31.19999999552965,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 24.200000002980232,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1011716,
+              "planner": {
+                "coldRawMs": 2.3000000044703484,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 70.60000000149012,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 82.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/webp": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 4142,
+              "planner": {
+                "coldRawMs": 0.29999999701976776,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 15.699999995529652,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16.200000002980232,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 244942,
+              "planner": {
+                "coldRawMs": 0.8000000044703484,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 42.79999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 34.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1035282,
+              "planner": {
+                "coldRawMs": 2.399999998509884,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 136.79999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 131.10000000149012,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ]
+        },
+        "nativeRequestPreparation": {
+          "legacySmallPng": {
+            "coldRawMs": 0.3999999985098839,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyMediumPng": {
+            "coldRawMs": 28.5,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyLargePng": {
+            "coldRawMs": 114.70000000298023,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "smallPng": {
+            "coldRawMs": 0.20000000298023224,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "mediumPng": {
+            "coldRawMs": 0.3999999985098839,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "largePng": {
+            "coldRawMs": 1.3000000044703484,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "automaticPasteMessages": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        }
+      }
+    },
+    {
+      "freshContextIndex": 3,
+      "result": {
+        "generatedAt": "2026-09-10T14:24:35.384Z",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+        "methodology": {
+          "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+          "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+          "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+        },
+        "text": {
+          "plainSerialization": {
+            "coldRawMs": 0.19999999552965164,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "richSerialization": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "planner": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        },
+        "images": {
+          "image/png": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 14275,
+              "planner": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 0.3999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 0.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 1057699,
+              "planner": {
+                "coldRawMs": 2.0999999940395355,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 1.4000000059604645,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 3.9000000059604645,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 4459989,
+              "planner": {
+                "coldRawMs": 5.399999998509884,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 2.7999999970197678,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 9.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/jpeg": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 3969,
+              "planner": {
+                "coldRawMs": 0.3999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 9.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 15.799999997019768,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 238942,
+              "planner": {
+                "coldRawMs": 0.8999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 26.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 34,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1011716,
+              "planner": {
+                "coldRawMs": 2.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 81.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 89.60000000149012,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/webp": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 4142,
+              "planner": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 9.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 17.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 244942,
+              "planner": {
+                "coldRawMs": 1.2999999970197678,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 42.400000005960464,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 55.69999999552965,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1035282,
+              "planner": {
+                "coldRawMs": 3.899999998509884,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 145.89999999850988,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 125.10000000149012,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ]
+        },
+        "nativeRequestPreparation": {
+          "legacySmallPng": {
+            "coldRawMs": 0.3999999985098839,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyMediumPng": {
+            "coldRawMs": 25.600000001490116,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyLargePng": {
+            "coldRawMs": 105.69999999552965,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "smallPng": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "mediumPng": {
+            "coldRawMs": 0.5,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "largePng": {
+            "coldRawMs": 1.5,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "automaticPasteMessages": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        }
+      }
+    },
+    {
+      "freshContextIndex": 4,
+      "result": {
+        "generatedAt": "2026-09-10T14:24:36.696Z",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+        "methodology": {
+          "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+          "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+          "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+        },
+        "text": {
+          "plainSerialization": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "richSerialization": {
+            "coldRawMs": 0.20000000298023224,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "planner": {
+            "coldRawMs": 0,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        },
+        "images": {
+          "image/png": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 14275,
+              "planner": {
+                "coldRawMs": 0.6000000014901161,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 1,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 1057699,
+              "planner": {
+                "coldRawMs": 2.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 1.6000000014901161,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 3.899999998509884,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 4459989,
+              "planner": {
+                "coldRawMs": 6.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 2.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 10.199999995529652,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/jpeg": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 3969,
+              "planner": {
+                "coldRawMs": 0.3999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 11,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 238942,
+              "planner": {
+                "coldRawMs": 0.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 25.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 18.69999999552965,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1011716,
+              "planner": {
+                "coldRawMs": 2.2000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 86.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 86.70000000298023,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/webp": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 4142,
+              "planner": {
+                "coldRawMs": 0.30000000447034836,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 9.600000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16.700000002980232,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 244942,
+              "planner": {
+                "coldRawMs": 2,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 44.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 29.899999998509884,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1035282,
+              "planner": {
+                "coldRawMs": 1.8999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 134,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 144.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ]
+        },
+        "nativeRequestPreparation": {
+          "legacySmallPng": {
+            "coldRawMs": 0.6000000014901161,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyMediumPng": {
+            "coldRawMs": 28.599999994039536,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyLargePng": {
+            "coldRawMs": 115.5,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "smallPng": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "mediumPng": {
+            "coldRawMs": 0.4000000059604645,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "largePng": {
+            "coldRawMs": 1.3000000044703484,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "automaticPasteMessages": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        }
+      }
+    },
+    {
+      "freshContextIndex": 5,
+      "result": {
+        "generatedAt": "2026-09-10T14:24:37.984Z",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+        "methodology": {
+          "sizes": ["small 64x64", "medium 640x480", "large 1440x900"],
+          "fixturePattern": "deterministic opaque pseudorandom RGB pixels",
+          "note": "Cold is the first measured call; distributions are warm sequential calls. Timings are diagnostic and have no pass/fail threshold."
+        },
+        "text": {
+          "plainSerialization": {
+            "coldRawMs": 0.29999999701976776,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "richSerialization": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "planner": {
+            "coldRawMs": 0,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        },
+        "images": {
+          "image/png": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 14275,
+              "planner": {
+                "coldRawMs": 0.30000000447034836,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 0.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 0.5999999940395355,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 1057699,
+              "planner": {
+                "coldRawMs": 2.2000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 1.7999999970197678,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 4.200000002980232,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 4459989,
+              "planner": {
+                "coldRawMs": 5.799999997019768,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 3.7000000029802322,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 7.699999995529652,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/jpeg": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 3969,
+              "planner": {
+                "coldRawMs": 0.30000000447034836,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 16,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16.299999997019768,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 238942,
+              "planner": {
+                "coldRawMs": 0.6000000014901161,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 28.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 32.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1011716,
+              "planner": {
+                "coldRawMs": 3.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 83.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 90.89999999850988,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ],
+          "image/webp": [
+            {
+              "size": "small",
+              "width": 64,
+              "height": 64,
+              "encodedBytes": 4142,
+              "planner": {
+                "coldRawMs": 0.3999999985098839,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 6.5,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 16,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "medium",
+              "width": 640,
+              "height": 480,
+              "encodedBytes": 244942,
+              "planner": {
+                "coldRawMs": 2.5999999940395355,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 42,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 34.70000000298023,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            },
+            {
+              "size": "large",
+              "width": 1440,
+              "height": 900,
+              "encodedBytes": 1035282,
+              "planner": {
+                "coldRawMs": 2.100000001490116,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "preparation": {
+                "coldRawMs": 128,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              },
+              "plannerAndPreparation": {
+                "coldRawMs": 134.29999999701977,
+                "firstCallStatus": "measured",
+                "status": "not-measured",
+                "n": 0,
+                "samplesMs": []
+              }
+            }
+          ]
+        },
+        "nativeRequestPreparation": {
+          "legacySmallPng": {
+            "coldRawMs": 0.3999999985098839,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyMediumPng": {
+            "coldRawMs": 25.600000001490116,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "legacyLargePng": {
+            "coldRawMs": 106.89999999850988,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "smallPng": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "mediumPng": {
+            "coldRawMs": 0.3999999985098839,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "largePng": {
+            "coldRawMs": 1.1000000014901161,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          },
+          "automaticPasteMessages": {
+            "coldRawMs": 0.10000000149011612,
+            "firstCallStatus": "measured",
+            "status": "not-measured",
+            "n": 0,
+            "samplesMs": []
+          }
+        }
+      }
+    }
+  ]
+}

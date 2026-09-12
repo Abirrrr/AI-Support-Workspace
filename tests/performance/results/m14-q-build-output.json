@@ -1,0 +1,171 @@
+{
+  "capturedAtUtc": "2026-09-12T09:23:01.031543+00:00",
+  "note": "Final validation output, not a retroactive build hash for earlier UI measurements. Bytes are uncompressed on-disk sizes.",
+  "builds": {
+    "chrome-mv3": {
+      "totalBytes": 1034883,
+      "files": [
+        {
+          "path": "assets/desktop.ini",
+          "bytes": 106,
+          "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30"
+        },
+        {
+          "path": "assets/styles-BmmXw6d8.css",
+          "bytes": 23755,
+          "sha256": "803029514225a2583ffc08d115167f6715d8f68c65101d0641a3cfff891cf088"
+        },
+        {
+          "path": "background.js",
+          "bytes": 167157,
+          "sha256": "a10d040e374d9c612251b0b5f29044ca00bd1f42eb0248cc5288b3a4f01fd87d"
+        },
+        {
+          "path": "chunks/_virtual_wxt-html-plugins-Dezn_h7o.js",
+          "bytes": 698,
+          "sha256": "785597bca2e7dd97a652a20a197c077079e635a5663433448e0e1d9fd8c98a64"
+        },
+        {
+          "path": "chunks/desktop.ini",
+          "bytes": 106,
+          "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30"
+        },
+        {
+          "path": "chunks/offscreen-BIOcxWgM.js",
+          "bytes": 1047,
+          "sha256": "cdc89cc55ff7fb52aa9d0d45d58bf30859caed28f7eded47a4b4bfef0f0bc036"
+        },
+        {
+          "path": "chunks/options-C3n92TOO.js",
+          "bytes": 600281,
+          "sha256": "cd7e7e4940f7662d250a2a0fe86200327ea7ce7fe644d7b2efab6288f39ed3b0"
+        },
+        {
+          "path": "chunks/sidepanel-pZYd12fA.js",
+          "bytes": 5641,
+          "sha256": "fdeeb9367bf884a4776c4928d0fc318c9d32d04785747e650ae40167daba8eab"
+        },
+        {
+          "path": "chunks/snippet-delivery-messages-Dnwat8x-.js",
+          "bytes": 834,
+          "sha256": "6d102fe64f4411e7bc4f39081bf77d69a597f1df4b9b899d8f8f2d3888c05022"
+        },
+        {
+          "path": "chunks/styles-Bw3Ae0q0.js",
+          "bytes": 190148,
+          "sha256": "80a55d4f9ea293294e28ee2872b6de11ae851ae072b1f18b0541142054004981"
+        },
+        {
+          "path": "content-scripts/content.js",
+          "bytes": 42559,
+          "sha256": "b52a656e5f019c56449cf999398534652c9b233b91b11fca7124ca5027c26500"
+        },
+        {
+          "path": "manifest.json",
+          "bytes": 816,
+          "sha256": "a19fd4c8c66d88eb6a292d06f94a2d37b50d7fd36691d77256eff430da3eb2f8"
+        },
+        {
+          "path": "offscreen.html",
+          "bytes": 421,
+          "sha256": "f7d2c80435e1df0efd3586a80b4eaac1e380930e1c4218ea04dc4a1ac86db40d"
+        },
+        {
+          "path": "options.html",
+          "bytes": 735,
+          "sha256": "e2f6e9c748a4344173d7f09b153a21d4fdb9854a5d0bd49019f0e5747cf3b346"
+        },
+        {
+          "path": "sidepanel.html",
+          "bytes": 579,
+          "sha256": "0930182f0bf7813fab978d7947c8aae79d8d6546e282357a888e16b202b80210"
+        }
+      ]
+    },
+    "chrome-mv3-native-dev": {
+      "totalBytes": 1312412,
+      "files": [
+        {
+          "path": "assets/desktop.ini",
+          "bytes": 106,
+          "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30"
+        },
+        {
+          "path": "assets/styles-BmmXw6d8.css",
+          "bytes": 23755,
+          "sha256": "803029514225a2583ffc08d115167f6715d8f68c65101d0641a3cfff891cf088"
+        },
+        {
+          "path": "background.js",
+          "bytes": 189628,
+          "sha256": "46ba99db5c8d0f1a24340866d84772a7ac9eda443927581427f9487818b694f3"
+        },
+        {
+          "path": "chunks/_virtual_wxt-html-plugins-Dezn_h7o.js",
+          "bytes": 698,
+          "sha256": "785597bca2e7dd97a652a20a197c077079e635a5663433448e0e1d9fd8c98a64"
+        },
+        {
+          "path": "chunks/desktop.ini",
+          "bytes": 106,
+          "sha256": "a46e137e1ee605e28313f20381fceea857889d26f8fc6e5f29e552811997ad30"
+        },
+        {
+          "path": "chunks/offscreen-BIOcxWgM.js",
+          "bytes": 1047,
+          "sha256": "cdc89cc55ff7fb52aa9d0d45d58bf30859caed28f7eded47a4b4bfef0f0bc036"
+        },
+        {
+          "path": "chunks/options-B4FCOtBa.js",
+          "bytes": 628392,
+          "sha256": "1bb0e259581e88f2b8ac9d8d08c4921e7eb6752556abd30a7d0705bbcbf000de"
+        },
+        {
+          "path": "chunks/sidepanel-_Ds4w3cX.js",
+          "bytes": 7964,
+          "sha256": "0d38f0cc87f16428a59f57e12fb6efb690393d65293ce23604ae8fdfb0bcce01"
+        },
+        {
+          "path": "chunks/snippet-delivery-messages-Dnwat8x-.js",
+          "bytes": 834,
+          "sha256": "6d102fe64f4411e7bc4f39081bf77d69a597f1df4b9b899d8f8f2d3888c05022"
+        },
+        {
+          "path": "chunks/snippet-list-serialization-diagnostic-DFfD-sQ2.js",
+          "bytes": 20429,
+          "sha256": "46d50bf722e750a183065d8c25bc212326168454fb32455503419d25407fe49e"
+        },
+        {
+          "path": "chunks/styles-Bb8CrWBD.js",
+          "bytes": 387301,
+          "sha256": "156500fe557da1eb46a4a8c549e043b4c4a63f35cbf42cff77e9011e497daa68"
+        },
+        {
+          "path": "content-scripts/content.js",
+          "bytes": 48902,
+          "sha256": "017fec4941fc9d84c615c09a2a8fccb4e00069a549219b880d815935761e497b"
+        },
+        {
+          "path": "manifest.json",
+          "bytes": 1515,
+          "sha256": "f04655d12bcbba2ab424b4d3e2f132f830bf80b7df9ca7efba39629e0f87e156"
+        },
+        {
+          "path": "offscreen.html",
+          "bytes": 421,
+          "sha256": "f7d2c80435e1df0efd3586a80b4eaac1e380930e1c4218ea04dc4a1ac86db40d"
+        },
+        {
+          "path": "options.html",
+          "bytes": 735,
+          "sha256": "b95ac830af4b3ecda3d9a1b608a43f75fc35cc935b042194b3b5b109141d653a"
+        },
+        {
+          "path": "sidepanel.html",
+          "bytes": 579,
+          "sha256": "c27d687cd86d274d2afdbe482cf7b34e85a59904b359c64d5047bc2c0670ab35"
+        }
+      ]
+    }
+  }
+}

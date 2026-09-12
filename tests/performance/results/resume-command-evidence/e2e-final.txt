@@ -1,0 +1,12 @@
+Command: pnpm.cmd test:e2e
+Started UTC: 2026-09-12T09:20:00.142Z
+OLLAMA_LIVE_MODEL empty in this child process.
+$ playwright test
+
+Running 1 test using 1 worker
+
+(node:48636) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\toolchain.spec.ts:3:1 › Playwright discovers the configured test project (4ms)
+
+  1 passed (474ms)

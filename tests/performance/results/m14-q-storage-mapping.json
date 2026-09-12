@@ -1,0 +1,297 @@
+{
+  "batch": "mapping",
+  "mode": "Vite development modules; real Chromium IndexedDB/Dexie, fake provider transport",
+  "interval": "performance.now immediately before awaited application operation to resolution/rejection; setup, seed, fixture serialization, metadata modes and declared warmups excluded",
+  "sessions": [
+    {
+      "tier": 10000,
+      "reset": 0,
+      "measurements": {
+        "restore-record-mapping": {
+          "firstUse": [
+            {
+              "ms": 54.4
+            }
+          ],
+          "warmups": 0,
+          "runs": [
+            {
+              "ms": 33.4
+            },
+            {
+              "ms": 34.5
+            },
+            {
+              "ms": 40.7
+            },
+            {
+              "ms": 54
+            },
+            {
+              "ms": 27.8
+            },
+            {
+              "ms": 25
+            },
+            {
+              "ms": 39.3
+            },
+            {
+              "ms": 47.8
+            },
+            {
+              "ms": 45.4
+            },
+            {
+              "ms": 47.7
+            },
+            {
+              "ms": 39.5
+            },
+            {
+              "ms": 42.1
+            },
+            {
+              "ms": 38.5
+            },
+            {
+              "ms": 27.8
+            },
+            {
+              "ms": 26.8
+            },
+            {
+              "ms": 27.6
+            },
+            {
+              "ms": 24.9
+            },
+            {
+              "ms": 30.3
+            },
+            {
+              "ms": 32.9
+            },
+            {
+              "ms": 48.9
+            },
+            {
+              "ms": 33.4
+            },
+            {
+              "ms": 37
+            },
+            {
+              "ms": 38.3
+            },
+            {
+              "ms": 43.5
+            },
+            {
+              "ms": 45.2
+            },
+            {
+              "ms": 29
+            },
+            {
+              "ms": 36.5
+            },
+            {
+              "ms": 30.6
+            },
+            {
+              "ms": 29.6
+            },
+            {
+              "ms": 23.9
+            }
+          ],
+          "status": "measured",
+          "n": 30,
+          "samplesMs": [
+            33.4, 34.5, 40.7, 54, 27.8, 25, 39.3, 47.8, 45.4, 47.7, 39.5, 42.1,
+            38.5, 27.8, 26.8, 27.6, 24.9, 30.3, 32.9, 48.9, 33.4, 37, 38.3,
+            43.5, 45.2, 29, 36.5, 30.6, 29.6, 23.9
+          ],
+          "minMs": 23.9,
+          "medianMs": 34.5,
+          "meanMs": 36.06333333333334,
+          "maxMs": 54,
+          "p95Ms": 48.9,
+          "failures": []
+        }
+      },
+      "setup": {
+        "fixture": {
+          "count": 10000,
+          "mixed": false,
+          "boundedMixed": false,
+          "nearLimit": false,
+          "seed": "index deterministic; image 0x9e3779b9 xor width xor (height << 16), original M14-P.1 algorithm, quality 0.88",
+          "snippets": 10000,
+          "textRecords": 10000,
+          "knowledge": 1,
+          "serializedBackupBytes": 16297675,
+          "renderedTextUtf8Bytes": 11311171,
+          "assets": [],
+          "assetBytes": 0
+        },
+        "checks": {
+          "emptyDatabaseOpenMs": 5.4,
+          "excludedFixture": null
+        }
+      },
+      "fakeProviderRequestUtf8Bytes": 0,
+      "endMetrics": {
+        "metrics": [
+          {
+            "name": "Timestamp",
+            "value": 206969.822137
+          },
+          {
+            "name": "AudioHandlers",
+            "value": 0
+          },
+          {
+            "name": "AudioWorkletProcessors",
+            "value": 0
+          },
+          {
+            "name": "Documents",
+            "value": 1
+          },
+          {
+            "name": "Frames",
+            "value": 1
+          },
+          {
+            "name": "JSEventListeners",
+            "value": 10039
+          },
+          {
+            "name": "LayoutObjects",
+            "value": 5
+          },
+          {
+            "name": "MediaKeySessions",
+            "value": 0
+          },
+          {
+            "name": "MediaKeys",
+            "value": 0
+          },
+          {
+            "name": "Nodes",
+            "value": 16
+          },
+          {
+            "name": "Resources",
+            "value": 2
+          },
+          {
+            "name": "ContextLifecycleStateObservers",
+            "value": 4
+          },
+          {
+            "name": "V8PerContextDatas",
+            "value": 2
+          },
+          {
+            "name": "WorkerGlobalScopes",
+            "value": 0
+          },
+          {
+            "name": "UACSSResources",
+            "value": 0
+          },
+          {
+            "name": "RTCPeerConnections",
+            "value": 0
+          },
+          {
+            "name": "ResourceFetchers",
+            "value": 1
+          },
+          {
+            "name": "AdSubframes",
+            "value": 0
+          },
+          {
+            "name": "DetachedScriptStates",
+            "value": 0
+          },
+          {
+            "name": "ArrayBufferContents",
+            "value": 30001
+          },
+          {
+            "name": "LayoutCount",
+            "value": 0
+          },
+          {
+            "name": "RecalcStyleCount",
+            "value": 0
+          },
+          {
+            "name": "LayoutDuration",
+            "value": 0
+          },
+          {
+            "name": "RecalcStyleDuration",
+            "value": 0
+          },
+          {
+            "name": "DevToolsCommandDuration",
+            "value": 0.000031
+          },
+          {
+            "name": "ScriptDuration",
+            "value": 0
+          },
+          {
+            "name": "V8CompileDuration",
+            "value": 0
+          },
+          {
+            "name": "TaskDuration",
+            "value": 0.000039
+          },
+          {
+            "name": "TaskOtherDuration",
+            "value": 0.000008
+          },
+          {
+            "name": "ThreadTime",
+            "value": 0.000133
+          },
+          {
+            "name": "ProcessTime",
+            "value": 3.168825
+          },
+          {
+            "name": "JSHeapUsedSize",
+            "value": 226608696
+          },
+          {
+            "name": "JSHeapTotalSize",
+            "value": 295899136
+          },
+          {
+            "name": "FirstMeaningfulPaint",
+            "value": 206964.313034
+          },
+          {
+            "name": "DomContentLoaded",
+            "value": 206964.75533
+          },
+          {
+            "name": "NavigationStart",
+            "value": 206964.259683
+          }
+        ]
+      }
+    }
+  ],
+  "failures": [],
+  "browser": "149.0.7827.55"
+}

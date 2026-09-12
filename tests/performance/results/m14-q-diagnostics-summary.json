@@ -1,0 +1,922 @@
+{
+  "m14-q-browser-lifecycle-control.json": {
+    "failures": [],
+    "profile": [],
+    "lifecycle": [
+      {
+        "cycle": 0,
+        "liveElements": 2435,
+        "nodes": 3122,
+        "listeners": 517,
+        "heapBytes": 4828836,
+        "urls": 9
+      },
+      {
+        "cycle": 10,
+        "liveElements": 2433,
+        "nodes": 3174,
+        "listeners": 539,
+        "heapBytes": 5729124,
+        "urls": 9
+      },
+      {
+        "cycle": 25,
+        "liveElements": 2433,
+        "nodes": 3174,
+        "listeners": 539,
+        "heapBytes": 5817632,
+        "urls": 9
+      },
+      {
+        "cycle": 50,
+        "liveElements": 2433,
+        "nodes": 3174,
+        "listeners": 539,
+        "heapBytes": 5879184,
+        "urls": 9
+      },
+      {
+        "cycle": "after-unmount",
+        "liveElements": 35,
+        "nodes": 133,
+        "listeners": 194,
+        "heapBytes": 5046348,
+        "urls": 0
+      }
+    ],
+    "idle": [
+      {
+        "extension": false,
+        "intervalSeconds": 10,
+        "rendererTaskMs": 9.350999999999999
+      },
+      {
+        "extension": true,
+        "intervalSeconds": 10,
+        "rendererTaskMs": 9.601
+      }
+    ],
+    "typing": [
+      {
+        "extension": false,
+        "target": "#input",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.540100000000166,
+        "medianMs": 12.235000000000127,
+        "meanMs": 13.459146666666667,
+        "maxMs": 22.678499999999985,
+        "p95Ms": 19.533099999999877
+      },
+      {
+        "extension": false,
+        "target": "#input",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.376599999999826,
+        "medianMs": 8.536499999999933,
+        "meanMs": 8.65152999999998,
+        "maxMs": 10.052200000000084,
+        "p95Ms": 9.793999999999869
+      },
+      {
+        "extension": false,
+        "target": "#textarea",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.929499999999962,
+        "medianMs": 11.303600000000188,
+        "meanMs": 11.45312333333333,
+        "maxMs": 12.916400000000067,
+        "p95Ms": 12.347699999999804
+      },
+      {
+        "extension": false,
+        "target": "#textarea",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.23700000000008,
+        "medianMs": 8.260399999999663,
+        "meanMs": 8.279779999999997,
+        "maxMs": 10.474699999999757,
+        "p95Ms": 9.367299999999886
+      },
+      {
+        "extension": false,
+        "target": "#rich",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.474999999999909,
+        "medianMs": 12.520800000000236,
+        "meanMs": 12.757166666666656,
+        "maxMs": 15.891999999999825,
+        "p95Ms": 14.540399999999863
+      },
+      {
+        "extension": false,
+        "target": "#rich",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 8.179399999999987,
+        "medianMs": 10.558599999999842,
+        "meanMs": 10.915629999999965,
+        "maxMs": 14.06269999999995,
+        "p95Ms": 13.942599999999857
+      },
+      {
+        "extension": false,
+        "target": "#shadow >> #inner",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 11.447200000000521,
+        "medianMs": 13.368599999999788,
+        "meanMs": 14.44012000000004,
+        "maxMs": 20.650699999999688,
+        "p95Ms": 20.143300000000636
+      },
+      {
+        "extension": false,
+        "target": "#shadow >> #inner",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 8.106900000000678,
+        "medianMs": 9.570799999999508,
+        "meanMs": 10.313683333333453,
+        "maxMs": 16.084899999999834,
+        "p95Ms": 14.77390000000014
+      },
+      {
+        "extension": true,
+        "target": "#input",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.971700000000055,
+        "medianMs": 13.717099999999846,
+        "meanMs": 14.351240000000022,
+        "maxMs": 24.07339999999931,
+        "p95Ms": 17.342200000000958
+      },
+      {
+        "extension": true,
+        "target": "#input",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.7546000000002095,
+        "medianMs": 9.188500000000204,
+        "meanMs": 9.258536666666503,
+        "maxMs": 11.021199999999226,
+        "p95Ms": 10.490600000000995
+      },
+      {
+        "extension": true,
+        "target": "#textarea",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 11.081400000002759,
+        "medianMs": 13.857299999999668,
+        "meanMs": 14.282503333333443,
+        "maxMs": 17.728399999999965,
+        "p95Ms": 17.474700000002485
+      },
+      {
+        "extension": true,
+        "target": "#textarea",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.154899999997724,
+        "medianMs": 11.116599999997561,
+        "meanMs": 10.918639999999625,
+        "maxMs": 12.7045999999973,
+        "p95Ms": 12.37749999999869
+      },
+      {
+        "extension": true,
+        "target": "#rich",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 11.895799999998417,
+        "medianMs": 19.59360000000015,
+        "meanMs": 19.440843333333152,
+        "maxMs": 27.810300000001007,
+        "p95Ms": 25.284700000000157
+      },
+      {
+        "extension": true,
+        "target": "#rich",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.28320000000167,
+        "medianMs": 14.181700000001001,
+        "meanMs": 14.376606666666703,
+        "maxMs": 21.072400000000926,
+        "p95Ms": 20.6404999999977
+      },
+      {
+        "extension": true,
+        "target": "#shadow >> #inner",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.75050000000192,
+        "medianMs": 13.119000000002416,
+        "meanMs": 13.917793333333854,
+        "maxMs": 18.00500000000102,
+        "p95Ms": 17.85740000000078
+      },
+      {
+        "extension": true,
+        "target": "#shadow >> #inner",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.8012000000017,
+        "medianMs": 8.998200000001816,
+        "meanMs": 9.617163333333398,
+        "maxMs": 14.498900000002322,
+        "p95Ms": 13.70679999999993
+      }
+    ],
+    "reopen": {
+      "status": "measured",
+      "n": 50,
+      "minMs": 101,
+      "medianMs": 106.09999999403954,
+      "meanMs": 111.01400000035763,
+      "maxMs": 167.5,
+      "p95Ms": 131.7999999821186
+    },
+    "shared": [
+      {
+        "tabs": 1,
+        "entries": 109,
+        "catalog": {
+          "status": "measured",
+          "n": 30,
+          "minMs": 4.5,
+          "medianMs": 6.299999982118607,
+          "meanMs": 8.430000000198682,
+          "maxMs": 31.099999994039536,
+          "p95Ms": 25.299999982118607
+        },
+        "reload": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 9.194100000000617,
+          "medianMs": 10.047500000000582,
+          "meanMs": 10.055580000000191,
+          "maxMs": 11.188200000004144
+        },
+        "overlap": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 69.74319999999716,
+          "medianMs": 84.77320000000327,
+          "meanMs": 96.86970000000001,
+          "maxMs": 146.12810000000172
+        }
+      },
+      {
+        "tabs": 4,
+        "entries": 109,
+        "catalog": {
+          "status": "measured",
+          "n": 30,
+          "minMs": 2.800000011920929,
+          "medianMs": 5.0999999940395355,
+          "meanMs": 5.980000000198682,
+          "maxMs": 20,
+          "p95Ms": 12
+        },
+        "reload": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 23.662199999998847,
+          "medianMs": 32.923399999999674,
+          "meanMs": 30.489319999999132,
+          "maxMs": 33.89979999999923
+        },
+        "overlap": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 60.555499999994936,
+          "medianMs": 63.82339999999385,
+          "meanMs": 78.79519999999611,
+          "maxMs": 127.61179999999877
+        }
+      }
+    ],
+    "workerRecovery": {
+      "status": "measured",
+      "n": 5,
+      "minMs": 30.80000001192093,
+      "medianMs": 48.29999998211861,
+      "meanMs": 44.640000003576276,
+      "maxMs": 57.30000001192093,
+      "distinctEpochs": 5,
+      "entries": [109, 109, 109, 109, 109]
+    }
+  },
+  "m14-q-browser-lifecycle-resume.json": {
+    "failures": [],
+    "profile": [],
+    "lifecycle": [
+      {
+        "cycle": 0,
+        "liveElements": 2435,
+        "nodes": 3122,
+        "listeners": 517,
+        "heapBytes": 4823004,
+        "urls": 9
+      },
+      {
+        "cycle": 10,
+        "liveElements": 2433,
+        "nodes": 3699,
+        "listeners": 620,
+        "heapBytes": 5791700,
+        "urls": 9
+      },
+      {
+        "cycle": 25,
+        "liveElements": 2433,
+        "nodes": 4569,
+        "listeners": 755,
+        "heapBytes": 5965536,
+        "urls": 9
+      },
+      {
+        "cycle": 50,
+        "liveElements": 2433,
+        "nodes": 6019,
+        "listeners": 980,
+        "heapBytes": 6166236,
+        "urls": 9
+      },
+      {
+        "cycle": "after-unmount",
+        "liveElements": 35,
+        "nodes": 2978,
+        "listeners": 635,
+        "heapBytes": 5335600,
+        "urls": 0
+      }
+    ],
+    "idle": [
+      {
+        "extension": false,
+        "intervalSeconds": 10,
+        "rendererTaskMs": 12.274000000000001
+      },
+      {
+        "extension": true,
+        "intervalSeconds": 10,
+        "rendererTaskMs": 10.955000000000002
+      }
+    ],
+    "typing": [
+      {
+        "extension": false,
+        "target": "#input",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.632200000000012,
+        "medianMs": 12.559000000000196,
+        "meanMs": 12.73545999999999,
+        "maxMs": 15.351300000000265,
+        "p95Ms": 15.195200000000114
+      },
+      {
+        "extension": false,
+        "target": "#input",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 6.877599999999802,
+        "medianMs": 7.406800000000203,
+        "meanMs": 7.537103333333334,
+        "maxMs": 9.1891999999998,
+        "p95Ms": 8.47019999999975
+      },
+      {
+        "extension": false,
+        "target": "#textarea",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.295200000000023,
+        "medianMs": 11.404500000000098,
+        "meanMs": 11.733396666666673,
+        "maxMs": 16.350400000000263,
+        "p95Ms": 15.027000000000044
+      },
+      {
+        "extension": false,
+        "target": "#textarea",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.072299999999814,
+        "medianMs": 8.533699999999953,
+        "meanMs": 9.028873333333332,
+        "maxMs": 13.563200000000052,
+        "p95Ms": 12.622600000000148
+      },
+      {
+        "extension": false,
+        "target": "#rich",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.510600000000522,
+        "medianMs": 11.697400000000016,
+        "meanMs": 12.575366666666575,
+        "maxMs": 21.103799999999865,
+        "p95Ms": 16.458299999999326
+      },
+      {
+        "extension": false,
+        "target": "#rich",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.052300000000287,
+        "medianMs": 9.700200000000223,
+        "meanMs": 9.989866666666664,
+        "maxMs": 14.710900000000038,
+        "p95Ms": 14.335500000000138
+      },
+      {
+        "extension": false,
+        "target": "#shadow >> #inner",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.953300000000127,
+        "medianMs": 11.698600000000624,
+        "meanMs": 12.78792333333334,
+        "maxMs": 18.375099999999293,
+        "p95Ms": 18.245600000000195
+      },
+      {
+        "extension": false,
+        "target": "#shadow >> #inner",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 6.75879999999961,
+        "medianMs": 8.648799999999937,
+        "meanMs": 9.709690000000016,
+        "maxMs": 15.47990000000027,
+        "p95Ms": 13.411700000000565
+      },
+      {
+        "extension": true,
+        "target": "#input",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 10.27520000000004,
+        "medianMs": 12.31079999999929,
+        "meanMs": 12.37956000000025,
+        "maxMs": 15.416199999999662,
+        "p95Ms": 15.166600000000471
+      },
+      {
+        "extension": true,
+        "target": "#input",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 6.859199999998964,
+        "medianMs": 8.046500000000378,
+        "meanMs": 8.414226666666945,
+        "maxMs": 10.474400000002788,
+        "p95Ms": 10.272799999998824
+      },
+      {
+        "extension": true,
+        "target": "#textarea",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.780900000001566,
+        "medianMs": 12.113199999999779,
+        "meanMs": 12.454456666666495,
+        "maxMs": 17.63509999999951,
+        "p95Ms": 16.88220000000001
+      },
+      {
+        "extension": true,
+        "target": "#textarea",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 7.704299999997602,
+        "medianMs": 11.637599999998201,
+        "meanMs": 12.293143333333015,
+        "maxMs": 20.33129999999801,
+        "p95Ms": 18.389799999997194
+      },
+      {
+        "extension": true,
+        "target": "#rich",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.388299999998708,
+        "medianMs": 10.098699999998644,
+        "meanMs": 10.318603333333158,
+        "maxMs": 12.03559999999925,
+        "p95Ms": 11.96429999999964
+      },
+      {
+        "extension": true,
+        "target": "#rich",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 6.61620000000039,
+        "medianMs": 7.347799999999552,
+        "meanMs": 7.610313333333276,
+        "maxMs": 9.841300000000047,
+        "p95Ms": 9.097300000001269
+      },
+      {
+        "extension": true,
+        "target": "#shadow >> #inner",
+        "text": "ordinary text ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 9.069900000002235,
+        "medianMs": 11.77270000000135,
+        "meanMs": 12.452083333333212,
+        "maxMs": 18.40689999999813,
+        "p95Ms": 17.812300000001414
+      },
+      {
+        "extension": true,
+        "target": "#shadow >> #inner",
+        "text": ";unknown ",
+        "status": "measured",
+        "n": 30,
+        "minMs": 6.222900000000664,
+        "medianMs": 7.896600000000035,
+        "meanMs": 8.235989999999948,
+        "maxMs": 11.405500000000757,
+        "p95Ms": 11.386399999999412
+      }
+    ],
+    "reopen": {
+      "status": "measured",
+      "n": 50,
+      "minMs": 89.30000001192093,
+      "medianMs": 118.2000000178814,
+      "meanMs": 121.06200000107289,
+      "maxMs": 204,
+      "p95Ms": 163.59999999403954
+    },
+    "shared": [
+      {
+        "tabs": 1,
+        "entries": 109,
+        "catalog": {
+          "status": "measured",
+          "n": 30,
+          "minMs": 4.9000000059604645,
+          "medianMs": 7.799999982118607,
+          "meanMs": 8.889999999602635,
+          "maxMs": 22.900000005960464,
+          "p95Ms": 21.799999982118607
+        },
+        "reload": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 13.027900000000955,
+          "medianMs": 14.382499999999709,
+          "meanMs": 14.832580000000599,
+          "maxMs": 16.893199999998615
+        },
+        "overlap": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 77.41560000000027,
+          "medianMs": 82.29299999999785,
+          "meanMs": 84.44360000000015,
+          "maxMs": 97.96370000000024
+        }
+      },
+      {
+        "tabs": 4,
+        "entries": 109,
+        "catalog": {
+          "status": "measured",
+          "n": 30,
+          "minMs": 3.2999999821186066,
+          "medianMs": 5.699999988079071,
+          "meanMs": 7.85,
+          "maxMs": 59.89999997615814,
+          "p95Ms": 15.199999988079071
+        },
+        "reload": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 37.987600000000384,
+          "medianMs": 41.83929999999964,
+          "meanMs": 41.713660000001255,
+          "maxMs": 45.94670000000042
+        },
+        "overlap": {
+          "status": "measured",
+          "n": 5,
+          "minMs": 1009.0437999999995,
+          "medianMs": 1013.1140999999989,
+          "meanMs": 1017.8756400000042,
+          "maxMs": 1040.3854000000065
+        }
+      }
+    ],
+    "workerRecovery": {
+      "status": "measured",
+      "n": 5,
+      "minMs": 37.400000005960464,
+      "medianMs": 52.89999997615814,
+      "meanMs": 49.81999999284744,
+      "maxMs": 60.39999997615814,
+      "distinctEpochs": 5,
+      "entries": [109, 109, 109, 109, 109]
+    }
+  },
+  "m14-q-browser-profile.json": {
+    "failures": [],
+    "profile": [
+      {
+        "tier": 1000,
+        "queries": [
+          {
+            "query": "common",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 517.3000000119209,
+              "medianMs": 552.8000000119209,
+              "meanMs": 553.6333333452543,
+              "maxMs": 590.8000000119209
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 532.241,
+              "medianMs": 568.7819999999999,
+              "meanMs": 564.5886666666667,
+              "maxMs": 592.743
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 37.328,
+              "medianMs": 41.411,
+              "meanMs": 41.43766666666667,
+              "maxMs": 45.574000000000005
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 390.08500000000004,
+              "medianMs": 411.9050000000001,
+              "meanMs": 421.1896666666667,
+              "maxMs": 461.579
+            }
+          },
+          {
+            "query": "rareterm",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 17.599999994039536,
+              "medianMs": 36.80000001192093,
+              "meanMs": 30.400000005960464,
+              "maxMs": 36.80000001192093
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 34.127999999999936,
+              "medianMs": 57.312999999999725,
+              "meanMs": 50.01366666666663,
+              "maxMs": 58.60000000000021
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 16.611999999999988,
+              "medianMs": 34.66999999999998,
+              "meanMs": 28.76733333333333,
+              "maxMs": 35.020000000000024
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 0.11099999999997223,
+              "medianMs": 0.1820000000001265,
+              "meanMs": 0.15966666666670606,
+              "maxMs": 0.18600000000001948
+            }
+          },
+          {
+            "query": "zzznomatch",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 23,
+              "medianMs": 29.400000005960464,
+              "meanMs": 28.900000005960464,
+              "maxMs": 34.30000001192093
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 25.83599999999997,
+              "medianMs": 47.13499999999993,
+              "meanMs": 40.34800000000012,
+              "maxMs": 48.07300000000048
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 21.499999999999964,
+              "medianMs": 28.249999999999996,
+              "meanMs": 27.15933333333331,
+              "maxMs": 31.72799999999998
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 0.14300000000044832,
+              "medianMs": 0.1609999999998557,
+              "meanMs": 0.21899999999996922,
+              "maxMs": 0.35299999999960363
+            }
+          }
+        ]
+      },
+      {
+        "tier": 10000,
+        "queries": [
+          {
+            "query": "common",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 6161.200000017881,
+              "medianMs": 6499.699999988079,
+              "meanMs": 6548.833333333333,
+              "maxMs": 6985.5999999940395
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 6177.898,
+              "medianMs": 6507.847,
+              "meanMs": 6559.0070000000005,
+              "maxMs": 6991.276000000001
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 423.74400000000014,
+              "medianMs": 523.1379999999999,
+              "meanMs": 536.776,
+              "maxMs": 663.446
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 4398.393,
+              "medianMs": 5095.753999999999,
+              "meanMs": 5011.853333333333,
+              "maxMs": 5541.413
+            }
+          },
+          {
+            "query": "rareterm",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 157.30000001192093,
+              "medianMs": 206.89999997615814,
+              "meanMs": 203.7999999920527,
+              "maxMs": 247.19999998807907
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 179.78800000000206,
+              "medianMs": 220.9580000000031,
+              "meanMs": 221.2400000000017,
+              "maxMs": 262.9739999999998
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 156.2330000000003,
+              "medianMs": 205.9610000000003,
+              "meanMs": 202.83700000000013,
+              "maxMs": 246.3169999999999
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 0.09899999999873899,
+              "medianMs": 0.10600000000060561,
+              "meanMs": 0.10566666666692963,
+              "maxMs": 0.11200000000144428
+            }
+          },
+          {
+            "query": "zzznomatch",
+            "interval": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 146.7000000178814,
+              "medianMs": 175.10000002384186,
+              "meanMs": 184.56666668256125,
+              "maxMs": 231.90000000596046
+            },
+            "task": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 167.95199999999966,
+              "medianMs": 434.7449999999995,
+              "meanMs": 402.91500000000013,
+              "maxMs": 606.0480000000013
+            },
+            "script": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 145.6470000000003,
+              "medianMs": 174.04799999999997,
+              "meanMs": 180.02166666666676,
+              "maxMs": 220.36999999999995
+            },
+            "layout": {
+              "status": "measured",
+              "n": 3,
+              "minMs": 0.10799999999733245,
+              "medianMs": 0.1160000000055561,
+              "meanMs": 0.11533333333346718,
+              "maxMs": 0.12199999999751299
+            }
+          }
+        ]
+      }
+    ],
+    "lifecycle": [],
+    "idle": [],
+    "typing": []
+  },
+  "near": {
+    "failures": [],
+    "fixture": {
+      "count": 0,
+      "mixed": false,
+      "boundedMixed": false,
+      "nearLimit": true,
+      "seed": "index deterministic; image 0x9e3779b9 xor width xor (height << 16), original M14-P.1 algorithm, quality 0.88",
+      "snippets": 1,
+      "textRecords": 1,
+      "knowledge": 0,
+      "serializedBackupBytes": 98566766,
+      "renderedTextUtf8Bytes": 98566144,
+      "assets": [],
+      "assetBytes": 0
+    },
+    "frameGaps": {
+      "status": "measured",
+      "n": 38,
+      "minMs": 0.09999999403953552,
+      "medianMs": 10.900000005960464,
+      "meanMs": 106.76578947352736,
+      "maxMs": 1061.3999999761581,
+      "p95Ms": 783.4000000059605
+    },
+    "stageBoundaryHeapBytes": [
+      397579544, 693470376, 989143788, 496269916, 792005608, 890614336,
+      989396528
+    ]
+  }
+}

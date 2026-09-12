@@ -1,0 +1,290 @@
+[
+  {
+    "timestamp": "2026-09-10T20:41:11.2850495+06:00",
+    "phase": "active 10000-record UI stress; exact sub-operation unavailable",
+    "processes": [
+      {
+        "Name": "node.exe",
+        "ProcessId": 31252,
+        "ParentProcessId": 24416,
+        "KernelModeTime": 13593750,
+        "UserModeTime": 45625000,
+        "WorkingSetSize": 147791872,
+        "PeakWorkingSetSize": 179500
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 29916,
+        "ParentProcessId": 31252,
+        "KernelModeTime": 28906250,
+        "UserModeTime": 52812500,
+        "WorkingSetSize": 156160000,
+        "PeakWorkingSetSize": 185088
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 22992,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 10608640,
+        "PeakWorkingSetSize": 10488
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 24288,
+        "ParentProcessId": 22992,
+        "KernelModeTime": 0,
+        "UserModeTime": 0,
+        "WorkingSetSize": 9560064,
+        "PeakWorkingSetSize": 9392
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 31244,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 45468750,
+        "UserModeTime": 45312500,
+        "WorkingSetSize": 170975232,
+        "PeakWorkingSetSize": 171408
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 43332,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 937500,
+        "UserModeTime": 2187500,
+        "WorkingSetSize": 40251392,
+        "PeakWorkingSetSize": 39308
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 36300,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 0,
+        "WorkingSetSize": 21667840,
+        "PeakWorkingSetSize": 21204
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 27796,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 781250,
+        "WorkingSetSize": 54185984,
+        "PeakWorkingSetSize": 52964
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 15744,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 34164736,
+        "PeakWorkingSetSize": 33416
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 30872,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 678906250,
+        "UserModeTime": 9066093750,
+        "WorkingSetSize": 2486439936,
+        "PeakWorkingSetSize": 4360432
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-09-10T20:41:21.6773747+06:00",
+    "phase": "active 10000-record UI stress; exact sub-operation unavailable",
+    "processes": [
+      {
+        "Name": "node.exe",
+        "ProcessId": 31252,
+        "ParentProcessId": 24416,
+        "KernelModeTime": 13593750,
+        "UserModeTime": 45625000,
+        "WorkingSetSize": 147791872,
+        "PeakWorkingSetSize": 179500
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 29916,
+        "ParentProcessId": 31252,
+        "KernelModeTime": 28906250,
+        "UserModeTime": 52812500,
+        "WorkingSetSize": 156160000,
+        "PeakWorkingSetSize": 185088
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 22992,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 10608640,
+        "PeakWorkingSetSize": 10488
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 24288,
+        "ParentProcessId": 22992,
+        "KernelModeTime": 0,
+        "UserModeTime": 0,
+        "WorkingSetSize": 9560064,
+        "PeakWorkingSetSize": 9392
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 31244,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 45781250,
+        "UserModeTime": 45625000,
+        "WorkingSetSize": 164151296,
+        "PeakWorkingSetSize": 171408
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 43332,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 937500,
+        "UserModeTime": 2187500,
+        "WorkingSetSize": 40251392,
+        "PeakWorkingSetSize": 39308
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 36300,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 0,
+        "WorkingSetSize": 21667840,
+        "PeakWorkingSetSize": 21204
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 27796,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 937500,
+        "WorkingSetSize": 54185984,
+        "PeakWorkingSetSize": 52964
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 15744,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 34164736,
+        "PeakWorkingSetSize": 33416
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 30872,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 685312500,
+        "UserModeTime": 9181406250,
+        "WorkingSetSize": 2868137984,
+        "PeakWorkingSetSize": 4360432
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-09-10T20:41:32.0739517+06:00",
+    "phase": "active 10000-record UI stress; exact sub-operation unavailable",
+    "processes": [
+      {
+        "Name": "node.exe",
+        "ProcessId": 31252,
+        "ParentProcessId": 24416,
+        "KernelModeTime": 13593750,
+        "UserModeTime": 45625000,
+        "WorkingSetSize": 147791872,
+        "PeakWorkingSetSize": 179500
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 29916,
+        "ParentProcessId": 31252,
+        "KernelModeTime": 28906250,
+        "UserModeTime": 52812500,
+        "WorkingSetSize": 156160000,
+        "PeakWorkingSetSize": 185088
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 22992,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 10608640,
+        "PeakWorkingSetSize": 10488
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 24288,
+        "ParentProcessId": 22992,
+        "KernelModeTime": 0,
+        "UserModeTime": 0,
+        "WorkingSetSize": 9560064,
+        "PeakWorkingSetSize": 9392
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 31244,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 46406250,
+        "UserModeTime": 46406250,
+        "WorkingSetSize": 164257792,
+        "PeakWorkingSetSize": 171408
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 43332,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 937500,
+        "UserModeTime": 2187500,
+        "WorkingSetSize": 40251392,
+        "PeakWorkingSetSize": 39308
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 36300,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 312500,
+        "UserModeTime": 0,
+        "WorkingSetSize": 21667840,
+        "PeakWorkingSetSize": 21204
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 27796,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 937500,
+        "WorkingSetSize": 54185984,
+        "PeakWorkingSetSize": 52964
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 15744,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 468750,
+        "UserModeTime": 468750,
+        "WorkingSetSize": 34164736,
+        "PeakWorkingSetSize": 33416
+      },
+      {
+        "Name": "chrome.exe",
+        "ProcessId": 30872,
+        "ParentProcessId": 29916,
+        "KernelModeTime": 691562500,
+        "UserModeTime": 9295625000,
+        "WorkingSetSize": 3315838976,
+        "PeakWorkingSetSize": 4360432
+      }
+    ]
+  }
+]

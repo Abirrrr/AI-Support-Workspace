@@ -1,0 +1,8 @@
+{
+  "command": "git fsck --full",
+  "startedUtc": "2026-09-12T09:21:04.518Z",
+  "finishedUtc": "2026-09-12T09:21:06.193Z",
+  "elapsedSeconds": 1.6743157,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

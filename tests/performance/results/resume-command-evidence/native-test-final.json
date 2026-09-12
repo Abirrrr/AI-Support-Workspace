@@ -1,0 +1,8 @@
+{
+  "command": "dotnet test native/windows-clipboard-companion/AI.SupportWorkspace.ClipboardCompanion.sln -c Release --no-build",
+  "startedUtc": "2026-09-12T09:20:14.716Z",
+  "finishedUtc": "2026-09-12T09:20:20.220Z",
+  "elapsedSeconds": 5.5042868,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

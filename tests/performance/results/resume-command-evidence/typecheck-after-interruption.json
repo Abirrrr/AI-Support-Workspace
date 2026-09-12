@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd typecheck",
+  "startedUtc": "2026-09-12T09:08:41.481Z",
+  "finishedUtc": "2026-09-12T09:09:00.440Z",
+  "elapsedSeconds": 18.9575055,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

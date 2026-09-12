@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd format --check --ignore-path .prettierignore --ignore-path tests/performance/.prettierignore",
+  "startedUtc": "2026-09-12T09:14:40.794Z",
+  "finishedUtc": "2026-09-12T09:14:55.240Z",
+  "elapsedSeconds": 14.4447477,
+  "exitCode": 1,
+  "liveProviderEnabled": false
+}

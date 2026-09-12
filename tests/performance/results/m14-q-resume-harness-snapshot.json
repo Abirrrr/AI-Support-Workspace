@@ -1,0 +1,96 @@
+﻿{
+  "capturedUtc": "2026-09-12T03:18:05.6383398Z",
+  "note": "Resume harness snapshot before remaining batches; previous batches retain their separately documented revision limitations. Production build has not changed during measurement.",
+  "files": [
+    {
+      "path": "tests/performance/aggregate-m14-q-results.mjs",
+      "sha256": "36C98077A259926940A3B9800C43CD27AF7EF302387E6842558F1EC6B175540E",
+      "bytes": 4550
+    },
+    {
+      "path": "tests/performance/inspect-m14-q-results.mjs",
+      "sha256": "E32C309B41B218F8429D64A5534F49E987F3F6FE7E2828E0658C6798620D493C",
+      "bytes": 795
+    },
+    {
+      "path": "tests/performance/m14-q-browser-fixture.mjs",
+      "sha256": "53385C690FBB4767C069EE8986CC1D9EDE54CB3720F390C64DB086C74802E982",
+      "bytes": 761
+    },
+    {
+      "path": "tests/performance/m14-q-delivery.html",
+      "sha256": "08E8BC9B8B4D4853C5795D5CFCA55C7B9037000BE11E409BA7C66BFF50659829",
+      "bytes": 210
+    },
+    {
+      "path": "tests/performance/m14-q-delivery.ts",
+      "sha256": "3A424019E67348EF8CC2B3F29B93A4C2995DF23F8CDFE18DA8D1C4351EC621A0",
+      "bytes": 192
+    },
+    {
+      "path": "tests/performance/m14-q-measurement.mjs",
+      "sha256": "C3AE99FC1D229641E45F4A3989916DA56B5472E7679D9E260CF345C410AA3B9D",
+      "bytes": 1683
+    },
+    {
+      "path": "tests/performance/m14-q-storage.html",
+      "sha256": "693BDEBE03E875CF0113C10AB80389F3ABACA6D5433BEE65D66EBBACF8600CCD",
+      "bytes": 281
+    },
+    {
+      "path": "tests/performance/m14-q-storage.ts",
+      "sha256": "18504CB910C7A40FD5AF67BCCC194FB4F8C64FE777A1B0E3ACC8CCF0E3ECBDC0",
+      "bytes": 20104
+    },
+    {
+      "path": "tests/performance/m14-q-trigger.html",
+      "sha256": "089970420B5F54A1483439A3E66F94BF89D49EA85331429998B6E5E60B4A9C32",
+      "bytes": 194
+    },
+    {
+      "path": "tests/performance/m14-q-trigger.ts",
+      "sha256": "9348CA22A47A093332080D1E4AD3AA40CEFACB5BD6B54AEA375C75959CA06E0A",
+      "bytes": 4430
+    },
+    {
+      "path": "tests/performance/run-m14-q-base64.mjs",
+      "sha256": "6FD6D6160900528BF5573FC7D5BD6B3BC8D41B4C340390B1D1B54DEC4B80AB98",
+      "bytes": 2660
+    },
+    {
+      "path": "tests/performance/run-m14-q-browser.mjs",
+      "sha256": "73B036E9B29F729C6E6009EB2C9816C2982D041989649A0B2AE099F594079522",
+      "bytes": 24305
+    },
+    {
+      "path": "tests/performance/run-m14-q-command.ps1",
+      "sha256": "1ED3941D47E294B09BF6F24A7D85515CE4ABE2F529BAC0FE0A9691A248F99AE0",
+      "bytes": 1074
+    },
+    {
+      "path": "tests/performance/run-m14-q-delivery.mjs",
+      "sha256": "A3FED9006211D490FC5F37D1377C9111AE3D08A2FD80724AEAA1A2F034BA07D6",
+      "bytes": 4930
+    },
+    {
+      "path": "tests/performance/run-m14-q-native.mjs",
+      "sha256": "B2CFD83F9381DFB4E442D6912CCE97AEE55F16C932C37E605DBDFC68D62AA350",
+      "bytes": 2721
+    },
+    {
+      "path": "tests/performance/run-m14-q-storage.mjs",
+      "sha256": "DF534A6DE980D1F0D05F77F62B0DB3345BF47A471D315977E80C028C4F2BC742",
+      "bytes": 7557
+    },
+    {
+      "path": "tests/performance/run-m14-q-trigger.mjs",
+      "sha256": "B4F92674921D11E6459DB1DAF12390DBEA776E0F566386ED76A0374926103A0E",
+      "bytes": 1735
+    },
+    {
+      "path": "tests/performance/verify-m14-q-measurement.mjs",
+      "sha256": "97BB9B421FA19DF8D7761265BC6B3080AEF7E607AA963CED75D08436DCF1FAE8",
+      "bytes": 2333
+    }
+  ]
+}

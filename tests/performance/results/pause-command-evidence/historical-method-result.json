@@ -1,0 +1,5 @@
+{
+  "command": "pnpm benchmark:snippet-delivery",
+  "exit": 0,
+  "seconds": 8.2226708
+}

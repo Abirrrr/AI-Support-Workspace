@@ -1,0 +1,8 @@
+{
+  "command": "node tests/performance/run-m14-q-browser.mjs image-edit",
+  "startedUtc": "2026-09-12T09:14:12.365Z",
+  "finishedUtc": "2026-09-12T09:14:19.044Z",
+  "elapsedSeconds": 6.677933299999999,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

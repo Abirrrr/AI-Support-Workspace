@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-09-10T20:42:22.8830157+06:00",
+  "reason": "Bounded costly 10000-record batch after more than 15 minutes in stress tier; preserve interruption and completed raw measurements; subsequent batch uses reduced samples",
+  "runnerPid": 31252,
+  "browserPid": 29916,
+  "rendererPid": 30872
+}

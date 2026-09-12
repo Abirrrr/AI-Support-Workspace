@@ -15,6 +15,16 @@ Vitest is the approved platform for unit, React UI, and integration tests. Playw
 - Playwright end-to-end tests where practical
 - Risk-based manual validation
 
+## M14-Q opt-in diagnostic measurements
+
+[M14-Q](PERFORMANCE_AUDIT_M14-Q.md) adds isolated Chromium/IndexedDB and production-extension audit harnesses under `tests/performance/`, with [reproduction instructions](../tests/performance/README.md) and phase-separated raw evidence. They are diagnostic commands, not CI latency gates or new supported-Library limits. The historical `pnpm benchmark:snippet-delivery` method remains unchanged.
+
+Before measurement, run `node tests/performance/verify-m14-q-measurement.mjs` and `pnpm.cmd typecheck`. The verification distinguishes unavailable samples from actual measured zero, verifies repeated real scroll movement, and diagnoses the original zero-height editable fixture before checking the corrected light/Shadow DOM targets. Use fresh output labels for storage `repeat`, `mixed`, `near`, and `mapping`, and browser `repeat`, `mixed`, `image-edit`, `profile`, `lifecycle`, and `lifecycle-control` modes. Run timing batches sequentially in disposable contexts; no real user profile, live provider, clipboard write, OS paste, or host registration is used.
+
+Raw audit evidence is intentionally immutable. Check formatting with `pnpm.cmd format --check --ignore-path .gitignore --ignore-path .prettierignore --ignore-path tests/performance/.prettierignore`; the additional ignore covers only `tests/performance/results/`, preserving original hashes, samples, failures, and logs. It does not exempt production or harness code. Run actual `pnpm.cmd test:e2e`, rather than substituting discovery, alongside normal lint/typecheck/Vitest, production and native-development builds/output checks, native restore/build/test, `git diff --check`, and `git fsck --full`. Keep `OLLAMA_LIVE_MODEL` unset for the normal suite.
+
+Browser protocol roundtrips, fake transport stages, instrumented counter passes, and real end-to-end delivery are distinct evidence. Forced debugger-assisted worker recovery does not prove natural suspension. Sampled renderer heap/DOM counters are not total process/image/GPU peak memory or proof of a leak. The ordered manual Chrome/Intercom/Crisp plan and exact NOT RUN gaps remain in the report; earlier Principal manual approval is historical evidence, not a new M14-Q timing result.
+
 ## Risk-Based Manual Validation
 
 Manual validation must target destructive operations, data-loss or corruption risks, persistence, security-sensitive behavior, external integrations, and core browser-only workflows. Automated tests may carry low-risk, reversible, and readily detectable edge cases when they provide reliable coverage.

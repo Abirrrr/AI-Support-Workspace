@@ -1,0 +1,72 @@
+[
+  {
+    "Id": 15744,
+    "ProcessName": "chrome",
+    "WorkingSet64": 34164736,
+    "PeakWorkingSet64": 34217984,
+    "CPU": 0.09375
+  },
+  {
+    "Id": 22992,
+    "ProcessName": "chrome",
+    "WorkingSet64": 10608640,
+    "PeakWorkingSet64": 10739712,
+    "CPU": 0.078125
+  },
+  {
+    "Id": 24288,
+    "ProcessName": "chrome",
+    "WorkingSet64": 9560064,
+    "PeakWorkingSet64": 9617408,
+    "CPU": 0
+  },
+  {
+    "Id": 27796,
+    "ProcessName": "chrome",
+    "WorkingSet64": 54185984,
+    "PeakWorkingSet64": 54235136,
+    "CPU": 0.140625
+  },
+  {
+    "Id": 29916,
+    "ProcessName": "chrome",
+    "WorkingSet64": 156160000,
+    "PeakWorkingSet64": 189530112,
+    "CPU": 8.171875
+  },
+  {
+    "Id": 30872,
+    "ProcessName": "chrome",
+    "WorkingSet64": 2508242944,
+    "PeakWorkingSet64": 4465082368,
+    "CPU": 1017.640625
+  },
+  {
+    "Id": 31244,
+    "ProcessName": "chrome",
+    "WorkingSet64": 171118592,
+    "PeakWorkingSet64": 175521792,
+    "CPU": 9.421875
+  },
+  {
+    "Id": 36300,
+    "ProcessName": "chrome",
+    "WorkingSet64": 21667840,
+    "PeakWorkingSet64": 21712896,
+    "CPU": 0.03125
+  },
+  {
+    "Id": 43332,
+    "ProcessName": "chrome",
+    "WorkingSet64": 40316928,
+    "PeakWorkingSet64": 40316928,
+    "CPU": 0.3125
+  },
+  {
+    "Id": 31252,
+    "ProcessName": "node",
+    "WorkingSet64": 147808256,
+    "PeakWorkingSet64": 183808000,
+    "CPU": 5.921875
+  }
+]

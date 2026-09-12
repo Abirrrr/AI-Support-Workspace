@@ -1,0 +1,693 @@
+{
+  "managedAssemblySha256": "7aa83e129f474597597dc8bb5c04cf1db2f651d90a49231b040e844d99aad0c6",
+  "executableSha256": "d24919a54ef72d5788f692a3ea11d0be779f4daacf549f805dfe60631b18583e",
+  "provenance": "Existing development publish; executable hash recorded, rebuild/registration not performed",
+  "interval": "Node spawn call through child close after one framed content-free get-capabilities response; OS caches not reset; no Chrome native-message transport",
+  "runs": [
+    {
+      "phase": "initial-exploratory-launch",
+      "ms": 101.11359999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "initial-exploratory-launch",
+      "ms": 92.48280000000003,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "initial-exploratory-launch",
+      "ms": 83.28020000000001,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "initial-exploratory-launch",
+      "ms": 86.12810000000002,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "initial-exploratory-launch",
+      "ms": 86.6395,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.96750000000003,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 78.34479999999996,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 73.9008,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 84.20259999999996,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 75.46859999999992,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 77.72069999999997,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 97.82920000000013,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 87.6848,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.8273999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 77.2293000000002,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 80.68029999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.45659999999998,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 76.74219999999991,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 79.01419999999985,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 76.6407999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 77.5456999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 75.98649999999998,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 76.70270000000005,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 79.21890000000008,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 74.63229999999999,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 81.98120000000017,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 81.57720000000018,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 75.54709999999977,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 79.20080000000007,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.51639999999998,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 80.81179999999995,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 74.9402,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 77.3489999999997,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.81840000000011,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    },
+    {
+      "phase": "warm-os-cache-launch",
+      "ms": 83.03450000000021,
+      "code": 0,
+      "response": {
+        "protocolVersion": 1,
+        "requestId": "0123456789abcdef0123456789abcdef",
+        "status": "success",
+        "hostVersion": "1.0.0",
+        "result": {
+          "operation": "get-capabilities",
+          "supportedProtocolVersions": [1],
+          "supportedOperations": ["write-image-png"],
+          "maxPngBytes": 5242880,
+          "clipboardFormats": ["png", "cf-dibv5"]
+        }
+      },
+      "stderrBytes": 0
+    }
+  ],
+  "summary": {
+    "status": "measured",
+    "n": 30,
+    "samplesMs": [
+      83.96750000000003, 78.34479999999996, 73.9008, 84.20259999999996,
+      75.46859999999992, 77.72069999999997, 97.82920000000013, 87.6848,
+      83.8273999999999, 77.2293000000002, 80.68029999999999, 83.45659999999998,
+      76.74219999999991, 79.01419999999985, 76.6407999999999, 77.5456999999999,
+      75.98649999999998, 76.70270000000005, 79.21890000000008,
+      74.63229999999999, 81.98120000000017, 81.57720000000018,
+      75.54709999999977, 79.20080000000007, 83.51639999999998,
+      80.81179999999995, 74.9402, 77.3489999999997, 83.81840000000011,
+      83.03450000000021
+    ],
+    "minMs": 73.9008,
+    "medianMs": 79.01419999999985,
+    "meanMs": 80.08575,
+    "maxMs": 97.82920000000013,
+    "p95Ms": 87.6848
+  }
+}

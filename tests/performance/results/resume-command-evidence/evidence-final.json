@@ -1,0 +1,8 @@
+{
+  "command": "node tests/performance/verify-m14-q-evidence.mjs",
+  "startedUtc": "2026-09-12T09:22:40.115Z",
+  "finishedUtc": "2026-09-12T09:22:41.062Z",
+  "elapsedSeconds": 0.9464067,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

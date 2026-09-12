@@ -11,6 +11,19 @@
 
 ## Future Considerations
 
+### M14-Q evidence-backed proposals — not approved or scheduled
+
+The supplemental [M14-Q audit](PERFORMANCE_AUDIT_M14-Q.md) provides the evidence and limitations for these proposals. Every entry below is **PROPOSED / UNAPPROVED / UNSCHEDULED**. They do not activate another task or change M14-P.6.1 approval, Decision 57, the existing architecture, or M15's NOT STARTED state.
+
+- **M14-Q-F3 — next focused task proposed:** review the reproducible canonical-Backup decoder failure for a valid 4,459,989-byte PNG. A separately authorized correctness fix should preserve exact canonical base64 validation, all Backup v1–v7 contracts, and image bytes/limits; validate the original fixture plus malformed/noncanonical inputs and the real export/import workflow. No fix was made by M14-Q.
+- **M14-Q-F1 — focused UI follow-up proposed:** investigate and reduce the demonstrated large-Library render/layout cost, using the repeat and instrumented evidence before selecting a bounded-row or other specific rendering change. Preserve complete search results, stable-ID Copy/Edit/Delete, focus, usage, and image ownership. No generic cache, index, or UI redesign is approved.
+- **M14-Q-F2 — further measurement proposed:** the independent 10,000-entry restore repeat and transaction hooks identify the Snippet write stage as the dominant cost. The completed mapping-only diagnostic measured 34.5 ms median for 10,000 conversions; next isolate browser/index-write behavior before selecting an improvement. Preserve one atomic restore and local reminder ownership; any schema/index/transaction redesign requires separate approval.
+- **M14-Q-F4 — later, evidence-dependent:** retrieval and authored create/update perform whole-Library work. Before any future retrieval optimization, preserve deterministic 5/3/1/1 scoring, current-fingerprint checks, Knowledge compatibility, and the delivery path's independence from generated metadata. Do not introduce caching or new indexes speculatively or begin M15 from this recommendation.
+
+- **M14-Q-F8 — further measurement proposed:** near-cap Backup completed, but stage-boundary heap approached 989.4 MB and a sampled frame gap reached 1.06 s. Measure true peak allocation and real download/import responsiveness before selecting a memory change; preserve the 96 MiB cap, canonical validation and atomicity. No memory optimization or contract change is approved.
+
+Text planner/serializer micro-optimization, quality-reducing Image changes, and persistent native-host redesign are **not recommended** by this audit. Controlled lifecycle and multi-tab results do not justify a production leak or one-second Save fix.
+
 - Preserve the completed M12 backup and restore guarantees and completed M13 Backup Format v2/v1-compatibility guarantees in all later data-model evolution.
 - Preserve the application-owned backup format independently from Dexie schema versioning; future format evolution must not silently redefine format version 1.
 - Reconsider provider endpoint configuration only with provider expansion or a dedicated security and permissions architecture review.

@@ -1,0 +1,8 @@
+{
+  "command": "pnpm.cmd test",
+  "startedUtc": "2026-09-12T09:19:19.662Z",
+  "finishedUtc": "2026-09-12T09:19:54.917Z",
+  "elapsedSeconds": 35.2537064,
+  "exitCode": 0,
+  "liveProviderEnabled": false
+}

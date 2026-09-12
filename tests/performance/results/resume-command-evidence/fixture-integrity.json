@@ -1,0 +1,7 @@
+﻿{
+  "command": "node tests/performance/verify-m14-q-measurement.mjs",
+  "startedUtc": "2026-09-12T03:06:48.5584537Z",
+  "finishedUtc": "2026-09-12T03:06:56.8688283Z",
+  "elapsedSeconds": 8.3080482,
+  "exitCode": 0
+}

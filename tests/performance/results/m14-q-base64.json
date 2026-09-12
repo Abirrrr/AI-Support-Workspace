@@ -1,0 +1,141 @@
+{
+  "scenario": "Existing opaque 1440x900 PNG, valid 4459989-byte asset; production Backup base64 decoder, real atob control; no production changes",
+  "contexts": [
+    {
+      "backupError": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "assetValidationPassed": true,
+      "assetBytes": 4459989,
+      "base64Characters": 5946652,
+      "browserAtobMatchesEverySourceByte": true,
+      "runs": [
+        {
+          "ms": 27.599999994039536,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 25.900000005960464,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 27.19999999552965,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        }
+      ]
+    },
+    {
+      "backupError": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "assetValidationPassed": true,
+      "assetBytes": 4459989,
+      "base64Characters": 5946652,
+      "browserAtobMatchesEverySourceByte": true,
+      "runs": [
+        {
+          "ms": 30,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 29.19999999552965,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 26.899999998509884,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        }
+      ]
+    },
+    {
+      "backupError": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "assetValidationPassed": true,
+      "assetBytes": 4459989,
+      "base64Characters": 5946652,
+      "browserAtobMatchesEverySourceByte": true,
+      "runs": [
+        {
+          "ms": 27.599999994039536,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 27.600000001490116,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 29.30000000447035,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        }
+      ]
+    },
+    {
+      "backupError": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "assetValidationPassed": true,
+      "assetBytes": 4459989,
+      "base64Characters": 5946652,
+      "browserAtobMatchesEverySourceByte": true,
+      "runs": [
+        {
+          "ms": 28.100000001490116,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 27.700000002980232,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 27.600000001490116,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        }
+      ]
+    },
+    {
+      "backupError": "BackupImportError: This isn't a valid AI Support Workspace backup file.",
+      "assetValidationPassed": true,
+      "assetBytes": 4459989,
+      "base64Characters": 5946652,
+      "browserAtobMatchesEverySourceByte": true,
+      "runs": [
+        {
+          "ms": 29,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 29,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        },
+        {
+          "ms": 27.69999999552965,
+          "outcome": "failed",
+          "name": "RangeError",
+          "message": "Maximum call stack size exceeded"
+        }
+      ]
+    }
+  ],
+  "browser": "149.0.7827.55"
+}

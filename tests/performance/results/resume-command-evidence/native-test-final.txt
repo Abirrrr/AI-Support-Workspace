@@ -1,0 +1,7 @@
+Command: dotnet test native/windows-clipboard-companion/AI.SupportWorkspace.ClipboardCompanion.sln -c Release --no-build
+Started UTC: 2026-09-12T09:20:14.716Z
+OLLAMA_LIVE_MODEL empty in this child process.
+Test run for C:\Users\shiha\My Drive\_Workspace\AI-Support-Workspace\native\windows-clipboard-companion\tests\AI.SupportWorkspace.ClipboardCompanion.Tests\bin\Release\net10.0-windows\win-x64\AI.SupportWorkspace.ClipboardCompanion.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   126, Skipped:     0, Total:   126, Duration: 325 ms - AI.SupportWorkspace.ClipboardCompanion.Tests.dll (net10.0)

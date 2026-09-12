@@ -7,11 +7,26 @@
 
 ## Current Milestone
 
+- Supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **AUDIT PRINCIPAL-REVIEWED / TECHNICALLY APPROVED; CHECKPOINT UNAUTHORIZED** as of 2026-09-12. Diagnostic work, validation and documentation synchronization are complete; explicitly operated manual/platform checks remain PENDING / NOT RUN. Recommendations are proposed / unapproved / unscheduled. No production optimization or M15 implementation is authorized.
 - Completed milestone: M14-P — Final Snippet Completion Gate
 - Closeout task: M14-P.6.1 — Final Snippet Completion Gate Closeout
 - Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15 — AI Workspace is the **NEXT MILESTONE**, but M15 implementation remains **NOT STARTED**.
 
 ## Task State
+
+### M14-Q — Internal Performance Audit & Improvement Recommendations
+
+The explicit supplemental specification authorized independent M14-Q diagnostics after approved M14-P closeout. September 6 clean preflight and live remote match are historical. Latest resumption began with existing M14-Q dirty documentation/harness/evidence at `master`, HEAD `9fe2d56e39793191530139ecdea70e6a2fbc4c7f`; final HEAD is unchanged. Git metadata: `C:/Users/shiha/GitMetadata/AI-Support-Workspace.git`; tracking comparison remains 0/0, with no fresh live-remote claim. Nothing was staged, committed or pushed.
+
+Continuity was checked before new measurements. Interrupted pause blocks were complete; the missing second manifest was completed at its actual capture time after original hashes verified. Raw measurements, failed/interrupted runs and logs remain intact. Current sources do not retroactively establish older harness provenance. The 10,000-entry UI repeat had already completed safely. Only remaining near-cap, mapping and mixed-UI/Image-Edit gaps were measured afterward.
+
+[The completed audit](PERFORMANCE_AUDIT_M14-Q.md) records confirmed synthetic Library/layout cost (220,035 live elements and 4.4–5.5 s separately measured layout at 10,000 rows), roughly 26 s median 10,000-record restore, and a valid-large-PNG Backup decoder failure in all 15 diagnostic attempts. Mapping-only results narrow restore investigation toward database/index writes without authorizing schema/transaction changes. Near-cap Backup completed with large sampled heap/frame gaps. Controlled lifecycle remained flat cycles 10–50 and object URLs returned to zero after unmount; no production leak is demonstrated. Corrected four-tab Save-plus-typing median was 63.8 ms; earlier one-second timing included harness frame waiting. Internal Text performance remains healthy.
+
+Status: **AUDIT PRINCIPAL-REVIEWED / TECHNICALLY APPROVED; CHECKPOINT UNAUTHORIZED**. Lint, raw-preserving formatting, typecheck, Vitest (68 files / 876 tests passed; one opt-in file/test skipped), actual configured Playwright (1 passed), both extension builds/output validation, native restore/build/test (126 passed), focused fixture/evidence and Git integrity/diff checks passed. Configured Playwright is a toolchain smoke; separate audit Chromium runs provide UI evidence. Warnings, historical failures, logger limitations and .NET first-run bootstrap side effects are disclosed. Manual toolbar/closed-UI suspension/clipboard/Intercom/Crisp/download and true peak-memory checks remain **PENDING / NOT RUN**, without borrowing historical manual PASS.
+
+Documentation Impact Review completed: report, this state, Roadmap, Changelog, Backlog and Testing Strategy synchronized; audit README gives reproduction. Architecture/schema/decisions/product/workflow/native/root setup docs need no changes because contracts/behavior did not change. All Backlog recommendations remain **PROPOSED / UNAPPROVED / UNSCHEDULED**, with PNG correctness review first proposed. No production fix, optimization, dependency, lockfile, architecture/schema/Backup/permission/native protocol or M15 change occurred. Intended files are those six docs and isolated audit files under `tests/performance/`; final status/hashes are linked from the report.
+
+Principal accepted the audit findings and Documentation Impact Review before this repository-hygiene continuation. The [checkpoint inventory](../tests/performance/results/m14-q-checkpoint-inventory.json) classifies proposed repository contents and local-only evidence; final result and verification instructions are in the audit report. **Principal-readiness self-check: PASS** for the diagnostic deliverable, with checkpoint-content verification recorded separately in the report. Exact next action: Principal review of checkpoint inventory and Git checkpoint authorization. Stop; no new task, staging, commit or push. M14-P.6.1 approval and Decision 57 remain intact; M15 is next and **NOT STARTED**.
 
 ### M14-P.6.1 — Final Snippet Completion Gate Closeout
 

@@ -1,0 +1,7 @@
+﻿{
+  "command": "pnpm typecheck",
+  "startedUtc": "2026-09-12T03:07:06.2899812Z",
+  "finishedUtc": "2026-09-12T03:07:16.1259115Z",
+  "elapsedSeconds": 9.8351323999999991,
+  "exitCode": 0
+}
