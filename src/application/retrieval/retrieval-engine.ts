@@ -1,15 +1,15 @@
 import type { KnowledgeEntry } from '../../domain/knowledge-entry';
 import type { SnippetEntry } from '../../domain/snippet-entry';
-import { renderSnippetPlainText } from '../../domain/snippet-content';
-import {
-  isSnippetGeneratedMetadataCurrent,
-  type SnippetGeneratedMetadata,
-} from '../../domain/snippet-generated-metadata';
+import type { SnippetGeneratedMetadata } from '../../domain/snippet-generated-metadata';
 import type { KnowledgeEntryRepository } from '../persistence/knowledge-entry-repository';
 import type { SnippetEntryRepository } from '../persistence/snippet-entry-repository';
 import type { SnippetGeneratedMetadataRepository } from '../persistence/snippet-generated-metadata-repository';
-
-const TOKEN_PATTERN = /[\p{L}\p{N}]+/gu;
+import {
+  compareScoredRecords,
+  rankTextSnippets,
+  scoreRetrievalFields,
+  tokenizeRetrievalText,
+} from './text-snippet-ranking';
 
 export interface RetrievalResults {
   knowledge: readonly KnowledgeRetrievalResult[];
@@ -30,63 +30,6 @@ export interface SnippetRetrievalResult {
   score: number;
 }
 
-interface ScoredRecord {
-  record: {
-    id: string;
-    createdAt: string;
-  };
-  score: number;
-}
-
-function tokenize(value: string): Set<string> {
-  const normalized = value.normalize('NFKC').toLowerCase();
-  return new Set(normalized.match(TOKEN_PATTERN) ?? []);
-}
-
-function tokenizeTags(tags: readonly string[]): Set<string> {
-  const tokens = new Set<string>();
-
-  for (const tag of tags) {
-    for (const token of tokenize(tag)) {
-      tokens.add(token);
-    }
-  }
-
-  return tokens;
-}
-
-function scoreRecord(
-  queryTokens: ReadonlySet<string>,
-  title: string,
-  tags: readonly string[],
-  content: string,
-  generatedTags: readonly string[] = [],
-): number {
-  const titleTokens = tokenize(title);
-  const tagTokens = tokenizeTags(tags);
-  const contentTokens = tokenize(content);
-  const generatedTagTokens = tokenizeTags(generatedTags);
-  let score = 0;
-
-  for (const token of queryTokens) {
-    if (titleTokens.has(token)) score += 5;
-    if (tagTokens.has(token)) score += 3;
-    if (contentTokens.has(token)) score += 1;
-    if (generatedTagTokens.has(token)) score += 1;
-  }
-
-  return score;
-}
-
-function compareScoredRecords(left: ScoredRecord, right: ScoredRecord): number {
-  if (left.score !== right.score) return right.score - left.score;
-  if (left.record.createdAt < right.record.createdAt) return -1;
-  if (left.record.createdAt > right.record.createdAt) return 1;
-  if (left.record.id < right.record.id) return -1;
-  if (left.record.id > right.record.id) return 1;
-  return 0;
-}
-
 function retrieveKnowledge(
   records: readonly KnowledgeEntry[],
   queryTokens: ReadonlySet<string>,
@@ -96,7 +39,12 @@ function retrieveKnowledge(
       kind: 'knowledge',
       id: record.id,
       record,
-      score: scoreRecord(queryTokens, record.title, record.tags, record.body),
+      score: scoreRetrievalFields(
+        queryTokens,
+        record.title,
+        record.tags,
+        record.body,
+      ),
     }))
     .filter((result) => result.score > 0)
     .sort(compareScoredRecords);
@@ -107,44 +55,14 @@ async function retrieveSnippets(
   queryTokens: ReadonlySet<string>,
   metadataRecords: readonly SnippetGeneratedMetadata[],
 ): Promise<SnippetRetrievalResult[]> {
-  const metadataBySnippet = new Map<
-    string,
-    SnippetGeneratedMetadata | undefined
-  >();
-  for (const metadata of metadataRecords) {
-    metadataBySnippet.set(
-      metadata.snippetId,
-      metadataBySnippet.has(metadata.snippetId) ? undefined : metadata,
-    );
-  }
-
-  const textRecords = records.filter(
-    (record) => record.content.kind !== 'image',
-  );
-  const scored = await Promise.all(
-    textRecords.map(async (record): Promise<SnippetRetrievalResult> => {
-      const metadata = metadataBySnippet.get(record.id);
-      const generatedTags = (await isSnippetGeneratedMetadataCurrent(
-        metadata,
-        record,
-      ))
-        ? (metadata?.generatedTags ?? [])
-        : [];
-      return {
-        kind: 'snippet',
-        id: record.id,
-        record,
-        score: scoreRecord(
-          queryTokens,
-          record.title,
-          record.tags,
-          renderSnippetPlainText(record.content),
-          generatedTags,
-        ),
-      };
+  return (await rankTextSnippets(records, queryTokens, metadataRecords)).map(
+    ({ record, score }): SnippetRetrievalResult => ({
+      kind: 'snippet',
+      id: record.id,
+      record,
+      score,
     }),
   );
-  return scored.filter((result) => result.score > 0).sort(compareScoredRecords);
 }
 
 export class RetrievalEngine {
@@ -155,7 +73,7 @@ export class RetrievalEngine {
   ) {}
 
   async retrieve(query: string): Promise<RetrievalResults> {
-    const queryTokens = tokenize(query);
+    const queryTokens = tokenizeRetrievalText(query);
 
     if (queryTokens.size === 0) {
       return { knowledge: [], snippets: [] };

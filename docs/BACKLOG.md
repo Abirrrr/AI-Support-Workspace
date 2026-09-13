@@ -85,7 +85,8 @@ Text planner/serializer micro-optimization, quality-reducing Image changes, and 
 
 ### M15 — AI Workspace Functionality and Multimodal Context
 
-- **M15-A — AI Workspace Architecture & Contract Lockdown (ARCHITECTURE/DOCUMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW):** Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) are the normative implementation contract. No runtime task is active and M15 runtime remains **NOT STARTED**.
+- **M15-A — AI Workspace Architecture & Contract Lockdown (COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `8aeab99`):** Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) are the normative implementation contract.
+- **M15-B — Drafting Retrieval & Prompt v2 Foundation (IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW):** adds the provider-independent Text-Snippet drafting reference, a Snippet-plus-generated-metadata retriever sharing the exact M14-O ranking implementation with historical retrieval, the trimmed Context/Gist lexical query helper, and Prompt v2 with exact application instructions and the first at most three references. Knowledge and Image Snippets are excluded from the M15 path; historical v1 contracts remain unchanged. Later M15 UI, Context Image, discovery/provider/generation, Copy, and Save-as-Snippet behavior remains unimplemented.
 - Consume the M14-P.4 navigation/Side Panel shell; do not reimplement or duplicate its toolbar and Settings navigation.
 - Add versioned Text-Snippet-only retrieval and Prompt Builder v2 contracts while preserving historical M7/M8/M9 v1 contracts, Knowledge compatibility, M14-O `5/3/1/1` scoring, and usage/recency exclusion.
 - Implement the locked authority order, minimal Gist validity, and Context-only/Gist-only/combined/image-only generation eligibility with a required opaque model ID.
