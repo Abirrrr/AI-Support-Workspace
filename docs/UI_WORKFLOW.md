@@ -123,7 +123,7 @@ Copy Reply
 - Approved M14-P.4 target: clicking the extension toolbar action opens/toggles the existing global Workspace Side Panel directly, with no intermediate popup. A compact Settings gear in the panel header opens the Options management surface; Snippets, Settings, Import / Export, backup, paste behavior, model/provider configuration, and future management stay in Options. Knowledge is hidden from active navigation only and retained as compatibility data.
 - The Side Panel is global rather than site-specific or tab-configured. It does not read the active page, and normal Chrome Side Panel lifecycle behavior may discard its transient state when the panel page is closed, destroyed, or reloaded.
 
-### Approved Future Compact Side Panel
+### M15 Compact Side Panel Contract
 
 ```text
 Merchant Context
@@ -140,12 +140,13 @@ Generated Output           [Save as Snippet] [Copy]
 ```
 
 - Context and Guidance / Gist start approximately one visual line high, grow to a sensible maximum, and then scroll internally. “One line” describes initial height, not a content restriction.
-- Generate is enabled for Context-only, Gist-only, or both and disabled only when both are empty. Context-only implies a sensible grounded reply; minimal Gist may refer to the pending/latest Context subject; Gist-only may directly specify the message.
-- Context Images are compact, removable, request-scoped multimodal AI input. They are not Image Snippets, Knowledge records, or permanent Library assets. Any mounted-workspace continuity remains separate from reusable Snippet ownership.
-- The Model control is a provider-independent dropdown supplied through application/provider boundaries, not Ollama-specific discovery inside the Workspace.
-- Generated Output stays editable while Context/Gist change and generation repeats. Generation clears neither input. Save as Snippet opens/navigates to Text Snippet authoring with the current response prefilled; the user may edit title, trigger, tags, and content, and only explicit Save creates a record. Generation itself never saves a Snippet. Copy remains on the output header; no direct Insert/Paste action is approved.
+- Generate supports Context-only, Gist-only, combined, and image-only requests. It also requires an opaque selected model and, for attachments, image capability exactly `supported`.
+- Context Images are compact, previewed, removable, request-scoped multimodal AI input acquired only by Merchant Context paste or explicit local files. They remain in mounted Side Panel memory and are not Image Snippets, Knowledge records, Snippet assets, URLs, database/Backup data, or page captures. There is no reorder interaction.
+- The Model control is a provider-independent dropdown supplied through application/provider boundaries, not Ollama-specific discovery inside the Workspace. Only an exact discovered saved-default match is selected; otherwise it starts empty. `unsupported` and `unknown` image capability block an image request visibly without discarding images.
+- Generated Output stays editable while Context/Gist change and generation repeats. Generation clears neither input. During the one active request, old output remains visible and edit-locked; success replaces it and failure preserves it with separate feedback.
+- Copy writes the exact edited plain text. Save as Snippet opens existing Text authoring through a random, 60-second, one-use, in-memory same-extension handoff; it pre-fills only content, and only explicit authoring Save creates a record. No draft enters a URL or durable store.
 - Redundant product headings, intro prose, “Local support drafting,” and persistent Ollama installation/helper copy do not occupy the future primary drafting surface.
-- This is approved future behavior. The current M9/M11 Side Panel, free-text model input, text-only Context, and current Prompt Builder remain implemented until future M15 work changes them.
+- Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) are authoritative. M15-A documents the contract; current M9/M11 runtime behavior remains until a separately activated M15 implementation task changes it.
 
 ## 4. Knowledge Compatibility Workflow
 
@@ -491,7 +492,29 @@ Copy
 - Successful repeated generation replaces the previous draft, while a failed generation preserves the current editable draft. Copy writes the current edited output with line breaks intact from the direct user action and needs no clipboard permission.
 - Manual Chrome validation passed for the complete Side Panel workflow, real local `qwen2.5:7b` generation, Guidance influence, edited-output Copy, repeated generation, safe provider and missing-model errors with draft preservation, and both Library regressions.
 - Images shown in the broader planned Support workflow remain deferred from Prompt Builder v1 and require a later architecture decision.
-- Multimodal Context Attachments are now an approved future product direction, while their Prompt Builder, provider-capability, serialization, limit, unsupported-provider, and persistence architecture remains deferred.
+- The historical M9 workflow above remains frozen. M15 replaces, rather than mutates, its active application contracts as specified below.
+
+### M15 Versioned Generation Workflow
+
+```text
+Merchant Context text + Context Images + Guidance / Gist + opaque Model
+↓ validate eligibility, image bounds, and explicit model capability
+Immutable request snapshot
+↓ Context + Gist lexical query; image-only skips retrieval
+Text-Snippet-only M14-O retrieval
+↓ at most three deterministic references
+Prompt Builder v2 + typed image attachments
+↓ provider-independent request
+Ollama M15 adapter
+↓
+Success: replace editable output
+Failure: preserve output + separate error
+```
+
+- Safety/application rules → Gist → Merchant facts → Text Snippet references → defaults is the exact authority order. Knowledge and Image Snippets are excluded from the active reference path.
+- Original PNG/JPEG/WebP Context Images are bounded to 4, 5 MiB each, 20 MiB combined, 8,192 × 8,192 dimensions, 16,777,216 pixels, and 64 MiB RGBA with overflow-safe fail-closed checks. M15 performs no resize, crop, downsample, or quality reduction.
+- Inputs may change after immutable snapshot capture and affect only a later request. Generate remains disabled until the active request settles. No history, cancellation, background generation, or silent image fallback is added.
+- Copy and Save as Snippet are explicit post-output gestures with separate application boundaries. Neither action clears inputs or invokes generation; Copy does not count Snippet usage, and handoff receipt does not persist until the existing authoring Save succeeds.
 
 ## 9. Settings Workflow
 
@@ -660,7 +683,8 @@ Generated tags have no user-facing workflow in M14-O. They do not appear in card
 - **M14-M.0 — Selected-Folder Backup Feasibility Gate:** **PASS / REAL-CHROME VALIDATED** through the native-dev Options diagnostic. Picker, persistence, reload/restart, service-worker reuse, exact owned-file lifecycle, same-folder identity, and unavailable-location safety passed. Different-folder distinction remains an M14-N verification before retention reliance. M14-M.1 implements only the Dexie v6/Backup v7 persistence boundary; ordinary production Options still has no automatic-backup product UI or scheduled output.
 - **M14-M.1/M14-M.1.1:** complete and synchronized at `20b509c`; Dexie v6 and Backup v7 are implemented. **M14-M.2** is synchronized at `f4d9ab0` and records F1/F2 as required pre-M14-P Snippet UX work and F3 Save as Snippet as M15 work. **M14-M.3** implements deterministic non-blocking usage behavior, and M14-M.3.1 displays only the numeric count in the Library, with absence as `0`; neither implements F1/F2/F3, automatic backup, or generated tags.
 - **M14-O — Generated Text Snippet Tags & Retrieval:** implemented, approved, and checkpointed at `6e893886ea23870c374e7e96dcc09a1c92184afc`, with no generated-tag UI or production generator.
-- **M14-P.6/M14-P.6.1 — Final Snippet Completion Gate and Closeout:** automated UI/workflow, regression, production-output, and Text performance checks pass with no behavior change, and the Principal accepted the complete 14-item real-Chrome/manual matrix. M14-P is **COMPLETE / PRINCIPAL-APPROVED** with no known blocking Snippet issue. M15 — AI Workspace is next but remains not started; it continues to own Merchant Context behavior, Context image attachments, Guidance / Gist behavior, provider-independent model selection, Generate/provider execution, editable Generated Output lifecycle/Copy, and F3 Save Generated Output as Snippet.
+- **M14-P.6/M14-P.6.1 — Final Snippet Completion Gate and Closeout:** automated UI/workflow, regression, production-output, and Text performance checks pass with no behavior change, and the Principal accepted the complete 14-item real-Chrome/manual matrix. M14-P is **COMPLETE / PRINCIPAL-APPROVED** with no known blocking Snippet issue.
+- **M15-A — AI Workspace Architecture & Contract Lockdown:** architecture/documentation complete and awaiting Principal review. Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) are normative; M15 runtime remains not started.
 
 The lifecycle availability flow is:
 
@@ -677,7 +701,7 @@ Connect and accept a complete current-epoch trigger catalog snapshot
 ```
 
 Normal navigation continues to use static content-script injection. The user should not need to refresh an already-open supported page after extension lifecycle changes. Chrome site-access controls remain authoritative; denied, restricted, protected, discarded, non-HTTP(S), and `file://` pages are not forced into availability. Recovery never pastes automatically and never inspects page text.
-- **M15 — Multimodal Screenshot Context:** combine text with one or more transient clipboard screenshots for capable generation providers, with attachment indication, preview, removal, and explicit unsupported-provider handling. Detailed architecture remains deferred.
+- **M15 — AI Workspace and Context Images:** later implementation follows the now-locked M15-A contract for transient pasted/file-selected images, explicit capability, versioned prompt/provider seams, output lifecycle, Copy, and Save as Snippet. No source work is activated by M15-A.
 - **M16 — OpenAI Provider Expansion:** add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, models, errors, and privacy are defined.
 
 ### Approved M14-P.4 Workspace Entry and Settings Navigation

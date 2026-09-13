@@ -21,26 +21,31 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - M14-P.4 hides the Knowledge Library surface from active navigation. Its domain, Dexie data/store, repository interfaces, historical records, Backup v1–v7 compatibility, import/restore behavior, and tests are not deleted or migrated. M14-P.4 does not silently change the versioned M6/M7/M9 retrieval/Prompt Builder contracts; permanent removal or AI-contract migration requires its separately assigned work.
 - Image Snippets remain reusable delivery assets and are excluded from AI retrieval/reference content.
 
-## Future AI Drafting Semantics
+## M15 AI Drafting Semantics
 
 - The user-facing field is **Guidance / Gist**. It is optional request-specific direction, not a complete-prompt requirement. Minimal Gist such as `follow up`, `keep it short`, or `ask for the URL` is valid.
 - Merchant Context is optional. With Context and no Gist, Generate infers that a sensible response is required. With Gist and no Context, Generate drafts directly from the Gist. When both are present, Gist controls the current requested action/presentation and Context supplies current-case facts.
-- Generate is enabled for Context-only, Gist-only, or Context-plus-Gist. It is disabled only when both are empty.
+- Generate supports Context-only, Gist-only, Context-plus-Gist, and image-only requests. It requires a selected model and at least one of Context text, one valid Context Image, or Gist.
 - Application-owned default drafting instructions always apply; users need not repeat them.
 - Product authority is `Safety/application rules → current Guidance / Gist → Merchant Context factual grounding → relevant Text Snippet reference material → default drafting behavior`.
 - Guidance / Gist controls intent, action, length, structure, tone modification, and drafting direction, but does not authorize invented facts contradicted or unsupported by Merchant Context.
 - Retrieved Text Snippets are reference/evidence, not current instructions. They never override Gist, Context facts, or safety rules, and must not introduce unsupported case-specific facts.
-- Current Prompt Builder v1 remains implemented with separate Knowledge/Snippet inputs until a future versioned application-contract change implements this product direction.
+- M15 uses versioned replacement application contracts. Historical Prompt Builder, Generation Provider/Ollama, and Output Workflow v1 remain unchanged rather than being silently reinterpreted.
+- Retrieval uses only Context-plus-Gist text and Text Snippets. Image-only requests skip lexical retrieval; images produce no OCR, caption, embedding, filename, or invented query text. M14-O title/authored-tag/content/generated-tag weights remain `5/3/1/1`, with usage and recency excluded.
+- Prompt assembly v2 contains application instructions, Gist, Merchant Context text, and bounded Text Snippet references. Knowledge is excluded, and Context Images are typed generation attachments rather than prompt sections.
 
-## Future Compact AI Workspace
+## M15 Compact AI Workspace
 
 - Order: Merchant Context, compact Context Image attachments when present, Guidance / Gist, one horizontal `[Model dropdown] [Generate]` row, then Generated Output with **Save as Snippet** and **Copy** on the same output-header row.
 - Merchant Context and Guidance / Gist begin approximately one visual line high, auto-grow to a sensible maximum, then scroll internally. Context remains multiline-capable and accepts pasted text.
-- Merchant Context accepts removable request-scoped Context Images. They are transient multimodal AI input, not Image Snippets, Knowledge records, or permanent Library records. Provider translation and any workspace-continuity lifetime belong to future M15 architecture.
+- Merchant Context accepts pasted and explicitly file-selected removable request-scoped Context Images. They are mounted-workspace-memory-only multimodal input, not Image Snippets, Knowledge records, Snippet assets, permanent Library records, database/Backup data, URLs, or page-derived captures.
+- Context Images accept original PNG/JPEG/WebP bytes only: maximum 4 images, 5 MiB each, 20 MiB combined, 8,192 × 8,192 dimensions, 16,777,216 pixels, and 64 MiB decoded RGBA, with fail-closed overflow-safe validation and no resize/crop/downsample/quality loss.
 - Guidance / Gist v1 accepts text only.
-- Model is a compact provider-independent dropdown. Discovery and selection belong behind project-owned provider/application boundaries, not Ollama-specific Workspace logic.
-- Generated Output remains editable and persists while the user changes Context/Gist and regenerates. Generation does not clear inputs. **Save as Snippet** opens or navigates to Text Snippet authoring with the current generated response prefilled; the user may edit title, trigger, tags, and content, and only explicit user Save creates the Snippet. Generation success never auto-creates or silently saves a Snippet. Copy remains; no direct Insert/Paste action is approved.
+- Model is a compact provider-independent dropdown over opaque discovered IDs. Only Ollama is adapted in M15. Images require model capability exactly `supported`; `unsupported` and `unknown` block visibly, and attachments are never silently discarded. An exact saved-default match is selected; otherwise selection is empty without rewriting Settings or auto-selecting another model.
+- Each request is one immutable snapshot, and only one request is active at a time. Inputs persist through generation. Existing editable output remains visible but edit-locked during regeneration; success replaces it, while failure preserves it and reports a separate error. Input edits never clear output.
+- **Copy** writes exact currently edited output as plain text and has no persistence, usage, delivery, or input side effect. **Save as Snippet** uses a random 60-second one-use in-memory same-extension `BroadcastChannel` handoff to existing Text authoring; no content enters a URL or durable store, and only explicit existing Save persists.
 - Permanent intro/helper copy, redundant headings, and Ollama installation guidance leave the primary drafting surface; configuration/troubleshooting stays elsewhere.
+- [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) is the normative implementation contract. M15-A documents this behavior; M15 runtime remains **NOT STARTED**.
 
 ## Future Snippet Hardening
 
@@ -87,7 +92,7 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - Image delivery prioritizes quality, correctness, and safety over absolute latency. Optimization may not resize, crop, downsample, reduce resolution or quality, bypass genuine JPEG/WebP decoding, relabel bytes, or weaken Decision 42 guards.
 - One-shot native startup overhead remains an evidence-dependent architectural opportunity. No persistent native host, Windows service, daemon, keepalive, or native protocol expansion is currently approved solely to remove its startup cost.
 - M14-O is retrieval infrastructure and must preserve M14-P.1. Generated metadata, fingerprinting, retrieval, generated-tag reads, generation, and backfill must not become trigger-expansion or delivery prerequisites.
-- M14-P.6 automated gate evidence passes: Text warm p95 remains 0 ms with 0.1 ms maxima for plain/rich serialization and planning, delivery imports no M14-O work, complete/focused suites and production-output checks pass, and no product behavior changed. M14-P.6.1 records the Principal-accepted complete 14-item real-Chrome/manual matrix PASS. M14-P is **COMPLETE / PRINCIPAL-APPROVED**, with Text performance and Image quality/safety accepted and no known blocking Snippet issue. M15 — AI Workspace is next, but its functional implementation has not started.
+- M14-P.6 automated gate evidence passes: Text warm p95 remains 0 ms with 0.1 ms maxima for plain/rich serialization and planning, delivery imports no M14-O work, complete/focused suites and production-output checks pass, and no product behavior changed. M14-P.6.1 records the Principal-accepted complete 14-item real-Chrome/manual matrix PASS. M14-P is **COMPLETE / PRINCIPAL-APPROVED**, with Text performance and Image quality/safety accepted and no known blocking Snippet issue. M15-A architecture/documentation is complete and awaiting Principal review; M15 runtime remains not started.
 
 ## Output Workspace v1
 
@@ -241,7 +246,7 @@ OpenAI Provider Expansion is assigned to M16. It will add OpenAI behind the exis
 
 ## Deferred Future Architecture
 
-M13 trigger architecture and M14 structured-text architecture are defined above. Decision 39 preserves Decision 37's implemented binary foundation while moving reusable-image authoring and delivery to one-image Image Snippets. Future reviews must still define rich-to-plain conversion or variables; M15 multimodal screenshot/provider capability details; and M16 OpenAI credentials, provider selection, permissions, models, errors, and privacy.
+M13 trigger architecture and M14 structured-text architecture are defined above. Decision 39 preserves Decision 37's implemented binary foundation while moving reusable-image authoring and delivery to one-image Image Snippets. Future reviews must still define rich-to-plain conversion or variables and M16 OpenAI credentials, provider selection, permissions, models, errors, and privacy. M15 Context Image and model-capability details are now defined by Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md).
 
 ## Quality Requirements
 

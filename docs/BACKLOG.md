@@ -13,7 +13,7 @@
 
 ### M14-Q evidence-backed follow-ups
 
-The supplemental [M14-Q audit](PERFORMANCE_AUDIT_M14-Q.md) provides the evidence and limitations for these follow-ups. F3 was completed by M14-S at `ccc1930`; F1 was completed by M14-T at `50eaf76`; and F2 diagnostic attribution was completed and Principal-approved by M14-U at `b8dfef1`. F2 is now **DEFERRED / EVIDENCE-PRESERVED**; F4 and F8 remain **DEFERRED / EVIDENCE-DEPENDENT**. No additional Backup restore performance task is scheduled before M15, no schema/index/transaction redesign is approved, and M15 remains **NOT STARTED**.
+The supplemental [M14-Q audit](PERFORMANCE_AUDIT_M14-Q.md) provides the evidence and limitations for these follow-ups. F3 was completed by M14-S at `ccc1930`; F1 was completed by M14-T at `50eaf76`; and F2 diagnostic attribution was completed and Principal-approved by M14-U at `b8dfef1`. F2 is now **DEFERRED / EVIDENCE-PRESERVED**; F4 and F8 remain **DEFERRED / EVIDENCE-DEPENDENT**. No additional Backup restore performance task is scheduled before M15, no schema/index/transaction redesign is approved, and M15-A architecture/documentation is complete awaiting Principal review while M15 runtime remains **NOT STARTED**.
 
 - **M14-Q-F3 — COMPLETED BY M14-S AT `ccc1930`:** the separately authorized correctness fix replaces only the stack-unsafe canonical-shape regex with a bounded alphabet/padding scan while retaining exact canonical re-encoding. The original valid 4,459,989-byte PNG now passes Backup v7 creation, validation/import, and restore with exact bytes; malformed/noncanonical inputs and the exact 5 MiB boundary remain guarded. Backup v1–v7, image limits/quality, atomicity, schema, permissions, native protocols, and dependencies are unchanged.
 - **M14-Q-F1 — COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED UNDER M14-T AT `50eaf76`:** fixed 100-Snippet pagination bounds mounted Library rows after the complete authoritative search/filter result. Focused UI, 10,000-record Chromium evidence, and Principal real-Chrome validation preserve ordered reachability, stable-ID actions, usage, Details, page-scoped Image ownership, keyboard/mouse usability, and normal small-Library behavior while reducing the observed live elements from approximately 220,035 to 2,241 in the isolated fixture. No cache, index, storage, retrieval, or general UI redesign is included.
@@ -83,19 +83,17 @@ Text planner/serializer micro-optimization, quality-reducing Image changes, and 
 - **M14-P.6/M14-P.6.1 / M14-P — Validation & Closeout (COMPLETE / PRINCIPAL-APPROVED):** automated feature inventory, regression, Text benchmark, delivery isolation, schema, permissions, dependencies, production output, and documentation checks pass with no blocker. The Principal accepted the complete 14-item real-Chrome/manual matrix. Text performance and Image quality/safety are accepted, no known blocking Snippet issue remains, and the complete Snippet foundation is stable and complete.
 - **Automatic-backup history:** Daily/Weekly retention values remain historical M14-N.1/N.2 design records only. Current product performs no automatic retention or filesystem deletion.
 
-### M15 — AI Workspace Functionality and Multimodal Context (NEXT / NOT STARTED)
+### M15 — AI Workspace Functionality and Multimodal Context
 
-- M15 is the next milestone, but no M15 implementation task is active. The Principal must define and activate the first implementation subtask before source work begins.
+- **M15-A — AI Workspace Architecture & Contract Lockdown (ARCHITECTURE/DOCUMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW):** Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) are the normative implementation contract. No runtime task is active and M15 runtime remains **NOT STARTED**.
 - Consume the M14-P.4 navigation/Side Panel shell; do not reimplement or duplicate its toolbar and Settings navigation.
-- Make Text Snippets the sole active AI retrieval/reference input while preserving the already-hidden Knowledge compatibility domain/store/backups until a separate cleanup task.
-- Implement optional Guidance / Gist, Context/Gist empty-state rules, factual grounding, application defaults, and Text-Snippet reference precedence from Decision 46.
-- Implement the compact Decision 47 Workspace order, bounded auto-growing inputs, provider-independent Model dropdown, editable preserved output, **Save as Snippet**, Copy, and reduced primary-workflow explanatory copy. Save as Snippet opens Text Snippet authoring with content prefilled and creates nothing until explicit user Save.
-- Extend Merchant Context beyond ordinary text to one or more request-scoped screenshots/images for AI generation when the selected provider and model support image understanding.
-- Allow direct screenshot clipboard paste without requiring a disk save or cloud upload first.
-- Provide visible attachment indication, appropriate preview, and removal before generation. Image reordering remains unresolved.
-- Keep screenshots transient and local-first by default; no persistence or image table is currently approved.
-- Preserve provider independence through a future capability boundary and never silently discard screenshots when a provider is text-only.
-- Defer representation, unsupported-provider UX details, count/size/format limits, workspace-continuity persistence, Prompt Builder/retrieval contract changes, provider serialization, and implementation decomposition to future M15 architecture work.
+- Add versioned Text-Snippet-only retrieval and Prompt Builder v2 contracts while preserving historical M7/M8/M9 v1 contracts, Knowledge compatibility, M14-O `5/3/1/1` scoring, and usage/recency exclusion.
+- Implement the locked authority order, minimal Gist validity, and Context-only/Gist-only/combined/image-only generation eligibility with a required opaque model ID.
+- Discover opaque local models behind a provider-independent catalog. Only Ollama is in M15. Exact saved-default matches select; otherwise selection remains empty. Images require capability exactly `supported`; `unsupported` or `unknown` blocks visibly without silent text-only fallback.
+- Accept pasted or explicitly file-selected original PNG/JPEG/WebP Context Images in Side Panel memory only. Enforce 4 images, 5 MiB each, 20 MiB combined, 8,192 × 8,192 dimensions, 16,777,216 pixels, 64 MiB RGBA, and overflow-safe validation without resize/crop/downsample/quality change.
+- Implement one immutable request snapshot and one active generation at a time. Preserve inputs and old output during regeneration; success replaces output, failure preserves it with a separate error, and output editing is locked only while active.
+- Copy exact edited output with no persistence/usage/delivery side effect. Save as Snippet uses a random, expiring, one-use in-memory same-extension `BroadcastChannel` handoff to existing Text authoring; URL/durable draft transport is prohibited and only explicit Save persists.
+- Do not add a schema/index/migration, Backup change, permission, provider selector, OpenAI/API key/cloud behavior, history, cancellation, screenshot capture, scrape, remote image fetch, OCR, captioning, or image persistence.
 
 ### M16 — OpenAI Provider Expansion
 
@@ -134,4 +132,4 @@ Context screenshots and Snippet images remain separate domains: Context images a
 
 ## Notes
 
-M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete and real-browser validated. M14-K is closed at `e34cd76`. M14-M.0 remains PASS; M14-M.1 is the Dexie v6/Backup v7 foundation; M14-M.2 is checkpointed at `f4d9ab0`; M14-M.3/M14-M.3.1 at `2475f8b`; and M14-N.3 is complete at `d410ecb`. M14-P.1 is approved at `7bc5005`; M14-P.2 at `64b5dd8`; M14-P.3 at `406ff08`; M14-P.4/M14-P.4.1/M14-P.4.2 at `52befe0`; M14-P.5 at `d94181746cff07632fba1cdb9c6d874b569b4f21`; and M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`. M14-P.6 automated audit and M14-P.6.1 Principal manual closeout both pass; M14-P is complete and Principal-approved. M15 is next but not started.
+M13 is complete at `b76fcb4`/`9a3c7ef`. M14-I is complete at `ebe915f`/`28dcf53`. M14-J is complete and real-browser validated. M14-K is closed at `e34cd76`. M14-M.0 remains PASS; M14-M.1 is the Dexie v6/Backup v7 foundation; M14-M.2 is checkpointed at `f4d9ab0`; M14-M.3/M14-M.3.1 at `2475f8b`; and M14-N.3 is complete at `d410ecb`. M14-P is complete and Principal-approved; M14-T is complete and Principal-approved; M14-U/U.1 is complete, Principal-approved, and pushed through `e9d0f97`. M15-A documentation is complete and awaiting Principal review; M15 runtime remains not started.

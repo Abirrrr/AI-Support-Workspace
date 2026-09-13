@@ -1,5 +1,14 @@
 # Changelog
 
+### M15-A — AI Workspace Architecture & Contract Lockdown (2026-09-13)
+
+- Activated M15-A as architecture/documentation only while M15 runtime remains **NOT STARTED**. Added [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) and Decision 58 as the normative implementation contract; the fixed M14-P.4 Workspace order and navigation remain unchanged.
+- Locked versioned replacement contracts instead of mutating historical M7 Prompt Builder v1, M8 `GenerationProvider`/Ollama v1, or M9 `OutputWorkflow` v1. Active references are Text Snippets only with M14-O `5/3/1/1` retrieval, no usage/recency, and no Knowledge/Image-Snippet participation. Prompt v2 contains application instructions, Gist, Merchant Context text, and bounded Text references; images remain typed provider-independent attachments.
+- Locked Context-only, Gist-only, combined, and image-only eligibility; opaque model discovery; exact saved-default matching; `supported | unsupported | unknown` image capability; and no silent attachment loss. Only Ollama is in M15, with no Workspace provider branch or selector; OpenAI/API keys/cloud/multi-provider behavior remains M16.
+- Locked transient Side Panel-memory Context Images acquired only by paste/local file selection: original PNG/JPEG/WebP, maximum 4, 5 MiB each, 20 MiB combined, 8,192 × 8,192, 16,777,216 pixels, and 64 MiB RGBA with overflow-safe fail-closed validation and no resize/crop/downsample/quality change.
+- Locked immutable one-active-request snapshots, preserved inputs and old output during regeneration, success-only output replacement, separate failure feedback, exact edited-output Copy, and a cryptographically random 60-second one-use in-memory same-extension `BroadcastChannel` handoff to existing Text authoring. No URL/durable draft transport or automatic Snippet persistence is allowed.
+- Documentation-only impact: normative architecture added; Project State, Architecture, Decisions, Product Requirements, Roadmap, UI Workflow, Testing Strategy, Backlog, Changelog, and README synchronized. Database Schema, production code, tests, harnesses/evidence, dependencies, manifest/permissions, Dexie/Backup, and M14-Q LOCAL ONLY evidence are unchanged. M15-A is architecture/documentation complete and awaits Principal review; M15 runtime remains **NOT STARTED**.
+
 ### M14-U.1 — Final Approval and Performance Follow-up Closeout (2026-09-13)
 
 - Recorded M14-U as **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`**. Its evidence remains authoritative: 10,000-Snippet restore is expensive, the awaited Snippet IndexedDB write is the dominant observable boundary, current indexes have measurable associated cost, and the fresh-write versus clear/rewrite and transaction-context gap remains unresolved.
