@@ -1,12 +1,19 @@
 # Changelog
 
+### M14-U.1 — Final Approval and Performance Follow-up Closeout (2026-09-13)
+
+- Recorded M14-U as **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`**. Its evidence remains authoritative: 10,000-Snippet restore is expensive, the awaited Snippet IndexedDB write is the dominant observable boundary, current indexes have measurable associated cost, and the fresh-write versus clear/rewrite and transaction-context gap remains unresolved.
+- Recorded the Principal decision not to schedule M14-V or any other Backup restore performance diagnostic or optimization before M15. M14-Q-F2 is **DEFERRED / EVIDENCE-PRESERVED** as a future optimization concern; M14-Q-F4 and F8 remain deferred and evidence-dependent.
+- Preserved the current schema, indexes, transaction boundaries and atomicity, Backup behavior/compatibility, production code, tests, diagnostic harnesses/evidence, and M14-Q LOCAL ONLY evidence. No redesign or optimization is approved or implemented.
+- Documentation-only closeout: Project State, Changelog, Backlog, and Roadmap synchronized. Other canonical documentation was reviewed and requires no change. M15 is the next engineering milestone but remains **NOT STARTED** until separately defined and activated after this closeout's Git checkpoint.
+
 ### M14-U — Backup Restore Write-Path Attribution (2026-09-13)
 
 - Added a diagnostic-only Chromium/Dexie harness for the real production `replaceAll(...)` path with a deterministic M14-Q-comparable 10,000-Text-Snippet fixture, existing restore-stage hooks, isolated actual production-table writes, matched diagnostic index variants, and request-versus-transaction-resolution boundaries. No production code, schema, index, transaction, Backup, UI, permission, native, dependency, or M15 behavior changed.
 - Production restore measured 10,249.8 ms first use after seeding and 13,227.8 ms repeat median (n=3). The Snippet write stage was 12,755.0 ms median (96.4%); Snippet clearing was 437.3 ms, and every other individual stage was 14.9 ms or less. Mapping remained small at 15.4 ms median / 20.7 ms p95 / 23.6 ms max (n=30).
 - Isolated 10,000-record writes measured 5,407.5 ms median through the actual production table, 5,293.0 ms with a matched current-index diagnostic schema, 3,777.3 ms with `createdAt`, and 3,051.7 ms with the primary key only (n=3 each). Post-`bulkAdd` transaction resolution was 0.3–0.4 ms median. The bottleneck is partially attributed to the awaited IndexedDB write-request boundary, with material index-associated synthetic cost; browser-internal mechanics and the production clear/rewrite-context gap remain unresolved.
-- The narrowest next option is separate Principal authorization for a bounded same-schema/atomicity diagnostic comparing fresh write versus clear-then-rewrite and single-store versus the existing six-store transaction context before selecting an optimization. M14-U implements no optimization or migration.
-- Documentation Impact Review: Project State, Changelog, Backlog, Testing Strategy, and performance reproduction guidance updated. Architecture, Decisions, database schema, product requirements/vision/workflows, Roadmap, setup, and native documentation require no change because this diagnostic changes no contract or product behavior. M14-T remains complete at `50eaf76`; M15 remains **NOT STARTED**.
+- The diagnostic identified a bounded same-schema/atomicity comparison of fresh write versus clear-then-rewrite and single-store versus the existing six-store transaction context as the narrowest possible follow-up. The Principal subsequently accepted the unresolved boundary and directed that no additional restore diagnostic or optimization occur before M15; the option is preserved only as future evidence, not scheduled work.
+- Documentation Impact Review: Project State, Changelog, Backlog, Testing Strategy, and performance reproduction guidance updated. Architecture, Decisions, database schema, product requirements/vision/workflows, Roadmap, setup, and native documentation required no change because this diagnostic changed no contract or product behavior. M14-U is **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`**; M14-T remains complete at `50eaf76`; M15 remains **NOT STARTED**.
 
 ### M14-T — Snippet Library Bounded Rendering (2026-09-13)
 

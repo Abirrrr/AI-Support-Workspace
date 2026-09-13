@@ -7,7 +7,8 @@
 
 ## Current Milestone
 
-- Completed diagnostic task awaiting review: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-13. The bottleneck is partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. No optimization or product behavior change is included.
+- Completed documentation closeout awaiting review: **M14-U.1 — Final Approval and Performance Follow-up Closeout**. Status: **COMPLETE / READY FOR PRINCIPAL REVIEW** as of 2026-09-13. M14-U is Principal-approved and synchronized at `b8dfef1`; no additional Backup restore diagnostic or optimization is scheduled before M15. After this closeout's authorized checkpoint, M15 is the next engineering milestone but remains not started.
+- Completed diagnostic task: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`** as of 2026-09-13. The bottleneck remains partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; indexes have measurable associated cost, while browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. The evidence is preserved for future optimization review, and no schema, index, transaction, atomicity, or Backup change is approved.
 - Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `50eaf76`** as of 2026-09-13. Local `master` and fetched `origin/master` are synchronized at `50eaf764525607c4ca30580467011e2378214ecd`.
 - Completed supplemental task: **M14-S — Large Canonical Base64 Backup Correctness Fix**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `ccc1930`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `ccc19305611695aaf4b3448d1f0479c200eaeb9f`.
 - Completed supplemental task: **M14-R — Interruption-Safe Coding-Agent Workflow Standardization**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `f2fe6e6`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd`.
@@ -18,15 +19,39 @@
 
 ## Task State
 
+### M14-U.1 — Final Approval and Performance Follow-up Closeout
+
+M14-U.1 is documentation-only. It records the Principal's acceptance of M14-U at synchronized checkpoint `b8dfef1` and closes M14-Q-F2 as **DEFERRED / EVIDENCE-PRESERVED**. No M14-V restore task or other Backup restore performance diagnostic/optimization is scheduled before M15. M14-Q-F4 and F8 remain deferred, evidence-dependent future considerations. M15 is the next engineering milestone but remains **NOT STARTED** pending this closeout's separate review and Git checkpoint.
+
+#### M14-U.1 Final Closeout State
+
+```text
+Task: M14-U.1 — Final Approval and Performance Follow-up Closeout
+Status: COMPLETE / READY FOR PRINCIPAL REVIEW
+Starting branch/HEAD: master at b8dfef1b34d9fd5db9a527692071394ef0d003d1
+Fetched origin/master: b8dfef1b34d9fd5db9a527692071394ef0d003d1; ahead/behind 0/0
+Starting tracked tree/index: clean
+Approved M14-Q LOCAL ONLY evidence: all 39 files present with exact approved bytes and SHA-256 hashes; do not modify, stage, delete, clean, or move
+Completed phase: continuity gate; required canonical-document review; M14-U final-status synchronization; F2/F4/F8 disposition synchronization; Roadmap transition; documentation consistency and formatting validation; final Git diff/status review
+Files changed: docs/PROJECT_STATE.md; docs/CHANGELOG.md; docs/BACKLOG.md; docs/ROADMAP.md
+Validation completed: documentation consistency PASS; explicit Prettier check for all four changed documents PASS; git diff --check PASS; final intended-file/status review PASS; all 39 approved M14-Q LOCAL ONLY files retain exact approved bytes and SHA-256 hashes
+Documentation Impact Review: Project State, Changelog, Backlog, and Roadmap updated; Coding Agent Rules and M14-Q performance audit reviewed and unchanged; no production, test, performance harness/evidence, architecture, schema, Backup, or other canonical documentation change required
+Incomplete work: none within M14-U.1
+Exact next action: Principal reviews M14-U.1 and decides whether to authorize its Git checkpoint; after that checkpoint M15 is next but remains NOT STARTED until separately defined and activated
+Git state: master remains at synchronized b8dfef1b34d9fd5db9a527692071394ef0d003d1; four unstaged M14-U.1 documentation files alongside untouched approved M14-Q LOCAL ONLY evidence; staged NONE; commit NONE; push NONE
+M15 implementation: NOT STARTED
+Principal-readiness self-check: PASS
+```
+
 ### M14-U — Backup Restore Write-Path Attribution
 
 M14-U is a focused diagnostic-only follow-up to M14-Q-F2. It measures the real `DexieTransactionalBackupRestorePort.replaceAll(...)` path and, only as needed for attribution, disposable diagnostic schema variants. It changes no production schema, indexes, transaction atomicity, Backup format/compatibility, reminder ownership, Snippet semantics, UI, permissions, native protocol, dependencies, or M15 functionality.
 
-#### M14-U Resume State
+#### M14-U Final State
 
 ```text
 Task: M14-U — Backup Restore Write-Path Attribution
-Status: COMPLETE / READY FOR PRINCIPAL REVIEW
+Status: COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT b8dfef1b34d9fd5db9a527692071394ef0d003d1
 Starting branch/HEAD: master at 50eaf764525607c4ca30580467011e2378214ecd
 Fetched origin/master: 50eaf764525607c4ca30580467011e2378214ecd; ahead/behind 0/0
 Starting tracked tree/index: clean
@@ -38,9 +63,10 @@ Harness status: completed at 2026-09-13T02:23:12.051Z in headless Chromium 140; 
 Attribution status: bottleneck partially attributed at observable boundaries to IndexedDB request execution represented by the awaited Snippet bulkAdd/write stage; current indexes add measurable synthetic cost, but browser internals cannot subdivide request execution into an exact engine/index-maintenance cause, and the isolated index comparison is attribution evidence rather than a migration proposal
 Validation completed: focused ESLint, Prettier, and TypeScript passed; result JSON/fixture/sample/final-count integrity passed; documentation consistency passed; git diff --check passed; git fsck --full reported only existing dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files retained exact approved bytes and SHA-256 hashes; no shared production or test helper changed, so the full suite/build and conditional Backup restore rerun were not required
 Documentation Impact Review: Project State, Changelog, Backlog, Testing Strategy, and performance README updated; Architecture, Decisions, database schema, product requirements, product vision, UI workflow, Roadmap, setup, and native documentation reviewed and require no change because no architecture, schema, contract, or product behavior changed
-Incomplete work: none within M14-U; no production optimization is authorized or implemented
-Exact next action: Principal reviews the M14-U evidence and decides whether to authorize a Git checkpoint and/or the separately scoped bounded follow-up diagnostic; do not stage, commit, or push without authorization
-Git state: master remains at synchronized 50eaf764525607c4ca30580467011e2378214ecd; unstaged M14-U documentation, isolated diagnostic harness, and M14-U result only alongside untouched approved M14-Q LOCAL ONLY evidence; staged NONE; commit NONE; push NONE
+Final Principal disposition: diagnostic conclusions accepted; M14-Q-F2 deferred with evidence preserved; no M14-V or other Backup restore performance diagnostic/optimization before M15; no schema, index, transaction, atomicity, or Backup redesign approved
+Incomplete work: none within M14-U
+Exact next action: M14-U is closed at b8dfef1b34d9fd5db9a527692071394ef0d003d1; M14-U.1 records final disposition before M15 planning
+Git state: checkpointed and pushed at b8dfef1b34d9fd5db9a527692071394ef0d003d1; approved M14-Q LOCAL ONLY evidence remains present and untouched
 M15 implementation: NOT STARTED
 Principal-readiness self-check: PASS
 ```
@@ -68,7 +94,7 @@ Documentation Impact Review: Project State, Changelog, Testing Strategy, Backlog
 Manual validation: PASS. Principal verified correct pagination; maximum 100 Snippets per page; Next/Previous navigation; later-page search reachability and reset; All/Text/Images filtering; later-page Edit/Copy/Delete targeting; Image preview behavior; mouse/keyboard pagination usability; and normal small-Library behavior
 Final integrity: intended nine M14-T files reviewed; tracked diff check, harness lint/format, and result JSON parse passed; index empty; HEAD and origin/master remain ccc1930 with ahead/behind 0/0; git fsck reported only known dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files remain present with exact approved bytes and hashes
 Incomplete work: none
-Exact next action: M14-T is closed; M14-U is the active supplemental diagnostic task
+Exact next action: M14-T is closed; M14-U is closed at b8dfef1; M14-U.1 is the active documentation closeout
 Git state: checkpointed and pushed at 50eaf764525607c4ca30580467011e2378214ecd; approved M14-Q LOCAL ONLY evidence remains present and untouched
 M15 implementation: NOT STARTED
 Principal-readiness self-check: PASS
