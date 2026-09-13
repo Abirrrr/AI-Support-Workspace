@@ -5,6 +5,7 @@ docs/
 node_modules/
 playwright-report/
 test-results/
+tests/performance/results/m14-q-aggregate-final.md
 README.md
 pnpm-lock.yaml
 native/windows-clipboard-companion/fixtures/protocol-v1/*.json
