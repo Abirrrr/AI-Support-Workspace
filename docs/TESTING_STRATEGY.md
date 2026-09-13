@@ -25,6 +25,12 @@ Raw audit evidence is intentionally immutable. Check formatting with `pnpm.cmd f
 
 Browser protocol roundtrips, fake transport stages, instrumented counter passes, and real end-to-end delivery are distinct evidence. Forced debugger-assisted worker recovery does not prove natural suspension. Sampled renderer heap/DOM counters are not total process/image/GPU peak memory or proof of a leak. The ordered manual Chrome/Intercom/Crisp plan and exact NOT RUN gaps remain in the report; earlier Principal manual approval is historical evidence, not a new M14-Q timing result.
 
+## M14-U Backup restore attribution diagnostics
+
+M14-U narrows M14-Q-F2 with one opt-in, non-CI Chromium harness over a deterministic 10,000-Text-Snippet fixture. It must begin at the real production `DexieTransactionalBackupRestorePort.replaceAll(...)` boundary, use existing stage hooks, keep first-use and repeat samples separate, record sample counts, declare/exclude warmups, preserve zero versus unavailable semantics, and verify final table counts and unique fixture IDs/triggers. Isolated write and diagnostic index comparisons must use fresh disposable database names, native IndexedDB, identical mapped records, rotated order, and no extension/user profile.
+
+Promise timing may attribute time to synchronous mapping, awaited `bulkAdd` request execution, or outer transaction resolution. It must not claim browser-internal B-tree, uniqueness-check, journaling, disk-flush, or scheduling time that Chromium does not expose. Diagnostic schema variants are synthetic attribution evidence only: they do not authorize a Dexie version, index, migration, atomicity, Backup, or persistence-semantics change. Preserve the retained result, use a fresh output label for any separately authorized repeat, and never add timing assertions to CI.
+
 ## M14-S canonical base64 correctness regression
 
 M14-S preserves the strict Backup contract while removing a stack-unsafe validation implementation. Focused automated coverage must accept empty canonical data, one- and two-padding forms, and unpadded complete quartets; reject invalid lengths and alphabet characters, misplaced/excess padding, whitespace/line wrapping, noncanonical pad bits, and truncated/corrupted forms; and exact-round-trip both the 4,459,989-byte M14-Q representative size and the 5 MiB asset boundary.

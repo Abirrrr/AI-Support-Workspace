@@ -1,5 +1,20 @@
 # Isolated performance diagnostics
 
+## M14-U Backup restore write-path attribution
+
+M14-U uses the real production `DexieTransactionalBackupRestorePort.replaceAll(...)` path and native IndexedDB in a disposable headless Chromium context. Its deterministic fixture contains 10,000 Text Snippets comparable to M14-Q. It separates production restore stages, synchronous record mapping, the actual production-table `bulkAdd` boundary, outer transaction resolution, and three diagnostic-only index variants. It does not access an extension/user database, change production schema or behavior, or define a CI timing threshold.
+
+The retained result is `results/m14-u-restore-attribution.json`. The runner refuses to overwrite it. A separately authorized fresh repeat must use a unique lowercase output label:
+
+```powershell
+pnpm.cmd exec eslint tests/performance/m14-u-restore-attribution.ts tests/performance/run-m14-u-restore-attribution.mjs
+pnpm.cmd exec prettier --check tests/performance/m14-u-restore-attribution.ts tests/performance/run-m14-u-restore-attribution.mjs
+pnpm.cmd typecheck
+node tests/performance/run-m14-u-restore-attribution.mjs fresh-repeat
+```
+
+Run the expensive batch sequentially. The runner declares and excludes 100-record warmups, separates the first production restore after seeding from three repeats, rotates index-variant order, opens a fresh disposable database before every isolated measured write, saves phase progress, and preserves failures. Mapping uses 30 repeats; production restore and each write variant use three expensive repeats. The result's index comparison is synthetic attribution evidence, not a schema-migration proposal. Chromium cannot expose internal B-tree, uniqueness-check, journal, disk-flush, or scheduler timing below the awaited request boundary.
+
 ## M14-T bounded Snippet Library rendering
 
 M14-T adds the assertion-backed `run-m14-t-pagination.mjs` follow-up and its retained `results/m14-t-pagination.json` evidence without changing or overwriting M14-Q artifacts. Build the current production extension first, then run the harness from the repository root:

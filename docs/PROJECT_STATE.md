@@ -7,7 +7,8 @@
 
 ## Current Milestone
 
-- Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / AWAITING AUTHORIZED GIT CHECKPOINT** as of 2026-09-13. Fixed 100-Snippet client-side pagination bounds mounted rows after the existing complete search/filter result, and the Principal accepted the complete real-Chrome manual matrix. Storage, retrieval, Snippet semantics, image ownership, and product architecture remain unchanged; M15 is not started.
+- Completed diagnostic task awaiting review: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-13. The bottleneck is partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. No optimization or product behavior change is included.
+- Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `50eaf76`** as of 2026-09-13. Local `master` and fetched `origin/master` are synchronized at `50eaf764525607c4ca30580467011e2378214ecd`.
 - Completed supplemental task: **M14-S — Large Canonical Base64 Backup Correctness Fix**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `ccc1930`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `ccc19305611695aaf4b3448d1f0479c200eaeb9f`.
 - Completed supplemental task: **M14-R — Interruption-Safe Coding-Agent Workflow Standardization**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `f2fe6e6`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd`.
 - Completed supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `50031877c0ac307be4781d120b412081970b25bc`. Approved M14-Q LOCAL ONLY evidence remains intentionally untracked/ignored and is not M14-S work.
@@ -17,6 +18,33 @@
 
 ## Task State
 
+### M14-U — Backup Restore Write-Path Attribution
+
+M14-U is a focused diagnostic-only follow-up to M14-Q-F2. It measures the real `DexieTransactionalBackupRestorePort.replaceAll(...)` path and, only as needed for attribution, disposable diagnostic schema variants. It changes no production schema, indexes, transaction atomicity, Backup format/compatibility, reminder ownership, Snippet semantics, UI, permissions, native protocol, dependencies, or M15 functionality.
+
+#### M14-U Resume State
+
+```text
+Task: M14-U — Backup Restore Write-Path Attribution
+Status: COMPLETE / READY FOR PRINCIPAL REVIEW
+Starting branch/HEAD: master at 50eaf764525607c4ca30580467011e2378214ecd
+Fetched origin/master: 50eaf764525607c4ca30580467011e2378214ecd; ahead/behind 0/0
+Starting tracked tree/index: clean
+Approved M14-Q LOCAL ONLY evidence: present; do not modify, stage, delete, clean, or move
+Completed phase: continuity gate; M14-T checkpoint verification; required architecture/schema/testing/audit and production restore/database/application/test/harness/evidence review; isolated M14-U harness implementation/static validation; one focused Chromium attribution batch; measurement integrity review; evidence interpretation; Documentation Impact Review; focused and final validation
+Evidence obtained: deterministic 10,000-record fixture integrity passed (10,000 unique IDs/triggers; 16,297,030 serialized Snippet bytes); production mapping first use 16.8 ms and repeat n=30 median 15.4 ms/p95 20.7 ms/max 23.6 ms; production replaceAll first use after seed 10,249.8 ms and repeat n=3 median 13,227.8 ms, of which Snippet write median was 12,755.0 ms and Snippet clear median was 437.3 ms; post-final-hook transaction resolution median was 0.4 ms; isolated actual production-table bulkAdd/transaction n=3 median 5,407.5 ms, with post-bulkAdd transaction resolution median 0.4 ms; matched diagnostic schemas n=3 medians were 3,051.7 ms primary-only, 3,777.3 ms with createdAt, and 5,293.0 ms with current createdAt plus unique trigger indexes; all final production counts matched and failures were empty
+Files changed: docs/PROJECT_STATE.md; docs/CHANGELOG.md; docs/BACKLOG.md; docs/TESTING_STRATEGY.md; tests/performance/README.md; tests/performance/m14-u-restore-attribution.html; tests/performance/m14-u-restore-attribution.ts; tests/performance/run-m14-u-restore-attribution.mjs; tests/performance/results/m14-u-restore-attribution.json
+Harness status: completed at 2026-09-13T02:23:12.051Z in headless Chromium 140; first-use and repeat samples are separate, warmups are declared/excluded, variant order is rotated, every measured isolated write uses a fresh disposable database, and no production/user database is used
+Attribution status: bottleneck partially attributed at observable boundaries to IndexedDB request execution represented by the awaited Snippet bulkAdd/write stage; current indexes add measurable synthetic cost, but browser internals cannot subdivide request execution into an exact engine/index-maintenance cause, and the isolated index comparison is attribution evidence rather than a migration proposal
+Validation completed: focused ESLint, Prettier, and TypeScript passed; result JSON/fixture/sample/final-count integrity passed; documentation consistency passed; git diff --check passed; git fsck --full reported only existing dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files retained exact approved bytes and SHA-256 hashes; no shared production or test helper changed, so the full suite/build and conditional Backup restore rerun were not required
+Documentation Impact Review: Project State, Changelog, Backlog, Testing Strategy, and performance README updated; Architecture, Decisions, database schema, product requirements, product vision, UI workflow, Roadmap, setup, and native documentation reviewed and require no change because no architecture, schema, contract, or product behavior changed
+Incomplete work: none within M14-U; no production optimization is authorized or implemented
+Exact next action: Principal reviews the M14-U evidence and decides whether to authorize a Git checkpoint and/or the separately scoped bounded follow-up diagnostic; do not stage, commit, or push without authorization
+Git state: master remains at synchronized 50eaf764525607c4ca30580467011e2378214ecd; unstaged M14-U documentation, isolated diagnostic harness, and M14-U result only alongside untouched approved M14-Q LOCAL ONLY evidence; staged NONE; commit NONE; push NONE
+M15 implementation: NOT STARTED
+Principal-readiness self-check: PASS
+```
+
 ### M14-T — Snippet Library Bounded Rendering
 
 M14-T is a bounded presentation-only correction for the M14-Q finding that a 10,000-result Snippet Library view mounted all 10,000 rows and approximately 220,035 live DOM elements. The complete existing `visibleEntries` result remains authoritative; fixed 100-Snippet pagination is applied only after full search/filter computation so every matching stable-ID record remains reachable in unchanged order.
@@ -25,7 +53,7 @@ M14-T is a bounded presentation-only correction for the M14-Q finding that a 10,
 
 ```text
 Task: M14-T — Snippet Library Bounded Rendering
-Status: COMPLETE / PRINCIPAL-APPROVED / AWAITING AUTHORIZED GIT CHECKPOINT
+Status: COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT 50eaf764525607c4ca30580467011e2378214ecd
 Starting branch/HEAD: master at ccc19305611695aaf4b3448d1f0479c200eaeb9f
 Fetched origin/master: ccc19305611695aaf4b3448d1f0479c200eaeb9f; ahead/behind 0/0
 Starting tracked tree/index: clean
@@ -39,9 +67,9 @@ Validation note: three earlier default full Vitest attempts passed all other tes
 Documentation Impact Review: Project State, Changelog, Testing Strategy, Backlog, and performance reproduction guidance updated; Architecture, Decisions, database schema, product requirements/vision/workflows, Roadmap, setup, and native documentation require no change
 Manual validation: PASS. Principal verified correct pagination; maximum 100 Snippets per page; Next/Previous navigation; later-page search reachability and reset; All/Text/Images filtering; later-page Edit/Copy/Delete targeting; Image preview behavior; mouse/keyboard pagination usability; and normal small-Library behavior
 Final integrity: intended nine M14-T files reviewed; tracked diff check, harness lint/format, and result JSON parse passed; index empty; HEAD and origin/master remain ccc1930 with ahead/behind 0/0; git fsck reported only known dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files remain present with exact approved bytes and hashes
-Incomplete work: authorized Git checkpoint and push remain separate
-Exact next action: Principal decides whether to authorize the M14-T Git checkpoint; do not stage, commit, or push without that authorization
-Git state: unstaged M14-T documentation, implementation, tests, diagnostic harness, and isolated M14-T evidence; approved M14-Q LOCAL ONLY evidence remains present; staged NONE; commit NONE; push NONE
+Incomplete work: none
+Exact next action: M14-T is closed; M14-U is the active supplemental diagnostic task
+Git state: checkpointed and pushed at 50eaf764525607c4ca30580467011e2378214ecd; approved M14-Q LOCAL ONLY evidence remains present and untouched
 M15 implementation: NOT STARTED
 Principal-readiness self-check: PASS
 ```

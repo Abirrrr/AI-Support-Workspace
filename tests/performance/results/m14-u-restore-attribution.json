@@ -1,0 +1,845 @@
+{
+  "task": "M14-U — Backup Restore Write-Path Attribution",
+  "status": "complete",
+  "startedAt": "2026-09-13T02:21:24.638Z",
+  "environment": {
+    "method": "Vite development modules in real headless Playwright Chromium; native IndexedDB and production Dexie; disposable browser context and randomized databases",
+    "timing": "performance.now around awaited production/application or Dexie boundaries; fixture creation, database open/delete, integrity checks, and declared warmups excluded unless explicitly identified",
+    "chromium": "149.0.7827.55"
+  },
+  "phases": {
+    "fixture": {
+      "recordCount": 10000,
+      "mappedRecordCount": 10000,
+      "uniqueIds": 10000,
+      "uniqueTriggers": 10000,
+      "firstId": "14000000-0000-4000-8000-000000000001",
+      "lastId": "14000000-0000-4000-8000-000000010000",
+      "serializedSnippetBytes": 16297030,
+      "fixture": "Deterministic M14-Q-comparable 10,000 Text Snippets: identical IDs, titles, content generator, tags, timestamps, and unique triggers."
+    },
+    "recordPreparation": {
+      "firstUseMs": 16.8,
+      "warmups": 0,
+      "runsMs": [
+        16.5, 17.8, 17.7, 16.2, 16.3, 15.1, 15.4, 14.4, 23.6, 14.1, 15.5, 15.3,
+        14.7, 14.4, 15.2, 15.8, 14.9, 15.4, 20.7, 14.4, 14.9, 15.9, 14.3, 14.4,
+        16, 16, 15.6, 18, 15, 16.8
+      ],
+      "boundary": "Synchronous production toSnippetEntryRecord conversion only; no IndexedDB request or transaction.",
+      "repeat": {
+        "status": "measured",
+        "n": 30,
+        "samplesMs": [
+          16.5, 17.8, 17.7, 16.2, 16.3, 15.1, 15.4, 14.4, 23.6, 14.1, 15.5,
+          15.3, 14.7, 14.4, 15.2, 15.8, 14.9, 15.4, 20.7, 14.4, 14.9, 15.9,
+          14.3, 14.4, 16, 16, 15.6, 18, 15, 16.8
+        ],
+        "minMs": 14.1,
+        "medianMs": 15.4,
+        "meanMs": 16.01,
+        "maxMs": 23.6,
+        "p95Ms": 20.7
+      },
+      "firstUse": {
+        "status": "measured",
+        "n": 1,
+        "samplesMs": [16.8],
+        "minMs": 16.8,
+        "medianMs": 16.8,
+        "meanMs": 16.8,
+        "maxMs": 16.8
+      }
+    },
+    "productionRestore": {
+      "seedMs": 2851.4,
+      "firstUseAfterSeed": {
+        "runs": [
+          {
+            "totalMs": 10249.8,
+            "postFinalHookMs": 0.4,
+            "stages": [
+              {
+                "stage": "knowledge-cleared",
+                "sincePriorMs": 0.9,
+                "cumulativeMs": 0.9
+              },
+              {
+                "stage": "snippets-cleared",
+                "sincePriorMs": 274.6,
+                "cumulativeMs": 275.5
+              },
+              {
+                "stage": "snippet-assets-cleared",
+                "sincePriorMs": 0.3,
+                "cumulativeMs": 275.8
+              },
+              {
+                "stage": "settings-cleared",
+                "sincePriorMs": 15.1,
+                "cumulativeMs": 290.9
+              },
+              {
+                "stage": "snippet-usage-stats-cleared",
+                "sincePriorMs": 0.2,
+                "cumulativeMs": 291.1
+              },
+              {
+                "stage": "snippet-generated-metadata-cleared",
+                "sincePriorMs": 0.3,
+                "cumulativeMs": 291.4
+              },
+              {
+                "stage": "knowledge-written",
+                "sincePriorMs": 15.3,
+                "cumulativeMs": 306.7
+              },
+              {
+                "stage": "snippets-written",
+                "sincePriorMs": 9930.3,
+                "cumulativeMs": 10237
+              },
+              {
+                "stage": "snippet-assets-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 10237
+              },
+              {
+                "stage": "settings-written",
+                "sincePriorMs": 12.4,
+                "cumulativeMs": 10249.4
+              },
+              {
+                "stage": "snippet-usage-stats-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 10249.4
+              },
+              {
+                "stage": "snippet-generated-metadata-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 10249.4
+              }
+            ]
+          }
+        ],
+        "total": {
+          "status": "measured",
+          "n": 1,
+          "samplesMs": [10249.8],
+          "minMs": 10249.8,
+          "medianMs": 10249.8,
+          "meanMs": 10249.8,
+          "maxMs": 10249.8
+        },
+        "postFinalHook": {
+          "status": "measured",
+          "n": 1,
+          "samplesMs": [0.4],
+          "minMs": 0.4,
+          "medianMs": 0.4,
+          "meanMs": 0.4,
+          "maxMs": 0.4
+        },
+        "stages": {
+          "knowledge-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0.9],
+            "minMs": 0.9,
+            "medianMs": 0.9,
+            "meanMs": 0.9,
+            "maxMs": 0.9
+          },
+          "snippets-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [274.6],
+            "minMs": 274.6,
+            "medianMs": 274.6,
+            "meanMs": 274.6,
+            "maxMs": 274.6
+          },
+          "snippet-assets-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0.3],
+            "minMs": 0.3,
+            "medianMs": 0.3,
+            "meanMs": 0.3,
+            "maxMs": 0.3
+          },
+          "settings-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [15.1],
+            "minMs": 15.1,
+            "medianMs": 15.1,
+            "meanMs": 15.1,
+            "maxMs": 15.1
+          },
+          "snippet-usage-stats-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0.2],
+            "minMs": 0.2,
+            "medianMs": 0.2,
+            "meanMs": 0.2,
+            "maxMs": 0.2
+          },
+          "snippet-generated-metadata-cleared": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0.3],
+            "minMs": 0.3,
+            "medianMs": 0.3,
+            "meanMs": 0.3,
+            "maxMs": 0.3
+          },
+          "knowledge-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [15.3],
+            "minMs": 15.3,
+            "medianMs": 15.3,
+            "meanMs": 15.3,
+            "maxMs": 15.3
+          },
+          "snippets-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [9930.3],
+            "minMs": 9930.3,
+            "medianMs": 9930.3,
+            "meanMs": 9930.3,
+            "maxMs": 9930.3
+          },
+          "snippet-assets-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          },
+          "settings-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [12.4],
+            "minMs": 12.4,
+            "medianMs": 12.4,
+            "meanMs": 12.4,
+            "maxMs": 12.4
+          },
+          "snippet-usage-stats-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          },
+          "snippet-generated-metadata-written": {
+            "status": "measured",
+            "n": 1,
+            "samplesMs": [0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          }
+        }
+      },
+      "repeated": {
+        "runs": [
+          {
+            "totalMs": 13227.8,
+            "postFinalHookMs": 4.3,
+            "stages": [
+              {
+                "stage": "knowledge-cleared",
+                "sincePriorMs": 0.6,
+                "cumulativeMs": 0.6
+              },
+              {
+                "stage": "snippets-cleared",
+                "sincePriorMs": 437.3,
+                "cumulativeMs": 437.9
+              },
+              {
+                "stage": "snippet-assets-cleared",
+                "sincePriorMs": 0.3,
+                "cumulativeMs": 438.2
+              },
+              {
+                "stage": "settings-cleared",
+                "sincePriorMs": 13.9,
+                "cumulativeMs": 452.1
+              },
+              {
+                "stage": "snippet-usage-stats-cleared",
+                "sincePriorMs": 0.5,
+                "cumulativeMs": 452.6
+              },
+              {
+                "stage": "snippet-generated-metadata-cleared",
+                "sincePriorMs": 0.2,
+                "cumulativeMs": 452.8
+              },
+              {
+                "stage": "knowledge-written",
+                "sincePriorMs": 15,
+                "cumulativeMs": 467.8
+              },
+              {
+                "stage": "snippets-written",
+                "sincePriorMs": 12755,
+                "cumulativeMs": 13222.8
+              },
+              {
+                "stage": "snippet-assets-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 13222.8
+              },
+              {
+                "stage": "settings-written",
+                "sincePriorMs": 0.7,
+                "cumulativeMs": 13223.5
+              },
+              {
+                "stage": "snippet-usage-stats-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 13223.5
+              },
+              {
+                "stage": "snippet-generated-metadata-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 13223.5
+              }
+            ]
+          },
+          {
+            "totalMs": 11615.7,
+            "postFinalHookMs": 0.4,
+            "stages": [
+              {
+                "stage": "knowledge-cleared",
+                "sincePriorMs": 0.5,
+                "cumulativeMs": 0.5
+              },
+              {
+                "stage": "snippets-cleared",
+                "sincePriorMs": 220.5,
+                "cumulativeMs": 221
+              },
+              {
+                "stage": "snippet-assets-cleared",
+                "sincePriorMs": 0.7,
+                "cumulativeMs": 221.7
+              },
+              {
+                "stage": "settings-cleared",
+                "sincePriorMs": 9.4,
+                "cumulativeMs": 231.1
+              },
+              {
+                "stage": "snippet-usage-stats-cleared",
+                "sincePriorMs": 0.4,
+                "cumulativeMs": 231.5
+              },
+              {
+                "stage": "snippet-generated-metadata-cleared",
+                "sincePriorMs": 0.1,
+                "cumulativeMs": 231.6
+              },
+              {
+                "stage": "knowledge-written",
+                "sincePriorMs": 14.6,
+                "cumulativeMs": 246.2
+              },
+              {
+                "stage": "snippets-written",
+                "sincePriorMs": 11368.4,
+                "cumulativeMs": 11614.6
+              },
+              {
+                "stage": "snippet-assets-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 11614.6
+              },
+              {
+                "stage": "settings-written",
+                "sincePriorMs": 0.7,
+                "cumulativeMs": 11615.3
+              },
+              {
+                "stage": "snippet-usage-stats-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 11615.3
+              },
+              {
+                "stage": "snippet-generated-metadata-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 11615.3
+              }
+            ]
+          },
+          {
+            "totalMs": 14516.7,
+            "postFinalHookMs": 0.3,
+            "stages": [
+              {
+                "stage": "knowledge-cleared",
+                "sincePriorMs": 0.6,
+                "cumulativeMs": 0.6
+              },
+              {
+                "stage": "snippets-cleared",
+                "sincePriorMs": 554.4,
+                "cumulativeMs": 555
+              },
+              {
+                "stage": "snippet-assets-cleared",
+                "sincePriorMs": 0.3,
+                "cumulativeMs": 555.3
+              },
+              {
+                "stage": "settings-cleared",
+                "sincePriorMs": 14.5,
+                "cumulativeMs": 569.8
+              },
+              {
+                "stage": "snippet-usage-stats-cleared",
+                "sincePriorMs": 0.2,
+                "cumulativeMs": 570
+              },
+              {
+                "stage": "snippet-generated-metadata-cleared",
+                "sincePriorMs": 0.2,
+                "cumulativeMs": 570.2
+              },
+              {
+                "stage": "knowledge-written",
+                "sincePriorMs": 14.9,
+                "cumulativeMs": 585.1
+              },
+              {
+                "stage": "snippets-written",
+                "sincePriorMs": 13930.8,
+                "cumulativeMs": 14515.9
+              },
+              {
+                "stage": "snippet-assets-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 14515.9
+              },
+              {
+                "stage": "settings-written",
+                "sincePriorMs": 0.5,
+                "cumulativeMs": 14516.4
+              },
+              {
+                "stage": "snippet-usage-stats-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 14516.4
+              },
+              {
+                "stage": "snippet-generated-metadata-written",
+                "sincePriorMs": 0,
+                "cumulativeMs": 14516.4
+              }
+            ]
+          }
+        ],
+        "total": {
+          "status": "measured",
+          "n": 3,
+          "samplesMs": [13227.8, 11615.7, 14516.7],
+          "minMs": 11615.7,
+          "medianMs": 13227.8,
+          "meanMs": 13120.066666666666,
+          "maxMs": 14516.7
+        },
+        "postFinalHook": {
+          "status": "measured",
+          "n": 3,
+          "samplesMs": [4.3, 0.4, 0.3],
+          "minMs": 0.3,
+          "medianMs": 0.4,
+          "meanMs": 1.6666666666666667,
+          "maxMs": 4.3
+        },
+        "stages": {
+          "knowledge-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.6, 0.5, 0.6],
+            "minMs": 0.5,
+            "medianMs": 0.6,
+            "meanMs": 0.5666666666666668,
+            "maxMs": 0.6
+          },
+          "snippets-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [437.3, 220.5, 554.4],
+            "minMs": 220.5,
+            "medianMs": 437.3,
+            "meanMs": 404.0666666666666,
+            "maxMs": 554.4
+          },
+          "snippet-assets-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.3, 0.7, 0.3],
+            "minMs": 0.3,
+            "medianMs": 0.3,
+            "meanMs": 0.4333333333333333,
+            "maxMs": 0.7
+          },
+          "settings-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [13.9, 9.4, 14.5],
+            "minMs": 9.4,
+            "medianMs": 13.9,
+            "meanMs": 12.6,
+            "maxMs": 14.5
+          },
+          "snippet-usage-stats-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.5, 0.4, 0.2],
+            "minMs": 0.2,
+            "medianMs": 0.4,
+            "meanMs": 0.3666666666666667,
+            "maxMs": 0.5
+          },
+          "snippet-generated-metadata-cleared": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.2, 0.1, 0.2],
+            "minMs": 0.1,
+            "medianMs": 0.2,
+            "meanMs": 0.16666666666666666,
+            "maxMs": 0.2
+          },
+          "knowledge-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [15, 14.6, 14.9],
+            "minMs": 14.6,
+            "medianMs": 14.9,
+            "meanMs": 14.833333333333334,
+            "maxMs": 15
+          },
+          "snippets-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [12755, 11368.4, 13930.8],
+            "minMs": 11368.4,
+            "medianMs": 12755,
+            "meanMs": 12684.733333333332,
+            "maxMs": 13930.8
+          },
+          "snippet-assets-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0, 0, 0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          },
+          "settings-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.7, 0.7, 0.5],
+            "minMs": 0.5,
+            "medianMs": 0.7,
+            "meanMs": 0.6333333333333333,
+            "maxMs": 0.7
+          },
+          "snippet-usage-stats-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0, 0, 0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          },
+          "snippet-generated-metadata-written": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0, 0, 0],
+            "minMs": 0,
+            "medianMs": 0,
+            "meanMs": 0,
+            "maxMs": 0
+          }
+        }
+      },
+      "finalCounts": {
+        "knowledge": 1,
+        "snippets": 10000,
+        "assets": 0,
+        "settings": 1,
+        "usage": 0,
+        "generatedMetadata": 0
+      },
+      "boundary": "Real DexieTransactionalBackupRestorePort.replaceAll over the production v6 database. Each hook interval ends after the named awaited stage; total resolution includes transaction completion after the final hook."
+    },
+    "writeVariants": {
+      "warmup": "One declared 100-record write per database class/schema; warmups are excluded.",
+      "rounds": 3,
+      "order": "Rotated variant order by round to reduce fixed sequence bias; every measured write uses a fresh disposable database opened before timing.",
+      "schemas": {
+        "production-current": "Production AiSupportWorkspaceDatabase v6 snippetEntries: id, createdAt, &trigger",
+        "diagnostic-primary-only": "id",
+        "diagnostic-created-at": "id, createdAt",
+        "diagnostic-current-indexes": "id, createdAt, &trigger"
+      },
+      "requestBoundary": "bulkAddAwaitMs ends when Dexie bulkAdd resolves inside the transaction callback. postBulkAddToTransactionResolutionMs is the remaining time until the outer Dexie transaction promise resolves; browser internals below these observable boundaries are not claimed.",
+      "samples": [
+        {
+          "variant": "production-current",
+          "round": 0,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3491,
+          "postBulkAddToTransactionResolutionMs": 0.5,
+          "transactionTotalMs": 3491.5
+        },
+        {
+          "variant": "diagnostic-primary-only",
+          "round": 0,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3030.4,
+          "postBulkAddToTransactionResolutionMs": 0.4,
+          "transactionTotalMs": 3030.8
+        },
+        {
+          "variant": "diagnostic-created-at",
+          "round": 0,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3684.7,
+          "postBulkAddToTransactionResolutionMs": 0.2,
+          "transactionTotalMs": 3684.9
+        },
+        {
+          "variant": "diagnostic-current-indexes",
+          "round": 0,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 5286.3,
+          "postBulkAddToTransactionResolutionMs": 0.4,
+          "transactionTotalMs": 5286.8
+        },
+        {
+          "variant": "diagnostic-primary-only",
+          "round": 1,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3171.3,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 3171.6
+        },
+        {
+          "variant": "diagnostic-created-at",
+          "round": 1,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3776.9,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 3777.3
+        },
+        {
+          "variant": "diagnostic-current-indexes",
+          "round": 1,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 5292.6,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 5293
+        },
+        {
+          "variant": "production-current",
+          "round": 1,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 5410.2,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 5410.5
+        },
+        {
+          "variant": "diagnostic-created-at",
+          "round": 2,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 4303.2,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 4303.6
+        },
+        {
+          "variant": "diagnostic-current-indexes",
+          "round": 2,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 5309.5,
+          "postBulkAddToTransactionResolutionMs": 0.3,
+          "transactionTotalMs": 5309.9
+        },
+        {
+          "variant": "production-current",
+          "round": 2,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 5407,
+          "postBulkAddToTransactionResolutionMs": 0.4,
+          "transactionTotalMs": 5407.5
+        },
+        {
+          "variant": "diagnostic-primary-only",
+          "round": 2,
+          "recordCount": 10000,
+          "bulkAddAwaitMs": 3051.1,
+          "postBulkAddToTransactionResolutionMs": 0.5,
+          "transactionTotalMs": 3051.7
+        }
+      ],
+      "summaries": {
+        "production-current": {
+          "transactionTotal": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3491.5, 5410.5, 5407.5],
+            "minMs": 3491.5,
+            "medianMs": 5407.5,
+            "meanMs": 4769.833333333333,
+            "maxMs": 5410.5
+          },
+          "bulkAddAwait": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3491, 5410.2, 5407],
+            "minMs": 3491,
+            "medianMs": 5407,
+            "meanMs": 4769.400000000001,
+            "maxMs": 5410.2
+          },
+          "postBulkAddToTransactionResolution": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.5, 0.3, 0.4],
+            "minMs": 0.3,
+            "medianMs": 0.4,
+            "meanMs": 0.39999999999999997,
+            "maxMs": 0.5
+          }
+        },
+        "diagnostic-primary-only": {
+          "transactionTotal": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3030.8, 3171.6, 3051.7],
+            "minMs": 3030.8,
+            "medianMs": 3051.7,
+            "meanMs": 3084.7000000000003,
+            "maxMs": 3171.6
+          },
+          "bulkAddAwait": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3030.4, 3171.3, 3051.1],
+            "minMs": 3030.4,
+            "medianMs": 3051.1,
+            "meanMs": 3084.2666666666664,
+            "maxMs": 3171.3
+          },
+          "postBulkAddToTransactionResolution": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.4, 0.3, 0.5],
+            "minMs": 0.3,
+            "medianMs": 0.4,
+            "meanMs": 0.39999999999999997,
+            "maxMs": 0.5
+          }
+        },
+        "diagnostic-created-at": {
+          "transactionTotal": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3684.9, 3777.3, 4303.6],
+            "minMs": 3684.9,
+            "medianMs": 3777.3,
+            "meanMs": 3921.933333333334,
+            "maxMs": 4303.6
+          },
+          "bulkAddAwait": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [3684.7, 3776.9, 4303.2],
+            "minMs": 3684.7,
+            "medianMs": 3776.9,
+            "meanMs": 3921.6,
+            "maxMs": 4303.2
+          },
+          "postBulkAddToTransactionResolution": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.2, 0.3, 0.3],
+            "minMs": 0.2,
+            "medianMs": 0.3,
+            "meanMs": 0.26666666666666666,
+            "maxMs": 0.3
+          }
+        },
+        "diagnostic-current-indexes": {
+          "transactionTotal": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [5286.8, 5293, 5309.9],
+            "minMs": 5286.8,
+            "medianMs": 5293,
+            "meanMs": 5296.566666666667,
+            "maxMs": 5309.9
+          },
+          "bulkAddAwait": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [5286.3, 5292.6, 5309.5],
+            "minMs": 5286.3,
+            "medianMs": 5292.6,
+            "meanMs": 5296.133333333334,
+            "maxMs": 5309.5
+          },
+          "postBulkAddToTransactionResolution": {
+            "status": "measured",
+            "n": 3,
+            "samplesMs": [0.4, 0.3, 0.3],
+            "minMs": 0.3,
+            "medianMs": 0.3,
+            "meanMs": 0.3333333333333333,
+            "maxMs": 0.4
+          }
+        }
+      }
+    }
+  },
+  "failures": [],
+  "result": {
+    "classification": "bottleneck partially attributed",
+    "confirmed": [
+      "The production replaceAll repeat median was 13227.8 ms (n=3), and its awaited Snippet write stage was 12755.0 ms median, or 96.4% of that boundary. Snippet clearing was 437.3 ms median; every other individual stage was 14.9 ms median or less.",
+      "Production record conversion was 15.4 ms median, 20.7 ms p95, and 23.6 ms maximum (n=30), directionally confirming the prior 34.5 ms mapping result and excluding mapping as the large cost.",
+      "The final-hook-to-outer-replaceAll-resolution interval was 0.4 ms median (n=3). In isolated writes, the bulkAdd-to-outer-transaction-resolution interval was 0.3-0.4 ms median across schemas. The measured delay is therefore inside the awaited write request boundary, not after it in observable transaction completion.",
+      "The isolated actual production-table write was 5407.5 ms median (n=3). A matched disposable current-index schema was 5293.0 ms median, compared with 3777.3 ms for primary key plus createdAt and 3051.7 ms for primary key only (all n=3)."
+    ],
+    "inferred": [
+      "On the matched synthetic variants, maintaining createdAt plus unique trigger indexes added 2241.3 ms median versus primary-key-only, including 1515.7 ms between createdAt-only and the current index set. This demonstrates a material index-associated contribution in the disposable comparison, but does not identify a browser-internal sub-operation or authorize an index change.",
+      "The longer production restore Snippet stage than the fresh isolated current-schema write indicates additional context or state effects within the production clear-and-rewrite, six-store atomic transaction path. The current measurements do not safely assign that gap to one Dexie or IndexedDB internal mechanism."
+    ],
+    "unresolved": [
+      "Chromium exposes promise/request and transaction-resolution boundaries here, not separate engine timings for record serialization, B-tree mutation, uniqueness checks, journaling, disk flush, or scheduling.",
+      "The M14-U production repeat median is lower than the retained M14-Q approximately 26-second median, so absolute duration varies across runs; both datasets still identify the Snippet write boundary as dominant.",
+      "The small n=3 expensive-write samples support stage attribution and large directional differences, not a stable performance SLA or a precise percentage for all devices."
+    ],
+    "narrowestNextOption": "Before selecting a production optimization, seek separate Principal authorization for one bounded diagnostic comparison that keeps the current schema and one atomic restore while isolating fresh-table write from clear-then-rewrite and single-store from the existing six-store transaction context. If a later architecture review considers index changes, it must preserve canonical trigger uniqueness and indexed trigger lookup and validate restore, delivery, migration, and atomicity independently; M14-U proposes no migration or production change."
+  },
+  "completedMeasurementsAt": "2026-09-13T02:23:12.051Z",
+  "analyzedAt": "2026-09-13T08:29:20.9372187+06:00"
+}
