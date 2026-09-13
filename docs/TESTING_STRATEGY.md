@@ -31,6 +31,12 @@ M14-S preserves the strict Backup contract while removing a stack-unsafe validat
 
 Backup coverage must exercise the application-owned Backup creation, strict validation/import, and restore services with a near-limit asset, prove exact restored byte equality, and retain the existing malformed-input, version 1–7 compatibility, MIME/signature, graph-limit, serialized-limit, and atomicity tests. A focused Chromium check against the original generated 1440×900 PNG is appropriate because it reproduces the browser engine's prior regular-expression stack failure and proves the corrected real Backup path without adding a timing threshold. This correctness fix does not require clipboard, destination-editor, native-host, or visual UI manual testing.
 
+## M14-T Snippet Library bounded-rendering regression
+
+M14-T keeps the complete ordered search/filter result authoritative and applies a fixed 100-Snippet page slice only for rendering. UI coverage must prove zero-result and exact-boundary behavior, ordered forward/backward traversal, range/page text and native control states, page-1 reset after search/filter changes, page clamping after entry replacement, and complete-result reachability. Later-page Copy/Edit/Delete must continue to use stable IDs; usage, Text/Image type and Details remain present; and Image preview object URLs load and revoke with the mounted page.
+
+The isolated production-extension Chromium diagnostic seeds 10,000 matching Text records in a disposable profile, asserts 100 mounted rows on pages 1 and 100, verifies the first/last stable IDs, and searches for the final off-page record. Live-element and timing values are descriptive evidence, not CI latency thresholds or a supported maximum Library size. It does not access a user profile, clipboard, destination editor, native host, provider, or network service, and it must not overwrite preserved M14-Q evidence.
+
 ## Risk-Based Manual Validation
 
 Manual validation must target destructive operations, data-loss or corruption risks, persistence, security-sensitive behavior, external integrations, and core browser-only workflows. Automated tests may carry low-risk, reversible, and readily detectable edge cases when they provide reliable coverage.

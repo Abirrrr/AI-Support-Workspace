@@ -7,7 +7,8 @@
 
 ## Current Milestone
 
-- Active supplemental task: **M14-S — Large Canonical Base64 Backup Correctness Fix**. Status: **IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-12. The valid-large-PNG Backup failure identified by M14-Q is corrected with a bounded canonical base64 shape scan while Backup v1–v7, exact bytes, existing safety limits, schema, permissions, and architecture remain unchanged. It is not a general performance task or M15 implementation.
+- Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / AWAITING AUTHORIZED GIT CHECKPOINT** as of 2026-09-13. Fixed 100-Snippet client-side pagination bounds mounted rows after the existing complete search/filter result, and the Principal accepted the complete real-Chrome manual matrix. Storage, retrieval, Snippet semantics, image ownership, and product architecture remain unchanged; M15 is not started.
+- Completed supplemental task: **M14-S — Large Canonical Base64 Backup Correctness Fix**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `ccc1930`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `ccc19305611695aaf4b3448d1f0479c200eaeb9f`.
 - Completed supplemental task: **M14-R — Interruption-Safe Coding-Agent Workflow Standardization**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `f2fe6e6`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `f2fe6e6722b4ba2eb87f6961f27a2720d43c51fd`.
 - Completed supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `50031877c0ac307be4781d120b412081970b25bc`. Approved M14-Q LOCAL ONLY evidence remains intentionally untracked/ignored and is not M14-S work.
 - Completed milestone: M14-P — Final Snippet Completion Gate
@@ -15,6 +16,35 @@
 - Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15 — AI Workspace is the **NEXT MILESTONE**, but M15 implementation remains **NOT STARTED**.
 
 ## Task State
+
+### M14-T — Snippet Library Bounded Rendering
+
+M14-T is a bounded presentation-only correction for the M14-Q finding that a 10,000-result Snippet Library view mounted all 10,000 rows and approximately 220,035 live DOM elements. The complete existing `visibleEntries` result remains authoritative; fixed 100-Snippet pagination is applied only after full search/filter computation so every matching stable-ID record remains reachable in unchanged order.
+
+#### M14-T Final Closeout State
+
+```text
+Task: M14-T — Snippet Library Bounded Rendering
+Status: COMPLETE / PRINCIPAL-APPROVED / AWAITING AUTHORIZED GIT CHECKPOINT
+Starting branch/HEAD: master at ccc19305611695aaf4b3448d1f0479c200eaeb9f
+Fetched origin/master: ccc19305611695aaf4b3448d1f0479c200eaeb9f; ahead/behind 0/0
+Starting tracked tree/index: clean
+Approved M14-Q LOCAL ONLY evidence: present; do not modify, stage, delete, or move
+Completed: continuity gate and required review; fixed 100-entry post-filter pagination; focused UI tests; assertion-backed 10,000-result Chromium diagnostic; full validation; Documentation Impact Review; Principal manual real-Chrome validation and approval
+Files changed: docs/PROJECT_STATE.md; docs/CHANGELOG.md; docs/BACKLOG.md; docs/TESTING_STRATEGY.md; src/ui/snippet/SnippetLibraryView.tsx; tests/unit/snippet-library-ui.test.tsx; tests/performance/run-m14-t-pagination.mjs; tests/performance/results/m14-t-pagination.json; tests/performance/README.md
+Implementation status: complete locally; full visibleEntries remains authoritative, page slice mounts at most 100 rows, search/filter reset page 1, entry replacement clamps page, native Previous/Next and range/page text added
+Validation completed: focused Snippet Library suite 3 files / 40 tests passed; focused implementation/test/harness lint and formatting passed; assertion-backed Chromium 149 diagnostic passed; full lint, M14-Q-aware formatting, typecheck, Vitest 69 files / 902 tests passed with one opt-in file/test skipped, configured Playwright 1 passed, and production/native-development builds plus output validation passed
+Focused performance evidence: isolated Chromium diagnostic passed with 10,000 matching records, 100 mounted rows, 2,241 live elements, page 100 reaching stable IDs 9,901–10,000, and off-page search reaching ID 10,000; committed M14-Q baseline remains unmodified at 10,000 mounted rows / approximately 220,035 live elements / multi-second render-layout cost
+Validation note: three earlier default full Vitest attempts passed all other tests but exceeded the existing exact-5-MiB Backup test's 5-second timeout at 5.14–5.55 seconds; that case passed alone in 1.88 seconds, no Backup code/timeout changed, and the unchanged default full suite passed after equivalent repeated M14-T UI scenarios were consolidated
+Documentation Impact Review: Project State, Changelog, Testing Strategy, Backlog, and performance reproduction guidance updated; Architecture, Decisions, database schema, product requirements/vision/workflows, Roadmap, setup, and native documentation require no change
+Manual validation: PASS. Principal verified correct pagination; maximum 100 Snippets per page; Next/Previous navigation; later-page search reachability and reset; All/Text/Images filtering; later-page Edit/Copy/Delete targeting; Image preview behavior; mouse/keyboard pagination usability; and normal small-Library behavior
+Final integrity: intended nine M14-T files reviewed; tracked diff check, harness lint/format, and result JSON parse passed; index empty; HEAD and origin/master remain ccc1930 with ahead/behind 0/0; git fsck reported only known dangling objects and no corruption; all 39 approved M14-Q LOCAL ONLY files remain present with exact approved bytes and hashes
+Incomplete work: authorized Git checkpoint and push remain separate
+Exact next action: Principal decides whether to authorize the M14-T Git checkpoint; do not stage, commit, or push without that authorization
+Git state: unstaged M14-T documentation, implementation, tests, diagnostic harness, and isolated M14-T evidence; approved M14-Q LOCAL ONLY evidence remains present; staged NONE; commit NONE; push NONE
+M15 implementation: NOT STARTED
+Principal-readiness self-check: PASS
+```
 
 ### M14-S — Large Canonical Base64 Backup Correctness Fix
 

@@ -1,0 +1,29 @@
+{
+  "scenario": "M14-T focused 10,000-result bounded rendering",
+  "chromium": "149.0.7827.55",
+  "initialNavigationMs": 286.12360000000035,
+  "searchCommonMs": 14.800000011920929,
+  "deltaMs": {
+    "TaskDuration": 18.219999999999995,
+    "ScriptDuration": 5.551,
+    "LayoutDuration": 5.032
+  },
+  "firstPage": {
+    "matchingResults": 10000,
+    "mountedRows": 100,
+    "liveElements": 2241,
+    "pageText": "Page 1 of 100",
+    "firstId": "00000000-0000-4000-8000-000000000001",
+    "lastId": "00000000-0000-4000-8000-000000000100"
+  },
+  "lastPage": {
+    "mountedRows": 100,
+    "pageText": "Page 100 of 100",
+    "firstId": "00000000-0000-4000-8000-000000009901",
+    "lastId": "00000000-0000-4000-8000-000000010000"
+  },
+  "offPageSearch": {
+    "mountedRows": 1,
+    "id": "00000000-0000-4000-8000-000000010000"
+  }
+}

@@ -1,5 +1,14 @@
 # Changelog
 
+### M14-T — Snippet Library Bounded Rendering (2026-09-13)
+
+- Applied fixed 100-Snippet client-side pagination after the complete existing search/filter result. The first page remains the default; search and type-filter changes reset to page 1; entry replacement clamps the current page; and native Previous/Next controls expose the visible range and page count.
+- Preserved complete-result search, deterministic order, stable-ID Copy/Edit/Delete, usage display, Text/Image Details, and page-scoped Image preview ownership. Storage/retrieval, Snippet content and trigger semantics, asset bytes, Backup v1–v7, Dexie v6, permissions, native protocols, dependencies, and M15 remain unchanged.
+- Added focused UI coverage for zero/100/101+ result boundaries, ordered traversal, complete-result search/filter reset, later-page actions, deletion clamping, and Image preview load/revocation. An assertion-backed isolated Chromium diagnostic with 10,000 matching records mounted 100 rows and 2,241 live elements, reached IDs 9,901–10,000 on page 100, and found ID 10,000 through search; the immutable M14-Q baseline mounted all 10,000 rows and approximately 220,035 live elements.
+- Validation: focused Snippet Library and harness checks; full lint, M14-Q-aware formatting, typecheck, Vitest (69 files / 902 tests passed with one opt-in file/test skipped), configured Playwright (1 passed), and production/native-development builds with output validation. Three earlier full-suite attempts exposed the existing exact-5-MiB Backup test's 5-second timeout under worker pressure; the case passed alone in 1.88 seconds and the unchanged default full suite passed after equivalent M14-T UI scenarios were consolidated.
+- Principal manual real-Chrome validation passed: pagination and the 100-Snippet maximum; Next/Previous; later-page search and reset; All/Text/Images filtering; later-page Edit/Copy/Delete targeting; Image previews; mouse/keyboard usability; and normal small-Library behavior. M14-T is **COMPLETE / PRINCIPAL-APPROVED** and awaits separate Git checkpoint authorization; M15 remains **NOT STARTED**.
+- Documentation Impact Review: Project State, Changelog, Testing Strategy, Backlog, and the isolated performance README updated. Architecture, Decisions, database schema, product requirements/vision/workflows, Roadmap, setup, and native documentation require no change because this is a presentation-only rendering bound with no architecture, data, delivery, permission, or native contract change.
+
 ### M14-S — Large Canonical Base64 Backup Correctness Fix (2026-09-12)
 
 - Reproduced the M14-Q 1440×900 PNG at 4,459,989 bytes / 5,946,652 canonical base64 characters and isolated `Maximum call stack size exceeded` to the anchored canonical-shape regular expression. In the same Chromium run, `atob`, `Uint8Array` conversion, canonical re-encoding, and exact byte comparison all passed independently.

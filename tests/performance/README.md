@@ -1,4 +1,17 @@
-# M14-Q isolated performance audit
+# Isolated performance diagnostics
+
+## M14-T bounded Snippet Library rendering
+
+M14-T adds the assertion-backed `run-m14-t-pagination.mjs` follow-up and its retained `results/m14-t-pagination.json` evidence without changing or overwriting M14-Q artifacts. Build the current production extension first, then run the harness from the repository root:
+
+```powershell
+pnpm.cmd build
+node tests/performance/run-m14-t-pagination.mjs
+```
+
+The harness creates a disposable Chromium profile and synthetic extension database, seeds 10,000 matching Text Snippets outside the measured search operation, and asserts the 100-row first/last pages plus off-page stable-ID search reachability. Reported live-element and timing values are descriptive single-run evidence, not CI thresholds or a supported Library-size limit. It performs no clipboard write, paste, native-host, provider, or user-profile operation.
+
+## M14-Q isolated performance audit
 
 These opt-in diagnostics belong to **M14-Q — Internal Performance Audit & Improvement Recommendations**. They do not authorize a production fix, a new performance milestone, or M15. The authoritative analysis, limitations, validation results, and manual plan are in [the audit report](../../docs/PERFORMANCE_AUDIT_M14-Q.md).
 

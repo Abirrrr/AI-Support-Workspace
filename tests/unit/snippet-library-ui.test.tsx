@@ -154,6 +154,21 @@ function library(entries: readonly SnippetEntry[] = []): SnippetLibrary {
   };
 }
 
+function numberedEntries(count: number): SnippetEntry[] {
+  return Array.from({ length: count }, (_, index): SnippetEntry => {
+    const number = index + 1;
+    return {
+      id: `00000000-0000-4000-8000-${number.toString().padStart(12, '0')}`,
+      title: `Snippet ${number}`,
+      content: { kind: 'plain', text: `Details ${number}` },
+      tags: [`group-${Math.floor(index / 100) + 1}`],
+      trigger: `;snippet-${number}`,
+      createdAt: CREATED,
+      updatedAt: CREATED,
+    };
+  });
+}
+
 const scrollIntoView = vi.fn();
 
 beforeEach(() => {
@@ -226,6 +241,156 @@ describe('unified Snippet Library', () => {
     });
     expect(screen.getByText('Widget setup')).toBeTruthy();
     expect(screen.queryByText('Welcome response')).toBeNull();
+  });
+
+  it('shows the empty state without pagination for zero results', async () => {
+    render(<SnippetLibraryView snippetLibrary={library()} />);
+
+    expect(await screen.findByText('No matching snippets.')).toBeTruthy();
+    expect(
+      screen.queryByRole('navigation', { name: 'Snippet pages' }),
+    ).toBeNull();
+  });
+
+  it('mounts all 100 results without unnecessary page navigation', async () => {
+    render(
+      <SnippetLibraryView snippetLibrary={library(numberedEntries(100))} />,
+    );
+
+    expect(await screen.findByText('Snippet 1')).toBeTruthy();
+    expect(document.querySelectorAll('li[data-snippet-id]')).toHaveLength(100);
+    expect(screen.getByText('Showing 1–100 of 100 snippets')).toBeTruthy();
+    expect(
+      screen.queryByRole('navigation', { name: 'Snippet pages' }),
+    ).toBeNull();
+  });
+
+  it('paginates ordered rows while preserving later-page actions and clamping deletion', async () => {
+    const entries = numberedEntries(101);
+    const laterEntry = entries[100];
+    if (laterEntry === undefined) throw new Error('Missing later entry.');
+    const service = library(entries);
+    service.loadUsageStats = vi.fn(async () => [
+      { snippetId: laterEntry.id, usageCount: 9, lastUsedAt: CREATED },
+    ]);
+    const copySnippet = {
+      copy: vi.fn(async () => ({ outcome: 'copied', kind: 'text' }) as const),
+    };
+    render(
+      <SnippetLibraryView copySnippet={copySnippet} snippetLibrary={service} />,
+    );
+
+    expect(await screen.findByText('Snippet 1')).toBeTruthy();
+    expect(
+      [...document.querySelectorAll('li[data-snippet-id]')].map((item) =>
+        item.getAttribute('data-snippet-id'),
+      ),
+    ).toEqual(entries.slice(0, 100).map((entry) => entry.id));
+    expect(screen.getByText('Showing 1–100 of 101 snippets')).toBeTruthy();
+    expect(screen.getByText('Page 1 of 2')).toBeTruthy();
+    expect(
+      (screen.getByRole('button', { name: 'Previous' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('Showing 101–101 of 101 snippets')).toBeTruthy();
+    const item = screen.getByText('Snippet 101').closest('li');
+    if (item === null) throw new Error('Missing later-page row.');
+    expect(screen.queryByText('Snippet 1')).toBeNull();
+    expect(document.querySelectorAll('li[data-snippet-id]')).toHaveLength(1);
+    expect(item.getAttribute('data-snippet-id')).toBe(laterEntry.id);
+    expect(within(item).getByText('Text')).toBeTruthy();
+    expect(within(item).getByText('Details')).toBeTruthy();
+    expect(within(item).getByText('Details 101')).toBeTruthy();
+    expect(within(item).getByLabelText('Usage count: 9')).toBeTruthy();
+    expect(
+      (screen.getByRole('button', { name: 'Next' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    fireEvent.click(within(item).getByRole('button', { name: 'Copy Snippet' }));
+    await screen.findByText('Snippet copied.');
+    expect(copySnippet.copy).toHaveBeenCalledWith(laterEntry.id);
+
+    fireEvent.click(within(item).getByRole('button', { name: 'Edit Snippet' }));
+    const form = screen.getByRole('form', { name: 'Edit text snippet' });
+    expect(
+      (within(form).getByLabelText('Title') as HTMLInputElement).value,
+    ).toBe('Snippet 101');
+    fireEvent.click(
+      within(form).getAllByRole('button', { name: 'Cancel' })[0] as Element,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous' }));
+    expect(screen.getByText('Showing 1–100 of 101 snippets')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    await screen.findByText('Snippet deleted.');
+    expect(service.delete).toHaveBeenCalledWith(laterEntry.id);
+    expect(screen.getByText('Showing 1–100 of 100 snippets')).toBeTruthy();
+    expect(screen.getByText('Snippet 1')).toBeTruthy();
+    expect(
+      screen.queryByRole('navigation', { name: 'Snippet pages' }),
+    ).toBeNull();
+  });
+
+  it('searches and filters the complete Library and resets to page 1', async () => {
+    const textEntries = numberedEntries(120);
+    const imageEntries = [imageEntry, secondImageEntry];
+    render(
+      <SnippetLibraryView
+        snippetLibrary={library([...textEntries, ...imageEntries])}
+      />,
+    );
+    await screen.findByText('Snippet 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('Page 2 of 2')).toBeTruthy();
+
+    fireEvent.change(screen.getByPlaceholderText('Search snippets...'), {
+      target: { value: 'Snippet 119' },
+    });
+    expect(screen.getByText('Snippet 119')).toBeTruthy();
+    expect(screen.getByText('Showing 1–1 of 1 snippets')).toBeTruthy();
+    expect(
+      screen.queryByRole('navigation', { name: 'Snippet pages' }),
+    ).toBeNull();
+
+    fireEvent.change(screen.getByPlaceholderText('Search snippets...'), {
+      target: { value: '' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'images' }));
+    expect(screen.getByText('Limitation screenshot')).toBeTruthy();
+    expect(screen.getByText('Second screenshot')).toBeTruthy();
+    expect(screen.getByText('Showing 1–2 of 2 snippets')).toBeTruthy();
+    expect(screen.queryByText('Snippet 1')).toBeNull();
+  });
+
+  it('loads and revokes Image previews only while their page is mounted', async () => {
+    const entries = numberedEntries(100);
+    const laterImage = {
+      ...imageEntry,
+      id: '00000000-0000-4000-8000-000000000101',
+    };
+    const service = library([...entries, laterImage]);
+    service.loadAsset = vi.fn(async () => asset({ snippetId: laterImage.id }));
+    render(<SnippetLibraryView snippetLibrary={service} />);
+    await screen.findByText('Snippet 1');
+    expect(service.loadAsset).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(
+      await screen.findByAltText('Image Snippet details preview'),
+    ).toBeTruthy();
+    expect(service.loadAsset).toHaveBeenCalledOnce();
+    expect(service.loadAsset).toHaveBeenCalledWith(ASSET_ID);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous' }));
+    await waitFor(() => expect(URL.revokeObjectURL).toHaveBeenCalledOnce());
+    expect(screen.queryByAltText('Image Snippet details preview')).toBeNull();
   });
 
   it('presents bounded Details and accessible actions in Delete, Edit, Copy order', async () => {

@@ -59,9 +59,35 @@ const EMPTY_RICH_CONTENT: RichSnippetContent = {
   kind: 'rich',
   blocks: [{ type: 'paragraph', children: [] }],
 };
+const SNIPPETS_PER_PAGE = 100;
 
 function emptyDraft(): SnippetDraft {
   return { title: '', content: EMPTY_RICH_CONTENT, tags: '', trigger: '' };
+}
+
+function filterSnippetEntries(
+  entries: readonly SnippetEntry[],
+  filter: LibraryFilter,
+  search: string,
+): SnippetEntry[] {
+  const query = search.trim().toLocaleLowerCase();
+  return entries.filter((entry) => {
+    const typeMatches =
+      filter === 'all' ||
+      (filter === 'images'
+        ? entry.content.kind === 'image'
+        : entry.content.kind !== 'image');
+    const searchMatches =
+      query === '' ||
+      [entry.title, entry.trigger ?? '', ...entry.tags].some((value) =>
+        value.toLocaleLowerCase().includes(query),
+      );
+    return typeMatches && searchMatches;
+  });
+}
+
+function pageCount(resultCount: number): number {
+  return Math.max(1, Math.ceil(resultCount / SNIPPETS_PER_PAGE));
 }
 
 async function readSnippetLibraryData(snippetLibrary: SnippetLibrary) {
@@ -156,6 +182,7 @@ export function SnippetLibraryView({
   const [mode, setMode] = useState<EditorMode>('closed');
   const [filter, setFilter] = useState<LibraryFilter>('all');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [draft, setDraft] = useState<SnippetDraft>(emptyDraft);
   const [imageAsset, setImageAsset] = useState<
     SnippetAsset | SnippetAssetDraft
@@ -179,6 +206,14 @@ export function SnippetLibraryView({
   const imageTitleRef = useRef<HTMLInputElement>(null);
   const compatibilitySectionRef = useRef<HTMLElement>(null);
   const compatibilityCloseRef = useRef<HTMLButtonElement>(null);
+
+  function replaceEntries(nextEntries: readonly SnippetEntry[]) {
+    setEntries(nextEntries);
+    const nextPageCount = pageCount(
+      filterSnippetEntries(nextEntries, filter, search).length,
+    );
+    setPage((current) => Math.min(current, nextPageCount));
+  }
 
   function requestEditNavigation(requestMode: EditNavigationRequest['mode']) {
     editNavigationGeneration.current += 1;
@@ -215,6 +250,7 @@ export function SnippetLibraryView({
     try {
       const loaded = await readSnippetLibraryData(snippetLibrary);
       setEntries(loaded.entries);
+      setPage(1);
       setUsageCounts(loaded.usageCounts);
       setLoadState('ready');
     } catch {
@@ -231,6 +267,7 @@ export function SnippetLibraryView({
       (loaded) => {
         if (!active) return;
         setEntries(loaded.entries);
+        setPage(1);
         setUsageCounts(loaded.usageCounts);
         setLoadState('ready');
       },
@@ -347,11 +384,11 @@ export function SnippetLibraryView({
       const saved = editingId
         ? await snippetLibrary.update(editingId, input)
         : await snippetLibrary.create(input);
-      setEntries((current) =>
+      replaceEntries(
         orderSnippetEntries(
           editingId
-            ? current.map((entry) => (entry.id === saved.id ? saved : entry))
-            : [...current, saved],
+            ? entries.map((entry) => (entry.id === saved.id ? saved : entry))
+            : [...entries, saved],
         ),
       );
       closeEditor();
@@ -359,13 +396,13 @@ export function SnippetLibraryView({
     } catch (error) {
       if (error instanceof CatalogUnavailableAfterMutationError) {
         const persisted = error.persistedResult as SnippetEntry;
-        setEntries((current) =>
+        replaceEntries(
           orderSnippetEntries(
             editingId
-              ? current.map((entry) =>
+              ? entries.map((entry) =>
                   entry.id === persisted.id ? persisted : entry,
                 )
-              : [...current, persisted],
+              : [...entries, persisted],
           ),
         );
         closeEditor();
@@ -415,15 +452,13 @@ export function SnippetLibraryView({
     setErrorMessage(undefined);
     try {
       await snippetLibrary.delete(target.id);
-      setEntries((current) =>
-        current.filter((candidate) => candidate.id !== target.id),
-      );
+      replaceEntries(entries.filter((candidate) => candidate.id !== target.id));
       if (editingId === target.id) closeEditor();
       setStatusMessage('Snippet deleted.');
     } catch (error) {
       if (error instanceof CatalogUnavailableAfterMutationError) {
-        setEntries((current) =>
-          current.filter((candidate) => candidate.id !== target.id),
+        replaceEntries(
+          entries.filter((candidate) => candidate.id !== target.id),
         );
         if (editingId === target.id) closeEditor();
         setStatusMessage(
@@ -461,22 +496,18 @@ export function SnippetLibraryView({
     setOperation(undefined);
   }
 
-  const visibleEntries = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase();
-    return entries.filter((entry) => {
-      const typeMatches =
-        filter === 'all' ||
-        (filter === 'images'
-          ? entry.content.kind === 'image'
-          : entry.content.kind !== 'image');
-      const searchMatches =
-        query === '' ||
-        [entry.title, entry.trigger ?? '', ...entry.tags].some((value) =>
-          value.toLocaleLowerCase().includes(query),
-        );
-      return typeMatches && searchMatches;
-    });
-  }, [entries, filter, search]);
+  const visibleEntries = useMemo(
+    () => filterSnippetEntries(entries, filter, search),
+    [entries, filter, search],
+  );
+
+  const totalPages = pageCount(visibleEntries.length);
+  const currentPage = Math.min(page, totalPages);
+  const firstVisibleIndex = (currentPage - 1) * SNIPPETS_PER_PAGE;
+  const pageEntries = visibleEntries.slice(
+    firstVisibleIndex,
+    firstVisibleIndex + SNIPPETS_PER_PAGE,
+  );
 
   const isBusy = operation !== undefined;
   const canSave =
@@ -715,7 +746,10 @@ export function SnippetLibraryView({
           <input
             className="block w-full rounded-md border border-slate-300 px-3 py-2"
             id="snippet-search"
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
             placeholder="Search snippets..."
             type="search"
             value={search}
@@ -726,7 +760,10 @@ export function SnippetLibraryView({
                 aria-pressed={filter === value}
                 className="rounded-full border border-slate-300 px-3 py-1.5 text-sm capitalize aria-pressed:border-blue-600 aria-pressed:bg-blue-100"
                 key={value}
-                onClick={() => setFilter(value)}
+                onClick={() => {
+                  setFilter(value);
+                  setPage(1);
+                }}
                 type="button"
               >
                 {value}
@@ -738,133 +775,172 @@ export function SnippetLibraryView({
               No matching snippets.
             </p>
           ) : (
-            <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-              {visibleEntries.map((entry) => {
-                const usageCount = usageCounts.get(entry.id) ?? 0;
+            <>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
+                <p aria-live="polite">
+                  Showing {firstVisibleIndex + 1}–
+                  {firstVisibleIndex + pageEntries.length} of{' '}
+                  {visibleEntries.length} snippets
+                </p>
+                {totalPages > 1 ? (
+                  <nav
+                    aria-label="Snippet pages"
+                    className="flex items-center gap-3"
+                  >
+                    <button
+                      className="rounded-md border border-slate-300 px-3 py-2 font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={currentPage === 1}
+                      onClick={() => setPage((current) => current - 1)}
+                      type="button"
+                    >
+                      Previous
+                    </button>
+                    <span>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      className="rounded-md border border-slate-300 px-3 py-2 font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setPage((current) => current + 1)}
+                      type="button"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                ) : null}
+              </div>
+              <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+                {pageEntries.map((entry) => {
+                  const usageCount = usageCounts.get(entry.id) ?? 0;
 
-                return (
-                  <li className="p-4" data-snippet-id={entry.id} key={entry.id}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-slate-950">
-                          {entry.title}
-                        </h3>
-                        {entry.trigger ? (
-                          <p className="mt-1 font-mono text-sm text-blue-700">
-                            {entry.trigger}
-                          </p>
-                        ) : null}
+                  return (
+                    <li
+                      className="p-4"
+                      data-snippet-id={entry.id}
+                      key={entry.id}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-slate-950">
+                            {entry.title}
+                          </h3>
+                          {entry.trigger ? (
+                            <p className="mt-1 font-mono text-sm text-blue-700">
+                              {entry.trigger}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div
+                          aria-label="Snippet actions"
+                          className="flex shrink-0 gap-1"
+                        >
+                          <button
+                            aria-label="Delete Snippet"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            disabled={isBusy}
+                            onClick={() => requestDelete(entry)}
+                            ref={(node) => {
+                              if (node === null)
+                                deleteButtons.current.delete(entry.id);
+                              else deleteButtons.current.set(entry.id, node);
+                            }}
+                            title="Delete Snippet"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Edit Snippet"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={isBusy}
+                            onClick={() => void beginEditing(entry)}
+                            title="Edit Snippet"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                d="m4 20 4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10L4 20Z"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            aria-label="Copy Snippet"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            disabled={isBusy}
+                            onClick={() => void copyEntry(entry)}
+                            title="Copy Snippet"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <rect height="12" rx="2" width="12" x="8" y="8" />
+                              <path
+                                d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div
-                        aria-label="Snippet actions"
-                        className="flex shrink-0 gap-1"
-                      >
-                        <button
-                          aria-label="Delete Snippet"
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-red-200 text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
-                          disabled={isBusy}
-                          onClick={() => requestDelete(entry)}
-                          ref={(node) => {
-                            if (node === null)
-                              deleteButtons.current.delete(entry.id);
-                            else deleteButtons.current.set(entry.id, node);
-                          }}
-                          title="Delete Snippet"
-                          type="button"
+                      <div className="mt-3 flex gap-2">
+                        <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                          {entry.content.kind === 'image' ? 'Image' : 'Text'}
+                        </span>
+                        <span
+                          aria-label={`Usage count: ${usageCount}`}
+                          className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
                         >
-                          <svg
-                            aria-hidden="true"
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          aria-label="Edit Snippet"
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          disabled={isBusy}
-                          onClick={() => void beginEditing(entry)}
-                          title="Edit Snippet"
-                          type="button"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="m4 20 4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10L4 20Z"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          aria-label="Copy Snippet"
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          disabled={isBusy}
-                          onClick={() => void copyEntry(entry)}
-                          title="Copy Snippet"
-                          type="button"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            className="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <rect height="12" rx="2" width="12" x="8" y="8" />
-                            <path
-                              d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </button>
+                          {usageCount}
+                        </span>
                       </div>
-                    </div>
-                    <div className="mt-3 flex gap-2">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800">
-                        {entry.content.kind === 'image' ? 'Image' : 'Text'}
-                      </span>
-                      <span
-                        aria-label={`Usage count: ${usageCount}`}
-                        className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
-                      >
-                        {usageCount}
-                      </span>
-                    </div>
-                    <div className="mt-4 border-t border-slate-100 pt-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Details
-                      </p>
-                      {entry.content.kind === 'image' ? (
-                        <ImageThumbnail
-                          assetId={entry.content.assetId}
-                          snippetLibrary={snippetLibrary}
-                        />
-                      ) : (
-                        <p className="mt-2 line-clamp-3 max-h-18 overflow-hidden whitespace-pre-wrap text-sm text-slate-600">
-                          {renderSnippetPlainText(entry.content)}
+                      <div className="mt-4 border-t border-slate-100 pt-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Details
                         </p>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                        {entry.content.kind === 'image' ? (
+                          <ImageThumbnail
+                            assetId={entry.content.assetId}
+                            snippetLibrary={snippetLibrary}
+                          />
+                        ) : (
+                          <p className="mt-2 line-clamp-3 max-h-18 overflow-hidden whitespace-pre-wrap text-sm text-slate-600">
+                            {renderSnippetPlainText(entry.content)}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
         </div>
       ) : null}
