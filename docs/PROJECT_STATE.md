@@ -7,7 +7,7 @@
 
 ## Current Milestone
 
-- Active milestone: **M15 — AI Workspace**. Active task: **M15-C — Context Image Attachment & Safety Foundation**. Status: **IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW** as of 2026-09-13. M15-B is **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `21e0572`**. M15 runtime implementation remains bounded to provider-independent foundations; later Context Image UI/acquisition, model discovery, provider execution, generation, Copy, and Save-as-Snippet behavior remains **NOT IMPLEMENTED**.
+- Active milestone: **M15 — AI Workspace**. Latest completed task: **M15-C — Context Image Attachment & Safety Foundation**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`** as of 2026-09-13. No later M15 task is active. M15 runtime implementation remains bounded to provider-independent foundations; later Context Image UI/acquisition, model discovery, provider execution, generation, Copy, and Save-as-Snippet behavior remains **NOT IMPLEMENTED**.
 - Completed documentation closeout: **M14-U.1 — Final Approval and Performance Follow-up Closeout**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `e9d0f97`** as of 2026-09-13. M14-Q-F2 is deferred with evidence preserved, F4/F8 remain evidence-dependent, and no additional Backup restore diagnostic or optimization is scheduled before M15.
 - Completed diagnostic task: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`** as of 2026-09-13. The bottleneck remains partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; indexes have measurable associated cost, while browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. The evidence is preserved for future optimization review, and no schema, index, transaction, atomicity, or Backup change is approved.
 - Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `50eaf76`** as of 2026-09-13. Local `master` and fetched `origin/master` are synchronized at `50eaf764525607c4ca30580467011e2378214ecd`.
@@ -16,19 +16,19 @@
 - Completed supplemental task: **M14-Q — Internal Performance Audit & Improvement Recommendations**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `5003187`** as of 2026-09-12. Local `master` and fetched `origin/master` are synchronized at `50031877c0ac307be4781d120b412081970b25bc`. Approved M14-Q LOCAL ONLY evidence remains intentionally untracked/ignored and is not M14-S work.
 - Completed milestone: M14-P — Final Snippet Completion Gate
 - Closeout task: M14-P.6.1 — Final Snippet Completion Gate Closeout
-- Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15-A is complete, Principal-approved, checkpointed, and pushed at `8aeab99`; M15-B is complete, Principal-approved, checkpointed, and pushed at `21e0572`; M15-C is the active bounded Context Image Attachment & Safety Foundation and is implementation complete, awaiting Principal review.
+- Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15-A is complete, Principal-approved, checkpointed, and pushed at `8aeab99`; M15-B is complete, Principal-approved, checkpointed, and pushed at `21e0572`; M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`. No later M15 task is active.
 
 ## Task State
 
 ### M15-C — Context Image Attachment & Safety Foundation
 
-M15-C implements only the provider-independent Context Image attachment contract, reusable encoded-raster inspection, Context Image validation, required decode-verification seam, byte ownership, injected identity, and atomic validated attachment-set construction authorized by Decision 58. Context Images remain separate from Snippet Assets and Image Snippets. No Side Panel, paste/file-picker, preview, model-discovery, provider, generation, output, Copy, Save-as-Snippet, persistence, schema, Backup, permission, dependency, or M16 behavior is in scope.
+M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`. It implements only the provider-independent Context Image attachment contract, reusable encoded-raster inspection, Context Image validation, required decode-verification seam, byte ownership, injected identity, and atomic validated attachment-set construction authorized by Decision 58. Context Images remain separate from Snippet Assets and Image Snippets. No Side Panel, paste/file-picker, preview, model-discovery, provider, generation, output, Copy, Save-as-Snippet, persistence, schema, Backup, permission, dependency, or M16 behavior was included.
 
 #### M15-C Durable Resume Checkpoint
 
 ```text
 Task: M15-C — Context Image Attachment & Safety Foundation
-Status: IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW
+Status: COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT c80796057ff2a747984b4423b82608bf270a9349
 Starting branch/HEAD: master at 21e057288d502ad85db3d7c86cf81102c887cd13
 Fetched origin/master: 21e057288d502ad85db3d7c86cf81102c887cd13; ahead/behind 0/0
 Starting tracked tree/index: clean
@@ -37,9 +37,9 @@ Continuity result: PASS; M15-B is complete, Principal-approved, checkpointed, an
 Completed phase: continuity gate and required review; shared provider-neutral encoded-raster safety extraction; unchanged clipboard compatibility wrapper; Context Image contract, candidate validator, required decode-verification seam, owned bytes, injected identity, and atomic set construction; focused and full validation; final source/contract/diff review; documentation synchronization and impact review
 Files changed: docs/PROJECT_STATE.md; docs/CHANGELOG.md; docs/BACKLOG.md; src/application/image/encoded-raster-safety.ts; src/application/snippet/clipboard-image-safety.ts; src/application/drafting/context-image-attachments.ts; tests/unit/context-image-attachments.test.ts
 Validation completed: focused M15-C plus unchanged clipboard/browser preparation/Snippet Asset/persistence regressions PASS — 5 files / 79 tests; full Vitest PASS — 73 files / 968 tests with one opt-in file/test skipped; repository ESLint PASS; TypeScript PASS; production build/output validation PASS; intended-file Prettier PASS; git diff --check PASS; all 39 approved M14-Q LOCAL ONLY evidence hashes PASS; git fsck --full PASS with only pre-existing dangling objects
-Incomplete work: Principal review only
-Exact next action: Principal reviews M15-C; do not stage, commit, push, or begin later M15 runtime/UI/provider work without separate authorization
-Git state: 7 intended unstaged M15-C files alongside untouched approved M14-Q LOCAL ONLY evidence; index empty; staged NONE; commit NONE; push NONE
+Incomplete work: none within M15-C
+Exact next action: no later M15 task is active; select and authorize the next bounded task separately
+Git state: checkpointed and pushed at c80796057ff2a747984b4423b82608bf270a9349; approved M14-Q LOCAL ONLY evidence remains present and untouched
 Architectural concerns: none
 Known limitations: M15-C defines a mandatory provider-independent decode-verification port but does not add the later browser acquisition adapter; encoded-header dimensions remain authoritative, avoiding an unapproved EXIF-orientation policy. No user-visible browser behavior is introduced, so real-Chrome validation is not required.
 Principal-readiness self-check: PASS
@@ -1260,7 +1260,7 @@ Image trigger + Space
 - **M14-P.6/M14-P.6.1 / M14-P — Final Snippet Completion Gate:** COMPLETE / PRINCIPAL-APPROVED. Automated feature-family, full-suite, build/output, dependency, schema, security, and performance evidence passes with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. Text performance and Image quality/safety are accepted; no known blocking Snippet issue remains.
 - **M15-A — AI Workspace Architecture & Contract Lockdown:** COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `8aeab99`. Decision 58 and `docs/AI_WORKSPACE_ARCHITECTURE.md` define the versioned Text-only retrieval, prompt v2, transient Context Image, opaque model/capability, immutable generation, exact Copy, and one-use handoff contracts.
 - **M15-B — Drafting Retrieval & Prompt v2 Foundation:** COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `21e0572`. The new Text-Snippet-only reference path shares authoritative M14-O scoring with historical retrieval, excludes Knowledge and Image Snippets, and adds the pure Context/Gist query helper plus provider-independent Prompt v2.
-- **M15-C — Context Image Attachment & Safety Foundation:** IMPLEMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW. Shared provider-neutral encoded-raster inspection now supports both the unchanged clipboard compatibility path and the new Context Image attachment validator with MIME/signature, size/raster/decode, byte-ownership, identity, and atomic-set guarantees. Later M15 UI/acquisition/model/provider/generation behavior remains unimplemented.
+- **M15-C — Context Image Attachment & Safety Foundation:** COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`. Shared provider-neutral encoded-raster inspection supports both the unchanged clipboard compatibility path and the Context Image attachment validator with MIME/signature, size/raster/decode, byte-ownership, identity, and atomic-set guarantees. Later M15 UI/acquisition/model/provider/generation behavior remains unimplemented.
 - **M16 — OpenAI Provider Expansion:** Add OpenAI and provider selection behind the existing provider-independent boundary after credentials, permissions, endpoints, models, privacy, and error behavior are defined.
 - **Chrome Side Panel Focus Activation:** Activate or focus an already-visible Side Panel after shortcut capture if Chrome exposes a supported API; no M10 workaround is authorized.
 - The Side Panel focus direction remains unassigned. M14–M16 retain their roadmap ownership. M13 remains authoritative for trigger persistence, editor activation, and runtime synchronization; M14-B preserves those behaviors while projecting structured content to the existing plain catalog payload. Decision 36 does not reopen M9, redefine M10, or change the existing Ollama/AI workflow.
@@ -1506,7 +1506,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current completed checkpoint: M15-B is complete, Principal-approved, checkpointed, and pushed at `21e0572`; M15-A is complete at `8aeab99`. M14-U.1 is complete at `e9d0f97`, M14-U at `b8dfef1`, M14-T at `50eaf76`, and M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`; M14-P is complete and Principal-approved. M15-C is active over the synchronized M15-B base.
+- Current completed checkpoint: M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`; M15-B is complete at `21e0572`; M15-A is complete at `8aeab99`. M14-U.1 is complete at `e9d0f97`, M14-U at `b8dfef1`, M14-T at `50eaf76`, and M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`; M14-P is complete and Principal-approved. No later M15 task is active.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1515,7 +1515,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next Principal action: review M15-C implementation and validation. Do not stage, commit, push, or begin later M15 runtime/UI/provider work without separate authorization.
+- Exact next Principal action: select and authorize the next bounded M15 task; none is active. Do not begin later M15 runtime/UI/provider work without separate authorization.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
