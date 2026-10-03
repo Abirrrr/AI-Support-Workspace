@@ -7,7 +7,7 @@
 
 ## Current Milestone
 
-- Active milestone: **M15 — AI Workspace**. Latest completed task: **M15-C — Context Image Attachment & Safety Foundation**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`** as of 2026-09-13. No later M15 task is active. M15 runtime implementation remains bounded to provider-independent foundations; later Context Image UI/acquisition, model discovery, provider execution, generation, Copy, and Save-as-Snippet behavior remains **NOT IMPLEMENTED**.
+- Active milestone: **M15 — AI Workspace**. Active task: **M15-D — Automatic Paste Diagnostics Architecture & Contract Lockdown**, with corrective continuation **M15-D.1 — Diagnostics Contract Reconciliation** complete. Status: **ARCHITECTURE/DOCUMENTATION COMPLETE / AWAITING PRINCIPAL REVIEW / NOT CHECKPOINTED** as of 2026-10-03. Latest completed M15 implementation task: **M15-C — Context Image Attachment & Safety Foundation**, **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`**. The M15-C.2 CI formatting-scope correction is complete at `020f649`, and the M15-C.3 continuity correction is complete and pushed at `0f3cfff`. No later M15 implementation task is active. M15-D/M15-D.1 change documentation/architecture only and do not start later AI Workspace runtime behavior.
 - Completed documentation closeout: **M14-U.1 — Final Approval and Performance Follow-up Closeout**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `e9d0f97`** as of 2026-09-13. M14-Q-F2 is deferred with evidence preserved, F4/F8 remain evidence-dependent, and no additional Backup restore diagnostic or optimization is scheduled before M15.
 - Completed diagnostic task: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`** as of 2026-09-13. The bottleneck remains partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; indexes have measurable associated cost, while browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. The evidence is preserved for future optimization review, and no schema, index, transaction, atomicity, or Backup change is approved.
 - Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `50eaf76`** as of 2026-09-13. Local `master` and fetched `origin/master` are synchronized at `50eaf764525607c4ca30580467011e2378214ecd`.
@@ -19,6 +19,32 @@
 - Status: **COMPLETE / PRINCIPAL-APPROVED**. M14-P.6 automated validation passed with no blocker, and the Principal accepted the complete 14-item real-Chrome/manual matrix. The complete Snippet foundation is stable and complete. M15-A is complete, Principal-approved, checkpointed, and pushed at `8aeab99`; M15-B is complete, Principal-approved, checkpointed, and pushed at `21e0572`; M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`. No later M15 task is active.
 
 ## Task State
+
+### M15-D — Automatic Paste Diagnostics Architecture & Contract Lockdown
+
+M15-D is the active supplemental reliability architecture task. It defines an off-by-default, local-only, persistent, bounded, exportable, and explicitly clearable Automatic Paste Diagnostics contract without implementing runtime behavior, UI, persistence migration, native-protocol changes, performance optimization, Quick Create, permissions, dependencies, schema code, or Backup evolution. M15-D.1 corrects only its versioned failure-code ownership and its explicit relationships with Decisions 45 and 58.
+
+#### M15-D Durable Resume Checkpoint
+
+```text
+Task: M15-D.1 — Diagnostics Contract Reconciliation (corrective continuation of M15-D)
+Status: CONTRACT RECONCILIATION COMPLETE / AWAITING PRINCIPAL REVIEW / NOT CHECKPOINTED
+Starting branch/HEAD: master at 0f3cffff3b99cbbd9dc16f00b5c41c2011571743
+Fetched origin/master: 0f3cffff3b99cbbd9dc16f00b5c41c2011571743; ahead/behind 0/0
+Starting tracked tree/index: six pre-existing desktop.ini modifications; index empty
+Approved M14-Q LOCAL ONLY evidence: present and baseline-hashed; do not modify, stage, delete, clean, move, or normalize
+Completed phases: M15-D architecture/documentation completed; M15-D.1 continuity PASS on master/0f3cfff with fetched origin/master synchronized 0/0; required documentation and live SnippetDeliveryFailureCode inspected; exact 26-value AutomaticPasteDiagnosticFailureCodeV1 frozen; Decisions 45/59 and Decisions 58/59 explicitly reconciled; affected current documentation synchronized; Documentation Impact Review completed without changing AI_WORKSPACE_ARCHITECTURE.md
+Existing M15-D working files: docs/ARCHITECTURE.md; docs/BACKLOG.md; docs/CHANGELOG.md; docs/DATABASE_SCHEMA.md; docs/DECISIONS.md; docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md; docs/PRODUCT_REQUIREMENTS.md; docs/PROJECT_STATE.md; docs/TESTING_STRATEGY.md
+M15-D.1 files changed: docs/ARCHITECTURE.md; docs/BACKLOG.md; docs/CHANGELOG.md; docs/DATABASE_SCHEMA.md; docs/DECISIONS.md; docs/NATIVE_CLIPBOARD_COMPANION_ARCHITECTURE.md; docs/PRODUCT_REQUIREMENTS.md; docs/PROJECT_STATE.md; docs/TESTING_STRATEGY.md
+Reconciliation decisions completed: persisted/exported v1 references only frozen AutomaticPasteDiagnosticFailureCodeV1; explicit live-to-v1 mapping with unknown/new/unmapped values mapped to null; Decision 45 request-scoped native diagnostics remain unchanged and distinct from Decision 59 application persistence; Decision 58 remains authoritative for AI Workspace no-persistence/no-schema, with Decision 59 superseding only the broad wording necessary for two future diagnostics-specific Dexie v7 stores
+Validation completed: intended-document diff review PASS; git diff --check PASS with only expected working-tree line-ending notices; intended-file Prettier PASS; exact frozen-union comparison PASS at 26 values in source selection/Decision 59/schema documentation; Decision 45/59 and Decision 58/59 consistency searches PASS; persisted/exported v1 schema has no live SnippetDeliveryFailureCode reference; no production/test/native/config/dependency files changed; all six desktop.ini files retain baseline blob 8167ac5c64bfecbe7f0b90d06edb67675a7176ef; all 114 protected M14-Q files retain aggregate SHA-256 a6cff4a9b34bc1d2f136e8b8740142c7a130ac85f33924552eeca18010fcfab0; index empty
+Unresolved issues: none within M15-D.1; runtime implementation and the future Dexie v7 migration remain separately authorized work
+Exact next action: Principal reviews M15-D with the M15-D.1 reconciliation and separately authorizes its Git checkpoint or requests another focused documentation correction; do not begin diagnostics implementation or another later M15 task
+Git state: existing M15-D documentation work preserved; M15-D.1 changes nine affected documents; six pre-existing desktop.ini modifications and protected untracked M14-Q evidence remain untouched; no stage, commit, or push
+Staged: NONE
+Commit: NONE
+Push: NONE
+```
 
 ### M15-C — Context Image Attachment & Safety Foundation
 
@@ -1228,7 +1254,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 and the complete post-M14 Snippet Hardening foundation are complete. M14-P is **COMPLETE / PRINCIPAL-APPROVED**; M14-T, M14-U, and M14-U.1 are complete and checkpointed through `e9d0f97`. M15-A is complete at `8aeab99`, M15-B is complete at `21e0572`, and M15-C is the latest completed M15 implementation task with status **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`**. The M15-C.2 CI formatting-scope correction is complete at `020f649`. No later M15 task is active. Later M15 runtime behavior remains unimplemented except for the completed provider-independent M15-B retrieval/Prompt v2 and M15-C Context Image attachment/safety foundations.
+- Status: Milestone 14 and the complete post-M14 Snippet Hardening foundation are complete. M14-P is **COMPLETE / PRINCIPAL-APPROVED**; M14-T, M14-U, and M14-U.1 are complete and checkpointed through `e9d0f97`. M15-A is complete at `8aeab99`, M15-B is complete at `21e0572`, and M15-C is the latest completed M15 implementation task with status **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `c807960`**. The M15-C.2 CI formatting-scope correction is complete at `020f649`, and M15-C.3 is complete and pushed at `0f3cfff`. M15-D is the active architecture/documentation task; M15-D.1 contract reconciliation is complete, and the combined documentation awaits Principal review/checkpoint. No later M15 task is active. Later M15 runtime behavior remains unimplemented except for the completed provider-independent M15-B retrieval/Prompt v2 and M15-C Context Image attachment/safety foundations.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -1477,7 +1503,7 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- M15-A, M15-B, and M15-C are complete, and no later M15 task is active. The next authorized engineering direction is M15-D — Automatic Paste Diagnostics Architecture & Contract Lockdown. M15-D remains not active and must be activated separately after M15-C.3 is reviewed and checkpointed.
+- M15-A, M15-B, and M15-C are complete. M15-D architecture/documentation, including M15-D.1 contract reconciliation, is complete and awaits Principal review and a separately authorized Git checkpoint. No later M15 task is active; do not begin diagnostics implementation or another M15 runtime/UI/provider task without separate authorization.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
@@ -1506,7 +1532,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current completed checkpoint: M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`; M15-B is complete at `21e0572`; M15-A is complete at `8aeab99`. M14-U.1 is complete at `e9d0f97`, M14-U at `b8dfef1`, M14-T at `50eaf76`, and M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`; M14-P is complete and Principal-approved. No later M15 task is active.
+- Current completed implementation checkpoint: M15-C is complete, Principal-approved, checkpointed, and pushed at `c807960`; M15-B is complete at `21e0572`; M15-A is complete at `8aeab99`. M15-C.2 is complete at `020f649`, and M15-C.3 is complete at `0f3cfff`. M15-D is the active documentation-only task; M15-D.1 reconciliation is complete, and the combined architecture awaits Principal review/checkpoint. No later M15 task is active. M14-U.1 is complete at `e9d0f97`, M14-U at `b8dfef1`, M14-T at `50eaf76`, and M14-O at `6e893886ea23870c374e7e96dcc09a1c92184afc`; M14-P is complete and Principal-approved.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1515,7 +1541,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next Principal action: select and authorize the next bounded M15 task; none is active. Do not begin later M15 runtime/UI/provider work without separate authorization.
+- Exact next Principal action: review M15-D together with the completed M15-D.1 reconciliation, resolve any requested documentation correction, and authorize its Git checkpoint separately. Do not begin diagnostics implementation or later M15 runtime/UI/provider work without separate authorization.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks

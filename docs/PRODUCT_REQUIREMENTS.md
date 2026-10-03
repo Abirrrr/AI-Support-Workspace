@@ -207,6 +207,21 @@ Image: one locally stored PNG/JPEG/WebP
 
 Text plus an image intentionally uses two independent shortcuts, such as `;limitation-text` and `;image-limitation`.
 
+## M15-D — Local Automatic Paste Diagnostics
+
+- Provide an explicitly user-controlled `Automatic Paste Diagnostics` concept with Enable/Disable, Export Diagnostics, and Clear Diagnostics. Diagnostics default disabled and enabling is a local per-profile action, not a portable product preference.
+- While enabled, retain one strict safe terminal record for successful and unsuccessful accepted automatic-mode attempts. Normal clipboard-only use is not recorded. Records contain only opaque random identity/correlation, canonical UTC time, Text/Image kind, typed result/stage/safety categories, an optional independently frozen `AutomaticPasteDiagnosticFailureCodeV1`, and bounded numeric durations. Future implementation must explicitly map live delivery failures into the frozen v1 allowlist; a new, unknown, or unmapped live code becomes `null` and cannot expand the format or introduce raw detail.
+- Persist records locally across browser/extension restarts through the project-owned diagnostics boundary. Retain only the newest 30 elapsed days and at most 2,000 records, removing oldest by timestamp then record ID. Persistence/pruning failure may undercount but must never delay or alter Snippet delivery.
+- Export only after an explicit user action as strict versioned `ai-support-workspace-automatic-paste-diagnostics` JSON ordered by timestamp/ID. Export performs no upload or network request, requires no new permission, is separate from application Backup, and contains no enablement state.
+- Clear deletes retained diagnostic records only. Disable stops future recording but preserves retained records; Clear does not disable diagnostics or change automatic-paste mode.
+- Diagnostics and their enablement are excluded from Backup export and restore. They are not telemetry, AI/provider data, cloud logging, a native-host log file, or a third-party logging service.
+- Never persist or export Snippet title/trigger/tags/content/HTML/image bytes, filenames, clipboard payloads, editor/surrounding/selected page content, Merchant Context, Guidance/Gist, AI prompts/output, URL/origin/domain/title, customer/merchant information, tab ID, window ID, unnecessary persistent frame ID, native/process/clipboard-sequence identity, paths, arbitrary errors/stacks, network data, credentials, API keys, or provider data. No persisted identifier is content-derived.
+- Preserve Decisions 43-45 exactly: no focus weakening, clipboard check removal, modifier relaxation, `SendInput` retry, authorization replay, native protocol change, native log database, persistent native host, or automatic-paste behavior change. Browser-side roundtrip timing is sufficient unless a later architecture decision explicitly approves otherwise.
+- Decision 45's optional diagnostics remain off-by-default native/request-scoped evidence limited to correlation, result, bounded timing, and safety category. Decision 59's additional record ID, UTC time, Text/Image kind, terminal stage, and frozen failure classification are a separate downstream application-owned envelope/projection, not native logging or protocol fields.
+- Preserve Decision 58 and the normative AI Workspace no-persistence contract for Merchant Context, Context Images, Guidance/Gist, models, generated output, provider behavior, and Save-as-Snippet handoff state. Decision 59 permits only the future diagnostics-specific Dexie v7 stores and no other schema/index/migration or Backup change; that migration remains unimplemented.
+- Timing evidence is descriptive only. Each duration is finite, non-negative, at most five minutes, and measured with a monotonic clock by the component owning that boundary. Cross-context clocks are never combined and no CI performance threshold is introduced.
+- M15-D defines the contract only. Runtime recording, Dexie v7 migration, controls, export, clear, performance optimization, and Quick Create remain unimplemented until separately authorized.
+
 ## Workspace Shell Action UX
 
 M14-P.4 retires the implemented popup. The extension toolbar action opens/toggles the global AI Support Workspace Side Panel directly, while the compact Settings gear opens the existing full Options application in a normal browser tab.

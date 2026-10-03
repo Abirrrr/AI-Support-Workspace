@@ -1212,6 +1212,143 @@ Save as Snippet uses a cryptographically random, 60-second, one-use, same-extens
 
 M15 adds no schema/index/migration, Backup change, provider selector, cloud provider, credential/API-key handling, telemetry, or background generation. OpenAI and multi-provider behavior remain M16.
 
+## Decision 59: Local Automatic Paste Diagnostics and Export Boundary
+
+M15-D defines a Local Automatic Paste Diagnostics system for evidence-based investigation of intermittent Windows automatic-paste failures and perceived delivery latency. Diagnostics are disabled by default and begin only after an explicit local user action. Enablement is profile-local diagnostic state, not a portable product preference. The system remains local-first, persists across browser/extension restarts while enabled, has deterministic retention, records successful and unsuccessful automatic-mode attempts, exports only on explicit request, clears only on explicit request, performs no upload or telemetry, and is independent of AI providers. M15-D is architecture/documentation only: it implements no UI, runtime recorder, persistence adapter, Dexie migration, export action, native change, permission, dependency, or performance optimization.
+
+Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) remain authoritative for the AI Workspace feature and data model: Merchant Context, Context Images, Guidance/Gist, model selection, generated output, provider behavior, and the Save-as-Snippet handoff gain no persistence, schema, index, migration, or Backup evolution through M15-D. Decision 59 is a separate user-directed Automatic Paste reliability capability. To the limited extent that Decision 58's broad “M15 adds no schema/index/migration” rule would prohibit the two diagnostics stores below, Decision 59 supersedes that prohibition only for this future diagnostics-specific additive Dexie version 7. It authorizes no AI Workspace persistence, unrelated store/index, Backup change, or implemented migration; implementation still requires a separately authorized task.
+
+The application owns the diagnostic contract through one project-owned `AutomaticPasteDiagnosticsRepository` port. A later infrastructure adapter will use a new additive Dexie physical version 7 with two isolated stores:
+
+```text
+automaticPasteDiagnosticsState: 'id'
+automaticPasteDiagnosticRecords: 'id, occurredAt, [occurredAt+id]'
+```
+
+The state store contains only singleton `{ id: 'global', enabled: boolean }`; absence means disabled. The record store contains only validated diagnostic records. Version 7 adds empty stores without scanning or rewriting Knowledge, Snippets, assets, Settings, usage, generated metadata, or dormant automatic-backup state. This dedicated state avoids treating diagnostic enablement as portable Settings and avoids reusing the unrelated `automaticBackupState` singleton. React will call application services rather than Dexie; content scripts never own durable diagnostics; the service worker may assemble one bounded observation in memory; and the native companion never becomes the log database or writes a diagnostic file.
+
+Automatic Paste Diagnostic Record v1 has exactly:
+
+```ts
+type AutomaticPasteDiagnosticFailureCodeV1 =
+  | 'snippet-unavailable'
+  | 'stale-trigger'
+  | 'unsupported-content'
+  | 'asset-unavailable'
+  | 'asset-ownership-invalid'
+  | 'asset-invalid'
+  | 'permission-required'
+  | 'offscreen-create-failed'
+  | 'offscreen-message-failed'
+  | 'invalid-offscreen-response'
+  | 'clipboard-write-failed'
+  | 'clipboard-copy-event-unavailable'
+  | 'clipboard-copy-command-failed'
+  | 'clipboard-copy-data-failed'
+  | 'image-invalid'
+  | 'image-decode-failed'
+  | 'image-too-large'
+  | 'animated-webp'
+  | 'native-permission-required'
+  | 'host-unavailable'
+  | 'host-version-mismatch'
+  | 'invalid-host-response'
+  | 'native-delivery-busy'
+  | 'automatic-delivery-busy'
+  | 'stale-catalog'
+  | 'unexpected-delivery-failure';
+
+interface AutomaticPasteDiagnosticRecordV1 {
+  schemaVersion: 1;
+  id: string;
+  occurredAt: string;
+  requestId: string;
+  kind: 'text' | 'image';
+  result:
+    | 'paste-issued'
+    | 'clipboard-only'
+    | 'unsafe-focus'
+    | 'not-foreground'
+    | 'clipboard-changed'
+    | 'unsafe-keyboard-state'
+    | 'busy'
+    | 'native-unavailable'
+    | 'input-injection-failed'
+    | 'indeterminate'
+    | 'delivery-failed';
+  terminalStage:
+    | 'activation'
+    | 'preflight'
+    | 'clipboard-preparation'
+    | 'clipboard-write'
+    | 'browser-safety-validation'
+    | 'native-context-capture'
+    | 'trigger-cleanup'
+    | 'editor-revalidation'
+    | 'service-worker-coordination'
+    | 'native-foreground-validation'
+    | 'native-clipboard-validation'
+    | 'native-keyboard-validation'
+    | 'input-injection'
+    | 'native-response'
+    | 'complete';
+  safetyCategory:
+    | 'browser-sender'
+    | 'browser-tab-window'
+    | 'editor-focus-selection'
+    | 'editor-cleanup-state'
+    | 'native-foreground-context'
+    | 'clipboard-sequence'
+    | 'keyboard-modifiers'
+    | 'delivery-concurrency'
+    | 'native-capability'
+    | 'response-correlation'
+    | 'input-injection'
+    | null;
+  failureCode: AutomaticPasteDiagnosticFailureCodeV1 | null;
+  timingsMs: {
+    clipboardPreparation: number | null;
+    clipboardWrite: number | null;
+    browserSafetyPreparation: number | null;
+    nativeContextCaptureRoundtrip: number | null;
+    triggerCleanupAndRevalidation: number | null;
+    nativePasteRequestRoundtrip: number | null;
+    totalObservedDelivery: number | null;
+  };
+}
+```
+
+`id` and `requestId` are independently generated opaque canonical lowercase UUIDs and are never derived from Snippet, editor, page, clipboard, customer, or merchant data. `occurredAt` is canonical UTC ISO 8601. `AutomaticPasteDiagnosticFailureCodeV1` freezes the 26 current content-free `SnippetDeliveryFailureCode` literals listed above because each identifies a useful catalog, planning, permission, offscreen, clipboard, image, native-capability, concurrency, or typed unexpected-delivery class without carrying raw detail. It is an independent persisted/exported v1 contract, not an alias, import, subtype, or automatically expanding projection of the live application type. A future recorder must explicitly map a live `SnippetDeliveryFailureCode` into this frozen union. A new, unknown, or intentionally unmapped live value maps fail-closed to `null`; it must not expand v1, be cast through, create a free-form replacement, or persist an error message, stack, metadata bag, native detail, or raw value. `failureCode` is non-null only when an accepted automatic-mode attempt terminates before an existing automatic-paste result can be produced; otherwise it is `null`. Every object and nested object is exact-key validated; there is no `metadata`, `details`, `message`, arbitrary string, or extension bag.
+
+Only attempts for which the service worker resolves the authoritative paste mode to `automatic` are eligible. Normal `clipboard-only` usage is not recorded. When diagnostics are enabled, one terminal record is attempted for both `paste-issued` success and every typed decline, failure, fallback, or indeterminate automatic attempt, including accepted attempts that fail during clipboard preparation. There is no free-form event stream or durable partial trace. Existing native-development/session traces are production-excluded investigation aids and must not be copied wholesale into the persistent record. The future recorder maps their safe typed outcomes into this smaller allowlist only.
+
+Timing fields are numeric durations, never timestamps or clock values. Each non-null duration must be finite, non-negative, and at most `300_000` milliseconds; an unavailable, invalid, cross-context, or over-bound measurement is stored as `null`, not guessed or clamped. The service worker may measure clipboard planning/preparation, clipboard write, browser safety preparation, native-context capture roundtrip, native-paste request roundtrip, and its total observed interval from receipt of the activation request through the terminal outcome using one local monotonic clock. The content script may measure only its own cleanup plus immediate editor/caret revalidation interval and send that bounded number for validation. Durations from different contexts are never added, subtracted, or treated as sharing a monotonic origin. The browser-side roundtrip is sufficient for Native Messaging evidence; the design does not claim to measure internal Chrome scheduling, native process startup separately, Win32 validation duration, `SendInput` internals, destination insertion, or user-visible render completion. These are diagnostic observations, not CI performance thresholds or pass/fail SLAs.
+
+Persistent diagnostics are observational and never part of the delivery critical path. The authoritative delivery result is selected before diagnostic persistence is attempted. A future service-worker recorder keeps at most the already-bounded in-flight automatic attempt in memory, creates the terminal allowlisted record after outcome selection, and starts one best-effort append/prune operation without awaiting it before delivery feedback or paste finalization. Recorder construction, validation, Dexie open/write/transaction/prune failure, quota exhaustion, worker termination, or export failure cannot block clipboard preparation, cleanup, focus validation, native input, or feedback; cannot alter a result; and cannot retry delivery, `SendInput`, or an authorization. Diagnostic write failures are swallowed at this boundary and may undercount evidence. There is no durable diagnostic queue, replay, retry loop, artificial service-worker keepalive, or automatic error notification that could be mistaken for a delivery failure.
+
+Retention is exactly the newest 30 elapsed days and at most 2,000 automatic-paste attempt records. Oldest is deterministic by `occurredAt` ascending then `id` ascending. A later adapter performs append plus age/count pruning atomically in the diagnostics transaction, but that operation remains best-effort and off the delivery path. Enabling diagnostics, service-worker initialization, and explicit export also request pruning through the application boundary without creating an artificial worker keepalive; export waits for its own user-requested prune/read and fails safely without a file if a valid bounded snapshot cannot be produced. Pruning never touches another store. If best-effort append/prune fails, delivery remains final and previously retained records remain authoritative.
+
+Explicit export uses one strict standalone JSON contract:
+
+```json
+{
+  "format": "ai-support-workspace-automatic-paste-diagnostics",
+  "formatVersion": 1,
+  "exportedAt": "2026-10-02T00:00:00.000Z",
+  "records": []
+}
+```
+
+All keys are required and unexpected keys are rejected by the application-owned serializer/validator. Records are ordered by `occurredAt` then `id`. Export uses the existing explicit browser Blob/object-URL/temporary-anchor download pattern, needs no new browser permission, performs no network request, never uploads automatically, and uses a diagnostics-specific filename. It exports neither enablement state nor any non-record storage value. This format is not `ai-support-workspace-backup`, is not a Backup version, and is never accepted by Backup restore.
+
+Diagnostics state and records are excluded from every application Backup snapshot and file, and Backup v1-v7 remain frozen. Restore never clears, replaces, imports, or creates diagnostic state or records. Clear Diagnostics deletes all retained attempt records only. It does not change enablement, paste mode, Snippets, Settings, Backup state, or automatic-paste behavior. Disable stops future recording and retains existing records until explicit Clear or retention pruning; re-enabling resumes with the same local store and applies retention. These operations are separate by design.
+
+The following data is prohibited from persistence and export: Snippet title, trigger, authored tags, text/content, rendered HTML, Image Snippet bytes, filenames, clipboard text/HTML/image bytes, editor contents or surrounding contents, selected webpage text/images, Merchant Context, Guidance/Gist, AI prompts/output, page URL/origin/domain/title, customer or merchant information, tab ID, window ID, frame ID when persistent identification is unnecessary, native HWND, process ID, clipboard sequence value, filesystem paths, arbitrary exception strings, arbitrary stack traces, network data, credentials, API keys, and provider data. No identifier may be derived from any prohibited value. Raw JSON, native-development diagnostic objects, browser/native error messages, and native security/session/integrity evidence are also not persistent record fields.
+
+Decisions 43-45 remain unchanged. Decision 45's optional diagnostics are native/request-scoped evidence, remain off by default, and remain limited to correlation, result category, bounded timing, and safety category. Decision 59 defines a distinct downstream application-owned persistence projection after the existing workflow produces safe typed outcomes. Its record identity, UTC occurrence time, Text/Image kind, terminal application stage, and frozen failure classification are fixed application envelope/classification fields, not new native logging or protocol data. Protocols v1/v2 gain no field, and no HWND, PID, clipboard sequence, browser identifier, raw native request/response, native diagnostic object, error message, stack, content, URL, or other prohibited value becomes persistable. Protocol v1 Image behavior, protocol v2 one-use authorization, foreground/process/clipboard/modifier guarantees, no retry after uncertain input, and the fixed four-event `SendInput` call remain authoritative. Decision 59 neither replaces nor weakens any Decision 45 focus, clipboard, authorization, modifier, `SendInput`, retry, or safety rule. M15-D adds no native protocol version, native log, filesystem log, persistent host, or network sink. If a later implementation cannot derive an approved safe category from current typed browser/native results, it must stop for an explicit future architecture/protocol decision rather than persisting raw native evidence or silently expanding this schema.
+
+The future user-facing concept is `Automatic Paste Diagnostics` with explicit Enable/Disable, Export Diagnostics, and Clear Diagnostics controls in the existing management surface. This decision defines behavior and ownership only; it does not implement or visually design those controls. It adds no browser permission. Performance optimization remains separately authorized work only after retained evidence attributes a meaningful delay to a specific stage. Text Quick Create and Image Quick Create are future product feedback only; their shortcut, selection, permission, and Image acquisition semantics are outside Decision 59.
+
 ## Rationale
 
 These decisions keep the project focused on the long term and reduce the risk of overengineering in the early stages.
