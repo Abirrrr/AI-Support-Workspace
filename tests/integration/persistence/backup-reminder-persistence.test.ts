@@ -51,6 +51,6 @@ describe('local backup reminder persistence', () => {
       status: 'current',
     });
     expect(database.verno).toBe(DATABASE_VERSION);
-    expect(DATABASE_VERSION).toBe(6);
+    expect(DATABASE_VERSION).toBe(7);
   });
 });

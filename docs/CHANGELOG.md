@@ -1,5 +1,19 @@
 # Changelog
 
+### M15-E.2 — Automatic Paste Diagnostics Closeout Synchronization (2026-10-03)
+
+- Recorded Principal source review PASS, M15-E.1 correction review PASS, and real-Chrome/manual validation PASS. M15-E and M15-E.1 are **COMPLETE / PRINCIPAL-APPROVED**, remain unstaged, and have not been committed or pushed. No M15-F or later task is active.
+- Recorded the accepted manual matrix: diagnostics default OFF; Enable and persistence across reload; automatic Text/Image paste; no noticeable delivery regression; JSON export and exact-field/privacy inspection; Disable preserving retained records while stopping new records; Clear preserving enablement; clipboard-only exclusion; Backup export exclusion; and Backup restore preservation of diagnostics state/records. The final JSON contained only approved v1 record/timing fields and no prohibited content or metadata. These are Principal-supplied results, not new browser runs or measured latency claims.
+- Documentation Impact Review: synchronized Project State, Testing Strategy, Changelog, and stale status summaries in Backlog and Architecture. Architecture status wording only changed; Decision 59, runtime source, tests, Backup contracts, native source/protocols, permissions, and dependencies remain unchanged. Protected M14-Q evidence, desktop.ini files, and all review artifacts remain preserved.
+
+### M15-E — Automatic Paste Diagnostics Implementation (2026-10-03)
+
+- Implemented Decision 59 end to end: an exact strict v1 record/export contract with an independently frozen 26-value failure-code union and explicit live mapping; off-by-default persistent enablement; additive Dexie v7 diagnostics state/record stores; atomic 30-day/2,000-record append/prune; deterministic export ordering; and record-only Clear behavior.
+- Added terminal-only, best-effort observation to the existing automatic Text/Image paste state machine. Clipboard-only mode and disabled diagnostics produce no record; eligible automatic attempts produce at most one safe terminal record; owner-local service-worker/content-frame timings remain bounded; recorder construction/write/prune failures cannot alter delivery, feedback, authorization, or native input behavior.
+- Added minimal Options controls for Enable/Disable, explicit local Export Diagnostics, and Clear Diagnostics. Export uses strict `ai-support-workspace-automatic-paste-diagnostics` JSON and a permission-free Blob/object-URL download. No viewer, upload, network path, telemetry, permission, dependency, native source/protocol, performance optimization, Quick Create, or AI Workspace/model-discovery behavior was added.
+- Kept Backup at v7. Diagnostics are absent from Backup snapshots/DTOs/files, restore leaves diagnostics state and records untouched, and the Backup parser rejects the diagnostics format. Automated contract, persistence/migration, retention, management/UI/export, runtime outcome/isolation, Backup, and regression coverage passes; Principal source review, M15-E.1 correction review, and real-Chrome/manual validation are now PASS, as recorded in M15-E.2; an authorized Git checkpoint remains outstanding.
+- Documentation Impact Review: Project State, Architecture, Database Schema, Product Requirements, Testing Strategy, Backlog, and Changelog updated for implemented status. Decision 59, AI Workspace Architecture, native architecture, Decisions 43–45/58, permissions, dependencies, configuration, and Backup contracts remain unchanged.
+
 ### M15-D.1 — Diagnostics Contract Reconciliation (2026-10-03)
 
 - Froze `AutomaticPasteDiagnosticFailureCodeV1` as the exact 26 safe current delivery-failure literals rather than referencing the live `SnippetDeliveryFailureCode` from persistent/exported schema v1. Later implementation must explicitly map live values; every new, unknown, or unmapped value becomes `null`, with no raw error, stack, metadata, native detail, or implicit v1 expansion.

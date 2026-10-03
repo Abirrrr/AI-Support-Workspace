@@ -8,6 +8,7 @@ import type { ClipboardDeliveryPermission } from '../../extension/snippet-trigge
 import type { WindowsImageClipboardCapability } from '../../extension/snippet-trigger/native-clipboard-capability';
 import type { NativeClipboardCapabilityStatus } from '../../application/snippet/image-clipboard-transport';
 import type { SnippetPasteMode } from '../../domain/settings';
+import type { AutomaticPasteDiagnosticsApplication } from '../../extension/options/automatic-paste-diagnostics-client';
 
 const LOAD_FAILURE_MESSAGE = "Couldn't load settings. Reload and try again.";
 const SAVE_FAILURE_MESSAGE = "Couldn't save settings. Try again.";
@@ -17,6 +18,7 @@ interface SettingsViewProps {
   settings: SettingsApplication;
   clipboardDelivery?: ClipboardDeliveryPermission | undefined;
   windowsImageClipboard?: WindowsImageClipboardCapability | undefined;
+  automaticPasteDiagnostics?: AutomaticPasteDiagnosticsApplication | undefined;
 }
 
 interface Feedback {
@@ -28,6 +30,7 @@ export function SettingsView({
   settings,
   clipboardDelivery,
   windowsImageClipboard,
+  automaticPasteDiagnostics,
 }: SettingsViewProps) {
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'failed'>(
     'loading',
@@ -51,6 +54,12 @@ export function SettingsView({
   const [windowsImageState, setWindowsImageState] = useState<
     NativeClipboardCapabilityStatus | 'checking' | 'status-unavailable'
   >(windowsImageClipboard === undefined ? 'status-unavailable' : 'checking');
+  const [diagnosticsState, setDiagnosticsState] = useState<
+    'loading' | 'disabled' | 'enabled' | 'failed'
+  >(automaticPasteDiagnostics === undefined ? 'failed' : 'loading');
+  const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
+  const [diagnosticsFeedback, setDiagnosticsFeedback] =
+    useState<Feedback | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -107,6 +116,86 @@ export function SettingsView({
       active = false;
     };
   }, [windowsImageClipboard]);
+
+  useEffect(() => {
+    if (automaticPasteDiagnostics === undefined) return;
+    let active = true;
+    void automaticPasteDiagnostics.loadEnabled().then(
+      (enabled) => {
+        if (active) setDiagnosticsState(enabled ? 'enabled' : 'disabled');
+      },
+      () => {
+        if (active) setDiagnosticsState('failed');
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [automaticPasteDiagnostics]);
+
+  async function setDiagnosticsEnabled(enabled: boolean) {
+    if (automaticPasteDiagnostics === undefined || diagnosticsBusy) return;
+    setDiagnosticsBusy(true);
+    setDiagnosticsFeedback(null);
+    try {
+      const saved = await automaticPasteDiagnostics.setEnabled(enabled);
+      setDiagnosticsState(saved ? 'enabled' : 'disabled');
+      setDiagnosticsFeedback({
+        kind: 'success',
+        message: saved
+          ? 'Automatic Paste Diagnostics enabled.'
+          : 'Automatic Paste Diagnostics disabled. Retained records were preserved.',
+      });
+    } catch {
+      setDiagnosticsFeedback({
+        kind: 'error',
+        message: "Couldn't update Automatic Paste Diagnostics. Try again.",
+      });
+    } finally {
+      setDiagnosticsBusy(false);
+    }
+  }
+
+  async function exportDiagnostics() {
+    if (automaticPasteDiagnostics === undefined || diagnosticsBusy) return;
+    setDiagnosticsBusy(true);
+    setDiagnosticsFeedback(null);
+    try {
+      await automaticPasteDiagnostics.exportDiagnostics();
+      setDiagnosticsFeedback({
+        kind: 'success',
+        message: 'Automatic Paste Diagnostics exported.',
+      });
+    } catch {
+      setDiagnosticsFeedback({
+        kind: 'error',
+        message:
+          "Couldn't export Automatic Paste Diagnostics. No file was created.",
+      });
+    } finally {
+      setDiagnosticsBusy(false);
+    }
+  }
+
+  async function clearDiagnostics() {
+    if (automaticPasteDiagnostics === undefined || diagnosticsBusy) return;
+    setDiagnosticsBusy(true);
+    setDiagnosticsFeedback(null);
+    try {
+      await automaticPasteDiagnostics.clearDiagnostics();
+      setDiagnosticsFeedback({
+        kind: 'success',
+        message: 'Automatic Paste Diagnostics records cleared.',
+      });
+    } catch {
+      setDiagnosticsFeedback({
+        kind: 'error',
+        message: "Couldn't clear Automatic Paste Diagnostics. Try again.",
+      });
+    } finally {
+      setDiagnosticsBusy(false);
+    }
+  }
 
   async function enableClipboardDelivery() {
     if (clipboardDelivery === undefined || clipboardState !== 'disabled') {
@@ -401,6 +490,83 @@ export function SettingsView({
               Check companion again
             </button>
           ) : null}
+        </section>
+      )}
+
+      {automaticPasteDiagnostics === undefined ? null : (
+        <section
+          aria-labelledby="automatic-paste-diagnostics-heading"
+          className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <h3
+            className="text-base font-semibold text-slate-950"
+            id="automatic-paste-diagnostics-heading"
+          >
+            Automatic Paste Diagnostics
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Locally records bounded, content-free automatic-paste outcomes and
+            timings. Diagnostics are off by default and are not included in
+            backups.
+          </p>
+          <p aria-live="polite" className="mt-4 text-sm font-medium">
+            {diagnosticsState === 'loading'
+              ? 'Loading diagnostics statusâ€¦'
+              : diagnosticsState === 'enabled'
+                ? 'Diagnostics enabled'
+                : diagnosticsState === 'disabled'
+                  ? 'Diagnostics disabled'
+                  : 'Diagnostics status unavailable'}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={
+                diagnosticsBusy ||
+                (diagnosticsState !== 'enabled' &&
+                  diagnosticsState !== 'disabled')
+              }
+              onClick={() =>
+                void setDiagnosticsEnabled(diagnosticsState !== 'enabled')
+              }
+              type="button"
+            >
+              {diagnosticsState === 'enabled'
+                ? 'Disable Diagnostics'
+                : 'Enable Diagnostics'}
+            </button>
+            <button
+              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={diagnosticsBusy || diagnosticsState === 'loading'}
+              onClick={() => void exportDiagnostics()}
+              type="button"
+            >
+              Export Diagnostics
+            </button>
+            <button
+              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={diagnosticsBusy || diagnosticsState === 'loading'}
+              onClick={() => void clearDiagnostics()}
+              type="button"
+            >
+              Clear Diagnostics
+            </button>
+          </div>
+          {diagnosticsFeedback === null ? null : (
+            <p
+              aria-live={
+                diagnosticsFeedback.kind === 'error' ? 'assertive' : 'polite'
+              }
+              className={`mt-3 text-sm ${
+                diagnosticsFeedback.kind === 'error'
+                  ? 'text-red-700'
+                  : 'text-emerald-700'
+              }`}
+              role={diagnosticsFeedback.kind === 'error' ? 'alert' : 'status'}
+            >
+              {diagnosticsFeedback.message}
+            </p>
+          )}
         </section>
       )}
 

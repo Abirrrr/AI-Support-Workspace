@@ -9,9 +9,13 @@ import type { SnippetUsageStatsRecord } from './snippet-usage-stats-record';
 import type { SnippetGeneratedMetadataRecord } from './snippet-generated-metadata-record';
 import type { AutomaticBackupStateRecord } from './automatic-backup-state-record';
 import { GLOBAL_SETTINGS_ID } from './settings-record';
+import type {
+  AutomaticPasteDiagnosticRecord,
+  AutomaticPasteDiagnosticsStateRecord,
+} from './automatic-paste-diagnostics-record';
 
 export const DATABASE_NAME = 'ai-support-workspace';
-export const DATABASE_VERSION = 6;
+export const DATABASE_VERSION = 7;
 
 export interface DatabaseConstructionOptions {
   databaseName?: string;
@@ -52,6 +56,14 @@ export class AiSupportWorkspaceDatabase extends Dexie {
     string
   >;
   readonly automaticBackupState!: Table<AutomaticBackupStateRecord, string>;
+  readonly automaticPasteDiagnosticsState!: Table<
+    AutomaticPasteDiagnosticsStateRecord,
+    string
+  >;
+  readonly automaticPasteDiagnosticRecords!: Table<
+    AutomaticPasteDiagnosticRecord,
+    string
+  >;
 
   constructor(options: DatabaseConstructionOptions = {}) {
     super(options.databaseName ?? DATABASE_NAME, getDexieOptions(options));
@@ -95,7 +107,7 @@ export class AiSupportWorkspaceDatabase extends Dexie {
       snippetEntries: 'id, createdAt, &trigger',
       snippetAssets: 'id, snippetId, createdAt',
     });
-    this.version(DATABASE_VERSION)
+    this.version(6)
       .stores({
         knowledgeEntries: 'id, createdAt',
         settings: 'id',
@@ -118,6 +130,17 @@ export class AiSupportWorkspaceDatabase extends Dexie {
           });
         }
       });
+    this.version(DATABASE_VERSION).stores({
+      knowledgeEntries: 'id, createdAt',
+      settings: 'id',
+      snippetEntries: 'id, createdAt, &trigger',
+      snippetAssets: 'id, snippetId, createdAt',
+      snippetUsageStats: 'snippetId, lastUsedAt',
+      snippetGeneratedMetadata: 'snippetId, generatedAt',
+      automaticBackupState: 'id',
+      automaticPasteDiagnosticsState: 'id',
+      automaticPasteDiagnosticRecords: 'id, occurredAt, [occurredAt+id]',
+    });
 
     this.knowledgeEntries = this.table('knowledgeEntries');
     this.settings = this.table('settings');
@@ -126,6 +149,12 @@ export class AiSupportWorkspaceDatabase extends Dexie {
     this.snippetUsageStats = this.table('snippetUsageStats');
     this.snippetGeneratedMetadata = this.table('snippetGeneratedMetadata');
     this.automaticBackupState = this.table('automaticBackupState');
+    this.automaticPasteDiagnosticsState = this.table(
+      'automaticPasteDiagnosticsState',
+    );
+    this.automaticPasteDiagnosticRecords = this.table(
+      'automaticPasteDiagnosticRecords',
+    );
   }
 }
 

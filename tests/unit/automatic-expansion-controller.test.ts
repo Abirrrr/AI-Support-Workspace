@@ -35,7 +35,11 @@ function automaticCache(kind: 'text' | 'image') {
   return cache;
 }
 
-function createHarness(kind: 'text' | 'image' = 'text', mountNotice = false) {
+function createHarness(
+  kind: 'text' | 'image' = 'text',
+  mountNotice = false,
+  now: () => number = () => performance.now(),
+) {
   const activation = deferred<unknown>();
   const requester: SnippetDeliveryRequester = {
     requestDelivery: vi.fn((message) =>
@@ -73,6 +77,7 @@ function createHarness(kind: 'text' | 'image' = 'text', mountNotice = false) {
       () => 'request-1',
       activationTrace,
       postCleanupTrace,
+      now,
     ),
   };
 }
@@ -148,6 +153,7 @@ describe('automatic expansion finalization', () => {
         requestId: 'request-1',
         authorizationId,
         editorState: 'ready',
+        triggerCleanupAndRevalidationMs: expect.any(Number),
       });
       expect(harness.feedback.show).toHaveBeenCalledWith(
         'Paste sent',
@@ -206,6 +212,75 @@ describe('automatic expansion finalization', () => {
       }),
     );
   });
+
+  it('measures cleanup and immediate revalidation only with the content-frame clock', async () => {
+    const times = [10, 24];
+    const harness = createHarness('text', false, () => times.shift() as number);
+    activate(harness.controller);
+    harness.activation.resolve({
+      type: 'snippet-trigger-activation-result',
+      requestId: 'request-1',
+      outcome: 'automatic-ready',
+      kind: 'text',
+      authorizationId,
+    });
+    await flushDelivery();
+
+    expect(harness.requester.requestDelivery).toHaveBeenLastCalledWith(
+      expect.objectContaining({ triggerCleanupAndRevalidationMs: 14 }),
+    );
+  });
+
+  it.each([
+    ['start', 'throw'],
+    ['end', 'throw'],
+    ['start', 'nan'],
+    ['end', 'nan'],
+    ['start', 'infinite'],
+    ['end', 'infinite'],
+    ['start', 'negative'],
+    ['end', 'negative'],
+  ] as const)(
+    'keeps cleanup and finalization ready when the content clock %s is %s',
+    async (boundary, failure) => {
+      let reads = 0;
+      const harness = createHarness('text', false, () => {
+        if (++reads === (boundary === 'start' ? 1 : 2)) {
+          if (failure === 'throw')
+            throw new Error('optional clock unavailable');
+          return failure === 'nan'
+            ? Number.NaN
+            : failure === 'infinite'
+              ? Number.POSITIVE_INFINITY
+              : -1;
+        }
+        return 10;
+      });
+      const editor = activate(harness.controller);
+      harness.activation.resolve({
+        type: 'snippet-trigger-activation-result',
+        requestId: 'request-1',
+        outcome: 'automatic-ready',
+        kind: 'text',
+        authorizationId,
+      });
+      await flushDelivery();
+
+      expect(editor.value).toBe('');
+      expect(harness.requester.requestDelivery).toHaveBeenCalledTimes(2);
+      expect(harness.requester.requestDelivery).toHaveBeenLastCalledWith({
+        type: 'snippet-automatic-paste-finalize',
+        requestId: 'request-1',
+        authorizationId,
+        editorState: 'ready',
+        triggerCleanupAndRevalidationMs: null,
+      });
+      expect(harness.feedback.show).toHaveBeenCalledExactlyOnceWith(
+        'Paste sent',
+        'success',
+      );
+    },
+  );
 
   it('reports cleanup failure and preserves the stale trigger without paste authority', async () => {
     const harness = createHarness();

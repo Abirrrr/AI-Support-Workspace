@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { SettingsRepository } from '../../src/application/persistence/settings-repository';
+import type { AutomaticPasteDiagnosticsRepository } from '../../src/application/persistence/automatic-paste-diagnostics-repository';
+import { AutomaticPasteDiagnosticsService } from '../../src/application/snippet/automatic-paste-diagnostics';
 import type {
   AutomaticPasteTransport,
   NativePasteAttemptDiagnostic,
@@ -10,6 +12,7 @@ import type { ClipboardTransport } from '../../src/extension/snippet-trigger/cli
 import {
   SnippetDeliveryCoordinator,
   type AutomaticPasteResultDiagnostic,
+  type AutomaticPasteDiagnosticsRecorder,
   type AutomaticPasteTraceDiagnostic,
   type SnippetDeliveryBrowserSafetyApi,
   type SnippetDeliveryMessageSender,
@@ -52,6 +55,10 @@ function createSubject(
     pasteError?: Error;
     pasteResult?: Awaited<ReturnType<AutomaticPasteTransport['requestPaste']>>;
     pasteDiagnostic?: NativePasteAttemptDiagnostic;
+    diagnosticsEnabled?: boolean;
+    diagnosticsThrow?: boolean;
+    diagnosticsRecorder?: AutomaticPasteDiagnosticsRecorder;
+    now?: () => number;
   } = {},
 ) {
   const planner = {
@@ -107,6 +114,16 @@ function createSubject(
   const timings: SnippetDeliveryTimingDiagnostic[] = [];
   const automaticPasteDiagnostics: AutomaticPasteResultDiagnostic[] = [];
   const automaticPasteTrace: AutomaticPasteTraceDiagnostic[] = [];
+  const terminalRecords: unknown[] = [];
+  const diagnosticsRecorder = {
+    isRecordingEnabled: vi.fn(() => options.diagnosticsEnabled === true),
+    recordEligibleTerminal: vi.fn((record: unknown) => {
+      terminalRecords.push(record);
+      if (options.diagnosticsThrow === true) {
+        throw new Error('diagnostics persistence unavailable');
+      }
+    }),
+  };
   let clock = 0;
   const coordinator = new SnippetDeliveryCoordinator(
     planner,
@@ -120,7 +137,11 @@ function createSubject(
     (diagnostic) => automaticPasteTrace.push(diagnostic),
     () => authorizationId,
     (diagnostic) => timings.push(diagnostic),
-    () => ++clock,
+    options.now ?? (() => ++clock),
+    undefined,
+    undefined,
+    undefined,
+    options.diagnosticsRecorder ?? diagnosticsRecorder,
   );
   return {
     coordinator,
@@ -128,13 +149,214 @@ function createSubject(
     clipboard,
     automaticPaste,
     browser,
+    settings,
     timings,
     automaticPasteDiagnostics,
     automaticPasteTrace,
+    diagnosticsRecorder,
+    terminalRecords,
   };
 }
 
 describe('automatic/manual delivery orchestration', () => {
+  it.each([
+    [1, 'totalObservedDelivery'],
+    [3, 'clipboardPreparation'],
+    [6, 'clipboardWrite'],
+    [9, 'browserSafetyPreparation'],
+    [11, 'nativeContextCaptureRoundtrip'],
+    [14, 'nativePasteRequestRoundtrip'],
+    [16, 'totalObservedDelivery'],
+  ] as const)(
+    'isolates diagnostics-only clock read %s for %s',
+    async (failingRead, timing) => {
+      let reads = 0;
+      const subject = createSubject({
+        diagnosticsEnabled: true,
+        now: () => {
+          if (++reads === failingRead)
+            throw new Error('optional clock unavailable');
+          return reads;
+        },
+      });
+      await expect(
+        subject.coordinator.handleMessage(request, sender),
+      ).resolves.toMatchObject({ outcome: 'automatic-ready' });
+      const finalize = {
+        type: 'snippet-automatic-paste-finalize' as const,
+        requestId: request.requestId,
+        authorizationId,
+        editorState: 'ready' as const,
+        triggerCleanupAndRevalidationMs: 4,
+      };
+      await expect(
+        subject.coordinator.handleMessage(finalize, sender),
+      ).resolves.toMatchObject({ result: 'paste-issued' });
+      await subject.coordinator.handleMessage(finalize, sender);
+      expect(subject.terminalRecords).toEqual([
+        expect.objectContaining({
+          result: 'paste-issued',
+          timingsMs: expect.objectContaining({ [timing]: null }),
+        }),
+      ]);
+      expect(subject.clipboard.write).toHaveBeenCalledOnce();
+      expect(subject.automaticPaste.capturePasteContext).toHaveBeenCalledOnce();
+      expect(subject.automaticPaste.requestPaste).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each([
+    [true, false, 'automatic', 1],
+    [false, true, 'automatic', 0],
+    [false, false, 'automatic', 0],
+    [true, false, 'clipboard-only', 0],
+  ] as const)(
+    'freezes receipt eligibility %s -> %s in %s mode (%s terminal attempts)',
+    async (enabledAtReceipt, enabledBeforeFinalize, mode, expectedRecords) => {
+      const repository: AutomaticPasteDiagnosticsRepository = {
+        isEnabled: async () => false,
+        setEnabled: async () => undefined,
+        appendAndPrune: vi.fn(async () => undefined),
+        pruneAndList: async () => [],
+        clearRecords: async () => undefined,
+      };
+      const service = new AutomaticPasteDiagnosticsService(
+        repository,
+        () => new Date('2026-10-03T00:00:00.000Z'),
+      );
+      await service.setEnabled(enabledAtReceipt);
+      const recordEligibleTerminal = vi.spyOn(
+        service,
+        'recordEligibleTerminal',
+      );
+      const subject = createSubject({ mode, diagnosticsRecorder: service });
+      // Change enablement while authoritative mode resolution is still pending.
+      const settings = await subject.settings.load();
+      let resolveSettings!: (value: typeof settings) => void;
+      vi.mocked(subject.settings.load).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveSettings = resolve;
+          }),
+      );
+      const activation = subject.coordinator.handleMessage(request, sender);
+      await service.setEnabled(enabledBeforeFinalize);
+      resolveSettings(settings);
+      await expect(activation).resolves.toMatchObject({
+        outcome: mode === 'automatic' ? 'automatic-ready' : 'copied',
+      });
+      if (mode === 'automatic') {
+        const finalize = {
+          type: 'snippet-automatic-paste-finalize' as const,
+          requestId: request.requestId,
+          authorizationId,
+          editorState: 'ready' as const,
+          triggerCleanupAndRevalidationMs: null,
+        };
+        await expect(
+          subject.coordinator.handleMessage(finalize, sender),
+        ).resolves.toMatchObject({ result: 'paste-issued' });
+        await subject.coordinator.handleMessage(finalize, sender);
+        expect(
+          subject.automaticPaste.capturePasteContext,
+        ).toHaveBeenCalledOnce();
+        expect(subject.automaticPaste.requestPaste).toHaveBeenCalledOnce();
+      }
+      expect(recordEligibleTerminal).toHaveBeenCalledTimes(expectedRecords);
+      expect(repository.appendAndPrune).toHaveBeenCalledTimes(expectedRecords);
+      expect(subject.clipboard.write).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each([
+    [true, false, 1],
+    [false, true, 0],
+  ] as const)(
+    'preserves eligibility %s -> %s after native capture (%s records)',
+    async (enabledAtReceipt, enabledBeforeFinalize, expectedRecords) => {
+      const options = { diagnosticsEnabled: enabledAtReceipt };
+      const subject = createSubject(options);
+      await expect(
+        subject.coordinator.handleMessage(request, sender),
+      ).resolves.toMatchObject({ outcome: 'automatic-ready' });
+      options.diagnosticsEnabled = enabledBeforeFinalize;
+      const finalize = {
+        type: 'snippet-automatic-paste-finalize' as const,
+        requestId: request.requestId,
+        authorizationId,
+        editorState: 'ready' as const,
+        triggerCleanupAndRevalidationMs: null,
+      };
+      await expect(
+        subject.coordinator.handleMessage(finalize, sender),
+      ).resolves.toMatchObject({ result: 'paste-issued' });
+      await subject.coordinator.handleMessage(finalize, sender);
+      expect(subject.terminalRecords).toHaveLength(expectedRecords);
+      expect(subject.automaticPaste.requestPaste).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(['throw', 'nan', 'infinite', 'negative'] as const)(
+    'isolates an unusable native-capture diagnostic start clock (%s)',
+    async (failure) => {
+      let clock = 0;
+      let failed = false;
+      const subject = createSubject({
+        diagnosticsEnabled: true,
+        now: () => {
+          if (
+            !failed &&
+            subject.automaticPasteTrace.at(-1)?.phase ===
+              'native-context-capture-started'
+          ) {
+            failed = true;
+            if (failure === 'throw')
+              throw new Error('optional clock unavailable');
+            return failure === 'nan'
+              ? Number.NaN
+              : failure === 'infinite'
+                ? Number.POSITIVE_INFINITY
+                : -1;
+          }
+          return ++clock;
+        },
+      });
+      await expect(
+        subject.coordinator.handleMessage(request, sender),
+      ).resolves.toMatchObject({ outcome: 'automatic-ready' });
+      const finalize = {
+        type: 'snippet-automatic-paste-finalize' as const,
+        requestId: request.requestId,
+        authorizationId,
+        editorState: 'ready' as const,
+        triggerCleanupAndRevalidationMs: null,
+      };
+      await expect(
+        subject.coordinator.handleMessage(finalize, sender),
+      ).resolves.toMatchObject({ result: 'paste-issued' });
+      await subject.coordinator.handleMessage(finalize, sender);
+      expect(failed).toBe(true);
+      expect(subject.clipboard.write).toHaveBeenCalledOnce();
+      expect(
+        subject.automaticPaste.capturePasteContext,
+      ).toHaveBeenCalledExactlyOnceWith(authorizationId);
+      expect(
+        subject.automaticPaste.requestPaste,
+      ).toHaveBeenCalledExactlyOnceWith({
+        activationId: authorizationId,
+        ...context,
+      });
+      expect(subject.terminalRecords).toEqual([
+        expect.objectContaining({
+          result: 'paste-issued',
+          terminalStage: 'complete',
+          timingsMs: expect.objectContaining({
+            nativeContextCaptureRoundtrip: null,
+          }),
+        }),
+      ]);
+    },
+  );
   it('manual Text mode copies and stops without automatic transport or browser checks', async () => {
     const subject = createSubject({ mode: 'clipboard-only' });
     await expect(
@@ -187,6 +409,7 @@ describe('automatic/manual delivery orchestration', () => {
             requestId: request.requestId,
             authorizationId,
             editorState: 'ready',
+            triggerCleanupAndRevalidationMs: null,
           },
           sender,
         ),
@@ -260,6 +483,7 @@ describe('automatic/manual delivery orchestration', () => {
             requestId: request.requestId,
             authorizationId,
             editorState: 'ready',
+            triggerCleanupAndRevalidationMs: null,
           },
           sender,
         ),
@@ -295,6 +519,7 @@ describe('automatic/manual delivery orchestration', () => {
           requestId: request.requestId,
           authorizationId,
           editorState: 'ready',
+          triggerCleanupAndRevalidationMs: null,
         },
         sender,
       ),
@@ -374,6 +599,7 @@ describe('automatic/manual delivery orchestration', () => {
             requestId: request.requestId,
             authorizationId,
             editorState,
+            triggerCleanupAndRevalidationMs: null,
           },
           sender,
         ),
@@ -400,6 +626,7 @@ describe('automatic/manual delivery orchestration', () => {
           requestId: request.requestId,
           authorizationId,
           editorState: 'ready',
+          triggerCleanupAndRevalidationMs: null,
         },
         { ...sender, documentId: 'different-document' },
       ),
@@ -424,6 +651,7 @@ describe('automatic/manual delivery orchestration', () => {
             requestId: request.requestId,
             authorizationId,
             editorState: 'ready',
+            triggerCleanupAndRevalidationMs: null,
           },
           changedSender,
         ),
@@ -456,6 +684,7 @@ describe('automatic/manual delivery orchestration', () => {
             requestId: request.requestId,
             authorizationId,
             editorState: 'ready',
+            triggerCleanupAndRevalidationMs: null,
           },
           sender,
         ),
@@ -490,6 +719,7 @@ describe('automatic/manual delivery orchestration', () => {
           requestId: request.requestId,
           authorizationId,
           editorState: 'ready',
+          triggerCleanupAndRevalidationMs: null,
         },
         sender,
       ),
@@ -511,6 +741,7 @@ describe('automatic/manual delivery orchestration', () => {
           requestId: request.requestId,
           authorizationId,
           editorState: 'ready',
+          triggerCleanupAndRevalidationMs: null,
         },
         sender,
       ),
@@ -529,10 +760,290 @@ describe('automatic/manual delivery orchestration', () => {
           requestId: request.requestId,
           authorizationId,
           editorState: 'ready',
+          triggerCleanupAndRevalidationMs: null,
         },
         sender,
       ),
     ).resolves.toBeUndefined();
     expect(recreated.automaticPaste.requestPaste).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['paste-issued', 'paste-issued', 'complete', null],
+    [
+      'clipboard-only',
+      'native-unavailable',
+      'native-response',
+      'native-capability',
+    ],
+    [
+      'not-foreground',
+      'not-foreground',
+      'native-foreground-validation',
+      'native-foreground-context',
+    ],
+    [
+      'unsafe-focus',
+      'unsafe-focus',
+      'native-foreground-validation',
+      'native-foreground-context',
+    ],
+    [
+      'clipboard-changed',
+      'clipboard-changed',
+      'native-clipboard-validation',
+      'clipboard-sequence',
+    ],
+    [
+      'unsafe-keyboard-state',
+      'unsafe-keyboard-state',
+      'native-keyboard-validation',
+      'keyboard-modifiers',
+    ],
+    ['busy', 'busy', 'service-worker-coordination', 'delivery-concurrency'],
+    [
+      'native-unavailable',
+      'native-unavailable',
+      'native-response',
+      'native-capability',
+    ],
+    [
+      'input-injection-failed',
+      'input-injection-failed',
+      'input-injection',
+      'input-injection',
+    ],
+    [
+      'indeterminate',
+      'indeterminate',
+      'native-response',
+      'response-correlation',
+    ],
+  ] as const)(
+    'records exactly one bounded terminal observation for native result %s',
+    async (pasteResult, result, terminalStage, safetyCategory) => {
+      const subject = createSubject({
+        diagnosticsEnabled: true,
+        pasteResult,
+      });
+      await subject.coordinator.handleMessage(request, sender);
+      await subject.coordinator.handleMessage(
+        {
+          type: 'snippet-automatic-paste-finalize',
+          requestId: request.requestId,
+          authorizationId,
+          editorState: 'ready',
+          triggerCleanupAndRevalidationMs: 4,
+        },
+        sender,
+      );
+
+      expect(
+        subject.diagnosticsRecorder.recordEligibleTerminal,
+      ).toHaveBeenCalledOnce();
+      expect(subject.terminalRecords[0]).toMatchObject({
+        kind: 'text',
+        result,
+        terminalStage,
+        safetyCategory,
+        failureCode: null,
+        timingsMs: {
+          triggerCleanupAndRevalidation: 4,
+        },
+      });
+    },
+  );
+
+  it('records a pre-result automatic clipboard failure without changing its delivery response', async () => {
+    const subject = createSubject({
+      diagnosticsEnabled: true,
+      clipboardError: new Error('write unavailable'),
+    });
+
+    await expect(
+      subject.coordinator.handleMessage(request, sender),
+    ).resolves.toMatchObject({
+      outcome: 'failed',
+      code: 'unexpected-delivery-failure',
+    });
+    expect(subject.terminalRecords).toEqual([
+      expect.objectContaining({
+        result: 'delivery-failed',
+        terminalStage: 'clipboard-write',
+        failureCode: 'unexpected-delivery-failure',
+      }),
+    ]);
+  });
+
+  it.each([
+    ['unsafe-focus', 'editor-revalidation', 'editor-focus-selection'],
+    ['cleanup-failed', 'trigger-cleanup', 'editor-cleanup-state'],
+  ] as const)(
+    'records the content-owned %s terminal classification once',
+    async (editorState, terminalStage, safetyCategory) => {
+      const subject = createSubject({ diagnosticsEnabled: true });
+      await subject.coordinator.handleMessage(request, sender);
+      await subject.coordinator.handleMessage(
+        {
+          type: 'snippet-automatic-paste-finalize',
+          requestId: request.requestId,
+          authorizationId,
+          editorState,
+          triggerCleanupAndRevalidationMs: 8,
+        },
+        sender,
+      );
+      expect(subject.terminalRecords).toEqual([
+        expect.objectContaining({
+          result: 'unsafe-focus',
+          terminalStage,
+          safetyCategory,
+          timingsMs: expect.objectContaining({
+            triggerCleanupAndRevalidation: 8,
+          }),
+        }),
+      ]);
+      expect(subject.automaticPaste.requestPaste).not.toHaveBeenCalled();
+    },
+  );
+
+  it('records browser precheck and native capture fallbacks once each', async () => {
+    const browserFallback = createSubject({
+      diagnosticsEnabled: true,
+      browser: { active: false },
+    });
+    await browserFallback.coordinator.handleMessage(request, sender);
+    expect(browserFallback.terminalRecords).toEqual([
+      expect.objectContaining({
+        result: 'not-foreground',
+        terminalStage: 'browser-safety-validation',
+        safetyCategory: 'browser-tab-window',
+      }),
+    ]);
+
+    const nativeFallback = createSubject({
+      diagnosticsEnabled: true,
+      captureError: new Error('host unavailable'),
+    });
+    await nativeFallback.coordinator.handleMessage(request, sender);
+    expect(nativeFallback.terminalRecords).toEqual([
+      expect.objectContaining({
+        result: 'native-unavailable',
+        terminalStage: 'native-context-capture',
+        safetyCategory: 'native-capability',
+      }),
+    ]);
+  });
+
+  it('records a competing automatic activation as busy without queueing or disturbing the first attempt', async () => {
+    const subject = createSubject({ diagnosticsEnabled: true });
+    await subject.coordinator.handleMessage(request, sender);
+    await subject.coordinator.handleMessage(
+      { ...request, requestId: 'request-2' },
+      sender,
+    );
+    expect(subject.terminalRecords).toEqual([
+      expect.objectContaining({
+        result: 'busy',
+        terminalStage: 'service-worker-coordination',
+        safetyCategory: 'delivery-concurrency',
+      }),
+    ]);
+    expect(subject.clipboard.write).toHaveBeenCalledOnce();
+  });
+
+  it('records final browser revalidation failure without calling native paste', async () => {
+    const browser = { active: true };
+    const subject = createSubject({ diagnosticsEnabled: true, browser });
+    await subject.coordinator.handleMessage(request, sender);
+    browser.active = false;
+    await subject.coordinator.handleMessage(
+      {
+        type: 'snippet-automatic-paste-finalize',
+        requestId: request.requestId,
+        authorizationId,
+        editorState: 'ready',
+        triggerCleanupAndRevalidationMs: 3,
+      },
+      sender,
+    );
+    expect(subject.terminalRecords).toEqual([
+      expect.objectContaining({
+        result: 'not-foreground',
+        terminalStage: 'browser-safety-validation',
+        safetyCategory: 'browser-tab-window',
+      }),
+    ]);
+    expect(subject.automaticPaste.requestPaste).not.toHaveBeenCalled();
+  });
+
+  it('records an unanswered accepted finalize as one indeterminate timeout without replay', async () => {
+    vi.useFakeTimers();
+    try {
+      const subject = createSubject({ diagnosticsEnabled: true });
+      await subject.coordinator.handleMessage(request, sender);
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(subject.terminalRecords).toEqual([
+        expect.objectContaining({
+          result: 'indeterminate',
+          terminalStage: 'service-worker-coordination',
+          safetyCategory: 'response-correlation',
+        }),
+      ]);
+      expect(subject.automaticPaste.requestPaste).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('records nothing for clipboard-only mode or disabled diagnostics', async () => {
+    const clipboardOnly = createSubject({
+      mode: 'clipboard-only',
+      diagnosticsEnabled: true,
+    });
+    await clipboardOnly.coordinator.handleMessage(request, sender);
+    expect(
+      clipboardOnly.diagnosticsRecorder.recordEligibleTerminal,
+    ).not.toHaveBeenCalled();
+
+    const disabled = createSubject({ diagnosticsEnabled: false });
+    await disabled.coordinator.handleMessage(request, sender);
+    await disabled.coordinator.handleMessage(
+      {
+        type: 'snippet-automatic-paste-finalize',
+        requestId: request.requestId,
+        authorizationId,
+        editorState: 'ready',
+        triggerCleanupAndRevalidationMs: 1,
+      },
+      sender,
+    );
+    expect(
+      disabled.diagnosticsRecorder.recordEligibleTerminal,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('keeps the authoritative result and never retries when terminal recording throws', async () => {
+    const subject = createSubject({
+      diagnosticsEnabled: true,
+      diagnosticsThrow: true,
+    });
+    await subject.coordinator.handleMessage(request, sender);
+    await expect(
+      subject.coordinator.handleMessage(
+        {
+          type: 'snippet-automatic-paste-finalize',
+          requestId: request.requestId,
+          authorizationId,
+          editorState: 'ready',
+          triggerCleanupAndRevalidationMs: 2,
+        },
+        sender,
+      ),
+    ).resolves.toMatchObject({ result: 'paste-issued' });
+    expect(
+      subject.diagnosticsRecorder.recordEligibleTerminal,
+    ).toHaveBeenCalledOnce();
+    expect(subject.automaticPaste.requestPaste).toHaveBeenCalledOnce();
   });
 });

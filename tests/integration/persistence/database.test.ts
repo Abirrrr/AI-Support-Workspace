@@ -32,12 +32,14 @@ describe('local database foundation', () => {
     await deleteIsolatedDatabase(databaseName);
   });
 
-  it('opens version 6 with only the approved tables and indexes', async () => {
+  it('opens version 7 with only the approved tables and indexes', async () => {
     await database.open();
 
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
       'automaticBackupState',
+      'automaticPasteDiagnosticRecords',
+      'automaticPasteDiagnosticsState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
@@ -91,6 +93,25 @@ describe('local database foundation', () => {
       expect.objectContaining({ name: 'generatedAt', unique: false }),
     ]);
     expect(database.automaticBackupState.schema.indexes).toHaveLength(0);
+    expect(database.automaticPasteDiagnosticsState.schema.indexes).toHaveLength(
+      0,
+    );
+    expect(database.automaticPasteDiagnosticRecords.schema.indexes).toEqual([
+      expect.objectContaining({
+        name: 'occurredAt',
+        keyPath: 'occurredAt',
+        compound: false,
+        unique: false,
+      }),
+      expect.objectContaining({
+        name: '[occurredAt+id]',
+        keyPath: ['occurredAt', 'id'],
+        compound: true,
+        unique: false,
+      }),
+    ]);
+    expect(await database.automaticPasteDiagnosticsState.count()).toBe(0);
+    expect(await database.automaticPasteDiagnosticRecords.count()).toBe(0);
   });
 
   it('upgrades version 1 while preserving metadata and wrapping Snippet content', async () => {
@@ -123,7 +144,7 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(6);
+    expect(database.verno).toBe(DATABASE_VERSION);
     expect(await database.knowledgeEntries.toArray()).toEqual([knowledge]);
     expect(await database.snippetEntries.toArray()).toEqual([
       { ...snippet, content: createPlainSnippetContent(snippet.content) },
@@ -131,6 +152,8 @@ describe('local database foundation', () => {
     expect(await database.settings.count()).toBe(0);
     expect(database.tables.map((table) => table.name).sort()).toEqual([
       'automaticBackupState',
+      'automaticPasteDiagnosticRecords',
+      'automaticPasteDiagnosticsState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
@@ -176,7 +199,7 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(6);
+    expect(database.verno).toBe(DATABASE_VERSION);
     expect(await database.snippetEntries.toArray()).toEqual([structured]);
     expect(await database.snippetAssets.count()).toBe(0);
     expect(await database.snippetUsageStats.count()).toBe(0);
@@ -216,7 +239,7 @@ describe('local database foundation', () => {
 
     await database.open();
 
-    expect(database.verno).toBe(6);
+    expect(database.verno).toBe(DATABASE_VERSION);
     expect(await database.snippetEntries.toArray()).toEqual([snippet]);
     expect(await database.settings.toArray()).toEqual([
       {
@@ -233,7 +256,7 @@ describe('local database foundation', () => {
     database.close();
     database = createIsolatedDatabase(databaseName);
     await database.open();
-    expect(database.verno).toBe(6);
+    expect(database.verno).toBe(DATABASE_VERSION);
     expect(await database.snippetEntries.toArray()).toEqual([snippet]);
     expect(await database.snippetUsageStats.count()).toBe(0);
   });

@@ -4,6 +4,7 @@ import { RecordNotFoundError } from '../../../src/application/persistence/errors
 import { DuplicateSnippetTriggerError } from '../../../src/application/snippet/snippet-trigger';
 import {
   DATABASE_NAME,
+  DATABASE_VERSION,
   type AiSupportWorkspaceDatabase,
 } from '../../../src/infrastructure/persistence/database';
 import { DexieSnippetEntryRepository } from '../../../src/infrastructure/persistence/dexie-snippet-entry-repository';
@@ -212,7 +213,7 @@ describe('DexieSnippetEntryRepository', () => {
       ],
     });
 
-    expect(database.verno).toBe(6);
+    expect(database.verno).toBe(DATABASE_VERSION);
     expect(await repository.get(list.id)).toEqual(list);
     expect(await repository.get(image.id)).toEqual(image);
     expect((await database.snippetAssets.get(assetId))?.snippetId).toBe(

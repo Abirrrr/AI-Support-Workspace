@@ -295,6 +295,7 @@ describe('service-worker one-use Snippet usage receipts', () => {
               requestId: request.requestId,
               authorizationId: activation.authorizationId,
               editorState: 'ready',
+              triggerCleanupAndRevalidationMs: null,
             },
             sender,
           ),
@@ -318,6 +319,7 @@ describe('service-worker one-use Snippet usage receipts', () => {
       requestId: request.requestId,
       authorizationId: activation.authorizationId,
       editorState: 'ready',
+      triggerCleanupAndRevalidationMs: null,
     };
     await expect(
       subject.coordinator.handleMessage(finalize, sender),

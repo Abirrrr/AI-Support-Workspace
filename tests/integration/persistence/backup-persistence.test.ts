@@ -331,6 +331,8 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(database.verno).toBe(DATABASE_VERSION);
     expect(database.tables.map(({ name }) => name).sort()).toEqual([
       'automaticBackupState',
+      'automaticPasteDiagnosticRecords',
+      'automaticPasteDiagnosticsState',
       'knowledgeEntries',
       'settings',
       'snippetAssets',
@@ -408,6 +410,50 @@ describe('Dexie backup snapshot and atomic restore', () => {
     expect(new Uint8Array(await restoredAsset.blob.arrayBuffer())).toEqual(
       bytes,
     );
+  });
+
+  it('excludes diagnostics from snapshots and preserves diagnostics state and records across restore', async () => {
+    const diagnosticRecord = {
+      schemaVersion: 1 as const,
+      id: '123e4567-e89b-42d3-a456-426614174111',
+      occurredAt: '2026-08-08T00:00:00.000Z',
+      requestId: '223e4567-e89b-42d3-a456-426614174111',
+      kind: 'text' as const,
+      result: 'paste-issued' as const,
+      terminalStage: 'complete' as const,
+      safetyCategory: null,
+      failureCode: null,
+      timingsMs: {
+        clipboardPreparation: 1,
+        clipboardWrite: 2,
+        browserSafetyPreparation: 3,
+        nativeContextCaptureRoundtrip: 4,
+        triggerCleanupAndRevalidation: 5,
+        nativePasteRequestRoundtrip: 6,
+        totalObservedDelivery: 7,
+      },
+    };
+    await database.automaticPasteDiagnosticsState.add({
+      id: 'global',
+      enabled: true,
+    });
+    await database.automaticPasteDiagnosticRecords.add(diagnosticRecord);
+
+    const snapshot = await new DexieBackupSnapshotReader(
+      database,
+    ).readSnapshot();
+    expect(JSON.stringify(snapshot)).not.toContain('automaticPasteDiagnostic');
+    expect(JSON.stringify(snapshot)).not.toContain(diagnosticRecord.id);
+
+    await new DexieTransactionalBackupRestorePort(database).replaceAll(
+      restoredData,
+    );
+    expect(await database.automaticPasteDiagnosticsState.toArray()).toEqual([
+      { id: 'global', enabled: true },
+    ]);
+    expect(await database.automaticPasteDiagnosticRecords.toArray()).toEqual([
+      diagnosticRecord,
+    ]);
   });
 
   it.each([

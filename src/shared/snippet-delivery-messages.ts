@@ -90,6 +90,7 @@ export interface AutomaticPasteFinalizeMessage {
   readonly requestId: string;
   readonly authorizationId: string;
   readonly editorState: 'ready' | 'unsafe-focus' | 'cleanup-failed';
+  readonly triggerCleanupAndRevalidationMs: number | null;
 }
 
 export interface AutomaticPasteFinalizeResponse {
@@ -243,7 +244,13 @@ export function isAutomaticPasteFinalizeMessage(
 ): value is AutomaticPasteFinalizeMessage {
   return (
     isRecord(value) &&
-    exactKeys(value, ['type', 'requestId', 'authorizationId', 'editorState']) &&
+    exactKeys(value, [
+      'type',
+      'requestId',
+      'authorizationId',
+      'editorState',
+      'triggerCleanupAndRevalidationMs',
+    ]) &&
     value.type === 'snippet-automatic-paste-finalize' &&
     typeof value.requestId === 'string' &&
     value.requestId.length > 0 &&
@@ -251,7 +258,12 @@ export function isAutomaticPasteFinalizeMessage(
     /^[0-9a-f]{32}$/.test(value.authorizationId) &&
     (value.editorState === 'ready' ||
       value.editorState === 'unsafe-focus' ||
-      value.editorState === 'cleanup-failed')
+      value.editorState === 'cleanup-failed') &&
+    (value.triggerCleanupAndRevalidationMs === null ||
+      (typeof value.triggerCleanupAndRevalidationMs === 'number' &&
+        Number.isFinite(value.triggerCleanupAndRevalidationMs) &&
+        value.triggerCleanupAndRevalidationMs >= 0 &&
+        value.triggerCleanupAndRevalidationMs <= 300_000))
   );
 }
 

@@ -31,6 +31,18 @@ import type { SettingsRepository } from '../../application/persistence/settings-
 import type { SnippetPasteMode } from '../../domain/settings';
 import { createNativeClipboardRequestId } from '../../infrastructure/clipboard/native-clipboard-protocol';
 import type { SnippetUsageStatsRepository } from '../../application/persistence/snippet-usage-stats-repository';
+import {
+  mapSnippetDeliveryFailureCodeToDiagnosticV1,
+  readAutomaticPasteDiagnosticClock,
+  type AutomaticPasteDiagnosticTerminalInput,
+} from '../../application/snippet/automatic-paste-diagnostics';
+import {
+  normalizeAutomaticPasteDiagnosticDuration,
+  type AutomaticPasteDiagnosticResultV1,
+  type AutomaticPasteDiagnosticSafetyCategoryV1,
+  type AutomaticPasteDiagnosticTerminalStageV1,
+  type AutomaticPasteDiagnosticTimingsV1,
+} from '../../domain/automatic-paste-diagnostics';
 
 export const SNIPPET_USAGE_RECEIPT_LIFETIME_MS = 30_000;
 
@@ -87,6 +99,29 @@ interface PendingAutomaticPaste {
   readonly sender: TrustedSenderIdentity;
   readonly context: NativePasteContext;
   readonly timeout: ReturnType<typeof setTimeout>;
+  readonly diagnostics?: AutomaticPasteDiagnosticAttempt;
+}
+
+interface MutableAutomaticPasteDiagnosticTimings {
+  clipboardPreparation: number | null;
+  clipboardWrite: number | null;
+  browserSafetyPreparation: number | null;
+  nativeContextCaptureRoundtrip: number | null;
+  triggerCleanupAndRevalidation: number | null;
+  nativePasteRequestRoundtrip: number | null;
+  totalObservedDelivery: number | null;
+}
+
+interface AutomaticPasteDiagnosticAttempt {
+  readonly kind: 'text' | 'image';
+  readonly startedAt: number | undefined;
+  readonly timings: MutableAutomaticPasteDiagnosticTimings;
+  completed: boolean;
+}
+
+export interface AutomaticPasteDiagnosticsRecorder {
+  isRecordingEnabled(): boolean;
+  recordEligibleTerminal(input: AutomaticPasteDiagnosticTerminalInput): void;
 }
 
 interface PendingUsageReceipt {
@@ -264,6 +299,7 @@ export class SnippetDeliveryCoordinator {
     private readonly usageClock: () => Date = () => new Date(),
     private readonly createUsageReceiptId: () => string = () =>
       crypto.randomUUID(),
+    private readonly automaticPasteDiagnostics?: AutomaticPasteDiagnosticsRecorder,
   ) {}
 
   handleMessage(
@@ -286,6 +322,18 @@ export class SnippetDeliveryCoordinator {
     message: TriggerActivationRequestMessage,
     sender: SnippetDeliveryMessageSender,
   ): Promise<TriggerActivationResponseMessage> {
+    let diagnosticAttempt: AutomaticPasteDiagnosticAttempt | undefined;
+    let diagnosticsEnabledAtReceipt = false;
+    let diagnosticStartedAt: number | undefined;
+    try {
+      diagnosticsEnabledAtReceipt =
+        this.automaticPasteDiagnostics?.isRecordingEnabled() === true;
+      if (diagnosticsEnabledAtReceipt) {
+        diagnosticStartedAt = readAutomaticPasteDiagnosticClock(this.now);
+      }
+    } catch {
+      // Diagnostics availability must never change delivery behavior.
+    }
     this.recordAutomaticPasteTrace({
       kind: message.kind,
       requestId: message.requestId,
@@ -302,6 +350,14 @@ export class SnippetDeliveryCoordinator {
         this.reportDiagnostic({ stage, code, kind: message.kind, phase });
       } catch {
         // Diagnostics must never change the fail-safe delivery outcome.
+      }
+      if (diagnosticAttempt !== undefined) {
+        this.finishDiagnosticAttempt(diagnosticAttempt, {
+          result: 'delivery-failed',
+          terminalStage: this.deliveryFailureStage(stage, phase),
+          safetyCategory: null,
+          failureCode: mapSnippetDeliveryFailureCodeToDiagnosticV1(code),
+        });
       }
       return {
         type: 'snippet-trigger-activation-result',
@@ -321,6 +377,12 @@ export class SnippetDeliveryCoordinator {
     const workerPasteMode: SnippetPasteMode =
       persistedPasteMode === 'automatic' ? 'automatic' : 'clipboard-only';
     const automaticMode = workerPasteMode === 'automatic';
+    if (automaticMode && diagnosticsEnabledAtReceipt) {
+      diagnosticAttempt = this.createDiagnosticAttempt(
+        message.kind,
+        diagnosticStartedAt,
+      );
+    }
     this.recordAutomaticPasteTrace({
       kind: message.kind,
       requestId: message.requestId,
@@ -336,6 +398,14 @@ export class SnippetDeliveryCoordinator {
         'preflight',
         'busy',
       );
+      if (diagnosticAttempt !== undefined) {
+        this.finishDiagnosticAttempt(diagnosticAttempt, {
+          result: 'busy',
+          terminalStage: 'service-worker-coordination',
+          safetyCategory: 'delivery-concurrency',
+          failureCode: null,
+        });
+      }
       return failure(
         'automatic-delivery-busy',
         'delivery',
@@ -356,6 +426,8 @@ export class SnippetDeliveryCoordinator {
         'Snippet changed. Type the trigger again.',
       );
     }
+    let clipboardPreparationStartedAt: number | undefined;
+    let activeClipboardWriteStartedAt: number | undefined;
     try {
       this.recordAutomaticPasteTrace({
         kind: message.kind,
@@ -363,7 +435,13 @@ export class SnippetDeliveryCoordinator {
         phase: 'clipboard-started',
       });
       const preparationStartedAt = this.now();
+      clipboardPreparationStartedAt = preparationStartedAt;
       const plan = await this.planner.plan(message);
+      this.setDiagnosticDuration(
+        diagnosticAttempt,
+        'clipboardPreparation',
+        preparationStartedAt,
+      );
       this.recordTiming(
         message.kind,
         'clipboard-preparation',
@@ -381,7 +459,13 @@ export class SnippetDeliveryCoordinator {
         );
       }
       const clipboardWriteStartedAt = this.now();
+      activeClipboardWriteStartedAt = clipboardWriteStartedAt;
       await this.transport.write(plan, message.requestId);
+      this.setDiagnosticDuration(
+        diagnosticAttempt,
+        'clipboardWrite',
+        clipboardWriteStartedAt,
+      );
       this.recordAutomaticPasteTrace({
         kind: plan.kind,
         requestId: message.requestId,
@@ -409,6 +493,11 @@ export class SnippetDeliveryCoordinator {
         const automaticSafetyStartedAt = this.now();
         const identity = this.toTrustedSenderIdentity(sender);
         if (identity === undefined) {
+          this.setDiagnosticDuration(
+            diagnosticAttempt,
+            'browserSafetyPreparation',
+            automaticSafetyStartedAt,
+          );
           this.recordTiming(
             plan.kind,
             'automatic-safety',
@@ -421,6 +510,14 @@ export class SnippetDeliveryCoordinator {
             'browser-precheck',
             'not-foreground',
           );
+          if (diagnosticAttempt !== undefined) {
+            this.finishDiagnosticAttempt(diagnosticAttempt, {
+              result: 'not-foreground',
+              terminalStage: 'browser-safety-validation',
+              safetyCategory: 'browser-sender',
+              failureCode: null,
+            });
+          }
           this.releaseAutomaticDelivery();
           return {
             type: 'snippet-trigger-activation-result',
@@ -431,6 +528,11 @@ export class SnippetDeliveryCoordinator {
           };
         }
         if (!(await this.isBrowserContextSafe(identity))) {
+          this.setDiagnosticDuration(
+            diagnosticAttempt,
+            'browserSafetyPreparation',
+            automaticSafetyStartedAt,
+          );
           this.recordTiming(
             plan.kind,
             'automatic-safety',
@@ -443,6 +545,14 @@ export class SnippetDeliveryCoordinator {
             'browser-precheck',
             'not-foreground',
           );
+          if (diagnosticAttempt !== undefined) {
+            this.finishDiagnosticAttempt(diagnosticAttempt, {
+              result: 'not-foreground',
+              terminalStage: 'browser-safety-validation',
+              safetyCategory: 'browser-tab-window',
+              failureCode: null,
+            });
+          }
           this.releaseAutomaticDelivery();
           return {
             type: 'snippet-trigger-activation-result',
@@ -453,6 +563,11 @@ export class SnippetDeliveryCoordinator {
           };
         }
         if (this.automaticPasteTransport === undefined) {
+          this.setDiagnosticDuration(
+            diagnosticAttempt,
+            'browserSafetyPreparation',
+            automaticSafetyStartedAt,
+          );
           this.recordTiming(
             plan.kind,
             'automatic-safety',
@@ -466,6 +581,14 @@ export class SnippetDeliveryCoordinator {
             'native-unavailable',
             'automatic-precheck-started',
           );
+          if (diagnosticAttempt !== undefined) {
+            this.finishDiagnosticAttempt(diagnosticAttempt, {
+              result: 'native-unavailable',
+              terminalStage: 'native-context-capture',
+              safetyCategory: 'native-capability',
+              failureCode: null,
+            });
+          }
           this.releaseAutomaticDelivery();
           return {
             type: 'snippet-trigger-activation-result',
@@ -477,17 +600,40 @@ export class SnippetDeliveryCoordinator {
         }
         const authorizationId = this.createAuthorizationId();
         let context: NativePasteContext;
+        this.setDiagnosticDuration(
+          diagnosticAttempt,
+          'browserSafetyPreparation',
+          automaticSafetyStartedAt,
+        );
         this.recordAutomaticPasteTrace({
           kind: plan.kind,
           requestId: message.requestId,
           phase: 'native-context-capture-started',
         });
+        const nativeCaptureStartedAt =
+          diagnosticAttempt === undefined
+            ? undefined
+            : readAutomaticPasteDiagnosticClock(this.now);
         try {
           context =
             await this.automaticPasteTransport.capturePasteContext(
               authorizationId,
             );
+          if (nativeCaptureStartedAt !== undefined) {
+            this.setDiagnosticDuration(
+              diagnosticAttempt,
+              'nativeContextCaptureRoundtrip',
+              nativeCaptureStartedAt,
+            );
+          }
         } catch {
+          if (nativeCaptureStartedAt !== undefined) {
+            this.setDiagnosticDuration(
+              diagnosticAttempt,
+              'nativeContextCaptureRoundtrip',
+              nativeCaptureStartedAt,
+            );
+          }
           this.recordTiming(
             plan.kind,
             'automatic-safety',
@@ -500,6 +646,14 @@ export class SnippetDeliveryCoordinator {
             'native-context-capture',
             'native-unavailable',
           );
+          if (diagnosticAttempt !== undefined) {
+            this.finishDiagnosticAttempt(diagnosticAttempt, {
+              result: 'native-unavailable',
+              terminalStage: 'native-context-capture',
+              safetyCategory: 'native-capability',
+              failureCode: null,
+            });
+          }
           this.releaseAutomaticDelivery();
           return {
             type: 'snippet-trigger-activation-result',
@@ -528,6 +682,15 @@ export class SnippetDeliveryCoordinator {
               'finalize-timeout',
               'indeterminate',
             );
+            const timedOutAttempt = this.pendingAutomaticPaste?.diagnostics;
+            if (timedOutAttempt !== undefined) {
+              this.finishDiagnosticAttempt(timedOutAttempt, {
+                result: 'indeterminate',
+                terminalStage: 'service-worker-coordination',
+                safetyCategory: 'response-correlation',
+                failureCode: null,
+              });
+            }
             this.releaseAutomaticDelivery();
           }
         }, 15_000);
@@ -538,6 +701,9 @@ export class SnippetDeliveryCoordinator {
           sender: identity,
           context,
           timeout,
+          ...(diagnosticAttempt === undefined
+            ? {}
+            : { diagnostics: diagnosticAttempt }),
         };
         return {
           type: 'snippet-trigger-activation-result',
@@ -561,6 +727,28 @@ export class SnippetDeliveryCoordinator {
         ...usageReceipt,
       } satisfies TriggerActivationResponseMessage;
     } catch (error) {
+      if (
+        diagnosticAttempt !== undefined &&
+        diagnosticAttempt.timings.clipboardPreparation === null &&
+        clipboardPreparationStartedAt !== undefined
+      ) {
+        this.setDiagnosticDuration(
+          diagnosticAttempt,
+          'clipboardPreparation',
+          clipboardPreparationStartedAt,
+        );
+      }
+      if (
+        diagnosticAttempt !== undefined &&
+        diagnosticAttempt.timings.clipboardWrite === null &&
+        activeClipboardWriteStartedAt !== undefined
+      ) {
+        this.setDiagnosticDuration(
+          diagnosticAttempt,
+          'clipboardWrite',
+          activeClipboardWriteStartedAt,
+        );
+      }
       if (automaticMode) this.releaseAutomaticDelivery();
       if (error instanceof SnippetDeliveryError) {
         return failure(
@@ -653,6 +841,10 @@ export class SnippetDeliveryCoordinator {
     clearTimeout(pending.timeout);
     this.pendingAutomaticPaste = undefined;
     this.automaticDeliveryInProgress = false;
+    if (pending.diagnostics !== undefined) {
+      pending.diagnostics.timings.triggerCleanupAndRevalidation =
+        message.triggerCleanupAndRevalidationMs;
+    }
 
     if (message.editorState === 'cleanup-failed') {
       this.recordAutomaticPasteTrace({
@@ -734,6 +926,11 @@ export class SnippetDeliveryCoordinator {
             'indeterminate',
           );
         }
+        this.setDiagnosticDuration(
+          pending.diagnostics,
+          'nativePasteRequestRoundtrip',
+          nativePasteStartedAt,
+        );
         if (nativeResult !== 'indeterminate') {
           this.recordTiming(
             pending.kind,
@@ -756,6 +953,18 @@ export class SnippetDeliveryCoordinator {
           tracePhase,
           nativePasteDiagnostic,
         );
+        if (pending.diagnostics !== undefined) {
+          const diagnostic = this.mapAutomaticResult(
+            result,
+            undefined,
+            'native',
+          );
+          this.finishDiagnosticAttempt(pending.diagnostics, {
+            result,
+            ...diagnostic,
+            failureCode: null,
+          });
+        }
         return {
           type: 'snippet-automatic-paste-result',
           requestId: message.requestId,
@@ -771,6 +980,14 @@ export class SnippetDeliveryCoordinator {
       result,
       tracePhase,
     );
+    if (pending.diagnostics !== undefined) {
+      const diagnostic = this.mapAutomaticResult(result, message.editorState);
+      this.finishDiagnosticAttempt(pending.diagnostics, {
+        result,
+        ...diagnostic,
+        failureCode: null,
+      });
+    }
     return {
       type: 'snippet-automatic-paste-result',
       requestId: message.requestId,
@@ -924,6 +1141,148 @@ export class SnippetDeliveryCoordinator {
       );
     } catch {
       return false;
+    }
+  }
+
+  private createDiagnosticAttempt(
+    kind: 'text' | 'image',
+    startedAt: number | undefined,
+  ): AutomaticPasteDiagnosticAttempt {
+    return {
+      kind,
+      startedAt,
+      completed: false,
+      timings: {
+        clipboardPreparation: null,
+        clipboardWrite: null,
+        browserSafetyPreparation: null,
+        nativeContextCaptureRoundtrip: null,
+        triggerCleanupAndRevalidation: null,
+        nativePasteRequestRoundtrip: null,
+        totalObservedDelivery: null,
+      },
+    };
+  }
+
+  private setDiagnosticDuration(
+    attempt: AutomaticPasteDiagnosticAttempt | undefined,
+    key: keyof AutomaticPasteDiagnosticTimingsV1,
+    startedAt: number,
+  ): void {
+    if (attempt === undefined || attempt.completed) return;
+    const endedAt = readAutomaticPasteDiagnosticClock(this.now);
+    attempt.timings[key] = normalizeAutomaticPasteDiagnosticDuration(
+      endedAt === undefined ? undefined : endedAt - startedAt,
+    );
+  }
+
+  private finishDiagnosticAttempt(
+    attempt: AutomaticPasteDiagnosticAttempt,
+    terminal: Omit<AutomaticPasteDiagnosticTerminalInput, 'kind' | 'timingsMs'>,
+  ): void {
+    if (attempt.completed) return;
+    attempt.completed = true;
+    if (attempt.startedAt !== undefined) {
+      const endedAt = readAutomaticPasteDiagnosticClock(this.now);
+      attempt.timings.totalObservedDelivery =
+        normalizeAutomaticPasteDiagnosticDuration(
+          endedAt === undefined ? undefined : endedAt - attempt.startedAt,
+        );
+    }
+    try {
+      this.automaticPasteDiagnostics?.recordEligibleTerminal({
+        kind: attempt.kind,
+        ...terminal,
+        timingsMs: { ...attempt.timings },
+      });
+    } catch {
+      // Terminal persistence is observational and cannot alter delivery.
+    }
+  }
+
+  private deliveryFailureStage(
+    stage: SnippetDeliveryFailureDiagnostic['stage'],
+    phase: SnippetDeliveryFailureDiagnostic['phase'],
+  ): AutomaticPasteDiagnosticTerminalStageV1 {
+    if (stage === 'catalog') return 'activation';
+    if (stage === 'planner' || stage === 'image-preparation') {
+      return 'clipboard-preparation';
+    }
+    if (phase === 'pre-planning') return 'preflight';
+    return 'clipboard-write';
+  }
+
+  private mapAutomaticResult(
+    result: AutomaticPasteDiagnosticResultV1,
+    editorState?: AutomaticPasteFinalizeMessage['editorState'],
+    source: 'browser' | 'native' = 'browser',
+  ): {
+    terminalStage: AutomaticPasteDiagnosticTerminalStageV1;
+    safetyCategory: AutomaticPasteDiagnosticSafetyCategoryV1;
+  } {
+    switch (result) {
+      case 'paste-issued':
+        return { terminalStage: 'complete', safetyCategory: null };
+      case 'unsafe-focus':
+        if (source === 'native') {
+          return {
+            terminalStage: 'native-foreground-validation',
+            safetyCategory: 'native-foreground-context',
+          };
+        }
+        return editorState === 'cleanup-failed'
+          ? {
+              terminalStage: 'trigger-cleanup',
+              safetyCategory: 'editor-cleanup-state',
+            }
+          : {
+              terminalStage: 'editor-revalidation',
+              safetyCategory: 'editor-focus-selection',
+            };
+      case 'not-foreground':
+        if (source === 'native') {
+          return {
+            terminalStage: 'native-foreground-validation',
+            safetyCategory: 'native-foreground-context',
+          };
+        }
+        return {
+          terminalStage: 'browser-safety-validation',
+          safetyCategory: 'browser-tab-window',
+        };
+      case 'clipboard-changed':
+        return {
+          terminalStage: 'native-clipboard-validation',
+          safetyCategory: 'clipboard-sequence',
+        };
+      case 'unsafe-keyboard-state':
+        return {
+          terminalStage: 'native-keyboard-validation',
+          safetyCategory: 'keyboard-modifiers',
+        };
+      case 'busy':
+        return {
+          terminalStage: 'service-worker-coordination',
+          safetyCategory: 'delivery-concurrency',
+        };
+      case 'native-unavailable':
+        return {
+          terminalStage: 'native-response',
+          safetyCategory: 'native-capability',
+        };
+      case 'input-injection-failed':
+        return {
+          terminalStage: 'input-injection',
+          safetyCategory: 'input-injection',
+        };
+      case 'indeterminate':
+        return {
+          terminalStage: 'native-response',
+          safetyCategory: 'response-correlation',
+        };
+      case 'clipboard-only':
+      case 'delivery-failed':
+        return { terminalStage: 'complete', safetyCategory: null };
     }
   }
 

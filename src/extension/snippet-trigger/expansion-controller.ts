@@ -12,6 +12,8 @@ import {
 } from '../../shared/snippet-delivery-messages';
 import type { FrameTriggerCatalogCache } from './frame-catalog-cache';
 import type { SnippetPasteMode } from '../../domain/settings';
+import { normalizeAutomaticPasteDiagnosticDuration } from '../../domain/automatic-paste-diagnostics';
+import { readAutomaticPasteDiagnosticClock } from '../../application/snippet/automatic-paste-diagnostics';
 import {
   createEditorAdapter,
   type AutomaticPasteEditorDiagnostic,
@@ -162,6 +164,7 @@ export class SnippetExpansionController {
       undefined,
     private readonly reportAutomaticPastePostCleanup: AutomaticPastePostCleanupTraceSink = () =>
       undefined,
+    private readonly now: () => number = () => performance.now(),
   ) {}
 
   handleBeforeInput(event: BeforeInputEventLike): BeforeInputHandlingResult {
@@ -295,6 +298,7 @@ export class SnippetExpansionController {
     const noticeExistedBeforePostCleanupCheck = diagnosticsEnabled
       ? this.document.getElementById(SNIPPET_DELIVERY_NOTICE_ID) !== null
       : false;
+    const cleanupStartedAt = readAutomaticPasteDiagnosticClock(this.now);
     const safeBeforeCleanup = snapshot.isAutomaticPasteSafe();
     const currentIdentity = this.cache.identity;
     const cleaned =
@@ -309,6 +313,16 @@ export class SnippetExpansionController {
       cleaned &&
       snapshot.consumeAutomaticPasteAuthorization();
     if (!editorReady) snapshot.invalidateAutomaticPasteAuthorization();
+    let triggerCleanupAndRevalidationMs: number | null = null;
+    if (cleanupStartedAt !== undefined) {
+      const cleanupEndedAt = readAutomaticPasteDiagnosticClock(this.now);
+      triggerCleanupAndRevalidationMs =
+        normalizeAutomaticPasteDiagnosticDuration(
+          cleanupEndedAt === undefined
+            ? undefined
+            : cleanupEndedAt - cleanupStartedAt,
+        );
+    }
     const editorDiagnostic = diagnosticsEnabled
       ? snapshot.readAutomaticPasteDiagnostic?.()
       : undefined;
@@ -339,6 +353,7 @@ export class SnippetExpansionController {
           : editorReady
             ? 'ready'
             : 'unsafe-focus',
+        triggerCleanupAndRevalidationMs,
       });
     } catch {
       finalResponse = undefined;

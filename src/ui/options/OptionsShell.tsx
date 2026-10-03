@@ -11,6 +11,7 @@ import {
 } from '../import-export/ImportExportView';
 import { SettingsView } from '../settings/SettingsView';
 import { SnippetLibraryView } from '../snippet/SnippetLibraryView';
+import type { AutomaticPasteDiagnosticsApplication } from '../../extension/options/automatic-paste-diagnostics-client';
 
 interface OptionsShellProps {
   settings: SettingsApplication;
@@ -19,6 +20,7 @@ interface OptionsShellProps {
   importExport: ImportExportActions;
   clipboardDelivery?: ClipboardDeliveryPermission | undefined;
   windowsImageClipboard?: WindowsImageClipboardCapability | undefined;
+  automaticPasteDiagnostics?: AutomaticPasteDiagnosticsApplication | undefined;
 }
 
 export function OptionsShell({
@@ -28,6 +30,7 @@ export function OptionsShell({
   importExport,
   clipboardDelivery,
   windowsImageClipboard,
+  automaticPasteDiagnostics,
 }: OptionsShellProps) {
   const [activeSection, setActiveSection] = useState<
     'snippets' | 'settings' | 'import-export'
@@ -123,6 +126,7 @@ export function OptionsShell({
         >
           <SettingsView
             clipboardDelivery={clipboardDelivery}
+            automaticPasteDiagnostics={automaticPasteDiagnostics}
             key={`settings-${dataRevision}`}
             settings={settings}
             windowsImageClipboard={windowsImageClipboard}

@@ -50,6 +50,9 @@ import {
   type LifecycleRecoveryRuntime,
 } from './snippet-trigger/lifecycle-recovery';
 import { enableToolbarSidePanelAction } from './sidepanel/toolbar-action';
+import { AutomaticPasteDiagnosticsService } from '../application/snippet/automatic-paste-diagnostics';
+import { registerAutomaticPasteDiagnosticsManagement } from '../application/snippet/automatic-paste-diagnostics-management';
+import { DexieAutomaticPasteDiagnosticsRepository } from '../infrastructure/persistence/dexie-automatic-paste-diagnostics-repository';
 
 export default defineBackground(() => {
   const sidePanel = (
@@ -118,6 +121,14 @@ export default defineBackground(() => {
       );
     }
     const database = createDatabase();
+    const automaticPasteDiagnostics = new AutomaticPasteDiagnosticsService(
+      new DexieAutomaticPasteDiagnosticsRepository(database),
+    );
+    void automaticPasteDiagnostics.initialize();
+    registerAutomaticPasteDiagnosticsManagement(
+      runtime,
+      automaticPasteDiagnostics,
+    );
     const repository = new DexieSnippetEntryRepository(database);
     const usageStatsRepository = new DexieSnippetUsageStatsRepository(database);
     const settingsRepository = new DexieSettingsRepository(database);
@@ -171,6 +182,9 @@ export default defineBackground(() => {
           undefined,
           undefined,
           usageStatsRepository,
+          undefined,
+          undefined,
+          automaticPasteDiagnostics,
         ),
       );
     }

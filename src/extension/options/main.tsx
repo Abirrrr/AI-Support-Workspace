@@ -40,6 +40,8 @@ import {
 } from '../snippet-trigger/clipboard-transport';
 import nativeDevelopment from '../../../config/native-clipboard-companion.development.json';
 import '../../ui/styles.css';
+import { RuntimeAutomaticPasteDiagnosticsApplication } from './automatic-paste-diagnostics-client';
+import { BrowserAutomaticPasteDiagnosticsDownloadAdapter } from '../../infrastructure/diagnostics/browser-automatic-paste-diagnostics-download-adapter';
 
 const root = document.querySelector('#root');
 
@@ -158,11 +160,19 @@ const importExport = {
   restoreBackup: (prepared: PreparedBackupImport) =>
     backupRestore.restoreBackup(prepared.backup),
 };
+const automaticPasteDiagnostics =
+  catalogRuntime === undefined
+    ? undefined
+    : new RuntimeAutomaticPasteDiagnosticsApplication(
+        catalogRuntime,
+        new BrowserAutomaticPasteDiagnosticsDownloadAdapter(),
+      );
 
 createRoot(root).render(
   <StrictMode>
     <OptionsShell
       clipboardDelivery={clipboardDelivery}
+      automaticPasteDiagnostics={automaticPasteDiagnostics}
       importExport={importExport}
       settings={settings}
       snippetLibrary={snippetLibrary}

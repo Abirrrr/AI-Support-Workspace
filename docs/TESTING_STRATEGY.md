@@ -514,7 +514,7 @@ The exact Principal workflow is: run `pnpm build:native-dev`; load or reload `.o
 - Tag-output tests must enforce the 64 KiB canonical input cap plus complete-array/4 KiB/eight-tag/1–40-code-point/NFKC/lowercase/whitespace/control/HTML/deduplication output contract and reject all malformed/prose/object/trailing/oversized cases without persisting raw output. Backfill tests allow qualifying edit or explicit maximum-20/concurrency-one/cancellable batch only; startup, delivery, and retrieval trigger no generation.
 - Retrieval tests preserve Text-only eligibility, Knowledge/Prompt Builder v1 continuity, and deterministic per-token weights title 5/authored tags 3/content 1/generated tags 1 only for a matching fingerprint. Missing/wrong tags cannot remove other evidence. Usage/recency do not enter ranking, so popularity cannot dominate relevance.
 - M14-O focused validation covers 7 files / 106 tests across fingerprinting, parser, generation lifecycle/races, backfill, persistence invalidation/deletion, retrieval weighting/fail-soft behavior, and Backup v7 strictness. The complete Vitest suite covers 68 passing files / 876 passing tests plus one opt-in file/test skipped. No real provider, network, clock wait, filesystem, native input, or browser-generated-tag UI is used.
-- Every future schema/Backup/permission change receives its own migration, compatibility, generated-output, and real-browser risk review. Current Dexie v6 and Backup v7 must not be rewritten in place.
+- Every future schema/Backup/permission change receives its own migration, compatibility, generated-output, and real-browser risk review. Current Dexie v7 and Backup v7 must not be rewritten in place.
 
 ### M15-A AI Workspace Validation Contract
 
@@ -532,12 +532,13 @@ Decision 58 and [AI_WORKSPACE_ARCHITECTURE.md](AI_WORKSPACE_ARCHITECTURE.md) rep
 
 M15 real-Chrome validation must cover keyboard and pointer operation at narrow and normal Side Panel widths; text-only and image-only generation; paste/file acquisition, preview, Remove, bounds errors, and reload loss; compatible/incompatible/unknown model states; regeneration with old output; edited Copy; Save as Snippet handoff and recoverable failure; explicit Options Save; no automatic persistence; and normal small text-only use. Provider/environment details and any omissions must be recorded without treating deterministic mocks as live-model evidence.
 
-### M15-D Local Automatic Paste Diagnostics Validation Contract
+### M15-D/M15-E Local Automatic Paste Diagnostics Validation Contract
 
-M15-D is documentation-only. These are acceptance requirements for a later separately authorized implementation of Decision 59, not tests executed by M15-D:
+M15-D is documentation-only; M15-E implements this Decision 59 validation contract. Automated coverage includes:
 
 - Domain/application tests must exact-key validate record schema version 1, canonical independent UUID record/request IDs, canonical UTC time, Text/Image kind, every typed result/stage/safety/failure-code combination, and all seven timing keys. Test the exact 26-literal `AutomaticPasteDiagnosticFailureCodeV1` allowlist independently of the live `SnippetDeliveryFailureCode`; prove explicit mappings for every approved live value and `null` for new, unknown, or intentionally unmapped values. Reject missing/extra/dangerous keys, arbitrary strings/objects, non-finite/negative/over-300,000 durations, content-derived IDs, and prohibited fields.
 - Outcome tests must produce one terminal record attempt for automatic-mode success plus every typed decline/failure/indeterminate path, including clipboard preparation failure, while producing no record for normal clipboard-only use. Existing automatic-paste result and user-feedback contracts remain unchanged.
+- M15-E.1 freezes diagnostic eligibility at activation receipt: disabling before terminal completion preserves one already-eligible record attempt; enabling later never makes an ineligible receipt eligible. Disable preserves retained records. Diagnostics-only clock reads fail softly to `null` timings without changing native capture, cleanup, authorization, clipboard delivery, terminal results, or no-retry behavior; pre-existing delivery timing remains unchanged.
 - Clock tests must prove service-worker timings use one injected monotonic origin for their complete boundaries, content cleanup/revalidation uses its own origin, cross-context values are never added/subtracted, unavailable or invalid values become `null`, and no timing assertion becomes a CI latency threshold.
 - Delivery-isolation tests must force record construction, state load, Dexie open/write/transaction/prune/quota, and worker-lifetime failures and prove clipboard preparation, cleanup, finalization, feedback, result identity, authorization consumption, and the at-most-one `SendInput` rule remain unchanged. No diagnostic retry, delivery replay, queue, keepalive, or misleading failure UI is allowed.
 - Persistence integration tests must cover fresh/reopened Dexie v7, exact v6-to-v7 preservation, absent-state-disabled default, state/record isolation, strict mapping, atomic append/prune, 30-day boundary, 2,000/2,001 count boundary, timestamp/ID tie ordering, Enable/Disable retention, Clear-records-only behavior, and failure rollback confined to diagnostics stores.
@@ -545,10 +546,36 @@ M15-D is documentation-only. These are acceptance requirements for a later separ
 - Export tests must prove exact format/version/timestamp/records keys, deterministic timestamp/ID ordering, strict record validation, diagnostics-specific filename, explicit-action-only Blob/object-URL download, safe failure without partial download, no enablement field, no Backup integration, no network request, and no new browser permission.
 - Privacy/static audits must enumerate the exported/persisted key allowlist and prove absence of Snippet/clipboard/editor/page/customer/merchant/AI/provider content, browser/native persistent identifiers, paths, arbitrary errors/stacks, network data, credentials, and content-derived identifiers. Existing native-development traces must not be stored or exported wholesale.
 - Native/protocol/build tests must prove protocols v1/v2, request/response shapes, one-use authorization, foreground/process/clipboard/modifier validation, fixed four-event `SendInput`, no retry, normal production diagnostic omission, generated permissions, dependencies, and native source remain unchanged.
-- Contract/static tests must prove Decision 45 request-scoped native diagnostics remain limited to correlation/result/timing/safety, Decision 59's extra fields exist only in the downstream application projection, and the future Dexie v7 declaration contains only the two diagnostics stores while Decision 58 AI Workspace data remains transient and schema-free.
+- Contract/static tests must prove Decision 45 request-scoped native diagnostics remain limited to correlation/result/timing/safety, Decision 59's extra fields exist only in the downstream application projection, and the Dexie v7 declaration contains only the two diagnostics stores while Decision 58 AI Workspace data remains transient and schema-free.
+
+M15-E focused automation covers the exact record/export contracts and 26-value frozen mapping; fresh and v6-to-v7 persistence; retention boundaries and rollback; enable/disable/clear semantics; service-worker management and non-blocking runtime recording; content-frame timing ownership; explicit local download; Backup exclusion/restore preservation; and relevant delivery, Settings, and persistence regressions. Principal source review, M15-E.1 correction review, and the accepted real-Chrome/manual matrix below are PASS; manual evidence remains distinct from the automated coverage.
 - Retention/export/clear UI tests, when separately authorized, must cover disabled default, explicit enable/disable, user-requested export/clear, accessible busy/error/success behavior, and Clear-versus-Disable distinction without exposing raw storage or error details.
 
-No real keyboard injection is required for deterministic implementation tests. Later risk-based real-Chrome validation should exercise explicit enablement, successful and failed automatic attempts, restart persistence, export inspection, Clear, Disable/re-enable, and ordinary delivery responsiveness while verifying the exported file contains only the allowlisted contract.
+No real keyboard injection is required for deterministic implementation tests. The Principal-supplied real-Chrome/manual results below close the M15-E/M15-E.1 manual-validation gate; future delivery changes retain the same risk-based validation discipline.
+
+#### M15-E/M15-E.1 Principal Acceptance (2026-10-03)
+
+The Principal supplied the following accepted results for M15-E.2 closeout synchronization. M15-E and M15-E.1 are **PRINCIPAL-APPROVED**; the implementation remains unstaged and has not been committed or pushed. This records the supplied manual evidence and adds no new browser run or measurements.
+
+| Review or manual check | Result |
+| --- | --- |
+| Principal source review | PASS |
+| M15-E.1 correction review | PASS |
+| Real-Chrome/manual validation | PASS |
+| Diagnostics default OFF | PASS |
+| Enable and persistence across reload | PASS |
+| Automatic Text paste | PASS |
+| Automatic Image paste | PASS |
+| No noticeable delivery regression | PASS |
+| Diagnostics JSON export | PASS |
+| Export exact-field/privacy inspection | PASS |
+| Disable stops new records while retaining existing records | PASS |
+| Clear removes records without changing enablement | PASS |
+| Clipboard-only creates no diagnostic records | PASS |
+| Backup export excludes diagnostics | PASS |
+| Backup restore preserves diagnostics state and records | PASS |
+
+The final exported JSON contained only the approved v1 record/timing fields and no prohibited content or metadata. The responsiveness result is the Principal's observed acceptance, not a new timing measurement or CI threshold. No M15-F or later task is active.
 
 ### Real Chrome Manual Validation
 

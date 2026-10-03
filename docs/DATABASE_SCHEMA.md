@@ -58,7 +58,7 @@ interface RichSnippetLocalImageBlock {
 }
 ```
 
-The block records document placement while a separately owned `SnippetAsset` stores the image bytes. M14-E introduced `snippetAssets` in Dexie v5 and Backup Format v4; the current coordinated foundation is Dexie v6 and Backup v7. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
+The block records document placement while a separately owned `SnippetAsset` stores the image bytes. M14-E introduced `snippetAssets` in Dexie v5 and Backup Format v4; the current coordinated foundation is Dexie v7 and Backup v7. Existing URL Image References remain readable/importable and are never automatically fetched or converted.
 
 Decision 39 makes the local-image Rich block a legacy compatibility shape and approves the future target union:
 
@@ -268,16 +268,16 @@ M14-N.3 adds local `lastSuccessfulBackupAt` as an optional canonical UTC ISO fie
 
 The v5-to-v6 migration preserves every Knowledge, Snippet, asset, authored timestamp/tag/trigger, and existing Settings value. A present historical Settings singleton missing `automaticBackupCadence` receives `weekly`; an absent singleton remains absent and the application default resolves to `weekly`. Snippet deletion covers Snippets, owned assets, usage, and generated metadata in one transaction. Restore covers Knowledge, Snippets, assets, Settings, and both sidecars in one portable transaction with rollback; local automatic-backup state is outside that transaction and remains unchanged.
 
-## Approved M15-D Dexie Version 7 Evolution (Not Implemented)
+## M15-E Dexie Version 7 Automatic Paste Diagnostics
 
-Decision 59 approves a future additive physical version 7 for Local Automatic Paste Diagnostics. M15-D does not implement this declaration or migration. Historical version 1-6 declarations remain unchanged. Version 7 will retain every version 6 store/index and add exactly:
+Decision 59 approves and M15-E implements additive physical version 7 for Local Automatic Paste Diagnostics. Historical version 1-6 declarations remain unchanged. Version 7 retains every version 6 store/index and adds exactly:
 
 ```text
 automaticPasteDiagnosticsState: 'id'
 automaticPasteDiagnosticRecords: 'id, occurredAt, [occurredAt+id]'
 ```
 
-This is the only schema exception authorized by Decision 59. Decision 58 and the normative AI Workspace architecture continue to prohibit persistence, schema, index, migration, and Backup evolution for Merchant Context, Context Images, Guidance/Gist, model selection, generated output, provider behavior, and Save-as-Snippet handoff state. Decision 59 narrowly supersedes Decision 58's broad M15 schema prohibition only for the two diagnostics-owned stores above; it authorizes no other store/index and does not implement version 7.
+This is the only schema exception authorized by Decision 59. Decision 58 and the normative AI Workspace architecture continue to prohibit persistence, schema, index, migration, and Backup evolution for Merchant Context, Context Images, Guidance/Gist, model selection, generated output, provider behavior, and Save-as-Snippet handoff state. M15-E adds no other store or index.
 
 `automaticPasteDiagnosticsState` is a diagnostics-owned local singleton keyed by physical `id: 'global'` with exact logical field `enabled: boolean`. No record means disabled. It is not the portable Settings aggregate, is not stored in `automaticBackupState`, and is excluded from Backup export/restore.
 
@@ -315,11 +315,11 @@ type AutomaticPasteDiagnosticFailureCodeV1 =
   | 'unexpected-delivery-failure';
 ```
 
-This union is frozen independently of the live application `SnippetDeliveryFailureCode`. Later implementation must use an explicit mapping from the live type; any new, unknown, or unmapped live value produces `failureCode: null`. No cast, shared type alias, catch-all string, raw error, stack, metadata bag, native detail, or implicit schema expansion is allowed.
+This union is frozen independently of the live application `SnippetDeliveryFailureCode`. M15-E uses an explicit mapping from the live type; any new, unknown, or unmapped live value produces `failureCode: null`. No cast, shared type alias, catch-all string, raw error, stack, metadata bag, native detail, or implicit schema expansion is allowed.
 
-The compound `[occurredAt+id]` index provides deterministic oldest-first ordering after canonical UTC validation; `occurredAt` supports age pruning. The future migration adds empty stores only. It performs no scan, rewrite, default-record creation, or transformation of Knowledge, Snippets, assets, Settings, usage, generated metadata, or dormant automatic-backup state. An absent diagnostics state and empty records are the complete post-upgrade default.
+The compound `[occurredAt+id]` index provides deterministic oldest-first ordering after canonical UTC validation; `occurredAt` supports age pruning. The v7 migration adds empty stores only. It performs no scan, rewrite, default-record creation, or transformation of Knowledge, Snippets, assets, Settings, usage, generated metadata, or dormant automatic-backup state. An absent diagnostics state and empty records are the complete post-upgrade default.
 
-The future adapter performs append plus retention pruning in one diagnostics-only transaction. It removes records older than 30 elapsed days, then removes excess oldest records by `occurredAt`/`id` until at most 2,000 remain. Enabling, explicit export, and service-worker initialization also request best-effort pruning; no pruning operation extends an automatic-paste lifetime. Failure rolls back that diagnostics operation only and never affects delivery or another store. `clearRecords()` clears only the record store; it preserves the enablement singleton. Disabling changes only `enabled` and preserves records until Clear or retention pruning.
+The M15-E adapter performs append plus retention pruning in one diagnostics-only transaction. It removes records older than 30 elapsed days, then removes excess oldest records by `occurredAt`/`id` until at most 2,000 remain. Enabling, explicit export, and service-worker initialization also request best-effort pruning; no pruning operation extends an automatic-paste lifetime. Failure rolls back that diagnostics operation only and never affects delivery or another store. `clearRecords()` clears only the record store; it preserves the enablement singleton. Disabling changes only `enabled` and preserves records until Clear or retention pruning.
 
 ## Record Identity
 
@@ -412,7 +412,7 @@ interface AutomaticBackupStateRepository {
 }
 ```
 
-Decision 59 separately approves this future application-owned port without implementing it in M15-D:
+Decision 59 defines and M15-E implements this application-owned port:
 
 ```ts
 interface AutomaticPasteDiagnosticsRepository {
@@ -484,7 +484,7 @@ Milestone 3 validation passed all 13 persistence integration tests, including da
 - Version 3 adds only optional Snippet `trigger` data and unique index `&trigger`, preserves every version 2 record without generating triggers, and does not support rollback to version 2.
 - Version 4 changes only Snippet `content` from a string to canonical `SnippetContent`, preserves every other logical field and the version 3 indexes, adds no table, and does not support rollback to version 3.
 - Version 5 adds only `snippetAssets`, preserves every v4 record and declaration, and performs no content migration. Decision 39 list and Image Snippet discriminants remain valid within this physical version because they require no index/store change.
-- Implemented production remains version 6. Decision 59 approves a future version 7 that adds only the two Automatic Paste Diagnostics stores described above; M15-D adds no declaration or migration code. The later implementation must preserve all version 1-6 declarations and data and must test fresh, v6-to-v7, reopen, retention, and Backup-isolation behavior.
+- Implemented production is version 7. It adds only the two Automatic Paste Diagnostics stores described above, preserves all version 1-6 declarations and data, and has automated fresh, v6-to-v7, reopen, retention, and Backup-isolation coverage.
 
 ## Storage Approach
 
@@ -585,7 +585,7 @@ V7 rejects unknown envelope/data/record keys—including attempted directory-han
 
 M14-N.3 does not create Backup v8 or alter the frozen v7 contract. Historical `automaticBackupCadence` remains required/importable but has no current UI or runtime effect. `lastSuccessfulBackupAt` is deliberately absent because it is current-profile reminder state, not portable recovery data or filesystem authority.
 
-Decision 59 likewise does not create Backup v8 or change any frozen Backup version. Automatic Paste diagnostic enablement and records are local operational evidence, not portable recovery data. Backup snapshot readers omit both future diagnostics stores, and restore transactions neither clear nor write them. A diagnostics export uses its own `ai-support-workspace-automatic-paste-diagnostics` format and is never accepted as an application Backup.
+Decision 59 likewise does not create Backup v8 or change any frozen Backup version. Automatic Paste diagnostic enablement and records are local operational evidence, not portable recovery data. Backup snapshot readers omit both diagnostics stores, and restore transactions neither clear nor write them. A diagnostics export uses its own `ai-support-workspace-automatic-paste-diagnostics` format and is never accepted as an application Backup.
 
 ## Future Capability Guidance
 
@@ -628,4 +628,4 @@ History is an intentionally undecided future capability. It is not an assumed fe
 
 ## Current Status
 
-Milestones 3 through 14 are complete. M14-M.1 implements Dexie physical version 6 plus canonical Backup v7, and M14-M.3 implements delivery usage counting. M14-N.1/N.2 remain historical automatic-backup checkpoints; M14-N.3 retires their current production activation and implements Manual Export success tracking plus a 30-day advisory reminder without schema or Backup evolution. `automaticBackupState` is dormant, `lastSuccessfulBackupAt` is local and nonportable, and imports grant no authority or local success. M15-D/Decision 59 approves but does not implement additive Dexie version 7 with isolated Automatic Paste Diagnostics state and record stores. Implemented production remains Dexie v6 and Backup v7 until a separately authorized implementation task.
+Milestones 3 through 14 are complete. M14-M.1 implemented Dexie physical version 6 plus canonical Backup v7, and M14-M.3 implements delivery usage counting. M14-N.1/N.2 remain historical automatic-backup checkpoints; M14-N.3 retires their current production activation and implements Manual Export success tracking plus a 30-day advisory reminder without Backup evolution. `automaticBackupState` is dormant, `lastSuccessfulBackupAt` is local and nonportable, and imports grant no authority or local success. M15-E implements Decision 59's additive Dexie version 7 with isolated Automatic Paste Diagnostics state and record stores. Backup remains v7.
