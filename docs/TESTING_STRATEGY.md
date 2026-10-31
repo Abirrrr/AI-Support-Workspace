@@ -555,7 +555,7 @@ No real keyboard injection is required for deterministic implementation tests. T
 
 #### M15-E/M15-E.1 Principal Acceptance (2026-10-03)
 
-The Principal supplied the following accepted results for M15-E.2 closeout synchronization. M15-E and M15-E.1 are **PRINCIPAL-APPROVED**; the implementation remains unstaged and has not been committed or pushed. This records the supplied manual evidence and adds no new browser run or measurements.
+The Principal supplied the following accepted results for M15-E.2 closeout synchronization. M15-E, M15-E.1, and M15-E.2 are **COMPLETE / PRINCIPAL-APPROVED**, committed and pushed together at `881b73a` (`feat: add automatic paste diagnostics`); GitHub Actions for `881b73a` passed, confirmed by the product owner. This records the supplied manual evidence and adds no new browser run or measurements.
 
 | Review or manual check | Result |
 | --- | --- |

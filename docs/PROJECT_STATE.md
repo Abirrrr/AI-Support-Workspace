@@ -7,7 +7,7 @@
 
 ## Current Milestone
 
-- Active milestone: **M15 — AI Workspace**. Active task: **M15-E.2 — Automatic Paste Diagnostics Closeout Synchronization**. M15-E and M15-E.1 are **COMPLETE / PRINCIPAL-APPROVED / REAL-CHROME VALIDATION PASS / NOT COMMITTED OR PUSHED** as of 2026-10-03. M15-E.2 synchronizes documentation only; a separately authorized Git checkpoint remains outstanding. **M15-D.2 — Closeout State Synchronization** is **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `2810b4b`**; GitHub CI run #78 passed, and local `master` and `origin/master` were synchronized at `2810b4b2d241bf5220ff66a65fdd23a51af1ca35`. Decision 59 is the authoritative architecture for M15-E. The previously postponed model-discovery work is not M15-E, and no task after M15-E is active.
+- Active milestone: **M15 — AI Workspace**. Post-approval continuity is synchronized by **M15-E.3 — Post-Approval Continuity Synchronization**, including **M15-E.3.1 — Remove Self-Referential Closeout State** (documentation only). No engineering task is active. M15-E, M15-E.1, and M15-E.2 are **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `881b73a` / GITHUB CI PASS** as of 2026-10-03; real-Chrome/manual validation is PASS. Authoritative M15-E implementation/closeout checkpoint `881b73aaebba36faff8a361ee4fad3ce7aab0675` (`feat: add automatic paste diagnostics`) contains exactly the approved 37 files. The implementation/closeout push to `origin/master` is complete; GitHub Actions for `881b73a` passed, confirmed by the product owner. Previous checkpoint: M15-D.2 at `2810b4b` (CI run #78 PASS). Decision 59 remains unchanged and authoritative. The postponed model-discovery work is not M15-E; no M15-F or later task is assigned or active.
 - Completed documentation closeout: **M14-U.1 — Final Approval and Performance Follow-up Closeout**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `e9d0f97`** as of 2026-09-13. M14-Q-F2 is deferred with evidence preserved, F4/F8 remain evidence-dependent, and no additional Backup restore diagnostic or optimization is scheduled before M15.
 - Completed diagnostic task: **M14-U — Backup Restore Write-Path Attribution**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `b8dfef1`** as of 2026-09-13. The bottleneck remains partially attributed at observable boundaries to the awaited Snippet IndexedDB write request; indexes have measurable associated cost, while browser-internal mechanics and the production clear/rewrite-context gap remain unresolved. The evidence is preserved for future optimization review, and no schema, index, transaction, atomicity, or Backup change is approved.
 - Completed supplemental task: **M14-T — Snippet Library Bounded Rendering**. Status: **COMPLETE / PRINCIPAL-APPROVED / CHECKPOINTED AND PUSHED AT `50eaf76`** as of 2026-09-13. Local `master` and fetched `origin/master` are synchronized at `50eaf764525607c4ca30580467011e2378214ecd`.
@@ -22,7 +22,7 @@
 
 ### M15-E — Automatic Paste Diagnostics Implementation
 
-M15-E and its M15-E.1 correction are complete and Principal-approved under Decision 59, with Principal source review, correction review, and real-Chrome/manual validation PASS. They remain unstaged and have not been committed or pushed. M15-E.2 is the documentation-only closeout synchronization; no later independent task is active. The approved M15-E implementation provides only the off-by-default local diagnostic contract, isolated Dexie v7 persistence, bounded retention, non-blocking automatic-paste observation, explicit Options controls, strict local export, and required validation. It does not redesign Decisions 43–45, 58, or 59; change native source/protocols; evolve Backup v1–v7; optimize delivery; implement Quick Create; resume model discovery; add permissions or dependencies; or activate a later task.
+M15-E and its M15-E.1 correction are complete and Principal-approved under Decision 59, with Principal source review, correction review, and real-Chrome/manual validation PASS. M15-E.2 documentation closeout is also complete and Principal-approved. The approved implementation, correction, and closeout are committed and pushed together at `881b73a` (`feat: add automatic paste diagnostics`); GitHub Actions for this commit passed, confirmed by the product owner. M15-E.3 documentation has synchronized post-approval continuity; no later independent task is active. The approved M15-E implementation provides only the off-by-default local diagnostic contract, isolated Dexie v7 persistence, bounded retention, non-blocking automatic-paste observation, explicit Options controls, strict local export, and required validation. It does not redesign Decisions 43–45, 58, or 59; change native source/protocols; evolve Backup v1–v7; optimize delivery; implement Quick Create; resume model discovery; add permissions or dependencies; or activate a later task.
 
 #### M15-E Durable Resume Checkpoint
 
@@ -41,47 +41,61 @@ M15-E.1 repository-wide validate: pnpm validate exits 1 only at pnpm format --ch
 M15-E.1 supplementary formatting audit: configured intended-file Prettier passes under the repository policy that excludes docs/. An extra --ignore-path .gitignore check of all 37 existing M15-E intended files reports formatting in seven documentation files (ARCHITECTURE, BACKLOG, CHANGELOG, DATABASE_SCHEMA, PRODUCT_REQUIREMENTS, PROJECT_STATE, TESTING_STRATEGY); the five untouched documents are byte-identical to the starting snapshot, and separately checking the saved pre-correction PROJECT_STATE/TESTING_STRATEGY copies also fails. These are pre-existing excluded-document differences, not a configured validation regression; no broad reformatting performed.
 M15-E.1 protected-state review: 128 correction-start snapshot paths (117 result-directory files including three incidental desktop.ini files, six protected desktop.ini files, four review diffs, and M15-E-SOURCE-REVIEW.txt) retain identical bytes and last-write times; the original 114-file M15-E aggregate also matches. Native source, protocols, permissions/configuration, dependencies, Backup source, Decision 59, and all other pre-existing working files unchanged; index empty.
 M15-E.1 Documentation Impact Review: checkpoint and testing contract synchronized for frozen eligibility, fail-soft optional timing, evidence reconciliation, and validation limits. Decision 59 and other architecture/product/schema/Backup/workflow/changelog documentation require no further correction; existing M15-E edits retained. Principal approval and manual PASS are now recorded by M15-E.2 from the supplied closeout results; no later independent task is activated.
-M15-E.1 next action: source/correction reviews and manual validation are complete; await a separately authorized Git checkpoint for approved unstaged M15-E/M15-E.1 work and synchronized closeout documentation; no M15-F or later task.
-M15-E.1 Git: staged NONE; commit NONE; push NONE.
-Status: COMPLETE / PRINCIPAL-APPROVED / AUTOMATED AND REAL-CHROME VALIDATION PASS / NOT COMMITTED OR PUSHED
+M15-E.1 next action: NONE; source/correction reviews and manual validation passed, and approved work was included in the completed, pushed 881b73a checkpoint; no M15-F or later task.
+Status: COMPLETE / PRINCIPAL-APPROVED / AUTOMATED AND REAL-CHROME VALIDATION PASS / CHECKPOINTED AND PUSHED AT 881b73a / GITHUB CI PASS
 Starting branch/HEAD: master at 2810b4b2d241bf5220ff66a65fdd23a51af1ca35
-Fetched origin/master: 2810b4b2d241bf5220ff66a65fdd23a51af1ca35; ahead/behind 0/0
-CI baseline: GitHub CI workflow run #78 completed successfully
+Starting fetched origin/master (historical): 2810b4b2d241bf5220ff66a65fdd23a51af1ca35; ahead/behind 0/0
+Starting CI baseline (historical): GitHub CI workflow run #78 completed successfully
 Continuity result: PASS; M15-D/M15-D.1 remain approved at 2b9dde4; M15-D.2 is approved, checkpointed, pushed, and CI-passed at 2810b4b; no later M15 task existed before M15-E authorization
 Starting tracked tree/index: six pre-existing desktop.ini modifications; index empty
-Protected local state: 114 M14-Q LOCAL ONLY evidence files; six pre-existing desktop.ini modifications; four M15-D review diffs, M15-E-SOURCE-REVIEW.txt, and M15-E1-CORRECTION-REVIEW.diff preserved; do not modify, stage, delete, clean, move, or normalize
-Current phase: implementation, M15-E.1 corrections, automated validation, Principal source/correction reviews, Principal real-Chrome/manual validation, and M15-E.2 documentation closeout synchronization complete; no Git checkpoint created
+Protected local state: 114 M14-Q LOCAL ONLY evidence files; six pre-existing desktop.ini modifications; four M15-D review diffs, M15-E-SOURCE-REVIEW.txt, M15-E1-CORRECTION-REVIEW.diff, and M15-E2-DOCS-REVIEW.diff preserved; do not modify, stage, delete, clean, move, or normalize
+Current phase: implementation, M15-E.1 correction, M15-E.2 documentation closeout, required validation, and Principal approvals complete; committed and pushed at 881b73a; GitHub Actions PASS (product-owner confirmation)
 Completed phases: continuity/workspace gate; protected-state baseline; required repository-document and implementation inspection; exact domain/export contracts and frozen live mapping; application service/cache; additive Dexie v7 migration and isolated repository; exact retention; terminal-only non-blocking automatic-paste recording and owner-local timings; service-worker management boundary; minimal Options controls and explicit local download; Backup v1-v7 isolation; focused automated coverage; Documentation Impact Review updates
 Files changed: diagnostics domain/application/shared-message/persistence/download source; background, delivery coordinator, content expansion, Options, and Settings source; focused unit/integration tests; PROJECT_STATE, ARCHITECTURE, DATABASE_SCHEMA, PRODUCT_REQUIREMENTS, TESTING_STRATEGY, BACKLOG, and CHANGELOG documentation
 Validation completed: baseline regression slice PASS 10 files / 158 tests; diagnostics contract Phase A PASS 2 files / 136 tests; Dexie v7/persistence PASS 2 files / 15 tests; combined focused diagnostics/delivery/Settings/persistence/Backup slice PASS 15 files / 305 tests; final focused source-hardening slice PASS 4 files / 188 tests; final full Vitest PASS 79 files / 1 skipped file, 1,141 tests / 1 skipped test; ESLint PASS; TypeScript PASS; intended-file Prettier PASS; Playwright discovery PASS 1 test; production and native-development builds/output validation PASS; diff, Git integrity, protected-state, index, and scope checks PASS
 Principal acceptance: source review PASS; M15-E.1 correction review PASS; real-Chrome/manual validation PASS. All accepted diagnostics controls, Text/Image paste, delivery responsiveness, export/privacy, clipboard-only exclusion, and Backup isolation checks are recorded in TESTING_STRATEGY.md; final JSON contains only approved v1 record/timing fields and no prohibited content or metadata.
-Incomplete work: authorized Git checkpoint and push only; neither is authorized by M15-E.2
-Exact next action: await explicit authorization for a Git checkpoint; M15-E.2 documentation validation, source/correction reviews, and real-Chrome/manual validation are complete; do not activate a later task
-Git state: Principal-approved M15-E/M15-E.1 implementation and M15-E.2 documentation are intentionally unstaged and uncommitted; protected desktop.ini modifications, M14-Q LOCAL ONLY evidence, and all review artifacts remain untouched
-Staged: NONE
-Commit: NONE
-Push: NONE
+Incomplete work: NONE for M15-E/M15-E.1/M15-E.2; the implementation/closeout Git checkpoint and push are complete
+Exact next engineering action: await Principal/product-owner direction for the next separately authorized task; no M15-F or later task is assigned or active; model discovery remains postponed unless separately authorized
+Authoritative implementation/closeout checkpoint: approved M15-E/M15-E.1/M15-E.2 work committed and pushed at 881b73aaebba36faff8a361ee4fad3ce7aab0675; later documentation-only commits do not replace this implementation checkpoint
+Completed implementation/closeout commit: 881b73aaebba36faff8a361ee4fad3ce7aab0675
+Completed implementation/closeout push: origin/master COMPLETE
 ```
 
 #### M15-E.2 Durable Resume Checkpoint
 
 ```text
 Task: M15-E.2 — Automatic Paste Diagnostics Closeout Synchronization
-Status: DOCUMENTATION CLOSEOUT COMPLETE / VALIDATION PASS / NOT COMMITTED OR PUSHED
-Continuity: master; HEAD and origin/master 2810b4b2d241bf5220ff66a65fdd23a51af1ca35; ahead/behind 0/0; index empty
-Approval source: Principal-supplied M15-E.2 closeout results; M15-E and M15-E.1 PRINCIPAL-APPROVED; source review, correction review, and real-Chrome/manual validation PASS
+Status: COMPLETE / PRINCIPAL-APPROVED / VALIDATION PASS / CHECKPOINTED AND PUSHED AT 881b73a / GITHUB CI PASS
+Starting continuity (historical M15-E.2 execution): master; HEAD and origin/master 2810b4b2d241bf5220ff66a65fdd23a51af1ca35; ahead/behind 0/0; index empty
+Completed checkpoint: 881b73aaebba36faff8a361ee4fad3ce7aab0675; approved 37-file M15-E/M15-E.1/M15-E.2 implementation and closeout; pushed to origin/master; GitHub Actions PASS, confirmed by the product owner
+Approval source: Principal-supplied closeout results and M15-E.3 authoritative facts; M15-E, M15-E.1, and M15-E.2 COMPLETE / PRINCIPAL-APPROVED; source review, correction review, and real-Chrome/manual validation PASS
 Completed phases: required document review; starting protected-state snapshot; current/pending status reconciliation; accepted manual matrix and strict export/privacy result recorded; scoped documentation review; Markdown parsing; diff/Git integrity validation; documentation consistency and protected-state verification; Principal-readiness self-check
 Files changed: docs/PROJECT_STATE.md; docs/TESTING_STRATEGY.md; docs/CHANGELOG.md; docs/BACKLOG.md; docs/ARCHITECTURE.md (status summary only)
 Protection baseline: C:/Users/shiha/AppData/Local/Temp/m15-e2-20261003/starting-files.json; 455 existing repository/evidence paths
 Validation: five-document-only changes PASS; all 15 supplied acceptance results and strict JSON/privacy statement present; no stale M15-E source-review/manual-pending summaries; Markdown parser PASS with output discarded, no formatting writes; git diff --check PASS; git fsck --full PASS with existing dangling objects only; all other 450 starting files and all 129 protected paths byte/mtime identical; branch/HEAD/origin/index unchanged
 Documentation Impact Review: only Project State, Testing Strategy, Changelog, Backlog, and Architecture current-status wording required synchronization; Decision 59 and all architecture contracts, schema/product/workflow/Backup/native documentation unchanged
 Principal-readiness self-check: PASS
-Incomplete work: NONE within M15-E.2; separately authorized Git checkpoint/push remains outside this request
-Exact next action: await explicit Git-checkpoint authorization; do not stage, commit, push, or activate M15-F or later work
+Incomplete work: NONE within M15-E.2; its approved documentation is included in the completed, pushed 881b73a checkpoint
+Exact next engineering action: await Principal/product-owner direction for the next separately authorized task; no M15-F or later task is assigned or active; model discovery remains postponed unless separately authorized
 Scope: documentation only; no runtime/test/architecture/Decision 59/Backup/native/protocol change; no M15-F or later task
-Staged: NONE
-Commit: NONE
-Push: NONE
+```
+
+#### M15-E.3 Durable Continuity Record
+
+```text
+Task: M15-E.3 — Post-Approval Continuity Synchronization
+Focused correction: M15-E.3.1 — Remove Self-Referential Closeout State
+Continuity result: post-approval M15-E implementation/closeout facts synchronized by this documentation
+Authoritative implementation/closeout checkpoint: 881b73aaebba36faff8a361ee4fad3ce7aab0675 (881b73a, feat: add automatic paste diagnostics); previous checkpoint 2810b4b2d241bf5220ff66a65fdd23a51af1ca35
+Checkpoint authority: later documentation-only commits do not replace the M15-E implementation/closeout checkpoint
+Authoritative closeout: M15-E, M15-E.1, and M15-E.2 COMPLETE / PRINCIPAL-APPROVED; real-Chrome/manual PASS; exactly the approved 37 implementation/closeout files committed and pushed to origin/master; GitHub Actions for 881b73a PASS, confirmed by the product owner
+Documentation scope: docs/PROJECT_STATE.md; docs/CHANGELOG.md; docs/BACKLOG.md; docs/ARCHITECTURE.md (Current Status only); docs/TESTING_STRATEGY.md
+Historical M15-E.3 validation: checkpoint parent and approved 37-file manifest matched; Markdown parsing, scoped diff, and Git integrity checks passed; all 451 other starting files and all 130 protected paths retained identical bytes and last-write times; architecture contracts and all 15 manual acceptance rows/privacy evidence unchanged
+Historical M15-E.3 protection baseline: C:/Users/shiha/AppData/Local/Temp/m15-e3-20261003/starting-files.json
+Documentation Impact Review: continuity wording only; Decision 59, architecture, Backup/native/protocol, runtime/test, schema/product/workflow, permissions, and dependencies unchanged
+Protected local state: M14-Q LOCAL ONLY evidence, desktop.ini files, and review artifacts preserved
+Engineering task state: no M15-F or later task assigned or active
+Exact next engineering action: await Principal/product-owner direction for the next separately authorized task; model discovery remains postponed unless separately authorized
 ```
 
 ### M15-D.2 — Closeout State Synchronization
@@ -1346,7 +1360,7 @@ Image trigger + Space
 
 ## Project Status
 
-- Status: Milestone 14 and the complete post-M14 Snippet Hardening foundation are complete. M15-A is complete at `8aeab99`, M15-B at `21e0572`, and M15-C is the latest checkpointed M15 implementation task at `c807960`; M15-C.2 is complete at `020f649`, and M15-C.3 at `0f3cfff`. M15-D/M15-D.1 are complete and approved at `2b9dde4`; M15-D.2 is complete, approved, checkpointed, pushed, and CI-passed at `2810b4b`. M15-E Automatic Paste Diagnostics and M15-E.1 are complete, Principal-approved, and automated/manual-validated, but not committed or pushed; M15-E.2 synchronizes closeout documentation only. The postponed model-discovery work is not active, and no task after M15-E is active.
+- Status: Milestone 14 and the complete post-M14 Snippet Hardening foundation are complete. M15-A is complete at `8aeab99`, M15-B at `21e0572`, and M15-C is complete at `c807960`; M15-C.2 is complete at `020f649`, and M15-C.3 at `0f3cfff`. M15-D/M15-D.1 are complete and approved at `2b9dde4`; M15-D.2 is complete, approved, checkpointed, pushed, and CI-passed at `2810b4b`. M15-E Automatic Paste Diagnostics, M15-E.1, and M15-E.2 closeout are complete, Principal-approved, committed, and pushed at the latest M15 implementation/closeout checkpoint `881b73a`; automated/manual validation and GitHub Actions for `881b73a` are PASS (CI confirmed by the product owner). M15-E.3 documentation has synchronized post-approval continuity. The postponed model-discovery work is not active, and no task after M15-E is active.
 - Scope: Completed Milestone 9 provides the first complete manual Context-to-generated-output workflow through a global foreground Chrome Side Panel, a focused application `OutputWorkflow`, automatic local retrieval, Prompt Builder, the project-owned generation boundary, transient model input, editable plain-text output, and Copy. `DECISIONS.md` remains authoritative for the exact M9 scope and non-goals.
 - Completed M10 scope: exactly one browser-scoped `capture-selection-to-workspace` command captures explicit main-frame selection through `activeTab` and `scripting`, immediately opens or activates the global Side Panel without awaiting capture, delivers the typed result through a transient delivery-ID ready/acknowledgement handshake, replaces Merchant Context, requests Guidance DOM focus with a collapsed end caret, and leaves Generate manual. Opening a closed panel makes Guidance immediately usable. For an already-visible panel, Chrome may retain webpage keyboard routing despite the internal focus/caret request, so the user may need to click Guidance. The service worker owns only browser coordination and transient acknowledged delivery; M9 foreground generation remains unchanged.
 - Business functionality: The Knowledge Library, Snippet Library, local lexical Retrieval Engine, deterministic provider-independent Prompt Builder, project-owned generation boundary, local Ollama provider adapter, and global Side Panel Output Workspace are implemented and validated. Libraries remain in the options page and open in a normal browser tab.
@@ -1595,13 +1609,15 @@ Image trigger + Space
 
 ## Next Engineering Action
 
-- M15-E and M15-E.1 are complete, Principal-approved, and automated/manual-validated under Decision 59. M15-E.2 synchronizes closeout documentation; the next action after its validation is a separately authorized Git checkpoint, which has not been created or pushed. Preserve Decisions 43–45 and Decision 58 isolation, leave native protocols/source and Backup v1–v7 unchanged, and do not resume model discovery or activate a task after M15-E.
+- M15-E/M15-E.1 implementation and M15-E.2 closeout are complete, Principal-approved, committed, and pushed at `881b73a`; real-Chrome/manual validation and GitHub Actions for that commit are PASS (CI confirmed by the product owner). M15-E.3 documentation has synchronized post-approval continuity. The exact next engineering action is to await Principal/product-owner direction for the next separately authorized task. Preserve Decisions 43–45, 58, and 59, native source/protocols, and Backup v1–v7. No M15-F or later task is assigned or active; model discovery remains postponed unless separately authorized.
 - M14-K.2 implements the existing-Settings `snippetPasteMode`, strict Backup v6 with v1-v5 defaulting to clipboard-only, shared post-clipboard boundary, one-use browser/editor authorization, strict protocol v2, direct Win32 `SendInput`, global no-queue concurrency, and typed fallback UX while preserving protocol v1 and existing Text/Image clipboard transports.
 - M14-K.3 real-browser validation is complete: automatic and clipboard-only Text/Image pass in Intercom and Crisp, unknown-trigger safety passes, and a saved clipboard-only-to-automatic change applies to an already-open Intercom tab. Deterministic focus-change, identity, modifier, sequence, concurrency, fallback, and no-retry coverage remains the safety baseline; the residual same-window native instant is documented.
 - M14-H remains absorbed into M14-G.2 and is not separately active.
 - A2/F9 was not run and is no longer required for the current decision tree. Do not request it again unless a future architecture task explicitly reopens it for a justified reason.
 
 ## Repository Status
+
+- Current M15 implementation/closeout checkpoint: `881b73aaebba36faff8a361ee4fad3ce7aab0675` (`881b73a`, `feat: add automatic paste diagnostics`), exactly the approved 37 M15-E/M15-E.1/M15-E.2 files; all three tasks COMPLETE / PRINCIPAL-APPROVED. The implementation/closeout push to `origin/master` is COMPLETE. GitHub Actions for `881b73a` passed, confirmed by the product owner. M15-E.3 documentation has synchronized post-approval continuity. Protected M14-Q evidence, desktop.ini modifications, and review artifacts remain local and untouched.
 
 - The working tree remains in the synchronized Google Drive project directory. Its root `.git` is a pointer file to a separate local non-synchronized Git metadata directory; discover the real location with `git rev-parse --absolute-git-dir`. GitHub remains the authoritative remote history and normal clone/recovery source.
 - The repository contains the completed Milestone 1 development foundation and completed Milestone 2 extension shell.
@@ -1624,7 +1640,7 @@ Image trigger + Space
 ## Continuity Handoff
 
 - Frozen architecture: WXT and Manifest V3 with the approved TypeScript, React, Tailwind CSS, pnpm, Dexie, validation, testing, and commit-gate stack listed above.
-- Current completed documentation checkpoint: M15-D.2 is complete, Principal-approved, checkpointed, and pushed at `2810b4b2d241bf5220ff66a65fdd23a51af1ca35` (`2810b4b`); GitHub CI run #78 passed, and local `master` and `origin/master` were synchronized at that checkpoint. M15-E and M15-E.1 are the latest Principal-approved M15 implementation work, with source/correction reviews and real-Chrome/manual validation PASS, but no commit or push. M15-E.2 is the documentation-only closeout task. M15-C remains the latest checkpointed M15 implementation task at `c807960`; M15-D/M15-D.1 remain the approved architecture checkpoint at `2b9dde4`. No task after M15-E is active.
+- Current completed implementation/closeout checkpoint: `881b73aaebba36faff8a361ee4fad3ce7aab0675` (`881b73a`, `feat: add automatic paste diagnostics`), exactly the approved 37 M15-E/M15-E.1/M15-E.2 files. All three tasks are COMPLETE / PRINCIPAL-APPROVED; source/correction reviews and real-Chrome/manual validation PASS. The implementation/closeout push to `origin/master` is COMPLETE. GitHub Actions for `881b73a` passed, confirmed by the product owner. Previous checkpoint: M15-D.2 at `2810b4b`; M15-D/M15-D.1 architecture remains approved at `2b9dde4`. M15-E.3 documentation has synchronized post-approval continuity; no M15-F or later task is assigned or active.
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It contains M13-B, M13-B.1, and M13-B.2 and remains the implementation checkpoint after the later documentation closeout.
 - Historical M14-A preflight and starting point: branch `master`, clean working tree, and local `master` synchronized with `origin/master` at M13-C closeout checkpoint `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`). This is historical starting-state information, not the expected post-architecture HEAD.
 - M14-A architecture checkpoint: `c1105d4` (`docs: define rich snippet template architecture`).
@@ -1633,7 +1649,7 @@ Image trigger + Space
 - M14-C implements Rich Snippet Library authoring at `a787100` on the existing aggregate and application boundary.
 - M14-D is complete at `64504df`, Decision 38 at `f9b5097`, and M14-E at `1828f09`.
 - Historical architecture correction: M14-F.1/Decision 39 at `b7d16ec`. Former M14-F is cancelled before implementation. M14-I.2 / Decision 43 and the M14-I.3–M14-I.5 implementation are committed in `ebe915f`; Decisions 42 and 43 are unchanged by closeout.
-- Exact next action: M15-E.2 documentation closeout is complete; await separate explicit Git-checkpoint authorization for approved M15-E/M15-E.1 work. Source/correction reviews and real-Chrome/manual validation are complete. Do not activate a later task.
+- Exact next engineering action: await Principal/product-owner direction for the next separately authorized task; model discovery remains postponed unless separately authorized. M15-E/M15-E.1/M15-E.2 approval, manual validation, implementation/closeout commit, push, and GitHub Actions are complete. Do not assign or activate M15-F or later work.
 - Additional business functionality starts only in its assigned later milestones.
 
 ## Outstanding Risks
@@ -1653,6 +1669,8 @@ Image trigger + Space
 - The already-mounted Side Panel does not live-refresh a restored default model; recreating the Side Panel loads the restored value. This edge case and a manual oversized-file exercise were not repeated during M12 closeout and are non-blocking because their required behavior is covered by source review and automated tests.
 
 ## Git Checkpoint Continuity
+
+- Authoritative current M15 implementation/closeout checkpoint: `881b73aaebba36faff8a361ee4fad3ce7aab0675` (`881b73a`, `feat: add automatic paste diagnostics`); parent/previous checkpoint `2810b4b2d241bf5220ff66a65fdd23a51af1ca35`. It contains exactly the approved 37 M15-E/M15-E.1/M15-E.2 files, is Principal-approved, and is pushed to `origin/master`. GitHub Actions for `881b73a` passed, confirmed by the product owner. No CI run number is asserted. Later documentation-only commits do not replace this authoritative M15-E implementation/closeout checkpoint; M15-E.3 documentation has synchronized post-approval continuity.
 
 - Approved M13 implementation checkpoint: `b76fcb4` (`feat: add snippet trigger expansion`). It remains the authoritative M13 source-and-test checkpoint.
 - M13-C documentation checkpoint: `9a3c7ef` (`docs: close milestone 13 and activate milestone 14`).
