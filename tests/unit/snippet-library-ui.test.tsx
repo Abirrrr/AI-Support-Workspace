@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -17,6 +18,11 @@ import type {
 } from '../../src/domain/snippet-asset';
 import type { SnippetEntry } from '../../src/domain/snippet-entry';
 import { SnippetLibraryView } from '../../src/ui/snippet/SnippetLibraryView';
+import {
+  QuickCreateError,
+  type QuickCreateClipboard,
+} from '../../src/application/snippet/quick-create-snippet';
+import { StrictMode } from 'react';
 
 const CREATED = '2026-08-09T00:00:00.000Z';
 const SNIPPET_ID = '123e4567-e89b-42d3-a456-426614174000';
@@ -192,6 +198,262 @@ afterEach(() => {
 });
 
 describe('unified Snippet Library', () => {
+  it('does not let cancelled manual Image ingestion overwrite a later Quick Create Image', async () => {
+    const pending = deferred<ArrayBuffer>();
+    const oldFile = new File(
+      [Uint8Array.from(bytesFor('image/png'))],
+      'old.png',
+      { type: 'image/png' },
+    );
+    Object.defineProperty(oldFile, 'arrayBuffer', {
+      value: () => pending.promise,
+    });
+    const service = library();
+    const a = asset({ id: SECOND_ASSET_ID });
+    const clipboardAsset = {
+      id: a.id,
+      mimeType: a.mimeType,
+      blob: a.blob,
+      byteSize: a.byteSize,
+      originalFilename: null,
+      createdAt: a.createdAt,
+    };
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi
+        .fn()
+        .mockResolvedValue({ kind: 'image', asset: clipboardAsset }),
+    };
+    const view = render(
+      <SnippetLibraryView snippetLibrary={service} quickCreate={quickCreate} />,
+    );
+    await screen.findByText('No matching snippets.');
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+    fireEvent.change(screen.getByLabelText('Choose Image'), {
+      target: { files: [oldFile] },
+    });
+    const [cancel] = within(
+      screen.getByRole('form', { name: 'Create image snippet' }),
+    ).getAllByRole('button', { name: 'Cancel' });
+    if (cancel === undefined)
+      throw new Error('Missing existing Cancel action.');
+    fireEvent.click(cancel);
+    view.rerender(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="new-image"
+      />,
+    );
+    await screen.findByRole('img', { name: 'Image snippet preview' });
+    await act(async () => {
+      pending.resolve(Uint8Array.from(bytesFor('image/png')).buffer);
+    });
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'New clipboard image' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.create).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(service.create).mock.calls[0]?.[0].content).toEqual({
+      kind: 'image',
+      assetId: SECOND_ASSET_ID,
+    });
+  });
+  it('consumes a StrictMode Quick Create request once and acknowledges it before any remount', async () => {
+    const service = library();
+    const handled = vi.fn();
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi.fn().mockResolvedValue({
+        kind: 'text',
+        content: { kind: 'rich', blocks: [] },
+      }),
+    };
+    render(
+      <StrictMode>
+        <SnippetLibraryView
+          snippetLibrary={service}
+          quickCreate={quickCreate}
+          quickCreateRequest="strict"
+          onQuickCreateHandled={handled}
+        />
+      </StrictMode>,
+    );
+    await screen.findByRole('form', { name: 'Create text snippet' });
+    expect(quickCreate.readDraft).toHaveBeenCalledTimes(1);
+    expect(handled).toHaveBeenCalledWith('strict');
+  });
+  it('Quick Create prefills existing Text editor with blank metadata and persists only on explicit Save', async () => {
+    const service = library();
+    const content = {
+      kind: 'rich' as const,
+      blocks: [
+        {
+          type: 'paragraph' as const,
+          children: [
+            {
+              type: 'text' as const,
+              text: 'Hello\n\nবাংলা <b>literal</b>',
+              bold: false,
+              italic: false,
+            },
+          ],
+        },
+      ],
+    };
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi.fn().mockResolvedValue({ kind: 'text', content }),
+    };
+    render(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="one"
+      />,
+    );
+    await screen.findByRole('form', { name: 'Create text snippet' });
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe('');
+    expect(
+      (screen.getByLabelText('Trigger (optional)') as HTMLInputElement).value,
+    ).toBe('');
+    expect(
+      (screen.getByLabelText('Tags (comma-separated)') as HTMLInputElement)
+        .value,
+    ).toBe('');
+    expect(await screen.findByLabelText('Text snippet content')).toBeTruthy();
+    expect(service.create).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Clipboard response' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.create).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(service.create).mock.calls[0]?.[0].content).toEqual(
+      content,
+    );
+  });
+  it('Quick Create reuses Image preview and sends a new owned asset only on Save', async () => {
+    const service = library();
+    const a = asset();
+    const draft = {
+      id: a.id,
+      mimeType: a.mimeType,
+      blob: a.blob,
+      byteSize: a.byteSize,
+      originalFilename: null,
+      createdAt: a.createdAt,
+    };
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi.fn().mockResolvedValue({ kind: 'image', asset: draft }),
+    };
+    render(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="image"
+      />,
+    );
+    await screen.findByRole('img', { name: 'Image snippet preview' });
+    expect(service.create).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Screenshot' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(service.create).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(service.create).mock.calls[0]?.[0]).toMatchObject({
+      content: { kind: 'image', assetId: a.id },
+      newAssets: [draft],
+    });
+  });
+  it('preserves an open draft and declines repeated shortcuts without another clipboard read', async () => {
+    const service = library();
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi.fn().mockResolvedValue({
+        kind: 'text',
+        content: { kind: 'rich', blocks: [] },
+      }),
+    };
+    const view = render(
+      <SnippetLibraryView snippetLibrary={service} quickCreate={quickCreate} />,
+    );
+    await screen.findByText('No matching snippets.');
+    fireEvent.click(screen.getByRole('button', { name: '+ New Snippet' }));
+    fireEvent.click(screen.getByRole('button', { name: /Text Snippet/ }));
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Unsaved title' },
+    });
+    view.rerender(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="two"
+      />,
+    );
+    await screen.findByText(/Finish or cancel your current snippet/);
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+      'Unsaved title',
+    );
+    expect(quickCreate.readDraft).not.toHaveBeenCalled();
+    expect(service.create).not.toHaveBeenCalled();
+  });
+  it('offers explicit permission enabling and safe manual fallback after denial/errors', async () => {
+    const service = library();
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn().mockResolvedValue(false),
+      readDraft: vi
+        .fn()
+        .mockRejectedValue(new QuickCreateError('permission-required')),
+    };
+    render(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="permission"
+      />,
+    );
+    const enable = await screen.findByRole('button', {
+      name: 'Enable clipboard access',
+    });
+    expect(quickCreate.requestEnable).not.toHaveBeenCalled();
+    fireEvent.click(enable);
+    expect(quickCreate.requestEnable).toHaveBeenCalledTimes(1);
+    await screen.findByRole('button', { name: 'Enable clipboard access' });
+    expect(quickCreate.readDraft).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: /Image Snippet/ }));
+    await screen.findByRole('form', { name: 'Create image snippet' });
+    expect(service.create).not.toHaveBeenCalled();
+  });
+  it('cancels a slow acquisition and discards its late result', async () => {
+    const pending = deferred<{
+      kind: 'text';
+      content: { kind: 'rich'; blocks: [] };
+    }>();
+    const service = library();
+    const quickCreate: QuickCreateClipboard = {
+      requestEnable: vi.fn(),
+      readDraft: vi.fn(() => pending.promise),
+    };
+    render(
+      <SnippetLibraryView
+        snippetLibrary={service}
+        quickCreate={quickCreate}
+        quickCreateRequest="slow"
+      />,
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancel clipboard read' }),
+    );
+    pending.resolve({ kind: 'text', content: { kind: 'rich', blocks: [] } });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('form', { name: 'Create text snippet' }),
+      ).toBeNull(),
+    );
+    expect(service.create).not.toHaveBeenCalled();
+  });
   it('shows zero-by-absence and persisted usage for Text and Image without reordering', async () => {
     const service = library([plain, rich, imageEntry]);
     service.loadUsageStats = vi.fn(async () => [

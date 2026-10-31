@@ -1,4 +1,4 @@
-import { useEffect, useState, type ClipboardEvent } from 'react';
+import { useEffect, useRef, useState, type ClipboardEvent } from 'react';
 
 import {
   isSnippetAssetMimeType,
@@ -32,8 +32,17 @@ export function ImageSnippetEditor({
   onChange,
 }: ImageSnippetEditorProps) {
   const [error, setError] = useState<string>();
+  const ingestGeneration = useRef(0);
+  useEffect(
+    () => () => {
+      ingestGeneration.current += 1;
+    },
+    [disabled],
+  );
 
   async function ingest(file: File) {
+    if (disabled) return;
+    const own = ++ingestGeneration.current;
     setError(undefined);
     if (!isSnippetAssetMimeType(file.type)) {
       setError('Choose a PNG, JPEG, or WebP image.');
@@ -48,13 +57,14 @@ export function ImageSnippetEditor({
         originalFilename: file.name || null,
         createdAt: new Date().toISOString(),
       });
-      onChange(draft);
+      if (own === ingestGeneration.current) onChange(draft);
     } catch (caught) {
-      setError(validationMessage(caught));
+      if (own === ingestGeneration.current) setError(validationMessage(caught));
     }
   }
 
   function pasteImage(event: ClipboardEvent<HTMLDivElement>) {
+    if (disabled) return;
     const item = Array.from(event.clipboardData.items).find(
       (candidate) =>
         candidate.kind === 'file' && candidate.type.startsWith('image/'),
@@ -99,7 +109,10 @@ export function ImageSnippetEditor({
           <button
             className="mt-3 rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
             disabled={disabled}
-            onClick={() => onChange(undefined)}
+            onClick={() => {
+              ingestGeneration.current += 1;
+              onChange(undefined);
+            }}
             type="button"
           >
             Remove image

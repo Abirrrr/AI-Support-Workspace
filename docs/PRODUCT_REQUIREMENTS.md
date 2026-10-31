@@ -14,6 +14,15 @@ The product provides a local-first support workspace with reusable Snippet deliv
 - Build prompts for AI assistance without coupling business logic to a specific provider.
 - Allow users to review and edit AI-generated drafts before use.
 
+## M15-F Quick Create Snippet from Clipboard
+
+- While Chrome is focused, suggested `Ctrl+Shift+S` opens/focuses the existing Options Snippet Library and prepares the existing Text or Image editor from one clipboard snapshot. Chrome owns shortcut conflicts/remapping; the selected-text Workspace command remains intact.
+- Optional `clipboardRead` is requested only through an explanatory user-clicked Options action. Granted subsequent shortcut invocations acquire automatically in the focused extension document, without an artificial delay or another click. Decision 60 is the narrow permission exception; it authorizes no monitoring, history, page injection or service-worker read.
+- Prefer a supported valid Image over accompanying text. PNG screenshots and supported JPEG/WebP reuse asset/Decision 42 validation, genuine decode and existing previews without quality changes. Unsupported/invalid Images fail safely without conversion to text. Text is plain structured input preserving meaningful newlines and Unicode, never clipboard HTML execution.
+- Title, optional trigger, and authored tags start blank and remain editable. Only explicit existing Save creates the Snippet/owned asset. No database or Backup evolution occurs.
+- Preserve any open authoring draft or Library mutation and ask the user to finish/cancel and invoke again, without reading. Repeated requests, cancellation, unmount and late results cannot overwrite a draft. Empty, denied/revoked, unavailable, malformed, oversized and failed acquisitions have accessible actionable feedback plus existing manual Text/Image creation/paste.
+- Clipboard payloads stay in Options memory until explicit Save; no URL content, logging, diagnostics export, persistent temporary store, telemetry, cloud or network path is permitted. M15-F is COMPLETE / PRINCIPAL-APPROVED following production source review and reported product-owner real-Chrome validation; TESTING_STRATEGY.md distinguishes the manual evidence from automated-only/unreported subcases.
+
 ## Current Knowledge Compatibility vs. Future Active Text Snippet Library
 
 - Current implementation before M14-P.4: Knowledge and Snippet remain separate persisted domains, repositories, Backup data, options-page surfaces, retrieval collections, and Prompt Builder sections.
@@ -220,7 +229,7 @@ Text plus an image intentionally uses two independent shortcuts, such as `;limit
 - Decision 45's optional diagnostics remain off-by-default native/request-scoped evidence limited to correlation, result, bounded timing, and safety category. Decision 59's additional record ID, UTC time, Text/Image kind, terminal stage, and frozen failure classification are a separate downstream application-owned envelope/projection, not native logging or protocol fields.
 - Preserve Decision 58 and the normative AI Workspace no-persistence contract for Merchant Context, Context Images, Guidance/Gist, models, generated output, provider behavior, and Save-as-Snippet handoff state. Decision 59 permits only the diagnostics-specific Dexie v7 stores implemented by M15-E and no other schema/index/migration or Backup change.
 - Timing evidence is descriptive only. Each duration is finite, non-negative, at most five minutes, and measured with a monotonic clock by the component owning that boundary. Cross-context clocks are never combined and no CI performance threshold is introduced.
-- M15-D defines the contract; M15-E implements its runtime recording, Dexie v7 migration, controls, export, clear behavior, and automated coverage. Performance optimization and Quick Create remain unimplemented and require separate authorization.
+- M15-D defines the contract; M15-E implements its runtime recording, Dexie v7 migration, controls, export, clear behavior, and automated coverage. Performance optimization remains unimplemented and requires separate authorization. Quick Create is separately implemented and Principal-approved under M15-F/Decision 60; it does not expand diagnostics ownership.
 
 ## Workspace Shell Action UX
 

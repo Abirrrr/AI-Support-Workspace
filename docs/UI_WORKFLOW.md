@@ -378,6 +378,18 @@ clipboard preparation succeeds
 
 ## 7. Keyboard Shortcut Workflow
 
+### M15-F Quick Create from Clipboard
+
+1. Copy ordinary/multiline Text or a screenshot; focus Chrome and press the assigned Quick Create shortcut (suggested `Ctrl+Shift+S`). Chrome's `chrome://extensions/shortcuts` owns registration/conflicts. Existing Workspace selection capture keeps its shortcut and behavior.
+2. The existing Options page opens/focuses and selects Snippet Library. A focused document claims the one-shot content-free intent. When permission is granted, the extension reads one clipboard snapshot immediately, without the pilot's test delay.
+3. Missing or denied `clipboardRead` shows **Enable clipboard access** in existing creation UI. The explicit click requests only that optional permission. On grant it acquires once; on denial the manual Text/Image choices remain available. Revocation is rechecked before applying the result.
+4. Valid Image takes priority; the existing Image editor displays its genuine preview after asset/raster/decode validation. Otherwise supported plain Text prefills the existing structured Text editor with meaningful newlines/Unicode intact. Title, trigger and tags remain blank/editable. Invalid/unsupported Image never silently becomes accompanying text.
+5. Enter metadata and explicitly click **Save**. Existing services persist the Snippet and, for Image, its one owned asset atomically. Before Save nothing is persisted. Cancel discards the transient authoring draft through the existing workflow.
+6. If an editor or Library mutation is already active, Quick Create preserves it, performs no read, and asks the user to finish/cancel and repeat. In-progress reads can be cancelled; repeated, stale or unmounted work cannot replace a newer draft.
+7. Empty/unsupported, unreadable, corrupt or oversized input produces concise accessible feedback in existing creation UI with manual Text/Image selection and paste as fallback. No clipboard content is stored in a URL, log, diagnostic record, persistent temporary store or network request. Decision 60 limits the new permission to this explicit feature.
+
+The following selected-text workflow remains the existing M10 behavior.
+
 The keyboard shortcut workflow is designed to make the extension feel fast and responsive during support work.
 
 ```text

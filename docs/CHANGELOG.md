@@ -1,5 +1,16 @@
 # Changelog
 
+### M15-F — Quick Create Snippet from Clipboard (2026-10-31)
+
+- Implemented suggested browser-scoped Ctrl+Shift+S, content-free one-shot navigation to existing Options, and focused one-snapshot clipboard acquisition without an artificial delay. The existing selected-text shortcut is preserved.
+- Decision 60 documents the narrow optional clipboardRead exception and explicit Options permission action. Text/Image detection reuses structured Text and Image authoring, validation/preview, and explicit existing Save services. Open drafts/busy work are preserved; cancellation and stale/mount protection prevent late overwrites.
+- Plain text remains literal with meaningful newlines/Unicode; valid Image has priority. Asset/Decision 42 guards and decode precede Image prefill; invalid/unsupported Images never silently become text. Error/permission states provide accessible feedback and manual creation/paste fallback.
+- No payload-bearing URL/runtime message, clipboard logging/diagnostics, persistent temporary store, database/migration/Backup change, dependency, native/protocol, delivery/Automatic Paste or AI generation change.
+- Recorded implementation validation (not rerun for documentation closeout): 1195 tests PASS (one skipped), typecheck/lint/intended-file formatting PASS, production/native-dev build and manifest checks PASS; one browser test discovered. Fresh review expiry/stale-ingestion findings fixed with regressions. Aggregate validate remains blocked only by three byte-preserved pre-existing M14-Q formatting differences.
+- Production source review and product-owner real-Chrome validation are Principal-approved for closeout: M15-F is COMPLETE / PRINCIPAL-APPROVED. Reported manual PASS covers the production shortcut, Text/Image detection and prefill, multiline Text, explicit Save, clipboard permission flow, empty/unsupported content, repeated invocation/draft protection, existing selected-text shortcut, Automatic Paste regression, and reopening a saved Image Snippet with its original image.
+- Testing Strategy distinguishes those reported results from automated-only denial/revocation, corrupt/oversized/Image-limit handling, JPEG/WebP, Unicode/whitespace details, cancellation/expiry/StrictMode/stale-result races, generated manifests and unreported full authoring/trigger permutations. No blanket twelve-item manual PASS, new browser run, original-image byte comparison, M15-F commit SHA or M15-F CI result is claimed.
+- Closeout Documentation Impact Review: Project State, Testing Strategy, Changelog, Backlog, Roadmap, Architecture Current Status and Product Requirements status synchronized. Decisions/established architecture, AI Workspace Architecture, UI Workflow, Database Schema, Engineering Principles and Coding Agent Rules require no closeout change. Production source/tests/configuration/dependencies/manifests, protected M14-Q evidence, six desktop.ini modifications and existing review artifacts remain unchanged. No stage, commit or push.
+
 ### M15-E.3.1 — Remove Self-Referential Closeout State (2026-10-03)
 
 - Corrected M15-E.3 continuity wording to retain `881b73a` as the authoritative M15-E implementation/closeout checkpoint across later documentation-only commits. Removed transient M15-E.3 review, index, staging, commit, and push status; retained useful validation evidence as historical.

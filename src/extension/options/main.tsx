@@ -1,4 +1,12 @@
 import { StrictMode } from 'react';
+import {
+  BrowserQuickCreateClipboard,
+  type QuickCreatePermissionApi,
+} from '../../infrastructure/clipboard/browser-quick-create-clipboard';
+import {
+  createQuickCreateNavigation,
+  type QuickCreateOptionsRuntime,
+} from '../quick-create/options-navigation';
 import { createRoot } from 'react-dom/client';
 
 import {
@@ -50,6 +58,25 @@ if (!root) {
 }
 
 const database = createDatabase();
+const quickCreateChrome = (
+  globalThis as typeof globalThis & {
+    chrome?: {
+      permissions: QuickCreatePermissionApi;
+      runtime: QuickCreateOptionsRuntime;
+    };
+  }
+).chrome;
+const quickCreate =
+  quickCreateChrome === undefined
+    ? undefined
+    : new BrowserQuickCreateClipboard(
+        quickCreateChrome.permissions,
+        navigator.clipboard,
+      );
+const quickCreateNavigation =
+  quickCreateChrome === undefined
+    ? undefined
+    : createQuickCreateNavigation(quickCreateChrome.runtime);
 const catalogRuntime = (
   globalThis as typeof globalThis & {
     chrome?: {
@@ -171,6 +198,8 @@ const automaticPasteDiagnostics =
 createRoot(root).render(
   <StrictMode>
     <OptionsShell
+      quickCreate={quickCreate}
+      quickCreateNavigation={quickCreateNavigation}
       clipboardDelivery={clipboardDelivery}
       automaticPasteDiagnostics={automaticPasteDiagnostics}
       importExport={importExport}

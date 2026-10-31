@@ -1,5 +1,6 @@
 import {
   type FormEvent,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -34,6 +35,11 @@ import { ImagePreviewUrl } from './image-preview-url';
 import { isSupportedTextSnippetContent } from './text-editor-document';
 import { TextSnippetEditor } from './TextSnippetEditor';
 import type { CopySnippetToClipboard } from '../../application/snippet/copy-snippet-to-clipboard';
+import {
+  QuickCreateError,
+  quickCreateFailureMessage,
+  type QuickCreateClipboard,
+} from '../../application/snippet/quick-create-snippet';
 
 type EditorMode = 'closed' | 'chooser' | 'text' | 'image' | 'compatibility';
 type LibraryFilter = 'all' | 'text' | 'images';
@@ -53,6 +59,9 @@ interface SnippetDraft {
 interface SnippetLibraryViewProps {
   snippetLibrary: SnippetLibrary;
   copySnippet?: CopySnippetToClipboard | undefined;
+  quickCreate?: QuickCreateClipboard | undefined;
+  quickCreateRequest?: string | undefined;
+  onQuickCreateHandled?: ((id: string) => void) | undefined;
 }
 
 const EMPTY_RICH_CONTENT: RichSnippetContent = {
@@ -171,6 +180,9 @@ function ImageThumbnail({
 export function SnippetLibraryView({
   snippetLibrary,
   copySnippet,
+  quickCreate,
+  quickCreateRequest,
+  onQuickCreateHandled,
 }: SnippetLibraryViewProps) {
   const [entries, setEntries] = useState<readonly SnippetEntry[]>([]);
   const [usageCounts, setUsageCounts] = useState<ReadonlyMap<string, number>>(
@@ -189,7 +201,7 @@ export function SnippetLibraryView({
   >();
   const [editingId, setEditingId] = useState<string>();
   const [operation, setOperation] = useState<
-    'saving' | 'deleting' | 'copying'
+    'saving' | 'deleting' | 'copying' | 'capturing'
   >();
   const [pendingDelete, setPendingDelete] =
     useState<Pick<SnippetEntry, 'id' | 'title'>>();
@@ -206,6 +218,11 @@ export function SnippetLibraryView({
   const imageTitleRef = useRef<HTMLInputElement>(null);
   const compatibilitySectionRef = useRef<HTMLElement>(null);
   const compatibilityCloseRef = useRef<HTMLButtonElement>(null);
+  const quickGeneration = useRef(0);
+  const handledQuickRequest = useRef<string | undefined>(undefined);
+  const [quickMessage, setQuickMessage] = useState<string>();
+  const [quickPermissionNeeded, setQuickPermissionNeeded] = useState(false);
+  const [authoringRevision, setAuthoringRevision] = useState(0);
 
   function replaceEntries(nextEntries: readonly SnippetEntry[]) {
     setEntries(nextEntries);
@@ -215,13 +232,106 @@ export function SnippetLibraryView({
     setPage((current) => Math.min(current, nextPageCount));
   }
 
-  function requestEditNavigation(requestMode: EditNavigationRequest['mode']) {
-    editNavigationGeneration.current += 1;
-    setEditNavigationRequest({
-      id: editNavigationGeneration.current,
-      mode: requestMode,
+  const requestEditNavigation = useCallback(
+    (requestMode: EditNavigationRequest['mode']) => {
+      editNavigationGeneration.current += 1;
+      setEditNavigationRequest({
+        id: editNavigationGeneration.current,
+        mode: requestMode,
+      });
+    },
+    [],
+  );
+
+  const captureQuickCreate = useCallback(
+    async (permission?: Promise<boolean>) => {
+      if (quickCreate === undefined) return;
+      const own = ++quickGeneration.current;
+      setMode('chooser');
+      setOperation('capturing');
+      setQuickPermissionNeeded(false);
+      setQuickMessage('Reading clipboard…');
+      setErrorMessage(undefined);
+      setStatusMessage(undefined);
+      try {
+        if (permission !== undefined && !(await permission))
+          throw new QuickCreateError('permission-required');
+        if (own !== quickGeneration.current) return;
+        const result = await quickCreate.readDraft();
+        if (own !== quickGeneration.current) return;
+        assetLoadGeneration.current += 1;
+        setDraft(
+          result.kind === 'text'
+            ? { title: '', content: result.content, tags: '', trigger: '' }
+            : emptyDraft(),
+        );
+        setImageAsset(result.kind === 'image' ? result.asset : undefined);
+        setEditingId(undefined);
+        setTriggerErrorMessage(undefined);
+        setAuthoringRevision((revision) => revision + 1);
+        setMode(result.kind);
+        requestEditNavigation(result.kind);
+        setQuickMessage(
+          'Clipboard content is ready. Add a title and click Save to create the snippet.',
+        );
+      } catch (error) {
+        if (own !== quickGeneration.current) return;
+        setQuickPermissionNeeded(
+          error instanceof QuickCreateError &&
+            error.code === 'permission-required',
+        );
+        setQuickMessage(quickCreateFailureMessage(error));
+      } finally {
+        if (own === quickGeneration.current) setOperation(undefined);
+      }
+    },
+    [quickCreate, requestEditNavigation],
+  );
+
+  useEffect(
+    () => () => {
+      quickGeneration.current += 1;
+    },
+    [],
+  );
+  useEffect(() => {
+    let active = true;
+    // Defer only to the lifecycle microtask, so StrictMode's discarded mount
+    // cannot consume the request. No timer or artificial clipboard-read delay.
+    void Promise.resolve().then(() => {
+      if (
+        !active ||
+        quickCreateRequest === undefined ||
+        handledQuickRequest.current === quickCreateRequest ||
+        quickCreate === undefined
+      )
+        return;
+      handledQuickRequest.current = quickCreateRequest;
+      onQuickCreateHandled?.(quickCreateRequest);
+      if (
+        (mode !== 'closed' && mode !== 'chooser') ||
+        operation !== undefined ||
+        pendingDelete !== undefined
+      ) {
+        setQuickMessage(
+          'Finish or cancel your current snippet or Library action, then use the shortcut again. Your draft is preserved.',
+        );
+        return;
+      }
+      void captureQuickCreate();
     });
-  }
+    return () => {
+      active = false;
+    };
+  }, [
+    quickCreateRequest,
+    quickCreate,
+    mode,
+    operation,
+    pendingDelete,
+    captureQuickCreate,
+    onQuickCreateHandled,
+  ]);
 
   useLayoutEffect(() => {
     if (editNavigationRequest === undefined) return;
@@ -285,6 +395,9 @@ export function SnippetLibraryView({
   }, [snippetLibrary]);
 
   function closeEditor() {
+    quickGeneration.current += 1;
+    setQuickMessage(undefined);
+    setQuickPermissionNeeded(false);
     assetLoadGeneration.current += 1;
     setMode('closed');
     setDraft(emptyDraft());
@@ -556,6 +669,50 @@ export function SnippetLibraryView({
           ) : null}
         </div>
       ) : null}
+      {quickMessage ? (
+        <div
+          className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-slate-800"
+          role="status"
+          aria-live="polite"
+        >
+          <p>{quickMessage}</p>
+          {quickPermissionNeeded && mode === 'chooser' ? (
+            <button
+              className="mt-3 rounded-md bg-blue-700 px-3 py-2 font-medium text-white disabled:opacity-50"
+              disabled={isBusy}
+              type="button"
+              onClick={() => {
+                if (quickCreate === undefined) return;
+                try {
+                  const permission = quickCreate.requestEnable();
+                  void captureQuickCreate(permission);
+                } catch {
+                  setQuickMessage(
+                    'Clipboard permission could not be enabled. Try again or paste manually.',
+                  );
+                }
+              }}
+            >
+              Enable clipboard access
+            </button>
+          ) : null}
+          {operation === 'capturing' ? (
+            <button
+              className="mt-3 rounded-md border border-slate-300 px-3 py-2"
+              type="button"
+              onClick={() => {
+                quickGeneration.current += 1;
+                setOperation(undefined);
+                setQuickMessage(
+                  'Clipboard read cancelled. Choose Text or Image and paste manually.',
+                );
+              }}
+            >
+              Cancel clipboard read
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       {statusMessage ? (
         <p
           className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
@@ -575,6 +732,7 @@ export function SnippetLibraryView({
             <button
               className="text-sm text-slate-600"
               onClick={closeEditor}
+              disabled={isBusy}
               type="button"
             >
               Cancel
@@ -584,6 +742,7 @@ export function SnippetLibraryView({
             <button
               className="rounded-lg border border-slate-300 p-4 text-left hover:border-blue-500 hover:bg-blue-50"
               onClick={openNewText}
+              disabled={isBusy}
               type="button"
             >
               <span className="block font-semibold">Text Snippet</span>
@@ -594,6 +753,7 @@ export function SnippetLibraryView({
             <button
               className="rounded-lg border border-slate-300 p-4 text-left hover:border-blue-500 hover:bg-blue-50"
               onClick={openNewImage}
+              disabled={isBusy}
               type="button"
             >
               <span className="block font-semibold">Image Snippet</span>
@@ -697,7 +857,7 @@ export function SnippetLibraryView({
               <TextSnippetEditor
                 content={draft.content}
                 disabled={isBusy}
-                key={editingId ?? 'new-text'}
+                key={`${editingId ?? 'new-text'}-${authoringRevision}`}
                 onChange={(content) =>
                   setDraft((current) => ({ ...current, content }))
                 }

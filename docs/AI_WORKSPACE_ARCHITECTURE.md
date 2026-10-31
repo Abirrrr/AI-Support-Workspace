@@ -243,6 +243,8 @@ If Options cannot connect, the Side Panel closes, the token expires, the URL tok
 
 ## Permissions, Security, and Privacy
 
+Decision 60 separately authorizes optional `clipboardRead` only for explicit M15-F Quick Create in focused Options Snippet authoring. That exception does not expand this AI Workspace's permissions, acquisition routes, Context Image ownership, generation state, or Decision 58 Save-as-Snippet handoff. The no-new-permission rule below continues to govern the AI drafting contracts.
+
 M15 adds no permission, host pattern, database table, migration, Backup version, secret, credential store, telemetry, remote provider, or page-content capability. Existing loopback Ollama access stays inside the provider adapter. Existing broad page host access supports the independently approved Snippet delivery lifecycle and is not drafting authority.
 
 Merchant Context, Gist, Context Images, retrieved references, prompts, generated output, handoff drafts, provider responses, and errors containing user content must not be logged. Provider requests occur only after the explicit Generate gesture. Model discovery may occur while the Workspace is mounted but must remain local to the configured M15 Ollama boundary.

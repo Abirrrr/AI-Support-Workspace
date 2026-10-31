@@ -208,3 +208,7 @@ Decision 45 resolves the Optional Windows Automatic Native Paste investigation. 
 ## Planning Note
 
 These milestones are intentionally small and can be refined as the product evolves.
+
+## M15-F - Quick Create Snippet from Clipboard
+
+Decision 60 adds the separately authorized browser-scoped Ctrl+Shift+S workflow inside existing Options/Snippet authoring. One explicit clipboard snapshot detects Text/Image, validates content, protects open drafts and prefills the existing corresponding editor; explicit Save alone persists. Optional clipboardRead is limited to this user-initiated feature. M15-F is COMPLETE / PRINCIPAL-APPROVED after production source review and the reported product-owner real-Chrome validation. Testing Strategy records the actual manual PASS evidence and automated-only/unreported subcases; no blanket manual-matrix completion is claimed. No artificial read delay, native/protocol, schema/Backup, provider, generation, or model-discovery expansion is included.

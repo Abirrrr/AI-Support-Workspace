@@ -1,4 +1,8 @@
 import { defineBackground } from 'wxt/utils/define-background';
+import {
+  getQuickCreateCommandApi,
+  registerQuickCreateCommand,
+} from './quick-create/background-command';
 
 import {
   getWorkspaceCaptureChromeApi,
@@ -55,6 +59,8 @@ import { registerAutomaticPasteDiagnosticsManagement } from '../application/snip
 import { DexieAutomaticPasteDiagnosticsRepository } from '../infrastructure/persistence/dexie-automatic-paste-diagnostics-repository';
 
 export default defineBackground(() => {
+  const quickCreateApi = getQuickCreateCommandApi();
+  if (quickCreateApi !== undefined) registerQuickCreateCommand(quickCreateApi);
   const sidePanel = (
     globalThis as typeof globalThis & {
       chrome?: {

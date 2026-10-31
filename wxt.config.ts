@@ -14,6 +14,10 @@ export default defineConfig({
       default_title: 'AI Support Workspace',
     },
     commands: {
+      'quick-create-snippet-from-clipboard': {
+        description: 'Create a snippet from clipboard Text or Image',
+        suggested_key: { default: 'Ctrl+Shift+S' },
+      },
       'capture-selection-to-workspace': {
         description: 'Capture selected text in AI Support Workspace',
         suggested_key: {
@@ -31,7 +35,12 @@ export default defineConfig({
       'scripting',
       ...(mode === 'native-dev' ? ['storage' as const] : []),
     ],
-    optional_permissions: ['clipboardWrite', 'offscreen', 'nativeMessaging'],
+    optional_permissions: [
+      'clipboardWrite',
+      'offscreen',
+      'nativeMessaging',
+      'clipboardRead',
+    ],
     ...(mode === 'native-dev' ? { key: nativeDevelopment.manifestKey } : {}),
   }),
   vite: () => ({

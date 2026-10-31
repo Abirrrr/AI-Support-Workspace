@@ -43,6 +43,38 @@ M14-T keeps the complete ordered search/filter result authoritative and applies 
 
 The isolated production-extension Chromium diagnostic seeds 10,000 matching Text records in a disposable profile, asserts 100 mounted rows on pages 1 and 100, verifies the first/last stable IDs, and searches for the final off-page record. Live-element and timing values are descriptive evidence, not CI latency thresholds or a supported maximum Library size. It does not access a user profile, clipboard, destination editor, native host, provider, or network service, and it must not overwrite preserved M14-Q evidence.
 
+## M15-F Clipboard Quick Create Validation
+
+Decision 60 requires one-read Text/Image detection, exact meaningful plain-text/newline/Unicode preservation, safe HTML exclusion, PNG-first Image priority, supported JPEG/WebP validation, no fallback from invalid/unsupported Image to text, empty/unsupported and API failure handling, encoded/raster/decode safety, permission absent/granted/denied/revoked handling, and raw-error sanitization. Permission requests must occur directly from an explicit Options click. No timer, polling, durable queue, clipboard cache, new telemetry, or payload-bearing URL/runtime message is permitted.
+
+Focused tests cover command dispatch and preservation of the old command, same-extension sender checks, newest-only expiry/one-use claims, focus and subscriber replacement, Options navigation, existing editor prefill/preview, blank metadata, explicit-Save-only behavior, existing service/atomic Image ownership, unsaved draft protection, repeated invocation, StrictMode request acknowledgement, cancellation and stale results. Regression tests also expire claimed intents across delayed replies/focus loss and prevent a cancelled manual Image ingestion from overwriting a newer Quick Create Image. Full-suite and build checks protect trigger expansion, native/Automatic Paste, diagnostics, Backup v1-v7, AI Workspace and least-privilege manifests.
+
+The Principal approved core real-Chrome feasibility from product-owner testing: `Ctrl+Shift+S`, permission grant, Text and genuine `image/png` screenshot preview at 1265 × 808, and reading with document focused/user activation inactive. The disposable six-second activation test is not production behavior. These remain pilot observations, separate from the production acceptance reported below.
+
+Recorded implementation validation (not rerun for documentation closeout): focused suite PASS 5 files / 61 tests; full suite PASS 83 files / 1 skipped file, 1195 tests / 1 skipped test; lint/typecheck, intended-file formatting, Markdown parsing, both builds/generated manifests and one-test browser discovery PASS. The aggregate validate command stops only on formatting in the three preserved pre-existing M14-Q reports, which remain untouched. Fresh review expiry and stale manual-image findings were reproduced and fixed with regression tests.
+
+The Principal approved the production implementation for closeout following source review and product-owner real-Chrome validation. The final closeout instruction is the source of the manual evidence below; the coding agent did not execute a new browser run. The previously preserved `M15-F-SOURCE-REVIEW.txt` records the implementation review snapshot and remains unchanged.
+
+Production evidence disposition (manual PASS applies only to the reported behavior, not every subcase in its original acceptance row):
+
+| # | Acceptance area | Reported manual result | Automated-only or unreported detail |
+| --- | --- | --- | --- |
+| 1 | Production Ctrl+Shift+S shortcut | PASS | No claim of testing every shortcut collision or remapping |
+| 2 | Text clipboard detection and existing-editor prefill | PASS | One-read/no-artificial-delay and blank-metadata details retain source/automated verification |
+| 3 | Multiline Text preservation | PASS | Unicode, exact whitespace and all Save/reopen variations were not individually reported |
+| 4 | Image clipboard detection and existing-editor prefill | PASS | Final production image format/dimensions were not restated; JPEG/WebP acquisition retains automated coverage. The 1265 × 808 genuine PNG observation belongs to the prior pilot |
+| 5 | Explicit Save behavior | PASS | Cancel and each no-persistence permutation were not individually reported; existing UI/service integration tests cover them |
+| 6 | Clipboard permission flow | PASS | The report does not enumerate each permission state; do not infer denial/revocation testing |
+| 7 | Permission denial/revocation | Not individually reported | Automated absent/granted/denied/revoked handling and safe recovery coverage |
+| 8 | Empty/unsupported clipboard handling | PASS | Corrupt/oversized Image, encoded/raster/decode limits and no image-to-text degradation retain automated coverage |
+| 9 | Existing selected-text shortcut | PASS | No new destination-wide compatibility claim |
+| 10 | Existing authoring/delivery regressions | Automatic Paste PASS | The full independent Text/Image create/edit/trigger matrix was not individually reported; retain existing full-suite coverage |
+| 11 | Repeated invocation and draft protection | PASS | Busy-read cancellation, expired/delayed intent, StrictMode and stale-ingestion races retain automated regression coverage |
+| 12 | Production/native-dev generated manifests | No manual inspection reported | Both generated-manifest checks passed during implementation; commands, optional permission scope and host boundaries are recorded in the preserved source review |
+| 13 | Saved Image Snippet reopening with its original image | PASS | Reported visual/original-image behavior; no byte-hash comparison is claimed |
+
+Unreported individual subcases are not marked manual PASS. Deterministic validation, ownership and race cases retain automated coverage; broad editor/format/collision permutations remain outside the reported manual evidence. The Principal accepted the production implementation for closeout on the reported real-Chrome behavior and reviewed automated/source evidence; these omissions do not create an additional acceptance gate or authorize further implementation. Privacy exclusions remain source/automated checks, not a newly reported manual diagnostics/export audit.
+
 ## Risk-Based Manual Validation
 
 Manual validation must target destructive operations, data-loss or corruption risks, persistence, security-sensitive behavior, external integrations, and core browser-only workflows. Automated tests may carry low-risk, reversible, and readily detectable edge cases when they provide reliable coverage.

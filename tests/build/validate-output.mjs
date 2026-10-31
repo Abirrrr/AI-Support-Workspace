@@ -34,6 +34,7 @@ assert.deepEqual(manifest.optional_permissions ?? [], [
   'clipboardWrite',
   'offscreen',
   'nativeMessaging',
+  'clipboardRead',
 ]);
 if (nativeDevelopmentMode) {
   assert.equal(manifest.key, nativeDevelopment.manifestKey);
@@ -59,6 +60,10 @@ assert.deepEqual(manifest.host_permissions ?? [], [
 assert.deepEqual(manifest.side_panel, { default_path: 'sidepanel.html' });
 assert.equal('sidebar_action' in manifest, false);
 assert.deepEqual(manifest.commands, {
+  'quick-create-snippet-from-clipboard': {
+    description: 'Create a snippet from clipboard Text or Image',
+    suggested_key: { default: 'Ctrl+Shift+S' },
+  },
   'capture-selection-to-workspace': {
     description: 'Capture selected text in AI Support Workspace',
     suggested_key: {
@@ -83,7 +88,11 @@ assert.equal(manifest.permissions.includes('nativeMessaging'), false);
 assert.equal(manifest.permissions.includes('debugger'), false);
 assert.equal(manifest.permissions.includes('clipboardWrite'), false);
 assert.equal(manifest.permissions.includes('offscreen'), false);
-assert.equal(manifest.optional_permissions.includes('clipboardRead'), false);
+assert.equal(manifest.optional_permissions.includes('clipboardRead'), true);
+assert.equal(
+  'global' in manifest.commands['quick-create-snippet-from-clipboard'],
+  false,
+);
 assert.equal(manifest.optional_permissions.includes('nativeMessaging'), true);
 assert.equal(manifest.optional_permissions.includes('debugger'), false);
 assert.equal(manifest.host_permissions.includes('<all_urls>'), false);

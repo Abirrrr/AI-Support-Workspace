@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type {
+  QuickCreateClipboard,
+  QuickCreateNavigation,
+} from '../../application/snippet/quick-create-snippet';
 
 import type { SettingsApplication } from '../../application/settings/settings-service';
 import type { SnippetLibrary } from '../../application/snippet/snippet-library';
@@ -14,6 +18,8 @@ import { SnippetLibraryView } from '../snippet/SnippetLibraryView';
 import type { AutomaticPasteDiagnosticsApplication } from '../../extension/options/automatic-paste-diagnostics-client';
 
 interface OptionsShellProps {
+  quickCreate?: QuickCreateClipboard | undefined;
+  quickCreateNavigation?: QuickCreateNavigation | undefined;
   settings: SettingsApplication;
   snippetLibrary: SnippetLibrary;
   copySnippet?: CopySnippetToClipboard | undefined;
@@ -24,6 +30,8 @@ interface OptionsShellProps {
 }
 
 export function OptionsShell({
+  quickCreate,
+  quickCreateNavigation,
   settings,
   snippetLibrary,
   copySnippet,
@@ -38,6 +46,18 @@ export function OptionsShell({
   const [settingsVisited, setSettingsVisited] = useState(false);
   const [importExportVisited, setImportExportVisited] = useState(false);
   const [dataRevision, setDataRevision] = useState(0);
+  const [quickCreateRequest, setQuickCreateRequest] = useState<string>();
+  const acknowledgeQuickCreate = useCallback((id: string) => {
+    setQuickCreateRequest((current) => (current === id ? undefined : current));
+  }, []);
+  useEffect(
+    () =>
+      quickCreateNavigation?.subscribe((id) => {
+        setActiveSection('snippets');
+        setQuickCreateRequest(id);
+      }),
+    [quickCreateNavigation],
+  );
 
   function openSection(section: 'snippets' | 'settings' | 'import-export') {
     setActiveSection(section);
@@ -112,6 +132,9 @@ export function OptionsShell({
         role="tabpanel"
       >
         <SnippetLibraryView
+          quickCreate={quickCreate}
+          quickCreateRequest={quickCreateRequest}
+          onQuickCreateHandled={acknowledgeQuickCreate}
           copySnippet={copySnippet}
           key={`snippets-${dataRevision}`}
           snippetLibrary={snippetLibrary}
